@@ -14,11 +14,14 @@ body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;
   color:var(--text);
+
+  /* 러블리 배경: 핑크/보라 그라데이션 + 은은한 하트 느낌 점 */
   background:
-    radial-gradient(900px 500px at 10% -10%, rgba(125,211,252,.22), transparent 60%),
-    radial-gradient(700px 500px at 90% 0%, rgba(167,139,250,.20), transparent 55%),
-    radial-gradient(900px 700px at 50% 110%, rgba(52,211,153,.10), transparent 60%),
-    var(--bg);
+    radial-gradient(12px 12px at 12px 12px, rgba(255,255,255,.10) 35%, transparent 36%) 0 0 / 48px 48px,
+    radial-gradient(900px 600px at 10% -10%, rgba(255,153,204,.25), transparent 60%),
+    radial-gradient(700px 600px at 90% 0%, rgba(186,164,255,.22), transparent 55%),
+    radial-gradient(900px 700px at 50% 110%, rgba(255,192,203,.12), transparent 60%),
+    #0b0f17;
 }
 
 .wrap{width:min(1120px, calc(100% - 32px)); margin:0 auto;}

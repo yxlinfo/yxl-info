@@ -521,9 +521,8 @@ const withRank = (rows) => {
     setTimeout(tick, Math.random() * 800);
   }
 
-  bulbs.forEach(schedule);
+bulbs.forEach(schedule);
 })();
 
 });
 
-});

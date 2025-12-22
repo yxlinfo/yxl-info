@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================
-     데이터(예시) - 너 데이터로 교체
+     예시 데이터(원하는 데이터로 교체)
   ========================= */
   const YXL_DATA = {
     total: [
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* =========================
-     공용 유틸
+     유틸
   ========================= */
   const numFmt = (n) => (n ?? 0).toLocaleString("ko-KR");
   const normalize = (s) => (s ?? "").toString().trim().toLowerCase();
@@ -49,10 +49,39 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* =========================
-     탭 전환 (누적/시즌/시너지)
+     헤더 유틸
+  ========================= */
+  const copyBtn = document.getElementById("copyBtn");
+  const updatedAt = document.getElementById("updatedAt");
+  if (updatedAt) updatedAt.textContent = new Date().toLocaleString("ko-KR");
+
+  copyBtn?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(location.href);
+      copyBtn.textContent = "복사됨!";
+      setTimeout(() => (copyBtn.textContent = "링크 복사"), 900);
+    } catch {
+      alert("복사 실패! 주소창에서 직접 복사해주세요.");
+    }
+  });
+
+  /* =========================
+     탭 전환 (hash: #dash=dash-total)
   ========================= */
   const tabs = Array.from(document.querySelectorAll(".dash-tab"));
   const panels = Array.from(document.querySelectorAll(".dash-panel"));
+
+  function readHashDash() {
+    const h = (location.hash || "").replace("#", "");
+    if (!h.startsWith("dash=")) return null;
+    return decodeURIComponent(h.slice(5));
+  }
+
+  function setHashDash(id) {
+    const url = new URL(location.href);
+    url.hash = `dash=${encodeURIComponent(id)}`;
+    history.replaceState(null, "", url.toString());
+  }
 
   function activatePanel(targetId, { pushHash = true } = {}) {
     tabs.forEach((btn) => {
@@ -67,28 +96,28 @@ document.addEventListener("DOMContentLoaded", () => {
       p.classList.toggle("is-active", on);
     });
 
-    try { localStorage.setItem("yxl_dash", targetId); } catch (e) {}
-
-    if (pushHash) {
-      const url = new URL(location.href);
-      url.hash = `dash=${encodeURIComponent(targetId)}`;
-      history.replaceState(null, "", url.toString());
-    }
+    try { localStorage.setItem("yxl_dash", targetId); } catch {}
+    if (pushHash) setHashDash(targetId);
   }
 
-  tabs.forEach((btn) => btn.addEventListener("click", () => activatePanel(btn.dataset.target)));
+  tabs.forEach((btn) => {
+    btn.addEventListener("click", () => activatePanel(btn.dataset.target));
+  });
 
-  // 초기 탭 결정: hash > localStorage > 첫 탭
-  const hash = (location.hash || "").replace("#", "");
-  const hashTarget = hash.startsWith("dash=") ? decodeURIComponent(hash.slice(5)) : null;
-  let initial = hashTarget;
-
+  // 초기 탭: hash > localStorage > 첫 탭
+  let initial = readHashDash();
   if (!initial) {
-    try { initial = localStorage.getItem("yxl_dash"); } catch (e) {}
+    try { initial = localStorage.getItem("yxl_dash"); } catch {}
   }
-  if (!initial || !document.getElementById(initial)) initial = tabs[0]?.dataset.target;
+  if (!initial || !document.getElementById(initial)) {
+    initial = tabs[0]?.dataset.target || "dash-total";
+  }
+  activatePanel(initial, { pushHash: true });
 
-  if (initial) activatePanel(initial, { pushHash: true });
+  window.addEventListener("hashchange", () => {
+    const id = readHashDash();
+    if (id && document.getElementById(id)) activatePanel(id, { pushHash: false });
+  });
 
   /* =========================
      누적 렌더 + 검색
@@ -113,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tbody.innerHTML = `<tr><td colspan="3" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
     }
   }
-
   document.getElementById("totalSearch")?.addEventListener("input", renderTotalTable);
 
   /* =========================
@@ -129,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const saved = localStorage.getItem("yxl_season");
       if (saved && seasons.includes(saved)) select.value = saved;
-    } catch (e) {}
+    } catch {}
   }
 
   function renderSeasonTable() {
@@ -140,8 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const seasonKey = select.value;
     const rows = YXL_DATA.seasons[seasonKey] ?? [];
-
-    try { localStorage.setItem("yxl_season", seasonKey); } catch (e) {}
+    try { localStorage.setItem("yxl_season", seasonKey); } catch {}
 
     const ranked = withRank(rows);
     const filtered = q ? ranked.filter((r) => normalize(r.name).includes(q)) : ranked;
@@ -164,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("seasonSearch")?.addEventListener("input", renderSeasonTable);
 
   /* =========================
-     시너지 정렬(헤더 클릭)
+     시너지 정렬 (헤더 클릭)
   ========================= */
   const synergyState = { key: "rank", dir: "asc" };
 
@@ -228,27 +255,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
-     헤더 유틸(링크 복사/업데이트)
+     ✅ Gate + BGM (첫 방문 클릭 필요, 이후 자동시도)
   ========================= */
-  const copyBtn = document.getElementById("copyBtn");
-  const updatedAt = document.getElementById("updatedAt");
-  if (updatedAt) updatedAt.textContent = new Date().toLocaleString("ko-KR");
-
-  copyBtn?.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(location.href);
-      copyBtn.textContent = "복사됨!";
-      setTimeout(() => (copyBtn.textContent = "링크 복사"), 900);
-    } catch (e) {
-      alert("복사 실패! 주소창에서 직접 복사해주세요.");
-    }
-  });
-
-  /* =========================
-     ✅ 게이트(스플래시) + BGM + 하트/반짝
-     - 클릭하면 무조건 입장(게이트 숨김) + BGM 재생 시도
-  ========================= */
-  (function gateAndBgmWithHearts() {
+  (function gateAndBgm() {
     const KEY = "yxl_bgm_on";
 
     const gate = document.getElementById("gate");
@@ -261,8 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!gate || !gateBtn || !audio || !particleLayer) return;
 
-    audio.loop = true;
-    audio.preload = "auto";
     audio.volume = 0.25;
 
     let floatTimer = null;
@@ -293,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem(KEY, "1");
         setHeaderUI(true);
         return true;
-      } catch (e) {
+      } catch {
         localStorage.setItem(KEY, "0");
         setHeaderUI(false);
         if (userInitiated && gateMsg) {
@@ -376,7 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
       floatTimer = null;
     }
 
-    // ✅ 클릭하면 “무조건 입장” + BGM 재생 시도
+    // ✅ 클릭하면 입장 + 재생 시도
     gateBtn.addEventListener("click", (e) => {
       if (gateMsg) gateMsg.textContent = "";
       burstAtClientPoint(e.clientX, e.clientY);
@@ -385,17 +392,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // 헤더 토글
-    if (headerToggle) {
-      headerToggle.addEventListener("click", async () => {
-        if (audio.paused) {
-          await tryPlay({ userInitiated: true });
-        } else {
-          stop();
-        }
-      });
-    }
+    headerToggle?.addEventListener("click", async () => {
+      if (audio.paused) await tryPlay({ userInitiated: true });
+      else stop();
+    });
 
-    // 다음 방문 자동재생 시도
+    // 다음 방문 자동 재생 시도
     const savedOn = localStorage.getItem(KEY) === "1";
     if (savedOn) {
       hideGate();
@@ -413,28 +415,3 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSeasonTable();
   renderSynergyTable();
 });
-// ✅ 탭 전환 보험 코드 (맨 아래에 추가)
-(function tabSwitchFix(){
-  const tabWrap = document.querySelector(".dash-tabs");
-  const tabs = tabWrap ? Array.from(tabWrap.querySelectorAll(".dash-tab")) : [];
-  const panels = Array.from(document.querySelectorAll(".dash-panel"));
-
-  if (!tabs.length || !panels.length) return;
-
-  function activateById(id){
-    tabs.forEach(t => t.classList.toggle("is-active", t.dataset.target === id));
-    panels.forEach(p => {
-      const on = p.id === id;
-      p.hidden = !on;
-      p.classList.toggle("is-active", on);
-    });
-  }
-
-  tabs.forEach((t) => {
-    t.addEventListener("click", (e) => {
-      e.preventDefault();
-      const id = t.dataset.target;
-      if (id) activateById(id);
-    });
-  });
-})();

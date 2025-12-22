@@ -734,7 +734,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setGate(open) {
       if (!gate) return;
-      gate.classList.toggle("is-open", !open);
+      // ✅ styles.css는 .gate.is-hidden 로 숨깁니다.
+      gate.classList.toggle("is-hidden", open);
       gate.setAttribute("aria-hidden", open ? "true" : "false");
     }
 
@@ -764,8 +765,8 @@ document.addEventListener("DOMContentLoaded", () => {
     gateBtn?.addEventListener("click", () => {
       localStorage.setItem("yxl_gate_ok", "1");
       setGate(true);
-      // auto try play if user previously enabled
-      if (localStorage.getItem(KEY) === "1") setBgm(true);
+      // ✅ 첫 입장 클릭 = 사용자 제스처이므로 BGM을 항상 재생 시도
+      setBgm(true);
     });
 
     bgmToggle?.addEventListener("click", () => {

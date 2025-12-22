@@ -461,3 +461,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   bulbs.forEach(schedule);
 })();
+  
+});

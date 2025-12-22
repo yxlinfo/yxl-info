@@ -26,55 +26,58 @@
     display:none;
   ">⏸ 음악</button>
 
-  <script>
-  (() => {
-    const audio   = document.getElementById('bgm');
-    const overlay = document.getElementById('bgmOverlay');
-    const startBtn= document.getElementById('bgmStartBtn');
-    const toggle  = document.getElementById('bgmToggle');
+<script>
+(() => {
+  const audio   = document.getElementById('bgm');
+  const overlay = document.getElementById('bgmOverlay');
+  const startBtn= document.getElementById('bgmStartBtn');
+  const toggle  = document.getElementById('bgmToggle');
 
-    audio.volume = 0.25;
-    const KEY = 'yxl_bgm_enabled';
+  audio.volume = 0.25;
+  const KEY = 'yxl_bgm_enabled';
 
-const showOverlay = () => overlay.style.display = 'flex';
+  const showOverlay = () => overlay.style.display = 'flex';
 
-const hideOverlay = () => {
-  overlay.style.display = 'none';
-  overlay.remove();
+  const hideOverlay = () => {
+    overlay.style.display = 'none';
+    overlay.remove(); // ✅ 오버레이 완전 제거(화면 가림 방지)
+  };
 
+  const setTogglePlaying = (isPlaying) => {
+    toggle.style.display = 'block';
+    toggle.textContent = isPlaying ? '⏸ 음악' : '▶ 음악';
+  };
 
-    };
-
-    const start = async () => {
-      try {
-        await audio.play();
-        localStorage.setItem(KEY, '1');
-        hideOverlay();
-        setTogglePlaying(true);
-      } catch (e) {
-        showOverlay();
-      }
-    };
-
-    const enabled = localStorage.getItem(KEY) === '1';
-    if (enabled) {
+  const start = async () => {
+    try {
+      await audio.play();
+      localStorage.setItem(KEY, '1');
       hideOverlay();
-      window.addEventListener('pointerdown', start, { once: true });
-      window.addEventListener('keydown', start, { once: true });
-      setTogglePlaying(false);
-    } else {
+      setTogglePlaying(true);
+    } catch (e) {
       showOverlay();
     }
+  };
 
-    startBtn.addEventListener('click', start);
-    overlay.addEventListener('pointerdown', (e) => { if (e.target === overlay) start(); });
+  const enabled = localStorage.getItem(KEY) === '1';
+  if (enabled) {
+    hideOverlay();
+    window.addEventListener('pointerdown', start, { once: true });
+    window.addEventListener('keydown', start, { once: true });
+    setTogglePlaying(false);
+  } else {
+    showOverlay();
+  }
 
-    toggle.addEventListener('click', async () => {
-      if (audio.paused) await start();
-      else { audio.pause(); setTogglePlaying(false); }
-    });
-  })();
-  </script>
+  startBtn.addEventListener('click', start);
+  overlay.addEventListener('pointerdown', (e) => { if (e.target === overlay) start(); });
+
+  toggle.addEventListener('click', async () => {
+    if (audio.paused) await start();
+    else { audio.pause(); setTogglePlaying(false); }
+  });
+})();
+</script>
   <!-- ✅ (여기까지) BGM 블록 -->
 
   <script src="app.js"></script>

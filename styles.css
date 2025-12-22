@@ -565,37 +565,102 @@ body::after{
 
 
 /* =========================
-   Dashboard extras (Synergy / Calendar / Deltas)
+   SOOP 썸네일 툴팁 + 라이브 이모지
 ========================= */
-.table.wide { min-width: 980px; }
-.sort-ind { font-size: 12px; opacity: .85; }
-
-.delta-up { color: inherit; font-weight: 700; }
-.delta-down { color: inherit; font-weight: 700; }
-.delta-same { opacity: .7; }
-.delta-new { font-weight: 700; }
-
-.synergy-top { display:flex; gap:12px; align-items:stretch; margin: 10px 0 12px; }
-.calendar-card{
-  display:flex; gap:12px; align-items:center;
-  padding: 12px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
+.soop-name{
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(255,255,255,.25);
+  text-underline-offset: 3px;
 }
-.cal-icon{ font-size: 22px; line-height:1; }
-.cal-title{ font-size: 12px; opacity:.85; }
-.cal-ym{ font-size: 18px; font-weight: 800; margin-top: 2px; }
-.cal-sub{ font-size: 12px; opacity:.9; margin-top: 4px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.badge{
-  display:inline-flex; align-items:center; justify-content:center;
-  font-size: 11px; font-weight: 800;
+.soop-name:hover{ text-decoration-color: rgba(255,255,255,.55); }
+
+.live-emoji{
+  display:inline-flex;
+  width: 1.2em;
+  justify-content:center;
+  margin-right: 6px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+}
+
+.soop-tooltip{
+  position: fixed;
+  z-index: 9999;
+  width: 260px;
+  max-width: 78vw;
+  background: rgba(8, 14, 26, .92);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.55);
+  overflow: hidden;
+  pointer-events: none;
+  transform: translate(12px, 12px);
+}
+.soop-tooltip .thumb{
+  width:100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(255,255,255,.06);
+  object-fit: cover;
+  display:block;
+}
+.soop-tooltip .body{
+  padding: 10px 12px 12px;
+}
+.soop-tooltip .title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight: 750;
+  margin:0 0 6px;
+}
+.soop-tooltip .sub{
+  margin:0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.synergy-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 14px;
+  width:100%;
+}
+
+.synergy-calendar{
+  min-width: 220px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+}
+.synergy-calendar .cal-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.synergy-calendar .cal-title{
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+.synergy-calendar .cal-badge{
+  font-size: 12px;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
+  background: rgba(250, 204, 21, .18);
+  border: 1px solid rgba(250, 204, 21, .35);
+  color: rgba(255,255,255,.92);
 }
-.badge-warn{
-  border-color: rgba(255,180,0,.35);
-  background: rgba(255,180,0,.12);
+.synergy-calendar .cal-mini{
+  display:flex;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.synergy-calendar .cal-mini b{
+  color: rgba(255,255,255,.9);
+  font-weight: 800;
 }

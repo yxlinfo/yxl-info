@@ -4,9 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YXL.info</title>
- <link rel="stylesheet" href="styles.css?v=17">
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+ <link rel="stylesheet" href="styles.css?v=16">
 </head>
 <body>
 
@@ -64,23 +62,23 @@
 
       <!-- Tabs -->
       <div class="dash-tabs">
-        <button class="dash-tab is-active" type="button" data-target="dash-total" aria-selected="true">누적 기여도표</button>
+        <button class="dash-tab is-active" type="button" data-target="dash-synergy" aria-selected="true">시너지표</button>
+        <button class="dash-tab" type="button" data-target="dash-total" aria-selected="false">누적 기여도표</button>
         <button class="dash-tab" type="button" data-target="dash-integrated" aria-selected="false">시즌통합랭킹</button>
         <button class="dash-tab" type="button" data-target="dash-season" aria-selected="false">시즌별 기여도표</button>
-        <button class="dash-tab" type="button" data-target="dash-synergy" aria-selected="false">시너지표</button>
       </div>
 
       <!-- Panel: Total -->
-      <div class="dash-panel is-active" id="dash-total">
+      <div class="dash-panel" id="dash-total" hidden>
         <div class="card">
           <div class="card-head">
             <div>
               <h3 style="margin:0 0 6px;">누적 기여도표</h3>
-              <p class="muted" style="margin:0;">엑셀 1번째 시트(누적기여도)를 사용합니다.</p>
+              <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
             </div>
             <div class="toolbar">
               <div class="input-wrap">
-                <input id="totalSearch" class="input" placeholder="스트리머 이름 검색" />
+                <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
               </div>
             </div>
           </div>
@@ -99,17 +97,18 @@
             </table>
           </div>
 
-          <div class="hint">* 변동사항은 브라우저에 저장된 이전 순위와 비교해 계산됩니다.</div>
+          <div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
         </div>
       </div>
 
+      
       <!-- Panel: Integrated -->
       <div class="dash-panel" id="dash-integrated" hidden>
         <div class="card">
           <div class="card-head">
             <div>
               <h3 style="margin:0 0 6px;">시즌통합랭킹</h3>
-              <p class="muted" style="margin:0;">엑셀 2번째 시트(S1~S10 YXL_기여도)를 사용합니다. (시즌 선택 박스 없음)</p>
+              <p class="muted" style="margin:0;">S1~S10 통합 데이터(엑셀 2번째 시트)입니다.</p>
             </div>
             <div class="toolbar">
               <div class="input-wrap">
@@ -119,100 +118,86 @@
           </div>
 
           <div class="table-wrap">
-            <table id="integratedTable" class="table sortable wide">
-              <thead>
-                <tr>
-                  <th data-key="시즌">시즌</th>
-                  <th data-key="순위" style="text-align:right;">순위</th>
-                  <th data-key="직급">직급</th>
-                  <th data-key="스트리머">스트리머</th>
-                  <th data-key="직급전" style="text-align:right;">직급전</th>
-                  <th data-key="1회차" style="text-align:right;">1회차</th>
-                  <th data-key="2회차" style="text-align:right;">2회차</th>
-                  <th data-key="3회차" style="text-align:right;">3회차</th>
-                  <th data-key="4회차" style="text-align:right;">4회차</th>
-                  <th data-key="5회차" style="text-align:right;">5회차</th>
-                  <th data-key="합산기여도" style="text-align:right;">합산기여도</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div class="hint">* 헤더 클릭 시 ▲/▼ 정렬됩니다.</div>
-        </div>
-      </div>
-
-      <!-- Panel: Season -->
-      <div class="dash-panel" id="dash-season" hidden>
-        <div class="card">
-          <div class="card-head">
-            <div>
-              <h3 style="margin:0 0 6px;">시즌별 기여도표</h3>
-              <p class="muted" style="margin:0;">엑셀 3~12번째 시트를 사용합니다.</p>
-            </div>
-            <div class="toolbar">
-              <select id="seasonSelect" class="select" aria-label="시즌 선택"></select>
-              <div class="input-wrap">
-                <input id="seasonSearch" class="input" placeholder="스트리머 이름 검색" />
-              </div>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table id="seasonTable" class="table sortable wide">
+            <table id="integratedTable" class="table">
               <thead></thead>
               <tbody></tbody>
             </table>
           </div>
 
-          <div class="hint">* 헤더 클릭 시 ▲/▼ 정렬됩니다.</div>
+          <div class="hint">* 헤더를 클릭하면 정렬(▲/▼)됩니다.</div>
         </div>
       </div>
 
-      <!-- Panel: Synergy -->
-      <div class="dash-panel" id="dash-synergy" hidden>
+<!-- Panel: Season -->
+      <div class="dash-panel" id="dash-season" hidden>
         <div class="card">
           <div class="card-head">
             <div>
-              <h3 style="margin:0 0 6px;">시너지표</h3>
-              <p class="muted" style="margin:0;"><span id="synergyAutoMsg">3시간마다 자동 업데이트가 됩니다</span></p>
+              <h3 style="margin:0 0 6px;">시즌별 기여도표</h3>
+              <p class="muted" style="margin:0;">시즌 선택 + 이름 검색이 가능합니다.</p>
             </div>
             <div class="toolbar">
+              <select id="seasonSelect" class="select"></select>
               <div class="input-wrap">
-                <input id="synergySearch" class="input" placeholder="스트리머 이름 검색" />
+                <input id="seasonSearch" class="input" placeholder="멤버 이름 검색" />
               </div>
             </div>
           </div>
 
-          <div class="synergy-top">
-            <div id="synergyCalendar" class="calendar-card"></div>
+          <div class="table-wrap">
+            <table id="seasonTable" class="table">
+              <thead></thead>
+
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다.</div>
+        </div>
+      </div>
+
+      <!-- Panel: Synergy -->
+      <div class="dash-panel is-active" id="dash-synergy">
+        <div class="card">
+          <div class="card-head">
+            <div class="synergy-head">
+              <div>
+                <h3 style="margin:0 0 6px;">시너지표</h3>
+                <p class="muted" style="margin:0 0 6px;">3시간마다 자동 업데이트가 됩니다.</p>
+                <div class="muted" id="synergyMeta" style="margin:0;">데이터 기준: --</div>
+              </div>
+              <div class="synergy-calendar" id="synergyCalendar" aria-label="월 변경 대시보드"></div>
+            </div>
+</div>
           </div>
 
           <div class="table-wrap">
-            <table id="synergyTable" class="table">
+            <table id="synergyTable" class="table sortable">
+              <thead>
               <thead>
                 <tr>
-                  <th>순위</th>
-                  <th>스트리머</th>
-                  <th style="text-align:right;">누적별풍선</th>
-                  <th style="text-align:right;">변동사항</th>
+                  <th data-key="순위">순위</th>
+                  <th data-key="비제이명">스트리머</th>
+                  <th data-key="월별 누적별풍선" style="text-align:right;">누적별풍선</th>
+                  <th data-key="변동" style="text-align:right;">변동사항</th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
 
-          <div class="hint">* 변동사항은 브라우저에 저장된 이전 순위와 비교해 계산됩니다.</div>
+          <div class="hint">* 정렬은 클릭할 때마다 ▲/▼ 토글됩니다.</div>
         </div>
       </div>
-</section>
+
+    </section>
 
     <footer class="section" style="padding-top:0;">
       <div class="muted">© YXL</div>
     </footer>
   </main>
 
-  <script src="app.js?v=17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>

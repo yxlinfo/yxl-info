@@ -1,1 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YXL 정보 허브</title>
+  <meta name="description" content="누적/시즌/시너지 대시보드" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="wrap header-inner">
+      <div class="brand">
+        <div class="brand-mark">YXL</div>
+        <div class="brand-text">
+          <div class="brand-title">YXL 정보 허브</div>
+          <div class="brand-sub">누적 · 시즌 · 시너지</div>
+        </div>
+      </div>
+    </div>
+  </header>
 
+  <main class="wrap">
+    <section class="section" id="dashboards">
+      <div class="section-head">
+        <h2>대시보드</h2>
+        <p class="muted">버튼을 눌러 화면을 전환해서 확인하세요.</p>
+      </div>
+
+      <div class="dash-tabs" role="tablist" aria-label="대시보드 선택">
+        <button class="dash-tab is-active" role="tab" aria-selected="true"
+          aria-controls="dash-total" data-target="dash-total">누적 기여도표</button>
+
+        <button class="dash-tab" role="tab" aria-selected="false"
+          aria-controls="dash-season" data-target="dash-season">시즌별 기여도표</button>
+
+        <button class="dash-tab" role="tab" aria-selected="false"
+          aria-controls="dash-synergy" data-target="dash-synergy">시너지표</button>
+      </div>
+
+      <div class="dash-panel is-active" id="dash-total" role="tabpanel">
+        <div class="card">
+          <h3>누적 기여도표</h3>
+          <p class="muted">여기에 표(테이블/이미지/iframe)를 넣으면 됩니다.</p>
+        </div>
+      </div>
+
+      <div class="dash-panel" id="dash-season" role="tabpanel" hidden>
+        <div class="card">
+          <h3>시즌별 기여도표</h3>
+          <p class="muted">시즌 선택/필터 UI를 붙이기 좋은 영역입니다.</p>
+        </div>
+      </div>
+
+      <div class="dash-panel" id="dash-synergy" role="tabpanel" hidden>
+        <div class="card">
+          <h3>시너지표</h3>
+          <p class="muted">조합/정렬/검색 기능을 붙이면 편해져요.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

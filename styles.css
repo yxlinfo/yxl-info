@@ -462,3 +462,92 @@ body::after{
   .dash-tab{ width: 100%; }
   .table{ min-width: 520px; }
 }
+/* =========================
+   🎄 Random Garland Lights (DOM + JS)
+   - styles.css 맨 아래에 붙여넣기
+========================= */
+
+/* 예전 가랜드(pseudo) 겹침 방지 */
+.header::before{ content:none !important; }
+
+/* 전구 줄 컨테이너 */
+.garland{
+  position:absolute;
+  left:0; right:0;
+  top:-10px;
+  height:40px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  padding: 0 14px;
+  pointer-events:none;
+  z-index: 12;
+  opacity:.95;
+}
+
+/* 와이어(줄) */
+.garland::before{
+  content:"";
+  position:absolute;
+  left:8px; right:8px;
+  top:18px;
+  height:2px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.05),
+    rgba(255,255,255,.16),
+    rgba(255,255,255,.05)
+  );
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  border-radius:999px;
+  opacity:.9;
+}
+
+/* 전구 공통 */
+.bulb{
+  position:relative;
+  width:9px;
+  height:9px;
+  border-radius:999px;
+  transform: translateY(14px) scale(var(--s, 1));
+  opacity: var(--o, .95);
+  background: var(--c, rgba(250,204,21,.95));
+  box-shadow:
+    0 0 var(--blur, 18px) var(--c, rgba(250,204,21,.95)),
+    0 0 calc(var(--blur, 18px) * 1.6) rgba(255,255,255,.10);
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
+  transition: opacity 120ms linear, transform 120ms linear, box-shadow 120ms linear;
+}
+
+/* 전구 소켓(윗부분) */
+.bulb::before{
+  content:"";
+  position:absolute;
+  left:50%; top:-5px;
+  width:10px; height:6px;
+  transform: translateX(-50%);
+  border-radius: 4px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 6px 14px rgba(0,0,0,.28);
+}
+
+/* 색상 클래스 */
+.bulb.r{ --c: rgba(239, 68, 68, .95); }
+.bulb.g{ --c: rgba(34, 197, 94, .92); }
+.bulb.y{ --c: rgba(250, 204, 21, .95); }
+.bulb.b{ --c: rgba(56, 189, 248, .85); }
+
+/* 전체 줄이 살짝 흔들리는 느낌(과하지 않게) */
+.garland{
+  animation: garlandSway 4.8s ease-in-out infinite alternate;
+}
+@keyframes garlandSway{
+  from{ transform: translateY(0); }
+  to{ transform: translateY(-1px); }
+}
+
+/* 모션 최소화 옵션 */
+@media (prefers-reduced-motion: reduce){
+  .garland{ animation:none; }
+  .bulb{ transition:none; }
+}

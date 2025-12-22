@@ -211,12 +211,10 @@ function initSynergySort(){
     th.addEventListener("click", () => {
       const key = th.dataset.key;
 
-      // 기본 오름차순 요구 충족: 새 컬럼 클릭 시 asc
       if (synergyState.key !== key) {
         synergyState.key = key;
         synergyState.dir = "asc";
       } else {
-        // 같은 컬럼 연속 클릭 시 asc/desc 토글 (원치 않으면 이 줄 제거)
         synergyState.dir = (synergyState.dir === "asc") ? "desc" : "asc";
       }
       renderSynergyTable();
@@ -248,30 +246,63 @@ function initSynergySort(){
 })();
 
 /* =========================
-   BGM (첫 방문 클릭 필요 + 저장 후 다음 방문 자동재생 '시도')
+   ✅ BGM Gate (오버레이 입장 방식)
+   - 첫 방문(또는 꺼둔 상태): 오버레이 먼저
+   - "음악 재생하고 입장하기" 클릭 시: 재생 성공하면 사이트 표시
+   - 한 번 켜두면 다음 방문부터: 오버레이 없이 자동재생 '시도'
 ========================= */
-(function bgmPlayer(){
-  const audio = document.getElementById("bgm");
-  const btn = document.getElementById("bgmToggle");
-  if (!audio || !btn) return;
-
+(function bgmGateMode(){
   const KEY = "yxl_bgm_on";
-  audio.volume = 0.25; // 원하는 볼륨 (0.0~1.0)
 
-  function setUI(isOn){
-    btn.classList.toggle("is-on", isOn);
-    btn.textContent = isOn ? "BGM 정지" : "BGM 재생";
-    btn.setAttribute("aria-pressed", isOn ? "true" : "false");
+  const gate = document.getElementById("bgmGate");
+  const startBtn = document.getElementById("bgmStart");
+  const msg = document.getElementById("bgmGateMsg");
+
+  const app = document.getElementById("app");
+  const audio = document.getElementById("bgm");
+
+  const headerToggle = document.getElementById("bgmToggle");
+
+  if (!gate || !startBtn || !app || !audio) return;
+
+  audio.loop = true;
+  audio.preload = "auto";
+  audio.volume = 0.25;
+
+  function lockSite(){
+    document.body.classList.add("is-locked");
+    app.classList.add("is-locked");
+    gate.classList.add("is-open");
+    gate.setAttribute("aria-hidden", "false");
   }
 
-  async function tryPlay(){
+  function unlockSite(){
+    document.body.classList.remove("is-locked");
+    app.classList.remove("is-locked");
+    gate.classList.remove("is-open");
+    gate.setAttribute("aria-hidden", "true");
+  }
+
+  function setHeaderUI(isOn){
+    if (!headerToggle) return;
+    headerToggle.classList.toggle("is-on", isOn);
+    headerToggle.textContent = isOn ? "BGM 정지" : "BGM 재생";
+    headerToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+  }
+
+  async function playSafe({ userInitiated = false } = {}){
     try{
-      await audio.play();                 // 자동재생 정책에 의해 실패할 수 있음
+      if (audio.readyState < 2) audio.load();
+      await audio.play();
       localStorage.setItem(KEY, "1");
-      setUI(true);
+      setHeaderUI(true);
+      return true;
     }catch(e){
-      // 자동재생 실패 시: UI OFF (사용자가 버튼 눌러야 함)
-      setUI(false);
+      setHeaderUI(false);
+      if (userInitiated && msg){
+        msg.textContent = "재생이 차단됐어요. 다시 한 번 눌러보거나 브라우저 설정/확장프로그램을 확인해주세요.";
+      }
+      return false;
     }
   }
 
@@ -279,24 +310,42 @@ function initSynergySort(){
     audio.pause();
     audio.currentTime = 0;
     localStorage.setItem(KEY, "0");
-    setUI(false);
+    setHeaderUI(false);
   }
 
-  // 버튼 토글 (첫 방문은 반드시 사용자가 눌러야 재생)
-  btn.addEventListener("click", () => {
-    if (audio.paused) tryPlay();
-    else stop();
+  // 오버레이 버튼: 재생 성공하면 입장
+  startBtn.addEventListener("click", async () => {
+    if (msg) msg.textContent = "";
+    const ok = await playSafe({ userInitiated: true });
+    if (ok) unlockSite();
   });
 
-  // 다음 방문부터: 이전에 켜둔 적 있으면 자동재생 '시도'
-  const savedOn = localStorage.getItem(KEY) === "1";
-  setUI(false);
-  if (savedOn) tryPlay();
+  // 헤더 버튼도 연동(있을 때만)
+  if (headerToggle){
+    headerToggle.addEventListener("click", async () => {
+      if (audio.paused){
+        const ok = await playSafe({ userInitiated: true });
+        if (ok) unlockSite();
+      } else {
+        stop();
+        lockSite(); // 꺼버리면 다음 방문도 오버레이 뜨게
+      }
+    });
+  }
 
-  // 탭 복귀 시: 켜짐 저장돼 있으면 다시 시도
+  // 다음 방문: 켜짐 저장돼 있으면 오버레이 없이 바로 보여주고 재생 '시도'
+  const savedOn = localStorage.getItem(KEY) === "1";
+  if (savedOn){
+    unlockSite();
+    playSafe({ userInitiated: false });
+  } else {
+    lockSite();
+  }
+
+  // 탭 복귀 시 재시도
   document.addEventListener("visibilitychange", () => {
     const shouldOn = localStorage.getItem(KEY) === "1";
-    if (!document.hidden && shouldOn && audio.paused) tryPlay();
+    if (!document.hidden && shouldOn && audio.paused) playSafe({ userInitiated: false });
   });
 })();
 

@@ -1,175 +1,134 @@
-:root{
-  --bg:#0b0f17;
-  --panel:rgba(255,255,255,.06);
-  --text:rgba(255,255,255,.92);
-  --muted:rgba(255,255,255,.66);
-  --border:rgba(255,255,255,.12);
-  --shadow:0 14px 40px rgba(0,0,0,.45);
-  --r1:16px; --r2:20px;
-  --a:#7dd3fc; --b:#a78bfa; --g:#34d399;
-}
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YXL 정보 허브</title>
+  <meta name="description" content="YXL 정보 · 규정 · 시너지표 · 타임라인" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="wrap header-inner">
+      <div class="brand">
+        <div class="brand-mark">YXL</div>
+        <div class="brand-text">
+          <div class="brand-title" id="siteTitle">YXL 정보 허브</div>
+          <div class="brand-sub" id="siteSub">규정 · 시너지표 · 변경이력 한방 정리</div>
+        </div>
+      </div>
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(900px 500px at 10% -10%, rgba(125,211,252,.22), transparent 60%),
-    radial-gradient(700px 500px at 90% 0%, rgba(167,139,250,.20), transparent 55%),
-    radial-gradient(900px 700px at 50% 110%, rgba(52,211,153,.10), transparent 60%),
-    var(--bg);
-}
+      <div class="header-actions">
+        <button class="btn ghost" id="copyBtn">링크 복사</button>
+        <span class="updated">업데이트: <b id="updatedAt">-</b></span>
+      </div>
+    </div>
 
-.wrap{width:min(1120px, calc(100% - 32px)); margin:0 auto;}
-.header{
-  position:sticky; top:0; z-index:10;
-  backdrop-filter: blur(10px);
-  background: rgba(11,15,23,.65);
-  border-bottom:1px solid var(--border);
-}
-.header-inner{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:14px 0; gap:14px;
-}
-.brand{display:flex; align-items:center; gap:12px;}
-.brand-mark{
-  width:48px; height:48px; border-radius:14px;
-  display:grid; place-items:center;
-  font-weight:900; letter-spacing:1px;
-  background: linear-gradient(135deg, rgba(125,211,252,.25), rgba(167,139,250,.25));
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 10px 30px rgba(0,0,0,.3);
-}
-.brand-title{font-weight:900;}
-.brand-sub{font-size:13px; color:var(--muted); margin-top:3px;}
+    <nav class="tabs wrap" aria-label="섹션 이동">
+      <a href="#info" class="tab">정보</a>
+      <a href="#rules" class="tab">규정</a>
+      <a href="#synergy" class="tab tab-strong">시너지표</a>
+      <a href="#timeline" class="tab">변경이력</a>
+      <a href="#links" class="tab">링크</a>
+    </nav>
+  </header>
 
-.header-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
-.updated{font-size:13px; color:var(--muted);}
-.btn{
-  padding:9px 12px; border-radius:14px;
-  border:1px solid rgba(255,255,255,.18);
-  background: linear-gradient(135deg, rgba(125,211,252,.20), rgba(167,139,250,.18));
-  color:var(--text); cursor:pointer; font-weight:800;
-}
-.btn.ghost{background:transparent; border:1px solid var(--border);}
+  <main class="wrap">
+    <section class="pin" id="pinArea" aria-label="고정 공지"></section>
 
-.tabs{display:flex; gap:10px; padding:10px 0 14px; flex-wrap:wrap;}
-.tab{
-  font-size:13px; color:var(--muted);
-  padding:8px 10px; border-radius:999px;
-  border:1px solid transparent; text-decoration:none;
-}
-.tab:hover{color:var(--text); border-color:var(--border);}
-.tab-strong{color:var(--text); border-color:rgba(125,211,252,.35); background:rgba(125,211,252,.08);}
+    <section class="section" id="info">
+      <div class="section-head">
+        <h2>YXL 정보</h2>
+        <p>처음 보는 사람도 30초 안에 이해하도록 “정의/목적/범위”만 짧게.</p>
+      </div>
 
-.section{margin:22px 0;}
-.section-head h2{margin:0; font-size:18px;}
-.section-head p{margin:6px 0 12px; color:var(--muted);}
+      <div class="cards two">
+        <article class="card">
+          <h3>한 줄 정의</h3>
+          <p class="muted" id="oneLine">-</p>
+        </article>
+        <article class="card">
+          <h3>핵심 키워드</h3>
+          <div class="chips" id="keywords"></div>
+        </article>
+      </div>
 
-.pin{display:flex; flex-direction:column; gap:10px; margin:16px 0 10px;}
-.pin .card{border-left:3px solid rgba(125,211,252,.55);}
+      <article class="card">
+        <h3>설명</h3>
+        <p class="muted" id="infoLong">-</p>
+      </article>
+    </section>
 
-.cards{display:grid; gap:12px;}
-.cards.two{grid-template-columns:1fr 1fr;}
-.cards.three{grid-template-columns:repeat(3,1fr);}
+    <section class="section" id="rules">
+      <div class="section-head">
+        <h2>규정 / 기준</h2>
+        <p>커뮤에서 말 나오는 포인트(집계 시간, 누락 처리, 동률, 수정 로그)를 “짧고 명확하게”.</p>
+      </div>
+      <div class="accordion" id="rulesAcc"></div>
+    </section>
 
-.card{
-  border-radius:var(--r2);
-  border:1px solid var(--border);
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-  box-shadow:var(--shadow);
-  padding:14px;
-}
-.card h3{margin:0 0 10px;}
-.muted{color:var(--muted); margin:0; line-height:1.55;}
+    <section class="section" id="synergy">
+      <div class="section-head">
+        <h2>시너지표</h2>
+        <p>필터/검색/정렬로 “지금 순위”와 “변화”를 한눈에.</p>
+      </div>
 
-.chips{display:flex; flex-wrap:wrap; gap:8px;}
-.chip{
-  padding:6px 10px; border-radius:999px;
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(0,0,0,.22);
-  font-size:12px;
-}
+      <div class="toolbar">
+        <input id="qSynergy" type="search" placeholder="검색: 닉네임/메모" />
+        <select id="roleSynergy">
+          <option value="all">역할 전체</option>
+        </select>
+        <select id="sortSynergy">
+          <option value="scoreDesc">점수 높은순</option>
+          <option value="scoreAsc">점수 낮은순</option>
+          <option value="deltaDesc">상승분 높은순</option>
+          <option value="nameAsc">이름 가나다</option>
+        </select>
+      </div>
 
-.toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
-.toolbar input, .toolbar select{
-  padding:12px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(0,0,0,.25);
-  color:var(--text);
-  outline:none;
-}
-.toolbar input{flex:1; min-width:220px;}
+      <div class="table-wrap">
+        <table class="table" aria-label="시너지표">
+          <thead>
+            <tr>
+              <th style="width:72px;">순위</th>
+              <th>멤버</th>
+              <th style="width:110px;">역할</th>
+              <th style="width:120px;">점수</th>
+              <th style="width:120px;">상승분</th>
+              <th>메모</th>
+            </tr>
+          </thead>
+          <tbody id="synergyBody"></tbody>
+        </table>
+      </div>
 
-.accordion{display:flex; flex-direction:column; gap:10px;}
-.acc{
-  border-radius:var(--r2);
-  border:1px solid var(--border);
-  background:var(--panel);
-  overflow:hidden;
-}
-.acc button{
-  width:100%; text-align:left;
-  padding:14px; border:0; background:transparent;
-  color:var(--text); cursor:pointer; font-weight:900;
-  display:flex; justify-content:space-between; align-items:center;
-}
-.acc .body{padding:0 14px 14px; color:var(--muted); line-height:1.6;}
+      <div class="hint">
+        <span class="badge">TIP</span>
+        <span>데이터는 <b>script.js</b>의 <b>DATA</b>만 바꾸면 자동 반영.</span>
+      </div>
+    </section>
 
-.table-wrap{
-  border-radius:var(--r2);
-  border:1px solid var(--border);
-  background:var(--panel);
-  overflow:auto;
-  box-shadow:var(--shadow);
-}
-.table{width:100%; border-collapse:collapse; min-width:760px;}
-.table th, .table td{
-  padding:12px 12px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  text-align:left;
-}
-.table th{
-  font-size:12px; color:var(--muted);
-  position:sticky; top:0;
-  background:rgba(11,15,23,.65);
-  backdrop-filter: blur(10px);
-}
-.rank{font-weight:900;}
-.delta.up{color:var(--g); font-weight:900;}
-.delta.down{color:#fb7185; font-weight:900;}
+    <section class="section" id="timeline">
+      <div class="section-head">
+        <h2>변경 이력</h2>
+        <p>규정/집계/표 수정 사항은 여기에 기록(논쟁 방지용).</p>
+      </div>
+      <div class="timeline" id="timelineList"></div>
+    </section>
 
-.hint{display:flex; gap:8px; align-items:center; margin-top:10px; color:var(--muted); font-size:13px;}
-.badge{
-  font-size:12px; padding:5px 9px; border-radius:999px;
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(0,0,0,.22);
-  color:var(--muted);
-}
+    <section class="section" id="links">
+      <div class="section-head">
+        <h2>링크</h2>
+        <p>대시보드/공지원문/커뮤스레드 같은 “출처”를 모아두기.</p>
+      </div>
+      <div class="cards three" id="linkCards"></div>
+    </section>
 
-.timeline{display:flex; flex-direction:column; gap:10px;}
-.tl{
-  border-radius:var(--r2);
-  border:1px solid var(--border);
-  background:var(--panel);
-  padding:14px;
-  display:flex; gap:12px;
-}
-.tl-date{min-width:120px; color:var(--a); font-weight:900;}
-.tl h4{margin:0 0 6px;}
-.tl p{margin:0; color:var(--muted); line-height:1.55;}
+    <footer class="footer">
+      <span>© <span id="year"></span> YXL</span>
+    </footer>
+  </main>
 
-.footer{
-  padding:26px 0 40px;
-  text-align:center;
-  color:var(--muted);
-  border-top:1px solid var(--border);
-  margin-top:18px;
-}
-
-@media (max-width:900px){
-  .cards.two{grid-template-columns:1fr;}
-  .cards.three{grid-template-columns:1fr;}
-}
+  <script src="script.js"></script>
+</body>
+</html>

@@ -631,5 +631,93 @@ document.addEventListener("DOMContentLoaded", () => {
 
   render();
 })();
+const carousel = document.getElementById("carousel");
+const caption = document.getElementById("caption");
+const btnToggle = document.getElementById("toggle");
+const btnPrev = document.getElementById("prev");
+const btnNext = document.getElementById("next");
+const speed = document.getElementById("speed");
+
+const COUNT = 13;
+let paused = false;
+let step = 0;
+
+function pad2(n){ return String(n).padStart(2, "0"); }
+
+function buildPanels(){
+  carousel.innerHTML = "";
+
+  for (let i = 1; i <= COUNT; i++) {
+    const panel = document.createElement("div");
+    panel.className = "panel";
+
+    const inner = document.createElement("div");
+    inner.className = "inner";
+    inner.style.animationDelay = `${(i * 0.12).toFixed(2)}s`;
+
+    const img = document.createElement("img");
+    img.alt = `dashboard ${pad2(i)}`;
+    img.src = `assets/${pad2(i)}.gif`; // 와이드 대시보드 GIF
+
+    inner.appendChild(img);
+    panel.appendChild(inner);
+    carousel.appendChild(panel);
+  }
+}
+
+/**
+ * ✅ 패널 폭에 맞춰 radius 자동 계산
+ * radius = (panelW/2) / tan(pi/N) + gap
+ */
+function layoutCarousel(){
+  const panels = [...carousel.querySelectorAll(".panel")];
+  if (!panels.length) return;
+
+  const panelW = panels[0].getBoundingClientRect().width;
+  const gap = 50; // 패널 사이 여유(겹침 방지). 필요하면 30~120 조절
+  const radius = (panelW / 2) / Math.tan(Math.PI / COUNT) + gap;
+
+  document.documentElement.style.setProperty("--radius", `${radius}px`);
+
+  panels.forEach((panel, idx) => {
+    const angle = (360 / COUNT) * idx;
+    panel.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+  });
+}
+
+function rotateToStep() {
+  carousel.style.animation = "none";
+  const deg = -(360 / COUNT) * step;
+  carousel.style.transform = `rotateY(${deg}deg)`;
+  caption.textContent = pad2(((step % COUNT) + COUNT) % COUNT + 1);
+
+  requestAnimationFrame(() => {
+    if (!paused) {
+      carousel.style.animation = "";
+      carousel.style.transform = "";
+    }
+  });
+}
+
+// 초기 생성/배치
+buildPanels();
+layoutCarousel();
+window.addEventListener("resize", () => layoutCarousel());
+
+// 속도 조절
+speed.addEventListener("input", () => {
+  document.documentElement.style.setProperty("--spin-seconds", `${speed.value}s`);
+});
+
+// 재생/정지
+btnToggle.addEventListener("click", () => {
+  paused = !paused;
+  carousel.classList.toggle("paused", paused);
+  btnToggle.textContent = paused ? "▶︎" : "⏸︎";
+});
+
+// 한 칸씩 넘기기
+btnPrev.addEventListener("click", () => { step -= 1; rotateToStep(); });
+btnNext.addEventListener("click", () => { step += 1; rotateToStep(); });
 
 });

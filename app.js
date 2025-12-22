@@ -464,10 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* =========================
    📅 Weekly Calendar (localStorage)
 ========================= */
-/* =========================
-   📅 Weekly Calendar (READ-ONLY from assets/events.json)
-========================= */
-(function weeklyCalendarReadOnly(){
+(function weeklyCalendar(){
   const grid = document.getElementById("weekGrid");
   if (!grid) return;
 
@@ -480,27 +477,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const detailDate = document.getElementById("detailDate");
   const detailTitle = document.getElementById("detailTitle");
   const detailMemo = document.getElementById("detailMemo");
+  const saveBtn = document.getElementById("saveDetail");
+  const clearBtn = document.getElementById("clearDetail");
   const closeBtn = document.getElementById("closeDetail");
 
-  // ✅ 공유 일정 데이터(보기 전용)
-  let EVENTS = {};
+  const KEY = "yxl_week_events_v1";
 
-  // 로드
-  async function loadEvents(){
-    try{
-      const res = await fetch("assets/events.json?v=" + Date.now(), { cache: "no-store" });
-      if (!res.ok) throw new Error("events.json load failed");
-      EVENTS = await res.json();
-    }catch(e){
-      EVENTS = {};
-      console.warn(e);
-    }
-  }
-
+  // KST 기준 today
   const now = new Date();
   const todayYMD = toYMD(now);
 
   function toYMD(d){
+    // 로컬(브라우저) 기준 YYYY-MM-DD
     const y = d.getFullYear();
     const m = String(d.getMonth()+1).padStart(2,"0");
     const dd = String(d.getDate()).padStart(2,"0");
@@ -513,9 +501,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function startOfWeek(date){
+    // 월요일 시작(한국식): Mon=1
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const day = d.getDay(); // Sun=0
-    const diff = (day === 0 ? -6 : 1 - day); // 월요일 시작
+    const diff = (day === 0 ? -6 : 1 - day); // 월요일로 이동
     d.setDate(d.getDate() + diff);
     d.setHours(0,0,0,0);
     return d;
@@ -527,6 +516,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return d;
   }
 
+  function loadAll(){
+    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); }
+    catch { return {}; }
+  }
+
+  function saveAll(obj){
+    localStorage.setItem(KEY, JSON.stringify(obj));
+  }
+
+  let base = startOfWeek(new Date()); // 현재 보는 주의 월요일
+  let selected = null;
+
   function formatRange(weekStart){
     const weekEnd = addDays(weekStart, 6);
     const s = weekStart.toLocaleDateString("ko-KR", { month:"long", day:"numeric" });
@@ -536,17 +537,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const DOW = ["월","화","수","목","금","토","일"];
 
-  let base = startOfWeek(new Date());
-  let selected = null;
-
   function render(){
+    const data = loadAll();
     grid.innerHTML = "";
+
     if (weekRange) weekRange.textContent = formatRange(base);
 
     for(let i=0;i<7;i++){
       const d = addDays(base, i);
       const ymd = toYMD(d);
-      const item = EVENTS[ymd];
+      const item = data[ymd];
 
       const card = document.createElement("div");
       card.className = "day-card";
@@ -569,7 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const memo = document.createElement("div");
       memo.className = "event-memo";
-      memo.textContent = item?.memo ? item.memo : "—";
+      memo.textContent = item?.memo ? item.memo : "클릭해서 일정 추가하기";
 
       card.appendChild(top);
       card.appendChild(title);
@@ -579,46 +579,6 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.appendChild(card);
     }
   }
-
-  function openDetail(ymd){
-    selected = ymd;
-    const item = EVENTS[ymd] || { title:"", memo:"" };
-
-    const d = parseYMD(ymd);
-    const label = d.toLocaleDateString("ko-KR", { year:"numeric", month:"long", day:"numeric", weekday:"short" });
-    if (detailDate) detailDate.textContent = label;
-
-    // 보기 전용: 입력칸 대신 값 표시(입력칸이 있어도 disabled 처리)
-    if (detailTitle){
-      detailTitle.value = item.title || "";
-      detailTitle.disabled = true;
-    }
-    if (detailMemo){
-      detailMemo.value = item.memo || "";
-      detailMemo.disabled = true;
-    }
-
-    if (detail) detail.hidden = false;
-    detail?.scrollIntoView({ behavior:"smooth", block:"nearest" });
-  }
-
-  function closeDetail(){
-    selected = null;
-    if (detail) detail.hidden = true;
-  }
-
-  closeBtn?.addEventListener("click", closeDetail);
-
-  prevBtn?.addEventListener("click", () => { base = addDays(base, -7); closeDetail(); render(); });
-  nextBtn?.addEventListener("click", () => { base = addDays(base, 7); closeDetail(); render(); });
-  thisBtn?.addEventListener("click", () => { base = startOfWeek(new Date()); closeDetail(); render(); });
-
-  (async () => {
-    await loadEvents();
-    render();
-  })();
-})();
-
 
   function openDetail(ymd){
     selected = ymd;

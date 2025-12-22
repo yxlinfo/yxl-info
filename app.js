@@ -169,33 +169,33 @@ const withRank = (rows) => {
   /* =========================
      누적 렌더 + 검색
   ========================= */
-  function renderTotalTable() {
-    const tbody = document.querySelector("#totalTable tbody");
-    const q = normalize(document.getElementById("totalSearch")?.value);
-    if (!tbody) return;
+function renderTotalTable() {
+  const tbody = document.querySelector("#totalTable tbody");
+  const q = normalize(document.getElementById("totalSearch")?.value);
+  if (!tbody) return;
 
-    const prevMap = totalPrevMap;
-    const ranked = withRank(YXL_DATA.total);
-    const filtered = q ? ranked.filter((r) => normalize(r.name).includes(q)) : ranked;
+  const prevMap = totalPrevMap;
+  const ranked = withRank(YXL_DATA.total);
+  const filtered = q ? ranked.filter((r) => normalize(r.name).includes(q)) : ranked;
 
-    tbody.innerHTML = filtered.map((r) => {
-      const prevRank = prevMap?.[r.name];
-      const delta = (typeof prevRank === "number") ? (prevRank - r.rank) : null; // +면 상승
-      return `
-        <tr>
-          <td>${rankBadge(r.rank)}</td>
-          <td>${r.name}</td>
-          <td class="num">${numFmt(r.balloons)}</td>
-          <td class="num">${formatDelta(delta)}</td>
-        </tr>
-      `;
-    }).join("");
+  tbody.innerHTML = filtered.map((r) => {
+    const prevRank = prevMap?.[r.name];
+    const delta = (typeof prevRank === "number") ? (prevRank - r.rank) : null; // +면 상승
+    return `
+      <tr>
+        <td>${rankBadge(r.rank)}</td>
+        <td>${r.name}</td>
+        <td class="num">${numFmt(r.balloons)}</td>
+        <td class="num">${formatDelta(delta)}</td>
+      </tr>
+    `;
+  }).join("");
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
   }
+}
 
-    if (!filtered.length) {
-      tbody.innerHTML = `<tr><td colspan="3" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
-    }
-  }
   document.getElementById("totalSearch")?.addEventListener("input", renderTotalTable);
 
   /* =========================

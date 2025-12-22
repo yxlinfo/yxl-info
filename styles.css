@@ -520,3 +520,53 @@ body::after{
   padding: 10px 10px;
   margin: -6px -6px 12px;
 }
+/* ✅ Xmas Background Strong (체감 확 나는 버전) */
+html, body{
+  background:
+    radial-gradient(900px 520px at 18% 10%, rgba(239, 68, 68, .18), transparent 60%),
+    radial-gradient(900px 520px at 82% 12%, rgba(34, 197, 94, .16), transparent 60%),
+    radial-gradient(1100px 650px at 50% 0%, rgba(250, 204, 21, .10), transparent 62%),
+    linear-gradient(180deg, #08101e 0%, #060b14 55%, #04070e 100%) !important;
+}
+
+/* 보케(빛) 더 강하게 */
+body::before{
+  content:"";
+  position: fixed;
+  inset:-20%;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(250, 204, 21, .18) 0 90px, transparent 110px),
+    radial-gradient(circle at 26% 36%, rgba(239, 68, 68, .16) 0 70px, transparent 90px),
+    radial-gradient(circle at 78% 22%, rgba(34, 197, 94, .14) 0 80px, transparent 100px),
+    radial-gradient(circle at 86% 44%, rgba(56, 189, 248, .10) 0 110px, transparent 130px);
+  filter: blur(22px);
+  opacity:.95;
+}
+
+/* 눈발 더 부드럽게 */
+body::after{
+  content:"";
+  position: fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background-image:
+    radial-gradient(1.2px 1.2px at 30px 40px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,.20) 55%, transparent 60%),
+    radial-gradient(1.6px 1.6px at 280px 80px, rgba(255,255,255,.18) 55%, transparent 60%),
+    radial-gradient(1.2px 1.2px at 520px 160px, rgba(255,255,255,.18) 55%, transparent 60%),
+    radial-gradient(2px 2px at 640px 60px, rgba(255,255,255,.14) 55%, transparent 60%),
+    radial-gradient(1.4px 1.4px at 760px 110px, rgba(255,255,255,.16) 55%, transparent 60%);
+  background-size: 900px 320px;
+  animation: snowFallStrong 9s linear infinite;
+  opacity:.85;
+}
+@keyframes snowFallStrong{
+  from{ transform: translate3d(0,-60px,0); }
+  to{ transform: translate3d(0,380px,0); }
+}
+
+/* 컨텐츠는 위로 */
+.header, main, .wrap{ position: relative; z-index: 1; }

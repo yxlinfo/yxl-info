@@ -667,7 +667,7 @@ body::after{
 }
 /* ✅ 헤더 로고 GIF 크기 줄이기 */
 .brand-gif{
-  height:15px;   /* 원하는 크기 */
+  height:30px;   /* 원하는 크기 */
   width:auto;
   display:block;
   border-radius:0;  /* 아주 작으니 둥글게 필요 없으면 0 */

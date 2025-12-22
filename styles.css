@@ -882,5 +882,122 @@ body::after{
   .week-grid{ grid-template-columns: 1fr; } /* 1열 카드 리스트 */
   .week-actions .btn{ width:100%; }
 }
+:root{
+  /* ✅ 와이드 대시보드 기준 */
+  --panel-w: min(900px, 92vw);
+  --panel-h: min(420px, 52vw);
+
+  /* JS가 자동으로 세팅 */
+  --radius: 520px;
+
+  --spin-seconds: 22s;
+}
+
+*{ box-sizing: border-box; }
+body{
+  margin:0;
+  background:#0b0f1a;
+  color:#e8eefc;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
+}
+
+.wrap{ max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+.top{
+  display:flex;
+  gap:16px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+h1{ font-size: 20px; margin: 0; }
+
+.controls{
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+}
+button{
+  background:#18213a; color:#e8eefc;
+  border:1px solid #2a3a66;
+  padding:8px 10px; border-radius:10px;
+  cursor:pointer;
+}
+label{ display:flex; gap:8px; align-items:center; font-size: 13px; opacity: .9; }
+
+.stage{ margin-top: 18px; }
+
+/* ✅ 와이드 패널은 높이가 더 필요할 수 있어서 scene 높이 살짝 증가 */
+.scene{
+  width: 100%;
+  height: 640px;
+  display:grid;
+  place-items:center;
+  perspective: 1400px;
+}
+
+.carousel{
+  position: relative;
+  width: var(--panel-w);
+  height: var(--panel-h);
+  transform-style: preserve-3d;
+  animation: spin var(--spin-seconds) linear infinite;
+}
+
+.carousel.paused{ animation-play-state: paused; }
+
+@keyframes spin{
+  from{ transform: rotateY(0deg); }
+  to  { transform: rotateY(-360deg); }
+}
+
+.panel{
+  position:absolute;
+  width: var(--panel-w);
+  height: var(--panel-h);
+  border-radius: 18px;
+  overflow:hidden;
+
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.panel .inner{
+  width:100%; height:100%;
+  display:grid; place-items:center;
+  animation: drift 4.2s ease-in-out infinite;
+}
+
+@keyframes drift{
+  0%   { transform: translateX(-6px) translateY(2px); }
+  50%  { transform: translateX(6px)  translateY(-2px); }
+  100% { transform: translateX(-6px) translateY(2px); }
+}
+
+/* ✅ 와이드면 cover가 잘릴 수 있음 → contain 권장(대시보드 전체 보이게) */
+.panel img{
+  width:100%;
+  height:100%;
+  object-fit: contain;
+  display:block;
+}
+
+/* 깊이감: 살짝 비네팅 */
+.panel::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.35) 100%);
+  pointer-events:none;
+}
+
+.caption{
+  margin-top: 14px;
+  text-align:center;
+  opacity: .85;
+  font-size: 14px;
+}
 
 

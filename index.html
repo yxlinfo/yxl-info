@@ -1,188 +1,218 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>YXL.info</title>
-<link href="styles.css?v=19" rel="stylesheet"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YXL.info</title>
+  <link rel="stylesheet" href="styles.css?v=20">
 </head>
 <body>
-<!-- ✅ Gate (첫 방문 클릭 필요) -->
-<div aria-hidden="true" class="gate" id="gate">
-<div class="gate-sparkles"></div>
-<div class="gate-particles" id="gateParticles"></div>
-<button class="gate-btn" id="gateBtn" type="button">
-<div class="gate-title">YXLinfo</div>
-<div class="gate-sub">많관부♥</div>
-<div class="gate-hint">눌러서 입장하기 (BGM 재생)</div>
-</button>
-<div class="gate-msg" id="gateMsg"></div>
-</div>
-<!-- ✅ BGM -->
-<audio id="bgm" loop="" preload="auto">
-<!-- 네가 올린 파일 경로 -->
-<source src="assets/bgm.mp3" type="audio/mpeg"/>
-</audio>
-<!-- Header -->
-<header class="header">
-<!-- 🎄 Garland (랜덤 반짝 전구) -->
-<div aria-hidden="true" class="garland">
-<span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-<span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-<span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-<span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-<span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-</div>
-<div class="wrap header-inner">
-<div class="brand">
-<img alt="YXL" class="brand-gif" src="assets/logo.gif"/>
-</div>
-<div class="header-actions">
-<button aria-pressed="false" class="btn" id="bgmToggle" type="button">BGM 재생</button>
-<div class="updated">업데이트: <span id="updatedAt">--</span></div>
-</div>
-</div>
-</header>
-<main class="wrap">
-<section class="section" id="info">
-<section class="section">
-<div class="section-head">
-<h2>📊 데이터</h2>
-</div>
-<!-- Tabs -->
-<div class="dash-tabs"><button class="dash-tab is-active" data-target="dash-synergy">시너지표</button><button class="dash-tab" data-target="dash-total">누적 기여도표</button><button class="dash-tab" data-target="dash-integrated">시즌통합랭킹</button><button class="dash-tab" data-target="dash-season">시즌별 기여도표</button></div>
-<!-- Panel: Total -->
-<div class="dash-panel" hidden="" id="dash-total">
-<div class="card">
-<div class="card-head">
-<div>
-<h3 style="margin:0 0 6px;">누적 기여도표</h3>
-<p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
-</div>
-<div class="toolbar">
-<div class="input-wrap">
-<input class="input" id="totalSearch" placeholder="멤버 이름 검색"/>
-</div>
-</div>
-</div>
-<div class="table-wrap">
-<table class="table" id="totalTable">
-<thead>
-<tr>
-<th>순위</th>
-<th>스트리머</th>
-<th style="text-align:right;">누적기여도</th>
-<th style="text-align:right;">변동사항</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
-<div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
-</div>
-</div><div class="dash-panel" hidden="" id="dash-integrated">
-<div class="card">
-<div class="card-head">
-<div>
-<h3 style="margin:0 0 6px;">시즌통합랭킹</h3>
-<p class="muted" style="margin:0;">S1~S10 기여도(시즌별 합산) 기준 통합 랭킹입니다.</p>
-</div>
-<div class="toolbar">
-<div class="input-wrap">
-<input class="input" id="integratedSearch" placeholder="스트리머 이름 검색"/>
-</div>
-</div>
-</div>
-<div class="table-wrap">
-<table class="table" id="integratedTable">
-<thead>
-<tr>
-<th>순위</th>
-<th>시즌</th>
-<th>직급</th>
-<th>스트리머</th>
-<th style="text-align:right;">합산기여도</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
-<div class="hint">* 엑셀 2번째 시트(S1~S10 YXL_기여도) 기반</div>
-</div>
-</div>
-<!-- Panel: Season -->
-<div class="dash-panel" hidden="" id="dash-season">
-<div class="card">
-<div class="card-head">
-<div>
-<h3 style="margin:0 0 6px;">시즌별 기여도표</h3>
-<p class="muted" style="margin:0;">시즌 선택 + 이름 검색이 가능합니다.</p>
-</div>
-<div class="toolbar">
-<select class="select" id="seasonSelect"></select>
-<div class="input-wrap">
-<input class="input" id="seasonSearch" placeholder="멤버 이름 검색"/>
-</div>
-</div>
-</div>
-<div class="table-wrap">
-<table class="table" id="seasonTable">
 
-<thead>
-<tr>
-<th>순위</th>
-<th>직급</th>
-<th>스트리머</th>
-<th style="text-align:right;">합산기여도</th>
-</tr>
-</thead>
+  <!-- ✅ Gate (첫 방문 클릭 필요) -->
+  <div id="gate" class="gate" aria-hidden="true">
+    <div class="gate-sparkles"></div>
+    <div id="gateParticles" class="gate-particles"></div>
 
-<tbody></tbody>
-</table>
-</div>
-<div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다.</div>
-</div>
-</div>
-<!-- Panel: Synergy -->
-<div class="dash-panel is-active" id="dash-synergy">
-  <div class="card">
-    <div class="card-head">
-      <div>
-        <h3 style="margin:0 0 6px;">시너지표</h3>
-        <p class="muted" style="margin:0;">새로고침시간: <span id="synergyRefreshedAt">--</span></p>
-      </div>
-      <div class="toolbar">
-        <div class="input-wrap">
-          <input class="input" id="synergySearch" placeholder="스트리머 이름 검색"/>
-        </div>
-      </div>
-    </div>
+    <button id="gateBtn" class="gate-btn" type="button">
+      <div class="gate-title">YXLinfo</div>
+      <div class="gate-sub">많관부♥</div>
+      <div class="gate-hint">눌러서 입장하기 (BGM 재생)</div>
+    </button>
 
-    <div class="table-wrap">
-      <table class="table" id="synergyTable">
-        <thead>
-          <tr>
-            <th>순위</th>
-            <th>스트리머</th>
-            <th style="text-align:right;">누적별풍선</th>
-            <th style="text-align:right;">변동사항</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="hint">* LIVE일 때만 이름에 마우스를 올리면 썸네일 툴팁이 표시됩니다. (OFF는 아무것도 안 뜸)</div>
+    <div id="gateMsg" class="gate-msg"></div>
   </div>
 
-  <div class="synergy-tooltip" hidden="" id="synergyTooltip"></div>
-</div>
-</section>
-<footer class="section" style="padding-top:0;">
-<div class="muted">© YXL</div>
-</footer>
-</section></main>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="app.js?v=19"></script>
+  <!-- ✅ BGM -->
+  <audio id="bgm" preload="auto" loop>
+    <source src="assets/bgm.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="garland" aria-hidden="true">
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+    </div>
+
+    <div class="wrap header-inner">
+      <div class="brand">
+        <img class="brand-gif" src="assets/logo.gif" alt="YXL" />
+      </div>
+
+      <div class="header-actions">
+        <button id="bgmToggle" class="btn" type="button" aria-pressed="false">BGM 재생</button>
+        <div class="updated">업데이트: <span id="updatedAt">--</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="section">
+
+      <div class="section-head">
+        <h2>📊 데이터</h2>
+      </div>
+
+      <!-- Tabs (시너지표가 맨 앞) -->
+      <div class="dash-tabs">
+        <button class="dash-tab is-active" type="button" data-target="dash-synergy" aria-selected="true">시너지표</button>
+        <button class="dash-tab" type="button" data-target="dash-total" aria-selected="false">누적 기여도표</button>
+        <button class="dash-tab" type="button" data-target="dash-integrated" aria-selected="false">시즌통합랭킹</button>
+        <button class="dash-tab" type="button" data-target="dash-season" aria-selected="false">시즌별 기여도표</button>
+      </div>
+
+      <!-- Panel: Synergy -->
+      <div class="dash-panel is-active" id="dash-synergy">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 style="margin:0 0 6px;">시너지표</h3>
+              <p class="muted" style="margin:0;">라이브 중이면 이름에 마우스를 올렸을 때 썸네일이 표시됩니다.</p>
+            </div>
+            <div class="toolbar">
+              <div class="input-wrap">
+                <input id="synergySearch" class="input" placeholder="스트리머 이름 검색" />
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="synergyTable" class="table sortable">
+              <thead>
+                <tr>
+                  <th data-key="rank">순위</th>
+                  <th data-key="streamer">스트리머</th>
+                  <th data-key="balloons" style="text-align:right;">누적별풍선</th>
+                  <th data-key="delta" style="text-align:right;">변동사항</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 변동사항은 이전 접속 시점의 순위와 비교합니다(브라우저 저장).</div>
+        </div>
+      </div>
+
+      <!-- Panel: Total -->
+      <div class="dash-panel" id="dash-total" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 style="margin:0 0 6px;">누적 기여도표</h3>
+              <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
+            </div>
+            <div class="toolbar">
+              <div class="input-wrap">
+                <input id="totalSearch" class="input" placeholder="스트리머 이름 검색" />
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="totalTable" class="table">
+              <thead>
+                <tr>
+                  <th>순위</th>
+                  <th>스트리머</th>
+                  <th style="text-align:right;">누적기여도</th>
+                  <th style="text-align:right;">변동사항</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
+        </div>
+      </div>
+
+      <!-- Panel: Integrated -->
+      <div class="dash-panel" id="dash-integrated" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 style="margin:0 0 6px;">시즌통합랭킹</h3>
+              <p class="muted" style="margin:0;">시즌 선택 박스 없이 전체 목록을 표시합니다.</p>
+            </div>
+            <div class="toolbar">
+              <div class="input-wrap">
+                <input id="integratedSearch" class="input" placeholder="스트리머 이름 검색" />
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="integratedTable" class="table sortable">
+              <thead>
+                <tr>
+                  <th data-key="season">시즌</th>
+                  <th data-key="rank">순위</th>
+                  <th data-key="grade">직급</th>
+                  <th data-key="streamer">스트리머</th>
+                  <th data-key="total" style="text-align:right;">기여도(합산)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 합산은 해당 행의 숫자 컬럼(직급전+회차)을 합친 값입니다.</div>
+        </div>
+      </div>
+
+      <!-- Panel: Season -->
+      <div class="dash-panel" id="dash-season" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 style="margin:0 0 6px;">시즌별 기여도표</h3>
+              <p class="muted" style="margin:0;">시즌 선택 + 이름 검색이 가능합니다.</p>
+            </div>
+            <div class="toolbar">
+              <select id="seasonSelect" class="select"></select>
+              <div class="input-wrap">
+                <input id="seasonSearch" class="input" placeholder="스트리머 이름 검색" />
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="seasonTable" class="table sortable">
+              <thead>
+                <tr>
+                  <th data-key="rank">순위</th>
+                  <th data-key="grade">직급</th>
+                  <th data-key="streamer">스트리머</th>
+                  <th data-key="total" style="text-align:right;">기여도(합산)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <footer class="section" style="padding-top:0;">
+      <div class="muted">© YXL</div>
+    </footer>
+  </main>
+
+  <!-- LIVE 툴팁 -->
+  <div id="soopTooltip" class="soop-tooltip" hidden>
+    <img id="soopThumb" alt="LIVE 썸네일" />
+    <div id="soopTitle" class="soop-title"></div>
+  </div>
+
+  <!-- SheetJS (Excel 파싱) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js?v=20"></script>
 </body>
 </html>

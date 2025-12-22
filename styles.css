@@ -564,169 +564,78 @@ body::after{
 .delta.new{color:rgba(255,255,255,.75)}
 
 
-
 /* =========================
-   시너지표 위젯/툴팁/라이브 표시
-   ========================= */
-.synergy-widgets{
-  display:grid;
-  grid-template-columns: 1.15fr .85fr;
-  gap:12px;
-  margin:12px 0 14px;
-}
-@media (max-width: 860px){
-  .synergy-widgets{ grid-template-columns: 1fr; }
-}
-
-.mini-card{
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  padding:12px 14px;
-}
-
-.mini-title{
-  font-size:12px;
-  letter-spacing:.02em;
-  opacity:.85;
-  margin-bottom:6px;
-}
-
-.mini-value{
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:.01em;
-}
-
-.mini-sub{
-  margin-top:6px;
-  font-size:12px;
-}
-
-.calendar-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:10px;
-}
-.calendar-ym{
-  font-size:16px;
-  font-weight:900;
-}
-.calendar-badge{
-  font-size:12px;
-  padding:4px 10px;
-  border-radius:999px;
-  background: rgba(255, 80, 105, .15);
-  border:1px solid rgba(255, 80, 105, .35);
-  color: rgba(255,255,255,.92);
-}
-
-.calendar-grid{
-  display:grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap:6px;
-}
-.cal-dow{
-  font-size:11px;
-  opacity:.7;
-  text-align:center;
-}
-.cal-day{
-  text-align:center;
-  font-size:12px;
-  padding:8px 0;
-  border-radius:10px;
-  background: rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.06);
-}
-.cal-day.is-empty{
-  background: transparent;
-  border-color: transparent;
-}
-.cal-day.is-today{
-  background: rgba(255,255,255,.10);
-  border-color: rgba(255,255,255,.18);
-  font-weight:900;
-}
-
-.synergy-tooltip{
-  position:fixed;
-  z-index:9999;
-  pointer-events:none;
-  width: 260px;
-  background: rgba(10,10,12,.92);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px;
-  padding: 10px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 14px 40px rgba(0,0,0,.55);
-}
-.synergy-tooltip img{
-  width:100%;
-  height:auto;
-  display:block;
-  border-radius: 12px;
-}
-.synergy-tooltip .tt-title{
-  font-size:12px;
-  margin-top:8px;
-  opacity:.85;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.name-cell{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
+   ✅ Synergy: LIVE 표시(영롱한 빨간 불빛) + 이름 3D hover
+========================= */
+.bj-cell{ display:flex; align-items:center; gap:8px; }
 .live-dot{
-  width:11px;
-  height:11px;
-  border-radius:999px;
+  display:inline-block;
+  width:10px; height:10px;
+  border-radius:50%;
+  flex: 0 0 auto;
   background: radial-gradient(circle at 30% 30%,
-    rgba(255,255,255,.95) 0%,
-    rgba(255,160,172,.95) 18%,
-    #ff2a4a 45%,
-    #b30018 75%,
-    #6a000c 100%);
+    #ffffff 0%,
+    #ffc0c0 18%,
+    #ff3b3b 42%,
+    #b80000 72%,
+    #4a0000 100%
+  );
   box-shadow:
-    0 0 7px rgba(255,42,74,.95),
-    0 0 18px rgba(255,42,74,.55),
-    0 0 34px rgba(255,42,74,.35);
-  flex:0 0 auto;
-  animation: livePulse 1.7s ease-in-out infinite;
+    0 0 6px rgba(255, 50, 50, .95),
+    0 0 14px rgba(255, 50, 50, .70),
+    0 0 26px rgba(255, 50, 50, .45);
+  animation: livePulse 1.4s ease-in-out infinite;
 }
-
-.live-dot.is-off{
-  background:#1d1f23;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
-  opacity:.75;
-  animation:none;
-}
-
 @keyframes livePulse{
-  0%,100%{ transform: scale(1); }
-  50%{ transform: scale(1.18); }
+  0%,100%{ transform:scale(1); filter:brightness(1); }
+  50%{ transform:scale(1.12); filter:brightness(1.25); }
 }
 
-/* 이름 호버: 밑줄 대신 볼록(엠보) 느낌 */
-.bj-link{
-  cursor:pointer;
+.bj-name{
+  display:inline-block;
   text-decoration:none !important;
-  font-weight:700;
-  transition: transform .12s ease, filter .12s ease, text-shadow .12s ease, font-weight .12s ease;
-  will-change: transform;
+  font-weight: 650;
+  cursor:pointer;
+  transition: transform .12s ease, text-shadow .12s ease, filter .12s ease, font-weight .12s ease;
 }
-.bj-link:hover{
-  font-weight:900;
-  transform: translateY(-1px) scale(1.02);
+.bj-name:hover{
+  font-weight: 850;
+  transform: translateY(-1px);
   text-shadow:
-    0 1px 0 rgba(255,255,255,.35),
-    0 2px 10px rgba(0,0,0,.55);
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+    0 -1px 0 rgba(255,255,255,.22),
+    0  1px 0 rgba(0,0,0,.45),
+    0  6px 14px rgba(0,0,0,.35);
+  filter: brightness(1.05);
 }
+
+/* LIVE 툴팁 */
+.soop-tooltip{
+  position: fixed;
+  z-index: 999999;
+  width: 320px;
+  max-width: min(360px, 92vw);
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(8, 16, 30, .92);
+  border: 1px solid rgba(255,255,255,.16);
+  box-shadow: 0 18px 60px rgba(0,0,0,.45);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+.soop-tooltip img{
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  display:block;
+  border: 1px solid rgba(255,255,255,.10);
+}
+.soop-title{
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255,255,255,.82);
+  line-height: 1.35;
+  max-height: 2.8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

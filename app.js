@@ -1,57 +1,27 @@
-/* YXLinfo v19
-   - Excel 기반 대시보드 (YXL_통합.xlsx, 시너지표.xlsx)
-   - 시너지표: LIVE 썸네일 툴팁(라이브일 때만), ON 표시(네온 빨간불), 클릭 이동(라이브/방송국)
-   - 
-*/
-(() => {
-  "use strict";
-
-  /* =========================
-     설정
-     ========================= */
-  const UPDATE_MS = 3 * 60 * 60 * 1000; // 3시간
-  const EXCEL_CANDIDATES = ["data/YXL_통합.xlsx", "YXL_통합.xlsx"];
-  const SYNERGY_CANDIDATES = ["data/시너지표.xlsx", "시너지표.xlsx"];
-
-  const SOOP_SEARCH_API = "https://sch.sooplive.co.kr/api.php"; // 통합검색 (bjSearch / liveSearch)
-
-  /* =========================
-     유틸
-     ========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  /* =========================================================
+     기본 DOM 유틸
+  ========================================================= */
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const safeText = (v) => (v ?? "").toString();
+  const safeText = (v) => (v == null ? "" : String(v));
   const toNum = (v) => {
-    if (v == null) return 0;
+    if (v == null || v === "") return 0;
     if (typeof v === "number") return Number.isFinite(v) ? v : 0;
-    const s = safeText(v).replace(/[,\s]/g, "");
+    const s = String(v).replace(/[,\s]/g, "");
     const n = Number(s);
     return Number.isFinite(n) ? n : 0;
   };
-  const fmtNum = (n) => new Intl.NumberFormat("ko-KR").format(toNum(n));
+  const fmtNum = (n) => (toNum(n)).toLocaleString("ko-KR");
 
   const normalizeNick = (s) =>
     safeText(s)
       .trim()
-      .replace(/\s+/g, "")
-      .replace(/[❤♥♡]/g, "")
-      .toLowerCase();
+      .toLowerCase()
+      .replace(/\s+/g, "");
 
-  // ✅ 시너지표 BJID 매핑(사용자 제공)
-  const BJID_MAP = {
-    [normalizeNick("리윤_♥")]: "sladk51",
-    [normalizeNick("후잉♥")]: "jaeha010",
-    [normalizeNick("하랑짱♥")]: "asy1218",
-    [normalizeNick("쩔밍♡")]: "wnsdus5900",
-    [normalizeNick("김유정S2")]: "tkek55",
-    [normalizeNick("서니_♥")]: "iluvpp",
-    [normalizeNick("#율무")]: "offside629",
-    [normalizeNick("소다♥")]: "zbxlzzz",
-    [normalizeNick("강소지♥")]: "nowsoji",
-  };
-
-  const readJSON = (key, fallback = null) => {
+  const readJSON = (key, fallback) => {
     try {
       const raw = localStorage.getItem(key);
       return raw ? JSON.parse(raw) : fallback;
@@ -65,288 +35,230 @@
     } catch {}
   };
 
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  /* =========================================================
+     파일 경로 (루트 우선, 없으면 data/)
+  ========================================================= */
+  const FILES = {
+    yxl: ["YXL_통합.xlsx", "data/YXL_통합.xlsx"],
+    synergy: ["시너지표.xlsx", "data/시너지표.xlsx"],
+  };
 
-  /* =========================
-     게이트 + BGM
-     ========================= */
-  function initGate() {
-    const gate = $("#gate");
-    const gateBtn = $("#gateBtn");
-    const bgm = $("#bgm");
-    const bgmToggle = $("#bgmToggle");
-
-    if (!gate || !gateBtn) return;
-
-    const KEY = "yxl_gate_open";
-    const opened = readJSON(KEY, false);
-
-    const showGate = () => {
-      gate.classList.remove("is-hidden");
-      gate.removeAttribute("aria-hidden");
-    };
-    const hideGate = () => {
-      gate.classList.add("is-hidden");
-      gate.setAttribute("aria-hidden", "true");
-    };
-
-    // 초기 상태
-    if (opened) hideGate();
-    else showGate();
-
-    // 오디오 자동재생은 대부분 브라우저에서 막힘 → 사용자 클릭 후 재생
-    const tryPlay = async () => {
-      if (!bgm) return;
+  async function fetchArrayBufferFirst(paths) {
+    const v = Date.now();
+    for (const p of paths) {
       try {
-        await bgm.play();
-        bgm.dataset.playing = "1";
-        if (bgmToggle) bgmToggle.textContent = "BGM OFF";
+        const res = await fetch(`${p}?v=${v}`, { cache: "no-store" });
+        if (!res.ok) continue;
+        return await res.arrayBuffer();
       } catch {
-        // 무시 (정책상 실패할 수 있음)
-      }
-    };
-
-    gateBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      writeJSON(KEY, true);
-      hideGate();
-      await tryPlay();
-    });
-
-    bgmToggle?.addEventListener("click", async () => {
-      if (!bgm) return;
-      const playing = bgm.dataset.playing === "1";
-      try {
-        if (playing) {
-          bgm.pause();
-          bgm.dataset.playing = "0";
-          bgmToggle.textContent = "BGM ON";
-        } else {
-          await bgm.play();
-          bgm.dataset.playing = "1";
-          bgmToggle.textContent = "BGM OFF";
-        }
-      } catch {
-        // 무시
-      }
-    });
-  }
-
-  /* =========================
-     탭 전환
-     ========================= */
-  function initTabs() {
-    const tabs = $$(".dash-tab");
-    const panels = $$(".dash-panel");
-    if (!tabs.length || !panels.length) return;
-
-    const KEY = "yxl_dash";
-
-    const activate = (id, { pushHash = true } = {}) => {
-      panels.forEach((p) => {
-        const isOn = p.id === id;
-        p.hidden = !isOn;
-        p.classList.toggle("is-active", isOn);
-      });
-      tabs.forEach((t) => t.classList.toggle("is-active", t.dataset.target === id));
-
-      try {
-        localStorage.setItem(KEY, id);
-      } catch {}
-
-      if (pushHash) {
-        const url = new URL(location.href);
-        url.hash = `dash=${id}`;
-        history.replaceState(null, "", url.toString());
-      }
-    };
-
-    const readHash = () => {
-      const h = location.hash || "";
-      const m = h.match(/dash=([^&]+)/);
-      return m ? decodeURIComponent(m[1]) : "";
-    };
-
-    tabs.forEach((t) => {
-      t.addEventListener("click", () => {
-        const id = t.dataset.target;
-        if (id) activate(id, { pushHash: true });
-      });
-    });
-
-    let initial = readHash();
-    if (!initial) initial = localStorage.getItem(KEY) || "";
-    if (!initial || !document.getElementById(initial)) initial = tabs[0].dataset.target;
-
-    activate(initial, { pushHash: true });
-
-    window.addEventListener("hashchange", () => {
-      const id = readHash();
-      if (id && document.getElementById(id)) activate(id, { pushHash: false });
-    });
-  }
-
-  /* =========================
-     엑셀 로더 (SheetJS)
-     ========================= */
-  async function fetchArrayBuffer(url) {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Fetch failed: ${url} (${res.status})`);
-    return await res.arrayBuffer();
-  }
-
-  async function loadWorkbookFromCandidates(candidates) {
-    const stamp = Date.now();
-    let lastErr = null;
-    for (const p of candidates) {
-      try {
-        const buf = await fetchArrayBuffer(`${p}?v=${stamp}`);
-        return XLSX.read(buf, { type: "array" });
-      } catch (e) {
-        lastErr = e;
+        // try next
       }
     }
-    throw lastErr || new Error("Workbook load failed");
+    throw new Error("파일을 불러오지 못했습니다: " + paths.join(", "));
   }
 
-  function sheetToRows(workbook, sheetName) {
-    const ws = workbook.Sheets[sheetName];
+  async function loadWorkbook(paths) {
+    const buf = await fetchArrayBufferFirst(paths);
+    // eslint-disable-next-line no-undef
+    return XLSX.read(buf, { type: "array" });
+  }
+
+  function sheetToObjects(wb, sheetName) {
+    const ws = wb.Sheets[sheetName];
     if (!ws) return [];
-    // defval: null → 빈셀 유지
-    return XLSX.utils.sheet_to_json(ws, { defval: null });
+    // eslint-disable-next-line no-undef
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+    return Array.isArray(rows) ? rows : [];
   }
 
-  function parseYxlWorkbook(wb) {
-    const names = wb.SheetNames || [];
-
-    // 1) 누적기여도 (첫번째 시트)
-    const totalSheet = names[0];
-    const totalRaw = sheetToRows(wb, totalSheet);
-    const total = totalRaw
-      .map((r) => ({
-        rank: toNum(r["순위"] ?? r["랭킹"] ?? r["Rank"]),
-        streamer: safeText(r["스트리머"] ?? r["멤버"] ?? r["BJ"] ?? r["이름"]).trim(),
-        total: toNum(r["누적기여도"] ?? r["기여도"] ?? r["합산기여도"] ?? r["별풍선"]),
-      }))
-      .filter((r) => r.streamer);
-
-    // 2) 시즌통합랭킹 (두번째 시트)
-    const integratedSheet = names[1];
-    const integratedRaw = sheetToRows(wb, integratedSheet);
-    const integrated = integratedRaw
-      .map((r) => {
-        const season = safeText(r["시즌"] ?? "").trim();
-        const rank = toNum(r["순위"] ?? r["랭킹"]);
-        const grade = safeText(r["직급"] ?? "").trim();
-        const streamer = safeText(r["스트리머"] ?? r["멤버"] ?? "").trim();
-
-        // 합산: 시즌/순위/직급/스트리머 제외한 숫자 컬럼 모두 더함
-        let sum = 0;
-        for (const [k, v] of Object.entries(r)) {
-          if (["시즌", "순위", "랭킹", "직급", "스트리머", "멤버"].includes(k)) continue;
-          sum += toNum(v);
-        }
-        return { season, rank, grade, streamer, sum };
-      })
-      .filter((r) => r.streamer);
-
-    // 3) 시즌별 (3~12번째 시트)
-    const seasonSheets = names.slice(2, 12);
-    const seasons = {};
-    for (const sn of seasonSheets) {
-      const raw = sheetToRows(wb, sn);
-      const rows = raw
-        .map((r) => {
-          const rank = toNum(r["순위"] ?? r["랭킹"]);
-          const grade = safeText(r["직급"] ?? "").trim();
-          const streamer = safeText(r["스트리머"] ?? r["멤버"] ?? "").trim();
-          const total = toNum(r["합산기여도"] ?? r["누적기여도"] ?? r["기여도"]);
-          let sum = total;
-          if (!sum) {
-            sum = 0;
-            for (const [k, v] of Object.entries(r)) {
-              if (["순위", "랭킹", "직급", "스트리머", "멤버"].includes(k)) continue;
-              sum += toNum(v);
-            }
-          }
-          return { rank, grade, streamer, sum };
-        })
-        .filter((r) => r.streamer);
-
-      seasons[sn] = rows;
-    }
-
-    return { total, integrated, seasons, sheetNames: names };
-  }
-
-  function parseSynergyWorkbook(wb) {
-    const names = wb.SheetNames || [];
-    const sheetName = names.includes("쿼리2") ? "쿼리2" : names[0];
-    const raw = sheetToRows(wb, sheetName);
-
-    const rows = raw
-      .map((r) => ({
-        rank: toNum(r["순위"] ?? r["랭킹"]),
-        streamer: safeText(r["비제이명"] ?? r["스트리머"] ?? r["멤버"]).trim(),
-        balloons: toNum(r["월별 누적별풍선"] ?? r["누적별풍선"] ?? r["별풍선"]),
-        refreshedAt: safeText(r["새로고침시간"] ?? r["업데이트"] ?? "").trim(),
-      }))
-      .filter((r) => r.streamer);
-
-    // refreshedAt은 모든 행에 동일 값이라고 가정
-    const refreshedAt = rows.find((x) => x.refreshedAt)?.refreshedAt || "";
-
-    // monthKey: YYYY-MM
-    const monthKey = (() => {
-      const m = refreshedAt.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
-      if (!m) {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      }
-      const y = m[1];
-      const mo = String(m[2]).padStart(2, "0");
-      return `${y}-${mo}`;
-    })();
-
-    return { rows, refreshedAt, monthKey };
-  }
-
-  /* =========================
+  /* =========================================================
      변동사항(순위 변화) 계산
-     ========================= */
-  function applyRankDelta(rows, { storageKey, monthKey }) {
-    const key = `${storageKey}:${monthKey}`;
-    const prev = readJSON(key, {}); // { streamerKey: rank }
+  ========================================================= */
+  function applyRankDelta(rows, { storageKey }) {
+    const prev = readJSON(storageKey, {});
     const next = {};
-
     rows.forEach((r) => {
-      const k = normalizeNick(r.streamer);
-      const prevRank = toNum(prev[k] ?? 0) || null;
+      const key = normalizeNick(r.streamer);
       const curRank = toNum(r.rank) || null;
-      next[k] = curRank;
+      const prevRank = toNum(prev[key]) || null;
+      next[key] = curRank || 0;
 
       if (!prevRank || !curRank) {
-        r.delta = { type: "new", diff: 0, text: "" };
+        r.delta = { type: "new", text: "—" };
         return;
       }
       const diff = prevRank - curRank; // +면 상승(순위 숫자 감소)
-      if (diff > 0) r.delta = { type: "up", diff, text: `▲${diff}` };
-      else if (diff < 0) r.delta = { type: "down", diff: Math.abs(diff), text: `▼${Math.abs(diff)}` };
-      else r.delta = { type: "same", diff: 0, text: "-" };
+      if (diff > 0) r.delta = { type: "up", text: `▲${diff}` };
+      else if (diff < 0) r.delta = { type: "down", text: `▼${Math.abs(diff)}` };
+      else r.delta = { type: "same", text: "—" };
     });
-
-    writeJSON(key, next);
+    writeJSON(storageKey, next);
   }
 
   function renderDeltaCell(delta) {
-    if (!delta || !delta.text) return `<span class="delta new"></span>`;
+    if (!delta) return `<span class="delta new">—</span>`;
     const cls = delta.type || "new";
-    return `<span class="delta ${cls}">${delta.text}</span>`;
+    return `<span class="delta ${cls}">${safeText(delta.text || "—")}</span>`;
   }
 
-  /* =========================
-     SOOP: BJID 찾기 + LIVE 확인 (CORS 실패 시 기능 자동 비활성)
-     ========================= */
+  /* =========================================================
+     탭 전환
+  ========================================================= */
+  const TAB_KEY = "yxl_active_tab_v1";
+
+  function activatePanel(id) {
+    const tabs = $$(".dash-tab");
+    const panels = $$(".dash-panel");
+
+    tabs.forEach((t) => {
+      const on = t.dataset.target === id;
+      t.classList.toggle("is-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    panels.forEach((p) => {
+      const on = p.id === id;
+      p.classList.toggle("is-active", on);
+      p.hidden = !on;
+    });
+
+    try { localStorage.setItem(TAB_KEY, id); } catch {}
+  }
+
+  $$(".dash-tab").forEach((btn) => {
+    btn.addEventListener("click", () => activatePanel(btn.dataset.target));
+  });
+
+  // 초기 탭
+  const savedTab = (() => {
+    try { return localStorage.getItem(TAB_KEY); } catch { return null; }
+  })();
+  if (savedTab && document.getElementById(savedTab)) activatePanel(savedTab);
+  else activatePanel("dash-synergy");
+
+  /* =========================================================
+     Gate + BGM (입장 버튼이 항상 먹도록 보강)
+  ========================================================= */
+  (function gateAndBgm() {
+    const KEY = "yxl_bgm_on_v2";
+    const gate = $("#gate");
+    const gateBtn = $("#gateBtn");
+    const gateMsg = $("#gateMsg");
+    const particleLayer = $("#gateParticles");
+    const audio = $("#bgm");
+    const headerToggle = $("#bgmToggle");
+
+    if (!gate || !gateBtn || !audio || !particleLayer) return;
+
+    audio.volume = 0.25;
+
+    function setHeaderUI(isOn) {
+      if (!headerToggle) return;
+      headerToggle.classList.toggle("is-on", isOn);
+      headerToggle.textContent = isOn ? "BGM 정지" : "BGM 재생";
+      headerToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+    }
+
+    function showGate() {
+      gate.classList.remove("is-hidden");
+      gate.setAttribute("aria-hidden", "false");
+    }
+
+    function hideGate() {
+      gate.classList.add("is-hidden");
+      gate.setAttribute("aria-hidden", "true");
+    }
+
+    async function tryPlay(userInitiated) {
+      try {
+        if (audio.readyState < 2) audio.load();
+        await audio.play();
+        localStorage.setItem(KEY, "1");
+        setHeaderUI(true);
+        return true;
+      } catch {
+        localStorage.setItem(KEY, "0");
+        setHeaderUI(false);
+        if (userInitiated && gateMsg) {
+          gateMsg.textContent = "BGM 재생이 차단됐어요. 입장 후 우측 상단 BGM 버튼으로 다시 시도해줘!";
+        }
+        return false;
+      }
+    }
+
+    function stop() {
+      audio.pause();
+      audio.currentTime = 0;
+      localStorage.setItem(KEY, "0");
+      setHeaderUI(false);
+    }
+
+    // 파티클(가벼운 연출)
+    function makeSpark(x, y) {
+      const el = document.createElement("div");
+      el.className = "spark";
+      const dx = (Math.random() - 0.5) * 90;
+      const dy = (Math.random() - 0.5) * 90;
+      el.style.setProperty("--sx0", `${x}px`);
+      el.style.setProperty("--sy0", `${y}px`);
+      el.style.setProperty("--sx1", `${x + dx}px`);
+      el.style.setProperty("--sy1", `${y + dy}px`);
+      particleLayer.appendChild(el);
+      el.addEventListener("animationend", () => el.remove());
+    }
+
+    function burstAtClientPoint(clientX, clientY) {
+      const rect = gate.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      for (let i = 0; i < 18; i++) makeSpark(x, y);
+    }
+
+    const enter = async (e) => {
+      if (gateMsg) gateMsg.textContent = "";
+      if (e && e.clientX != null) burstAtClientPoint(e.clientX, e.clientY);
+      hideGate(); // ✅ 무조건 숨김(입장 실패 방지)
+      await tryPlay(true);
+    };
+
+    gateBtn.addEventListener("click", enter);
+    gateBtn.addEventListener("touchstart", (e) => enter(e.touches?.[0] || e), { passive: true });
+
+    // 헤더 토글
+    headerToggle?.addEventListener("click", async () => {
+      if (audio.paused) await tryPlay(true);
+      else stop();
+    });
+
+    // 다음 방문: 저장값이 1이면 gate 없이 자동시도
+    const savedOn = localStorage.getItem(KEY) === "1";
+    if (savedOn) {
+      hideGate();
+      tryPlay(false);
+    } else {
+      showGate();
+      setHeaderUI(false);
+    }
+  })();
+
+  /* =========================================================
+     SOOP LIVE (bjSearch / liveSearch)
+     - CORS가 막히면 자동으로 OFF 처리됩니다.
+  ========================================================= */
+  const SOOP_SEARCH_API = "https://sch.sooplive.co.kr/api.php";
+
+  // 사용자 제공 BJID 매핑(우선 적용)
+  const BJID_MAP = {
+    "리윤_♥": "sladk51",
+    "후잉♥": "jaeha010",
+    "하랑짱♥": "asy1218",
+    "쩔밍♡": "wnsdus5900",
+    "김유정S2": "tkek55",
+    "서니_♥": "iluvpp",
+    "#율무": "offside629",
+    "소다♥": "zbxlzzz",
+    "강소지♥": "nowsoji",
+  };
+
   function readBjidCache() {
     return readJSON("soop_bjid_cache_v1", {});
   }
@@ -378,7 +290,6 @@
     const data = j && (j.DATA || j.data);
     if (!Array.isArray(data) || !data.length) return null;
 
-    // 가장 비슷한 닉을 선택
     const nKey = normalizeNick(clean);
     let best = data[0];
     let bestScore = -1;
@@ -428,22 +339,28 @@
     return { isLive: !!broadNo, broadNo, thumb, title };
   }
 
-  /* =========================
-     렌더: 누적 / 통합 / 시즌별
-     ========================= */
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  /* =========================================================
+     렌더: 누적 / 통합 / 시즌 / 시너지
+  ========================================================= */
   function renderTotal(rows) {
     const tbody = $("#totalTable tbody");
     if (!tbody) return;
 
-    const q = safeText($("#totalSearch")?.value).trim();
-    const filtered = q ? rows.filter((r) => r.streamer.includes(q)) : rows;
+    const q = normalizeNick($("#totalSearch")?.value);
+    const filtered = q ? rows.filter((r) => normalizeNick(r.streamer).includes(q)) : rows;
 
     tbody.innerHTML = filtered
       .slice()
       .sort((a, b) => (a.rank || 9999) - (b.rank || 9999))
       .map((r) => {
         const medal =
-          r.rank === 1 ? `<span class="medal gold">1</span>` : r.rank === 2 ? `<span class="medal silver">2</span>` : r.rank === 3 ? `<span class="medal bronze">3</span>` : `<span class="rank">${r.rank}</span>`;
+          r.rank === 1 ? `<span class="medal gold">1</span>` :
+          r.rank === 2 ? `<span class="medal silver">2</span>` :
+          r.rank === 3 ? `<span class="medal bronze">3</span>` :
+          `<span class="rank">${r.rank}</span>`;
+
         return `
           <tr>
             <td class="rank-cell">${medal}</td>
@@ -454,88 +371,143 @@
         `;
       })
       .join("");
+
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
+    }
   }
 
+  const integratedState = { key: "rank", dir: "asc" };
   function renderIntegrated(rows) {
     const tbody = $("#integratedTable tbody");
     if (!tbody) return;
 
-    const q = safeText($("#integratedSearch")?.value).trim();
-    const filtered = q ? rows.filter((r) => r.streamer.includes(q)) : rows;
+    const q = normalizeNick($("#integratedSearch")?.value);
+    const filtered = q ? rows.filter((r) => normalizeNick(r.streamer).includes(q)) : rows;
 
-    tbody.innerHTML = filtered
-      .slice()
-      .sort((a, b) => (a.rank || 9999) - (b.rank || 9999))
-      .map((r) => {
-        return `
-          <tr>
-            <td class="rank-cell"><span class="rank">${r.rank}</span></td>
-            <td>${safeText(r.season)}</td>
-            <td>${safeText(r.grade)}</td>
-            <td>${safeText(r.streamer)}</td>
-            <td style="text-align:right;">${fmtNum(r.sum)}</td>
-          </tr>
-        `;
-      })
+    const sorted = filtered.slice().sort((a, b) => {
+      const k = integratedState.key;
+      const dir = integratedState.dir === "asc" ? 1 : -1;
+
+      const av = a[k];
+      const bv = b[k];
+      const an = typeof av === "number" ? av : toNum(av);
+      const bn = typeof bv === "number" ? bv : toNum(bv);
+
+      if (Number.isFinite(an) && Number.isFinite(bn) && (an !== bn)) return (an - bn) * dir;
+      return safeText(av).localeCompare(safeText(bv), "ko") * dir;
+    });
+
+    tbody.innerHTML = sorted
+      .map((r) => `
+        <tr>
+          <td>${safeText(r.season)}</td>
+          <td>${toNum(r.rank) || ""}</td>
+          <td>${safeText(r.grade)}</td>
+          <td>${safeText(r.streamer)}</td>
+          <td style="text-align:right;">${fmtNum(r.total)}</td>
+        </tr>
+      `)
       .join("");
+
+    if (!sorted.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
+    }
   }
 
+  const seasonState = { key: "rank", dir: "asc" };
   function renderSeason(rows) {
     const tbody = $("#seasonTable tbody");
     if (!tbody) return;
 
-    const q = safeText($("#seasonSearch")?.value).trim();
-    const filtered = q ? rows.filter((r) => r.streamer.includes(q)) : rows;
+    const q = normalizeNick($("#seasonSearch")?.value);
+    const filtered = q ? rows.filter((r) => normalizeNick(r.streamer).includes(q)) : rows;
 
-    tbody.innerHTML = filtered
-      .slice()
-      .sort((a, b) => (a.rank || 9999) - (b.rank || 9999))
-      .map((r) => {
-        return `
-          <tr>
-            <td class="rank-cell"><span class="rank">${r.rank}</span></td>
-            <td>${safeText(r.grade)}</td>
-            <td>${safeText(r.streamer)}</td>
-            <td style="text-align:right;">${fmtNum(r.sum)}</td>
-          </tr>
-        `;
-      })
+    const sorted = filtered.slice().sort((a, b) => {
+      const k = seasonState.key;
+      const dir = seasonState.dir === "asc" ? 1 : -1;
+      const av = a[k];
+      const bv = b[k];
+      const an = typeof av === "number" ? av : toNum(av);
+      const bn = typeof bv === "number" ? bv : toNum(bv);
+      if (Number.isFinite(an) && Number.isFinite(bn) && (an !== bn)) return (an - bn) * dir;
+      return safeText(av).localeCompare(safeText(bv), "ko") * dir;
+    });
+
+    tbody.innerHTML = sorted
+      .map((r) => `
+        <tr>
+          <td>${toNum(r.rank) || ""}</td>
+          <td>${safeText(r.grade)}</td>
+          <td>${safeText(r.streamer)}</td>
+          <td style="text-align:right;">${fmtNum(r.total)}</td>
+        </tr>
+      `)
       .join("");
+
+    if (!sorted.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
+    }
   }
 
-  /* =========================
-     렌더: 시너지표 + LIVE 상태/툴팁
-     ========================= */
   const synergyState = {
+    key: "rank",
+    dir: "asc",
     rows: [],
-    // streamerKey -> { bjid, isLive, broadNo, thumb, title }
-    liveMap: {},
+    liveMap: {}, // normalizeNick -> {bjid,isLive,broadNo,thumb,title}
   };
 
   function renderSynergy(rows) {
     const tbody = $("#synergyTable tbody");
     if (!tbody) return;
 
-    const q = safeText($("#synergySearch")?.value).trim();
-    const filtered = q ? rows.filter((r) => r.streamer.includes(q)) : rows;
+    const q = normalizeNick($("#synergySearch")?.value);
+    const filtered = q ? rows.filter((r) => normalizeNick(r.streamer).includes(q)) : rows;
 
-    tbody.innerHTML = filtered
-      .slice()
-      .sort((a, b) => (a.rank || 9999) - (b.rank || 9999))
+    const sorted = filtered.slice().sort((a, b) => {
+      const k = synergyState.key;
+      const dir = synergyState.dir === "asc" ? 1 : -1;
+
+      if (k === "delta") {
+        const as = a.delta?.text || "";
+        const bs = b.delta?.text || "";
+        return as.localeCompare(bs, "ko") * dir;
+      }
+
+      const av = a[k];
+      const bv = b[k];
+      const an = typeof av === "number" ? av : toNum(av);
+      const bn = typeof bv === "number" ? bv : toNum(bv);
+
+      if (Number.isFinite(an) && Number.isFinite(bn) && (an !== bn)) return (an - bn) * dir;
+      return safeText(av).localeCompare(safeText(bv), "ko") * dir;
+    });
+
+    tbody.innerHTML = sorted
       .map((r) => {
         const key = normalizeNick(r.streamer);
         const live = synergyState.liveMap[key] || {};
         const isLive = !!live.isLive;
-
-        const statusHtml = isLive ? `<span class="live-dot" title="LIVE"></span>` : `<span class="live-dot is-off" title="OFF"></span>`;
+        const dot = isLive ? `<span class="live-dot" aria-hidden="true"></span>` : "";
+        const dataBjid = safeText(live.bjid || r.bjid || "");
+        const dataBroad = safeText(live.broadNo || "");
+        const dataThumb = safeText(live.thumb || "");
+        const dataTitle = safeText(live.title || "");
 
         return `
-          <tr data-streamer-key="${key}">
-            <td class="rank-cell"><span class="rank">${r.rank}</span></td>
+          <tr>
+            <td>${toNum(r.rank) || ""}</td>
             <td>
-              <div class="name-cell">
-                ${statusHtml}
-                <span class="bj-link" data-action="open" data-streamer="${encodeURIComponent(r.streamer)}">${safeText(r.streamer)}</span>
+              <div class="bj-cell">
+                ${dot}
+                <span class="bj-name"
+                  data-nick="${safeText(r.streamer).replace(/"/g, "&quot;")}"
+                  data-bjid="${dataBjid.replace(/"/g, "&quot;")}"
+                  data-live="${isLive ? "1" : "0"}"
+                  data-broadno="${dataBroad.replace(/"/g, "&quot;")}"
+                  data-thumb="${dataThumb.replace(/"/g, "&quot;")}"
+                  data-title="${dataTitle.replace(/"/g, "&quot;")}"
+                >${safeText(r.streamer)}</span>
               </div>
             </td>
             <td style="text-align:right;">${fmtNum(r.balloons)}</td>
@@ -544,253 +516,377 @@
         `;
       })
       .join("");
+
+    if (!sorted.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
+    }
   }
 
-  function initSynergyInteractions() {
-    const table = $("#synergyTable");
-    const tooltip = $("#synergyTooltip");
-    if (!table || !tooltip) return;
+  // 헤더 클릭 정렬
+  function bindSortable(tableSel, stateObj) {
+    const table = $(tableSel);
+    if (!table) return;
+    $$("thead th[data-key]", table).forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.key;
+        if (!key) return;
 
-    let raf = 0;
+        if (stateObj.key !== key) {
+          stateObj.key = key;
+          stateObj.dir = "asc";
+        } else {
+          stateObj.dir = stateObj.dir === "asc" ? "desc" : "asc";
+        }
 
-    const hideTooltip = () => {
+        // 해당 테이블 다시 렌더
+        if (tableSel === "#synergyTable") renderSynergy(synergyState.rows);
+        if (tableSel === "#integratedTable" && appState.yxl) renderIntegrated(appState.yxl.integrated);
+        if (tableSel === "#seasonTable" && appState.yxl) {
+          const sn = $("#seasonSelect")?.value;
+          renderSeason(appState.yxl.seasons[sn] || []);
+        }
+      });
+    });
+  }
+
+  bindSortable("#synergyTable", synergyState);
+  bindSortable("#integratedTable", integratedState);
+  bindSortable("#seasonTable", seasonState);
+
+  /* =========================================================
+     시너지: LIVE 툴팁 + 클릭 링크 (LIVE면 play, OFF면 station)
+     - OFF일 때는 툴팁 표시 안 함
+  ========================================================= */
+  (function bindSynergyHoverAndClick() {
+    const tooltip = $("#soopTooltip");
+    const thumbEl = $("#soopThumb");
+    const titleEl = $("#soopTitle");
+    const tbody = $("#synergyTable tbody");
+    if (!tooltip || !thumbEl || !titleEl || !tbody) return;
+
+    function positionTooltip(clientX, clientY) {
+      const pad = 16;
+      const w = tooltip.offsetWidth || 320;
+      const h = tooltip.offsetHeight || 200;
+
+      let left = clientX + 16;
+      let top = clientY + 16;
+
+      const maxLeft = window.innerWidth - w - pad;
+      const maxTop = window.innerHeight - h - pad;
+
+      if (left > maxLeft) left = clientX - w - 16;
+      if (top > maxTop) top = clientY - h - 16;
+
+      tooltip.style.left = `${Math.max(pad, left)}px`;
+      tooltip.style.top = `${Math.max(pad, top)}px`;
+    }
+
+    function hideTooltip() {
       tooltip.hidden = true;
-      tooltip.innerHTML = "";
-    };
+      thumbEl.removeAttribute("src");
+      titleEl.textContent = "";
+    }
 
-    const positionTooltip = (x, y) => {
-      const pad = 14;
-      const w = tooltip.offsetWidth || 260;
-      const h = tooltip.offsetHeight || 160;
-      const maxX = window.innerWidth - w - pad;
-      const maxY = window.innerHeight - h - pad;
-      tooltip.style.left = Math.max(pad, Math.min(x + 14, maxX)) + "px";
-      tooltip.style.top = Math.max(pad, Math.min(y + 14, maxY)) + "px";
-    };
-
-    table.addEventListener("mousemove", (e) => {
+    tbody.addEventListener("mousemove", (e) => {
       if (tooltip.hidden) return;
-      if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => positionTooltip(e.clientX, e.clientY));
+      positionTooltip(e.clientX, e.clientY);
     });
 
-    table.addEventListener("mouseleave", hideTooltip);
+    tbody.addEventListener("mouseover", (e) => {
+      const el = e.target.closest(".bj-name");
+      if (!el) return;
 
-    // hover: LIVE일 때만 썸네일 표시
-    table.addEventListener("mouseover", (e) => {
-      const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
-      const nameEl = target.closest(".bj-link");
-      if (!nameEl) return;
+      const isLive = el.dataset.live === "1";
+      const thumb = safeText(el.dataset.thumb).trim();
+      const title = safeText(el.dataset.title).trim();
 
-      const tr = nameEl.closest("tr");
-      const key = tr?.dataset.streamerKey || "";
-      const live = synergyState.liveMap[key] || {};
-      if (!live.isLive || !live.thumb) {
-        hideTooltip();
-        return;
-      }
+      // ✅ OFF면 툴팁 자체를 안 띄움
+      if (!isLive || !thumb) return;
 
+      thumbEl.src = thumb;
+      titleEl.textContent = title;
       tooltip.hidden = false;
-      tooltip.innerHTML = `
-        <img src="${live.thumb}" alt="LIVE thumbnail" />
-        <div class="tt-title">${safeText(live.title || "LIVE")}</div>
-      `;
+      positionTooltip(e.clientX, e.clientY);
     });
 
-    // click: LIVE면 라이브 주소 / 아니면 방송국
-    table.addEventListener("click", (e) => {
-      const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
-      const nameEl = target.closest(".bj-link[data-action='open']");
-      if (!nameEl) return;
+    tbody.addEventListener("mouseout", (e) => {
+      const el = e.target.closest(".bj-name");
+      if (!el) return;
+      hideTooltip();
+    });
 
-      const tr = nameEl.closest("tr");
-      const key = tr?.dataset.streamerKey || "";
-      const live = synergyState.liveMap[key] || {};
+    tbody.addEventListener("click", (e) => {
+      const el = e.target.closest(".bj-name");
+      if (!el) return;
 
-      // streamer 원문
-      const streamer = decodeURIComponent(nameEl.dataset.streamer || "");
-      const fallbackSearch = `https://www.sooplive.com/search?keyword=${encodeURIComponent(streamer)}`;
+      const bjid = safeText(el.dataset.bjid).trim();
+      if (!bjid) return;
 
-      if (!live.bjid) {
-        window.open(fallbackSearch, "_blank", "noopener");
-        return;
-      }
+      const isLive = el.dataset.live === "1";
+      const broadNo = safeText(el.dataset.broadno).trim();
 
-      if (live.isLive && live.broadNo) {
-        window.open(`https://play.sooplive.co.kr/${live.bjid}/${live.broadNo}`, "_blank", "noopener");
+      if (isLive && broadNo) {
+        window.open(`https://play.sooplive.co.kr/${encodeURIComponent(bjid)}/${encodeURIComponent(broadNo)}`, "_blank", "noopener");
       } else {
-        window.open(`https://www.sooplive.co.kr/station/${live.bjid}`, "_blank", "noopener");
+        window.open(`https://www.sooplive.co.kr/station/${encodeURIComponent(bjid)}`, "_blank", "noopener");
       }
     });
+
+    // 스크롤/리사이즈 시 숨김
+    window.addEventListener("scroll", hideTooltip, { passive: true });
+    window.addEventListener("resize", hideTooltip);
+  })();
+
+  /* =========================================================
+     Excel 로드/가공
+  ========================================================= */
+  function parseYxlWorkbook(wb) {
+    const sheets = wb.SheetNames || [];
+
+    // 1) 누적기여도
+    const totalSheet = sheets[0];
+    const totalRaw = sheetToObjects(wb, totalSheet);
+    const total = totalRaw
+      .map((r) => ({
+        rank: toNum(r["순위"]),
+        streamer: safeText(r["스트리머"] || r["멤버"] || r["비제이명"] || ""),
+        total: toNum(r["누적기여도"] || r["누적별풍선"] || r["누적"] || 0),
+      }))
+      .filter((r) => r.streamer);
+
+    applyRankDelta(total, { storageKey: "yxl_total_rank_v1" });
+
+    // 2) 시즌통합랭킹
+    const integratedSheet = sheets[1];
+    const integratedRaw = sheetToObjects(wb, integratedSheet);
+    const integrated = integratedRaw
+      .map((r) => {
+        const season = safeText(r["시즌"] || "");
+        const rank = toNum(r["순위"]);
+        const grade = safeText(r["직급"] || "");
+        const streamer = safeText(r["스트리머"] || "");
+
+        // 숫자 컬럼 합산(시즌/순위/직급/스트리머 제외)
+        let sum = 0;
+        Object.keys(r).forEach((k) => {
+          if (["시즌", "순위", "직급", "스트리머"].includes(k)) return;
+          sum += toNum(r[k]);
+        });
+
+        return { season, rank, grade, streamer, total: sum };
+      })
+      .filter((r) => r.streamer);
+
+    // 3) 시즌별(3~12번째 시트)
+    const seasonSheets = sheets.slice(2, 12);
+    const seasons = {};
+    seasonSheets.forEach((sn) => {
+      const raw = sheetToObjects(wb, sn);
+      const rows = raw
+        .map((r) => {
+          const rank = toNum(r["순위"]);
+          const grade = safeText(r["직급"] || "");
+          const streamer = safeText(r["스트리머"] || r["멤버"] || "");
+          let sum = 0;
+          Object.keys(r).forEach((k) => {
+            if (["순위", "직급", "스트리머", "멤버"].includes(k)) return;
+            sum += toNum(r[k]);
+          });
+          return { rank, grade, streamer, total: sum };
+        })
+        .filter((r) => r.streamer);
+      seasons[sn] = rows;
+    });
+
+    return { sheetNames: sheets, total, integrated, seasons };
   }
 
-  async function enrichSynergyLive(rows) {
-    // 1) bjid 찾기 → 2) liveSearch로 라이브 확인
-    // 너무 과한 병렬 호출 방지 (동시 4개)
-    const concurrency = 4;
-    const queue = rows.slice();
-    const outMap = { ...synergyState.liveMap };
+  function parseSynergyWorkbook(wb) {
+    const sheetName = (wb.SheetNames || [])[0] || "쿼리2";
+    const raw = sheetToObjects(wb, sheetName);
 
-    const worker = async () => {
+    const rows = raw
+      .map((r) => {
+        const rank = toNum(r["순위"]);
+        const streamer = safeText(r["비제이명"] || r["스트리머"] || r["멤버"] || "");
+        const balloons = toNum(r["월별 누적별풍선"] || r["누적별풍선"] || r["별풍선갯수"] || 0);
+        const bjidFromSheet = safeText(r["BJId"] || r["BJID"] || r["bjid"] || "").trim();
+        return { rank, streamer, balloons, bjid: bjidFromSheet };
+      })
+      .filter((r) => r.streamer);
+
+    applyRankDelta(rows, { storageKey: "yxl_synergy_rank_v1" });
+
+    return { rows };
+  }
+
+  async function updateSynergyLive(rows) {
+    const outMap = { ...synergyState.liveMap };
+    const queue = rows.slice();
+    const concurrency = 3;
+
+    async function worker() {
       while (queue.length) {
         const r = queue.shift();
-        const key = normalizeNick(r.streamer);
-        if (!key) continue;
+        const nick = r.streamer;
+        const key = normalizeNick(nick);
 
-        // 이미 최근에 확인한 정보가 있으면 스킵(90초)
-        const existing = outMap[key];
-        if (existing && existing.ts && Date.now() - existing.ts < 90_000) continue;
+        // ✅ BJID 우선순위: 시트(BJId) > 고정 매핑 > 검색
+        let bjid = safeText(r.bjid).trim() || BJID_MAP[nick] || BJID_MAP[key] || "";
+        try {
+          if (!bjid) {
+            const found = await soopFindBjidByNick(nick);
+            bjid = found?.user_id || "";
+          }
+        } catch {
+          // ignore
+        }
+
+        // bjid가 없으면 OFF 처리
+        if (!bjid) {
+          outMap[key] = { bjid: "", isLive: false, broadNo: "", thumb: "", title: "" };
+          continue;
+        }
 
         try {
-          const mappedBjid = BJID_MAP[key] || "";
-          const bj = mappedBjid ? { user_id: mappedBjid } : await soopFindBjidByNick(r.streamer);
-          const bjid = bj?.user_id || "";
-          if (!bjid) {
-            outMap[key] = { bjid: (BJID_MAP[key] || ""), isLive: false, broadNo: "", thumb: "", title: "", ts: Date.now() };
-            continue;
-          }
-
           const live = await soopGetLiveInfoByBjid(bjid);
-
           outMap[key] = {
             bjid,
             isLive: !!live.isLive,
             broadNo: live.broadNo || "",
             thumb: live.thumb || "",
             title: live.title || "",
-            ts: Date.now(),
           };
         } catch {
-          // CORS/네트워크 실패 시: 해당 행만 offline 처리
-          outMap[key] = { bjid: (BJID_MAP[key] || ""), isLive: false, broadNo: "", thumb: "", title: "", ts: Date.now() };
+          // CORS/네트워크 실패 시: OFF 처리(표시는 OFF=아무것도 없음)
+          outMap[key] = { bjid, isLive: false, broadNo: "", thumb: "", title: "" };
         }
 
-        // 짧은 딜레이(서버 부담 완화)
-        await sleep(60);
+        await sleep(80);
       }
-    };
+    }
 
-    const workers = Array.from({ length: concurrency }, () => worker());
-    await Promise.all(workers);
-
+    await Promise.all(Array.from({ length: concurrency }, () => worker()));
     synergyState.liveMap = outMap;
   }
 
-  /* =========================
-     전체 로드 + 렌더 + 3시간 타이머
-     ========================= */
-  const state = {
-    yxl: null,
-    synergy: null,
-  };
+  /* =========================================================
+     상태 + 로드
+  ========================================================= */
+  const appState = { yxl: null, synergy: null };
 
-  function setUpdatedAtNow() {
+  function setUpdatedAt(text) {
     const el = $("#updatedAt");
-    if (el) el.textContent = new Date().toLocaleString("ko-KR");
-  }
-    el.textContent = new Date(nextAt).toLocaleString("ko-KR");
+    if (el) el.textContent = text || new Date().toLocaleString("ko-KR");
   }
 
-  function setSynergyRefreshedUI(text) {
-    const el = $("#synergyRefreshedAt");
-    if (el) el.textContent = text || "--";
-  }
+  async function loadAll() {
+    // 1) YXL_통합.xlsx
+    const yxlWb = await loadWorkbook(FILES.yxl);
+    const yxl = parseYxlWorkbook(yxlWb);
+    appState.yxl = yxl;
 
-  function bindSearchInputs() {
-    $("#totalSearch")?.addEventListener("input", () => state.yxl && renderTotal(state.yxl.total));
-    $("#integratedSearch")?.addEventListener("input", () => state.yxl && renderIntegrated(state.yxl.integrated));
-    $("#seasonSearch")?.addEventListener("input", () => {
-      if (!state.yxl) return;
-      const sn = $("#seasonSelect")?.value;
-      renderSeason(state.yxl.seasons[sn] || []);
-    });
-    $("#synergySearch")?.addEventListener("input", () => state.synergy && renderSynergy(state.synergy.rows));
-  }
-
-  function initSeasonSelect(sheetNames) {
+    // 시즌 select 채우기
     const select = $("#seasonSelect");
-    if (!select) return;
+    if (select) {
+      const seasonSheets = (yxl.sheetNames || []).slice(2, 12);
+      select.innerHTML = seasonSheets.map((n) => `<option value="${n}">${n}</option>`).join("");
 
-    const seasonSheets = (sheetNames || []).slice(2, 12);
-    select.innerHTML = seasonSheets.map((n) => `<option value="${n}">${n}</option>`).join("");
+      // 저장값 복원
+      try {
+        const saved = localStorage.getItem("yxl_season_sheet_v1");
+        if (saved && seasonSheets.includes(saved)) select.value = saved;
+      } catch {}
 
-    select.addEventListener("change", () => {
-      if (!state.yxl) return;
-      const sn = select.value;
-      renderSeason(state.yxl.seasons[sn] || []);
-    });
-  }
-
-  async function refreshAll() {
-    try {
-      // 엑셀 로드
-      const yxlWb = await loadWorkbookFromCandidates(EXCEL_CANDIDATES);
-      const yxl = parseYxlWorkbook(yxlWb);
-
-      // 누적 변동사항 적용 (이번 달 기준)
-      const d = new Date();
-      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      applyRankDelta(yxl.total, { storageKey: "yxl_total_rank", monthKey });
-
-      state.yxl = yxl;
-
-      initSeasonSelect(yxl.sheetNames);
-
-      // 렌더
-      renderTotal(yxl.total);
-      renderIntegrated(yxl.integrated);
-
-      const defaultSeason = $("#seasonSelect")?.value || Object.keys(yxl.seasons)[0];
-      renderSeason(yxl.seasons[defaultSeason] || []);
-
-      // 시너지 로드
-      const synWb = await loadWorkbookFromCandidates(SYNERGY_CANDIDATES);
-      const syn = parseSynergyWorkbook(synWb);
-
-      applyRankDelta(syn.rows, { storageKey: "yxl_synergy_rank", monthKey: syn.monthKey });
-
-      state.synergy = syn;
-      synergyState.rows = syn.rows;
-
-      setSynergyRefreshedUI(syn.refreshedAt || "--");
-
-      renderSynergy(syn.rows);
-
-      // LIVE 정보 업데이트 (비동기)
-      await enrichSynergyLive(syn.rows);
-      renderSynergy(syn.rows); // 상태 반영 재렌더
-
-      // 공통 UI
-      setUpdatedAtNow();
-
-      // 다음 업데이트 시간
-    } catch (e) {
-      console.error(e);
-      setUpdatedAtNow();
-      // 최소한 사용자에게 느낌표라도
-      const el = $("#synergyRefreshedAt");
-      if (el) el.textContent = "데이터 로드 실패 (파일 경로/이름 확인)";
+      select.addEventListener("change", () => {
+        try { localStorage.setItem("yxl_season_sheet_v1", select.value); } catch {}
+        renderSeason(yxl.seasons[select.value] || []);
+      });
     }
+
+    // 2) 시너지표.xlsx
+    const synWb = await loadWorkbook(FILES.synergy);
+    const syn = parseSynergyWorkbook(synWb);
+    appState.synergy = syn;
+    synergyState.rows = syn.rows;
+
+    // 렌더(일단 데이터만)
+    renderTotal(yxl.total);
+    renderIntegrated(yxl.integrated);
+    if (select && select.value) renderSeason(yxl.seasons[select.value] || []);
+    else {
+      const first = Object.keys(yxl.seasons)[0];
+      if (first) renderSeason(yxl.seasons[first] || []);
+    }
+    renderSynergy(syn.rows);
+
+    // LIVE 정보 갱신(비동기)
+    updateSynergyLive(syn.rows).then(() => {
+      renderSynergy(syn.rows);
+    });
+
+    // 상단 업데이트 시간
+    setUpdatedAt(new Date().toLocaleString("ko-KR"));
   }
 
-  function startAutoRefresh() {
-    // 페이지를 열어두면 3시간마다 갱신
-    setInterval(() => {
-      refreshAll();
-    }, UPDATE_MS);
-  }
-
-  /* =========================
-     시작
-     ========================= */
-  document.addEventListener("DOMContentLoaded", async () => {
-    initGate();
-    initTabs();
-    bindSearchInputs();
-    initSynergyInteractions();
-    await refreshAll();
-    startAutoRefresh();
+  // 검색 바인딩
+  $("#totalSearch")?.addEventListener("input", () => appState.yxl && renderTotal(appState.yxl.total));
+  $("#integratedSearch")?.addEventListener("input", () => appState.yxl && renderIntegrated(appState.yxl.integrated));
+  $("#seasonSearch")?.addEventListener("input", () => {
+    if (!appState.yxl) return;
+    const sn = $("#seasonSelect")?.value;
+    renderSeason(appState.yxl.seasons[sn] || []);
   });
-})();
+  $("#synergySearch")?.addEventListener("input", () => appState.synergy && renderSynergy(synergyState.rows));
+
+  // 시작
+  loadAll().catch((err) => {
+    console.error(err);
+    setUpdatedAt("데이터 로드 실패");
+    // 최소한 gate는 동작해야 하므로 여기서 종료
+  });
+
+  /* =========================================================
+     Garland 랜덤 반짝
+  ========================================================= */
+  (function initGarlandTwinkle() {
+    const bulbs = $$(".garland .bulb");
+    if (!bulbs.length) return;
+
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduced) {
+      bulbs.forEach((b) => {
+        b.style.setProperty("--o", "0.95");
+        b.style.setProperty("--s", "1.0");
+        b.style.setProperty("--blur", "18px");
+      });
+      return;
+    }
+
+    function schedule(bulb) {
+      const tick = () => {
+        let o = 0.25 + Math.random() * 0.85;
+        let s = 0.85 + Math.random() * 0.55;
+        let blur = 10 + Math.random() * 26;
+
+        if (Math.random() < 0.12) {
+          o *= 0.15;
+          s *= 0.92;
+          blur *= 0.55;
+        }
+
+        bulb.style.setProperty("--o", o.toFixed(2));
+        bulb.style.setProperty("--s", s.toFixed(2));
+        bulb.style.setProperty("--blur", `${Math.round(blur)}px`);
+
+        const next = 90 + Math.random() * 900;
+        setTimeout(tick, next);
+      };
+
+      setTimeout(tick, 120 + Math.random() * 800);
+    }
+
+    bulbs.forEach(schedule);
+  })();
+});

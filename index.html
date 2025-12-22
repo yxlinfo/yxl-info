@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>YXL.info</title>
-<link href="styles.css?v=16" rel="stylesheet"/>
+<link href="styles.css?v=19" rel="stylesheet"/>
 </head>
 <body>
 <!-- ✅ Gate (첫 방문 클릭 필요) -->
@@ -146,48 +146,43 @@
 </div>
 <!-- Panel: Synergy -->
 <div class="dash-panel is-active" id="dash-synergy">
-<div class="card">
-<div class="card-head">
-<div>
-<h3 style="margin:0 0 6px;">시너지표</h3>
-<p class="muted" style="margin:0;">3시간마다 자동 업데이트가 됩니다.</p>
-</div>
-<div class="toolbar">
-<div class="input-wrap">
-<input class="input" id="synergySearch" placeholder="스트리머 이름 검색"/>
-</div>
-</div>
-</div>
-<div class="synergy-widgets">
-<div class="mini-card" id="monthCalendar"></div>
-<div class="mini-card">
-<div class="mini-title">새로고침시간</div>
-<div class="mini-value" id="synergyRefreshedAt">--</div>
-<div class="mini-sub muted">다음 업데이트: <span id="synergyNextUpdate">--</span></div>
-</div>
-</div>
-<div class="table-wrap">
-<table class="table" id="synergyTable">
-<thead>
-<tr>
-<th>순위</th>
-<th>스트리머</th>
-<th style="text-align:right;">누적별풍선</th>
-<th style="text-align:right;">변동사항</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
-<div class="hint">* LIVE일 때만 이름에 마우스를 올리면 썸네일 툴팁이 표시됩니다. (OFF는 아무것도 안 뜸)</div>
-</div>
-<div class="synergy-tooltip" hidden="" id="synergyTooltip"></div>
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h3 style="margin:0 0 6px;">시너지표</h3>
+        <p class="muted" style="margin:0;">새로고침시간: <span id="synergyRefreshedAt">--</span></p>
+      </div>
+      <div class="toolbar">
+        <div class="input-wrap">
+          <input class="input" id="synergySearch" placeholder="스트리머 이름 검색"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table" id="synergyTable">
+        <thead>
+          <tr>
+            <th>순위</th>
+            <th>스트리머</th>
+            <th style="text-align:right;">누적별풍선</th>
+            <th style="text-align:right;">변동사항</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="hint">* LIVE일 때만 이름에 마우스를 올리면 썸네일 툴팁이 표시됩니다. (OFF는 아무것도 안 뜸)</div>
+  </div>
+
+  <div class="synergy-tooltip" hidden="" id="synergyTooltip"></div>
 </div>
 </section>
 <footer class="section" style="padding-top:0;">
 <div class="muted">© YXL</div>
 </footer>
 </section></main>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="app.js?v=18"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="app.js?v=19"></script>
 </body>
 </html>

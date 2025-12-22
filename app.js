@@ -1,7 +1,7 @@
-/* YXLinfo v18
+/* YXLinfo v19
    - Excel 기반 대시보드 (YXL_통합.xlsx, 시너지표.xlsx)
    - 시너지표: LIVE 썸네일 툴팁(라이브일 때만), ON 표시(네온 빨간불), 클릭 이동(라이브/방송국)
-   - 3시간마다 자동 업데이트 + 월/년도 달력 위젯
+   - 
 */
 (() => {
   "use strict";
@@ -37,6 +37,19 @@
       .replace(/\s+/g, "")
       .replace(/[❤♥♡]/g, "")
       .toLowerCase();
+
+  // ✅ 시너지표 BJID 매핑(사용자 제공)
+  const BJID_MAP = {
+    [normalizeNick("리윤_♥")]: "sladk51",
+    [normalizeNick("후잉♥")]: "jaeha010",
+    [normalizeNick("하랑짱♥")]: "asy1218",
+    [normalizeNick("쩔밍♡")]: "wnsdus5900",
+    [normalizeNick("김유정S2")]: "tkek55",
+    [normalizeNick("서니_♥")]: "iluvpp",
+    [normalizeNick("#율무")]: "offside629",
+    [normalizeNick("소다♥")]: "zbxlzzz",
+    [normalizeNick("강소지♥")]: "nowsoji",
+  };
 
   const readJSON = (key, fallback = null) => {
     try {
@@ -332,57 +345,6 @@
   }
 
   /* =========================
-     달력 위젯
-     ========================= */
-  function renderCalendar(el, monthKey) {
-    if (!el) return;
-
-    const [yy, mm] = monthKey.split("-").map((x) => parseInt(x, 10));
-    const year = yy || new Date().getFullYear();
-    const month = mm || new Date().getMonth() + 1;
-
-    const lastKey = readJSON("yxl_last_monthkey", "");
-    const changed = lastKey && lastKey !== monthKey;
-
-    writeJSON("yxl_last_monthkey", monthKey);
-
-    const first = new Date(year, month - 1, 1);
-    const last = new Date(year, month, 0);
-    const startDow = first.getDay(); // 0=일
-    const days = last.getDate();
-
-    const today = new Date();
-    const isThisMonth = today.getFullYear() === year && today.getMonth() + 1 === month;
-    const todayDate = today.getDate();
-
-    const dows = ["일", "월", "화", "수", "목", "금", "토"];
-
-    const parts = [];
-    parts.push(`
-      <div class="calendar-head">
-        <div class="calendar-ym">${year}년 ${String(month).padStart(2, "0")}월</div>
-        ${changed ? `<div class="calendar-badge">월 변경!</div>` : ``}
-      </div>
-      <div class="calendar-grid">
-        ${dows.map((d) => `<div class="cal-dow">${d}</div>`).join("")}
-    `);
-
-    // 빈칸
-    for (let i = 0; i < startDow; i++) {
-      parts.push(`<div class="cal-day is-empty"></div>`);
-    }
-    // 날짜
-    for (let d = 1; d <= days; d++) {
-      const cls = ["cal-day"];
-      if (isThisMonth && d === todayDate) cls.push("is-today");
-      parts.push(`<div class="${cls.join(" ")}">${d}</div>`);
-    }
-    parts.push(`</div>`);
-
-    el.innerHTML = parts.join("");
-  }
-
-  /* =========================
      SOOP: BJID 찾기 + LIVE 확인 (CORS 실패 시 기능 자동 비활성)
      ========================= */
   function readBjidCache() {
@@ -565,7 +527,7 @@
         const live = synergyState.liveMap[key] || {};
         const isLive = !!live.isLive;
 
-        const statusHtml = isLive ? `<span class="live-dot" title="LIVE"></span>` : ``;
+        const statusHtml = isLive ? `<span class="live-dot" title="LIVE"></span>` : `<span class="live-dot is-off" title="OFF"></span>`;
 
         return `
           <tr data-streamer-key="${key}">
@@ -659,7 +621,7 @@
       if (live.isLive && live.broadNo) {
         window.open(`https://play.sooplive.co.kr/${live.bjid}/${live.broadNo}`, "_blank", "noopener");
       } else {
-        window.open(`https://www.sooplive.com/${live.bjid}`, "_blank", "noopener");
+        window.open(`https://www.sooplive.co.kr/station/${live.bjid}`, "_blank", "noopener");
       }
     });
   }
@@ -682,10 +644,11 @@
         if (existing && existing.ts && Date.now() - existing.ts < 90_000) continue;
 
         try {
-          const bj = await soopFindBjidByNick(r.streamer);
+          const mappedBjid = BJID_MAP[key] || "";
+          const bj = mappedBjid ? { user_id: mappedBjid } : await soopFindBjidByNick(r.streamer);
           const bjid = bj?.user_id || "";
           if (!bjid) {
-            outMap[key] = { bjid: "", isLive: false, broadNo: "", thumb: "", title: "", ts: Date.now() };
+            outMap[key] = { bjid: (BJID_MAP[key] || ""), isLive: false, broadNo: "", thumb: "", title: "", ts: Date.now() };
             continue;
           }
 
@@ -701,7 +664,7 @@
           };
         } catch {
           // CORS/네트워크 실패 시: 해당 행만 offline 처리
-          outMap[key] = { bjid: "", isLive: false, broadNo: "", thumb: "", title: "", ts: Date.now() };
+          outMap[key] = { bjid: (BJID_MAP[key] || ""), isLive: false, broadNo: "", thumb: "", title: "", ts: Date.now() };
         }
 
         // 짧은 딜레이(서버 부담 완화)
@@ -721,21 +684,12 @@
   const state = {
     yxl: null,
     synergy: null,
-    nextUpdateAt: 0,
   };
 
   function setUpdatedAtNow() {
     const el = $("#updatedAt");
     if (el) el.textContent = new Date().toLocaleString("ko-KR");
   }
-
-  function setNextUpdateUI(nextAt) {
-    const el = $("#synergyNextUpdate");
-    if (!el) return;
-    if (!nextAt) {
-      el.textContent = "--";
-      return;
-    }
     el.textContent = new Date(nextAt).toLocaleString("ko-KR");
   }
 
@@ -801,7 +755,6 @@
       synergyState.rows = syn.rows;
 
       setSynergyRefreshedUI(syn.refreshedAt || "--");
-      renderCalendar($("#monthCalendar"), syn.monthKey);
 
       renderSynergy(syn.rows);
 
@@ -813,8 +766,6 @@
       setUpdatedAtNow();
 
       // 다음 업데이트 시간
-      state.nextUpdateAt = Date.now() + UPDATE_MS;
-      setNextUpdateUI(state.nextUpdateAt);
     } catch (e) {
       console.error(e);
       setUpdatedAtNow();

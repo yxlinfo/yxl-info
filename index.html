@@ -53,9 +53,25 @@
   <main class="wrap">
 <section class="section" id="info">
   <div class="section-head">
+   <!-- ✅ 여기! 회전문 대시보드 마크업 -->
+    <div class="stage">
+      <div class="scene">
+        <div id="carousel" class="carousel" aria-label="13개의 와이드 대시보드 회전문"></div>
+      </div>
+      <div id="caption" class="caption">01</div>
 
-  </div>
-
+      <!-- (선택) 컨트롤 버튼을 이 위치에 두고 싶으면 -->
+      <div class="controls">
+        <button id="prev">◀</button>
+        <button id="toggle">⏸︎</button>
+        <button id="next">▶</button>
+        <label>
+          Speed
+          <input id="speed" type="range" min="6" max="60" value="22">
+        </label>
+      </div>
+    </div>
+    <!-- ✅ 여기까지 -->
     </section>
 
     <section class="section">

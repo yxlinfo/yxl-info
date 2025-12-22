@@ -1,5 +1,5 @@
 /* =========================
-   탭 전환 (대시보드 버튼)
+   탭 전환
 ========================= */
 (function dashboardTabs(){
   const tabs = Array.from(document.querySelectorAll(".dash-tab"));
@@ -15,8 +15,8 @@
 
     panels.forEach(p => {
       const on = p.id === targetId;
-      p.classList.toggle("is-active", on);
       p.hidden = !on;
+      p.classList.toggle("is-active", on);
     });
 
     if (pushHash) {
@@ -43,8 +43,7 @@
 })();
 
 /* =========================
-   유틸/데이터 (예시)
-   -> 여기만 너 데이터로 교체하면 끝
+   데이터(예시) - 너 데이터로 교체
 ========================= */
 const YXL_DATA = {
   total: [
@@ -90,7 +89,7 @@ function rankBadge(rank){
 }
 
 /* =========================
-   누적 (검색 + TOP 배지)
+   누적
 ========================= */
 function renderTotalTable(){
   const tbody = document.querySelector("#totalTable tbody");
@@ -113,7 +112,7 @@ function renderTotalTable(){
 }
 
 /* =========================
-   시즌별 (드롭다운 + 검색)
+   시즌별
 ========================= */
 function initSeasonSelect(){
   const select = document.getElementById("seasonSelect");
@@ -155,7 +154,7 @@ function renderSeasonTable(){
 }
 
 /* =========================
-   시너지 (컬럼 클릭 정렬)
+   시너지 정렬
 ========================= */
 const synergyState = { key: "rank", dir: "asc" };
 
@@ -210,7 +209,6 @@ function initSynergySort(){
   table.querySelectorAll("thead th[data-key]").forEach(th => {
     th.addEventListener("click", () => {
       const key = th.dataset.key;
-
       if (synergyState.key !== key) {
         synergyState.key = key;
         synergyState.dir = "asc";
@@ -223,15 +221,14 @@ function initSynergySort(){
 }
 
 /* =========================
-   헤더 유틸(링크복사/업데이트표시)
+   헤더 유틸
 ========================= */
 (function headerUtils(){
   const copyBtn = document.getElementById("copyBtn");
   const updatedAt = document.getElementById("updatedAt");
 
   if (updatedAt){
-    const now = new Date();
-    updatedAt.textContent = now.toLocaleString("ko-KR");
+    updatedAt.textContent = new Date().toLocaleString("ko-KR");
   }
 
   copyBtn?.addEventListener("click", async () => {
@@ -246,48 +243,44 @@ function initSynergySort(){
 })();
 
 /* =========================
-   ✅ BGM Gate (오버레이 입장 방식)
-   - 첫 방문(또는 꺼둔 상태): 오버레이 먼저
-   - "음악 재생하고 입장하기" 클릭 시: 재생 성공하면 사이트 표시
-   - 한 번 켜두면 다음 방문부터: 오버레이 없이 자동재생 '시도'
+   ✅ Gate + BGM + 하트 파티클
 ========================= */
-(function bgmGateMode(){
+(function gateAndBgmWithHearts(){
   const KEY = "yxl_bgm_on";
 
-  const gate = document.getElementById("bgmGate");
-  const startBtn = document.getElementById("bgmStart");
-  const msg = document.getElementById("bgmGateMsg");
+  const gate = document.getElementById("gate");
+  const gateBtn = document.getElementById("gateBtn");
+  const gateMsg = document.getElementById("gateMsg");
+  const particleLayer = document.getElementById("gateParticles");
 
-  const app = document.getElementById("app");
   const audio = document.getElementById("bgm");
-
   const headerToggle = document.getElementById("bgmToggle");
 
-  if (!gate || !startBtn || !app || !audio) return;
+  if (!gate || !gateBtn || !audio || !particleLayer) return;
 
   audio.loop = true;
   audio.preload = "auto";
   audio.volume = 0.25;
 
-  function lockSite(){
-    document.body.classList.add("is-locked");
-    app.classList.add("is-locked");
-    gate.classList.add("is-open");
-    gate.setAttribute("aria-hidden", "false");
-  }
-
-  function unlockSite(){
-    document.body.classList.remove("is-locked");
-    app.classList.remove("is-locked");
-    gate.classList.remove("is-open");
-    gate.setAttribute("aria-hidden", "true");
-  }
+  let floatTimer = null;
 
   function setHeaderUI(isOn){
     if (!headerToggle) return;
     headerToggle.classList.toggle("is-on", isOn);
     headerToggle.textContent = isOn ? "BGM 정지" : "BGM 재생";
     headerToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+  }
+
+  function showGate(){
+    gate.classList.remove("is-hidden");
+    gate.setAttribute("aria-hidden", "false");
+    startFloatingHearts();
+  }
+
+  function hideGate(){
+    gate.classList.add("is-hidden");
+    gate.setAttribute("aria-hidden", "true");
+    stopFloatingHearts();
   }
 
   async function playSafe({ userInitiated = false } = {}){
@@ -299,8 +292,8 @@ function initSynergySort(){
       return true;
     }catch(e){
       setHeaderUI(false);
-      if (userInitiated && msg){
-        msg.textContent = "재생이 차단됐어요. 다시 한 번 눌러보거나 브라우저 설정/확장프로그램을 확인해주세요.";
+      if (userInitiated && gateMsg){
+        gateMsg.textContent = "재생이 차단됐어요. 한 번 더 눌러보거나 브라우저 설정/확장프로그램을 확인해주세요.";
       }
       return false;
     }
@@ -313,61 +306,50 @@ function initSynergySort(){
     setHeaderUI(false);
   }
 
-  // 오버레이 버튼: 재생 성공하면 입장
-  startBtn.addEventListener("click", async () => {
-    if (msg) msg.textContent = "";
-    const ok = await playSafe({ userInitiated: true });
-    if (ok) unlockSite();
-  });
+  /* ---- 파티클 생성 ---- */
+  function makeHeart(x, y, opts = {}){
+    const el = document.createElement("div");
+    el.className = "heart";
 
-  // 헤더 버튼도 연동(있을 때만)
-  if (headerToggle){
-    headerToggle.addEventListener("click", async () => {
-      if (audio.paused){
-        const ok = await playSafe({ userInitiated: true });
-        if (ok) unlockSite();
-      } else {
-        stop();
-        lockSite(); // 꺼버리면 다음 방문도 오버레이 뜨게
-      }
-    });
+    const size = opts.size ?? (12 + Math.random() * 16);
+    const dur = opts.dur ?? (900 + Math.random() * 700);
+
+    // 시작/끝 위치(상승 + 퍼짐)
+    const dx = (Math.random() - 0.5) * (opts.spread ?? 220);
+    const dy = -(opts.rise ?? (160 + Math.random() * 240));
+
+    el.style.setProperty("--size", `${size}px`);
+    el.style.setProperty("--dur", `${dur}ms`);
+
+    el.style.setProperty("--x0", `${x}px`);
+    el.style.setProperty("--y0", `${y}px`);
+    el.style.setProperty("--x1", `${x + dx}px`);
+    el.style.setProperty("--y1", `${y + dy}px`);
+
+    el.style.setProperty("--s0", `${0.85 + Math.random() * 0.35}`);
+    el.style.setProperty("--s1", `${1.2 + Math.random() * 0.8}`);
+
+    el.style.setProperty("--r0", `${(Math.random() - 0.5) * 20}deg`);
+    el.style.setProperty("--r1", `${(Math.random() - 0.5) * 80}deg`);
+
+    particleLayer.appendChild(el);
+    el.addEventListener("animationend", () => el.remove());
   }
 
-  // 다음 방문: 켜짐 저장돼 있으면 오버레이 없이 바로 보여주고 재생 '시도'
-  const savedOn = localStorage.getItem(KEY) === "1";
-  if (savedOn){
-    unlockSite();
-    playSafe({ userInitiated: false });
-  } else {
-    lockSite();
+  function makeSpark(x, y){
+    const el = document.createElement("div");
+    el.className = "spark";
+
+    const dx = (Math.random() - 0.5) * 90;
+    const dy = (Math.random() - 0.5) * 90;
+
+    el.style.setProperty("--sx0", `${x}px`);
+    el.style.setProperty("--sy0", `${y}px`);
+    el.style.setProperty("--sx1", `${x + dx}px`);
+    el.style.setProperty("--sy1", `${y + dy}px`);
+
+    particleLayer.appendChild(el);
+    el.addEventListener("animationend", () => el.remove());
   }
 
-  // 탭 복귀 시 재시도
-  document.addEventListener("visibilitychange", () => {
-    const shouldOn = localStorage.getItem(KEY) === "1";
-    if (!document.hidden && shouldOn && audio.paused) playSafe({ userInitiated: false });
-  });
-})();
-
-/* =========================
-   초기 바인딩/렌더
-========================= */
-function bindYxlDashFeatures(){
-  document.getElementById("totalSearch")?.addEventListener("input", renderTotalTable);
-
-  initSeasonSelect();
-  document.getElementById("seasonSelect")?.addEventListener("change", renderSeasonTable);
-  document.getElementById("seasonSearch")?.addEventListener("input", renderSeasonTable);
-
-  initSynergySort();
-
-  renderTotalTable();
-  renderSeasonTable();
-  renderSynergyTable();
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", bindYxlDashFeatures);
-} else {
-  bindYxlDashFeatures();
-}
+  f

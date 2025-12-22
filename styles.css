@@ -673,5 +673,36 @@ body::after{
   border-radius:0;  /* 아주 작으니 둥글게 필요 없으면 0 */
   filter:none;      /* 그림자 제거(작을수록 지저분해질 수 있음) */
 }
+/* =========================
+   ✅ Responsive (Desktop / Mobile)
+   - styles.css 맨 아래에 붙여넣기
+========================= */
+
+/* 기본(모바일 우선) */
+.brand-gif{ height:15px; }         /* 모바일에서 로고 작게 */
+.table-wrap{ max-height: 420px; }  /* 모바일 스크롤 높이 */
+.dash-tabs{ top:56px; }            /* 모바일 헤더 높이 기준 */
+.card-head{ top:110px; }           /* 모바일: 헤더+탭 기준 */
+.week-grid{
+  display:grid;
+  grid-template-columns: 1fr;      /* 모바일은 1열 */
+  gap:10px;
+}
+
+/* ✅ 태블릿 이상 */
+@media (min-width: 600px){
+  .brand-gif{ height:18px; }
+  .week-grid{ grid-template-columns: repeat(2, 1fr); } /* 2열 */
+  .table-wrap{ max-height: 520px; }
+}
+
+/* ✅ 데스크탑 */
+@media (min-width: 960px){
+  .brand-gif{ height:22px; }       /* 데스크탑은 로고 조금 크게 */
+  .week-grid{ grid-template-columns: repeat(7, 1fr); } /* 주간 7칸 한줄 */
+  .table-wrap{ max-height: 600px; }
+  .dash-tabs{ top:64px; }
+  .card-head{ top:118px; }
+}
 
 

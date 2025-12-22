@@ -704,5 +704,183 @@ body::after{
   .dash-tabs{ top:64px; }
   .card-head{ top:118px; }
 }
+/* =========================
+   ✅ Table + Weekly Calendar Polish (Mobile/Desk)
+   - styles.css 맨 아래에 붙여넣기
+========================= */
+
+/* ---------- 공통: 표 가독성 업 ---------- */
+.table th, .table td{
+  padding: 11px 12px;
+  line-height: 1.25;
+}
+.table tbody tr:hover td{
+  background: rgba(255,255,255,.04);
+}
+
+/* 표: 모바일에서 글자/패딩 조금 줄이고, 스크롤 느낌 개선 */
+.table-wrap{
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.table{
+  font-size: 14px;
+}
+
+/* ---------- 공통: 일정 보드 ---------- */
+.week-card{ padding:16px; }
+.week-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.week-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.week-range{
+  font-weight: 1000;
+  font-size: 16px;
+  letter-spacing: .2px;
+}
+
+/* 7일 그리드 */
+.week-grid{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:10px;
+  margin-top:10px;
+}
+
+/* 날짜 카드 */
+.day-card{
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  padding:12px;
+  cursor:pointer;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+  min-height: 110px;
+}
+.day-card:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.20);
+  background: rgba(255,255,255,.06);
+}
+.day-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.dow{
+  font-weight: 1000;
+  font-size: 12px;
+  color: rgba(255,255,255,.75);
+}
+.dnum{
+  font-weight: 1000;
+  font-size: 14px;
+  color: rgba(255,255,255,.92);
+}
+.badge-dot{
+  width:8px; height:8px;
+  border-radius:999px;
+  background: rgba(255,255,255,.16);
+  box-shadow: 0 0 16px rgba(255,255,255,.08);
+}
+
+/* 일정 있음 표시 */
+.day-card.has-event .badge-dot{
+  background: rgba(34,211,238,.9);
+  box-shadow: 0 0 18px rgba(34,211,238,.35);
+}
+
+/* 오늘 강조 */
+.day-card.is-today{
+  border-color: rgba(255,209,102,.35);
+  box-shadow: 0 0 0 1px rgba(255,209,102,.18) inset;
+}
+.day-card.is-today .dow{ color: rgba(255,209,102,.95); }
+
+/* 제목/메모 */
+.event-title{
+  font-weight: 1000;
+  font-size: 13px;
+  margin-bottom: 6px;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.event-memo{
+  font-size: 12px;
+  color: rgba(255,255,255,.72);
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* 상세 패널 */
+.week-detail{
+  margin-top:12px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.22);
+  padding:14px;
+}
+.detail-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.detail-date{
+  font-weight: 1000;
+  font-size: 14px;
+}
+.detail-body{ display:grid; gap:10px; }
+.detail-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+
+/* ---------- ✅ 모바일 최적화 ---------- */
+@media (max-width: 720px){
+
+  /* 일정: 7칸 한줄은 작으니 2열(=주간 리스트 느낌) */
+  .week-grid{
+    grid-template-columns: repeat(2, 1fr);
+    gap:10px;
+  }
+
+  /* 날짜 카드 높이/패딩 조정 */
+  .day-card{
+    min-height: 96px;
+    padding: 11px;
+  }
+
+  /* 표: 모바일에서 글자 조금 더 작게 */
+  .table{ font-size: 13px; }
+  .table th, .table td{ padding: 10px 10px; }
+
+  /* 툴바(검색/드롭다운) 세로정렬로 */
+  .toolbar{ width:100%; }
+  .select{ width:100%; min-width: 0; }
+  .input-wrap{ min-width: 0; width:100%; }
+}
+
+/* ---------- ✅ 아주 작은 모바일 ---------- */
+@media (max-width: 420px){
+  .week-grid{ grid-template-columns: 1fr; } /* 1열 카드 리스트 */
+  .week-actions .btn{ width:100%; }
+}
 
 

@@ -9,6 +9,22 @@
 </head>
 
 <body>
+  <!-- ✅ BGM 진입 오버레이 -->
+  <div id="bgmGate" class="bgm-gate" aria-hidden="true">
+    <div class="bgm-gate-card">
+      <div class="bgm-gate-title">🎧 음악 재생</div>
+      <div class="bgm-gate-desc">
+        사이트를 이용하려면 먼저 BGM 재생을 눌러주세요.
+      </div>
+
+      <button id="bgmStart" class="btn is-on" type="button">
+        음악 재생하고 입장하기
+      </button>
+
+      <div id="bgmGateMsg" class="bgm-gate-msg"></div>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="header">
     <div class="wrap header-inner">
@@ -29,7 +45,7 @@
   </header>
 
   <!-- Main -->
-  <main class="wrap">
+  <main class="wrap" id="app">
     <section class="section" id="info">
       <div class="section-head">
         <h2>정보</h2>
@@ -156,8 +172,8 @@
     </footer>
   </main>
 
-  <!-- ✅ BGM 오디오 (repo에 assets/bgm.mp3 업로드 필요) -->
-<audio id="bgm" src="bgm.mp3" preload="auto" loop></audio>
+  <!-- ✅ BGM 오디오 -->
+  <audio id="bgm" src="assets/bgm.mp3" preload="auto" loop></audio>
 
   <script src="app.js"></script>
 </body>

@@ -244,7 +244,15 @@ document.addEventListener("DOMContentLoaded", () => {
      SOOP LIVE (bjSearch / liveSearch)
      - CORS가 막히면 자동으로 OFF 처리됩니다.
   ========================================================= */
-  const SOOP_SEARCH_API = "https://sch.sooplive.co.kr/api.php";
+  
+  function normalizeThumbUrl(u) {
+    const s = safeText(u).trim();
+    if (!s) return "";
+    if (s.startsWith("//")) return "https:" + s;
+    if (s.startsWith("http://")) return "https://" + s.slice(7);
+    return s;
+  }
+const SOOP_SEARCH_API = "https://sch.sooplive.co.kr/api.php";
 
   // 사용자 제공 BJID 매핑(우선 적용)
   const BJID_MAP = {
@@ -334,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const row = list.find((x) => (x.user_id || "").toLowerCase() === bjid.toLowerCase()) || list[0];
     const broadNo = safeText(row.broad_no || "").trim();
-    const thumb = safeText(row.broad_img || row.sn_url || "").trim();
+    const thumb = normalizeThumbUrl(row.broad_img || row.sn_url || "");
     const title = safeText(row.broad_title || "").trim();
     return { isLive: !!broadNo, broadNo, thumb, title };
   }
@@ -626,8 +634,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const isLive = el.dataset.live === "1";
       const broadNo = safeText(el.dataset.broadno).trim();
 
-      if (isLive && broadNo) {
-        window.open(`https://play.sooplive.co.kr/${encodeURIComponent(bjid)}/${encodeURIComponent(broadNo)}`, "_blank", "noopener");
+      if (isLive) {
+        window.open(`https://play.sooplive.co.kr/${encodeURIComponent(bjid)}/`, "_blank", "noopener");
       } else {
         window.open(`https://www.sooplive.co.kr/station/${encodeURIComponent(bjid)}`, "_blank", "noopener");
       }

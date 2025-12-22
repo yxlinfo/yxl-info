@@ -171,15 +171,10 @@ body::after{
   gap:16px; padding:14px 0;
 }
 .brand{ display:flex; gap:12px; align-items:center; }
-.brand-mark{
-  width:11px; height:11px; border-radius:3.5px;
-  display:grid; place-items:center;
-  background: rgba(125,211,252,.14);
-  border:1px solid var(--accent);
-  font-weight:900;
+.brand-gif{
+  height:15px;
+  width:auto;
 }
-.brand-title{ font-weight:900; font-size:18px; }
-.brand-sub{ color:var(--muted); font-size:12px; margin-top:2px; }
 .header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .updated{ color:var(--muted); font-size:12px; }
 

@@ -36,7 +36,54 @@ document.addEventListener("DOMContentLoaded", () => {
   const numFmt = (n) => (n ?? 0).toLocaleString("ko-KR");
   const normalize = (s) => (s ?? "").toString().trim().toLowerCase();
 
-  const withRank = (rows) => {
+  
+  const TOTAL_PREV_KEY = "yxl_total_prev_ranks";
+
+  const loadPrevTotalRanks = () => {
+    try {
+      const raw = localStorage.getItem(TOTAL_PREV_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  const saveTotalRanks = (rankedRows) => {
+    try {
+      const map = {};
+      rankedRows.forEach((r) => { map[r.name] = r.rank; });
+      localStorage.setItem(TOTAL_PREV_KEY, JSON.stringify(map));
+    } catch (e) {}
+  };
+
+  const formatDelta = (delta) => {
+    if (delta == null) return `<span class="delta new">—</span>`;
+    if (delta > 0) return `<span class="delta up" title="상승 ${delta}계단">▲${delta}</span>`;
+    if (delta < 0) return `<span class="delta down" title="하락 ${Math.abs(delta)}계단">▼${Math.abs(delta)}</span>`;
+    return `<span class="delta same" title="변동 없음">—</span>`;
+  };
+
+  const totalPrevMap = loadPrevTotalRanks();
+
+
+  // (선택) 누적기여도 데이터를 외부 JSON으로 분리해 가져오기
+  async function loadTotalFromJSON(url = "data/total.json") {
+    try {
+      const res = await fetch(url + "?v=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const rows = await res.json();
+      if (Array.isArray(rows) && rows.length) {
+        // rows: [{name, balloons}]
+        YXL_DATA.total = rows
+          .map((r) => ({ name: r.name, balloons: Number(r.balloons ?? 0) }))
+          .filter((r) => r.name);
+      }
+    } catch (e) {
+      // 실패 시 기존 하드코딩 데이터 유지
+    }
+  }
+
+const withRank = (rows) => {
     const sorted = [...rows].sort((a, b) => (b.balloons ?? 0) - (a.balloons ?? 0));
     return sorted.map((r, i) => ({ ...r, rank: i + 1 }));
   };
@@ -127,16 +174,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const q = normalize(document.getElementById("totalSearch")?.value);
     if (!tbody) return;
 
+    const prevMap = totalPrevMap;
     const ranked = withRank(YXL_DATA.total);
     const filtered = q ? ranked.filter((r) => normalize(r.name).includes(q)) : ranked;
 
-    tbody.innerHTML = filtered.map((r) => `
-      <tr>
-        <td>${rankBadge(r.rank)}</td>
-        <td>${r.name}</td>
-        <td class="num">${numFmt(r.balloons)}</td>
-      </tr>
-    `).join("");
+    tbody.innerHTML = filtered.map((r) => {
+      const prevRank = prevMap?.[r.name];
+      const delta = (typeof prevRank === "number") ? (prevRank - r.rank) : null; // +면 상승
+      return `
+        <tr>
+          <td>${rankBadge(r.rank)}</td>
+          <td>${r.name}</td>
+          <td class="num">${numFmt(r.balloons)}</td>
+          <td class="num">${formatDelta(delta)}</td>
+        </tr>
+      `;
+    }).join("");
+  }
 
     if (!filtered.length) {
       tbody.innerHTML = `<tr><td colspan="3" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
@@ -411,10 +465,18 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      최초 렌더
   ========================= */
-  renderTotalTable();
-  renderSeasonTable();
-  renderSynergyTable();
-  /* =========================
+  (async () => {
+    // GitHub Pages에서 Excel 데이터를 쓰고 싶으면: data/total.json 업데이트만 하면 됨
+    await loadTotalFromJSON("data/total.json");
+    renderTotalTable();
+    // 다음 새로고침/업데이트에서 변동사항 계산을 위해 현재 순위를 저장
+    saveTotalRanks(withRank(YXL_DATA.total));
+
+    renderSeasonTable();
+    renderSynergyTable();
+  })();
+
+/* =========================
    🎄 Garland Random Twinkle (per-bulb)
 ========================= */
 (function initGarlandTwinkle(){

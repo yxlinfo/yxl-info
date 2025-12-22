@@ -554,3 +554,11 @@ body::after{
   border-radius:0;  /* 아주 작으니 둥글게 필요 없으면 0 */
   filter:none;      /* 그림자 제거(작을수록 지저분해질 수 있음) */
 }
+
+
+/* 변동사항(상승/하락 계단) */
+.delta{display:inline-flex;align-items:center;gap:6px;font-weight:800;justify-content:flex-end}
+.delta.up{color:#18a957}
+.delta.down{color:#e05252}
+.delta.same{color:rgba(255,255,255,.65)}
+.delta.new{color:rgba(255,255,255,.75)}

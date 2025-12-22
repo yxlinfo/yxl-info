@@ -414,4 +414,52 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTotalTable();
   renderSeasonTable();
   renderSynergyTable();
+  /* =========================
+   🎄 Garland Random Twinkle (per-bulb)
+========================= */
+(function initGarlandTwinkle(){
+  const bulbs = Array.from(document.querySelectorAll(".garland .bulb"));
+  if (!bulbs.length) return;
+
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  if (reduced) {
+    // 모션 최소화: 고정 점등
+    bulbs.forEach(b => {
+      b.style.setProperty("--o", "0.95");
+      b.style.setProperty("--s", "1.0");
+      b.style.setProperty("--blur", "18px");
+    });
+    return;
+  }
+
+  function schedule(bulb){
+    const tick = () => {
+      // 기본 밝기/크기 랜덤
+      let o = 0.25 + Math.random() * 0.85;     // opacity
+      let s = 0.85 + Math.random() * 0.55;     // scale
+      let blur = 10 + Math.random() * 26;      // glow size(px)
+
+      // 가끔 “살짝 꺼졌다 켜짐” 느낌 (진짜 전구같이)
+      if (Math.random() < 0.12) {
+        o *= 0.15;
+        s *= 0.92;
+        blur *= 0.55;
+      }
+
+      bulb.style.setProperty("--o", o.toFixed(2));
+      bulb.style.setProperty("--s", s.toFixed(2));
+      bulb.style.setProperty("--blur", `${Math.round(blur)}px`);
+
+      // 다음 깜빡임 간격도 랜덤(전구마다 다르게)
+      const next = 90 + Math.random() * 900; // 90ms ~ 990ms
+      setTimeout(tick, next);
+    };
+
+    // 전구마다 시작 타이밍도 랜덤
+    setTimeout(tick, Math.random() * 800);
+  }
+
+  bulbs.forEach(schedule);
+})();
+
 });

@@ -66,8 +66,12 @@ body::after{
     radial-gradient(2.3px 2.3px at 690px 220px, rgba(255,255,255,.32) 55%, transparent 60%),
 
     /* big (few) */
-    radial-gradient(3.6px 3.6px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
-    radial-gradient(3.2px 3.2px at 620px 40px, rgba(255,255,255,.22) 55%, transparent 60%);
+    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(6.4px 6.4px at 620px 40px, rgba(255,255,255,.22) 55%, transparent 60%);
 
   background-size: 900px 340px;
   animation: yxlSnow 7.5s linear infinite;

@@ -36,11 +36,13 @@
     audio.volume = 0.25;
     const KEY = 'yxl_bgm_enabled';
 
-    const showOverlay = () => overlay.style.display = 'flex';
-    const hideOverlay = () => overlay.style.display = 'none';
-    const setTogglePlaying = (isPlaying) => {
-      toggle.style.display = 'block';
-      toggle.textContent = isPlaying ? '⏸ 음악' : '▶ 음악';
+const showOverlay = () => overlay.style.display = 'flex';
+
+const hideOverlay = () => {
+  overlay.style.display = 'none';
+  overlay.remove();
+};
+
     };
 
     const start = async () => {

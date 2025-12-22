@@ -383,18 +383,18 @@ body{
 }
 /* =========================
  /* =========================
-   🎄 FINAL Winter / Christmas Theme (Clean)
-   - 기존 Theme Pack 블록을 지우고 이걸로 교체
+/* =========================
+   🎄 FINAL Winter / Christmas Theme (SAFE)
+   - 이 블록만 styles.css 맨 아래에 붙이기
 ========================= */
 
-/* 배경: 겨울 오로라 + 크리스마스 보케 */
-body{
+/* 배경(무조건 덮어쓰기) */
+html, body{
   background:
     radial-gradient(1200px 600px at 15% 0%, rgba(56,189,248,.18), transparent 60%),
     radial-gradient(1200px 600px at 85% 0%, rgba(168,85,247,.12), transparent 60%),
     radial-gradient(900px 520px at 50% 18%, rgba(16,185,129,.10), transparent 65%),
-    linear-gradient(180deg, #061225 0%, #050e1a 55%, #040910 100%);
-  position: relative;
+    linear-gradient(180deg, #061225 0%, #050e1a 55%, #040910 100%) !important;
 }
 
 /* 보케(빛) 레이어 */
@@ -414,32 +414,25 @@ body::before{
   opacity:.88;
 }
 
-/* 눈발(3 레이어) */
+/* 눈발 */
 body::after{
   content:"";
   position: fixed;
   inset:0;
   pointer-events:none;
   z-index:0;
-
   background-image:
-    /* layer 1: 작은 눈 */
     radial-gradient(1.2px 1.2px at 30px 40px, rgba(255,255,255,.22) 55%, transparent 60%),
     radial-gradient(1.1px 1.1px at 180px 120px, rgba(255,255,255,.18) 55%, transparent 60%),
     radial-gradient(1px 1px at 320px 70px, rgba(255,255,255,.16) 55%, transparent 60%),
     radial-gradient(1.2px 1.2px at 520px 160px, rgba(255,255,255,.18) 55%, transparent 60%),
     radial-gradient(1px 1px at 760px 110px, rgba(255,255,255,.14) 55%, transparent 60%),
-
-    /* layer 2: 중간 눈 */
     radial-gradient(1.7px 1.7px at 90px 190px, rgba(255,255,255,.18) 55%, transparent 60%),
     radial-gradient(1.6px 1.6px at 260px 210px, rgba(255,255,255,.16) 55%, transparent 60%),
     radial-gradient(1.5px 1.5px at 460px 240px, rgba(255,255,255,.15) 55%, transparent 60%),
     radial-gradient(1.7px 1.7px at 690px 220px, rgba(255,255,255,.14) 55%, transparent 60%),
-
-    /* layer 3: 큰 눈(아주 조금) */
     radial-gradient(2.3px 2.3px at 140px 60px, rgba(255,255,255,.12) 55%, transparent 60%),
     radial-gradient(2.2px 2.2px at 600px 40px, rgba(255,255,255,.10) 55%, transparent 60%);
-
   background-size: 900px 320px;
   animation: snowFallA 11s linear infinite;
   opacity:.75;
@@ -450,10 +443,10 @@ body::after{
   to{ transform: translate3d(0,360px,0); }
 }
 
-/* 컨텐츠는 배경 위로 */
+/* 컨텐츠 레이어 올리기 */
 .header, main, .wrap { position: relative; z-index: 1; }
 
-/* 헤더: 글래스 + 크리스마스 라인 */
+/* 헤더 강화 */
 .header{
   background: rgba(7, 18, 38, .55) !important;
   border-bottom: 1px solid rgba(255,255,255,.14) !important;
@@ -476,7 +469,7 @@ body::after{
   pointer-events:none;
 }
 
-/* 카드: 더 선명 */
+/* 카드 강화 */
 .card{
   background: rgba(255,255,255,.055) !important;
   border: 1px solid rgba(255,255,255,.14) !important;
@@ -486,11 +479,7 @@ body::after{
   border-color: rgba(255,255,255,.18) !important;
 }
 
-/* 탭: 포인트 */
-.dash-tab{
-  border: 1px solid rgba(255,255,255,.14) !important;
-  background: rgba(0,0,0,.20) !important;
-}
+/* 탭 포인트 */
 .dash-tab.is-active{
   background: linear-gradient(90deg,
     rgba(255,99,132,.12),
@@ -498,21 +487,9 @@ body::after{
     rgba(34,211,238,.10)
   ) !important;
   border-color: rgba(255,255,255,.18) !important;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset;
 }
 
-/* 입력: 포커스 */
-.input, .select{
-  background: rgba(0,0,0,.22) !important;
-  border: 1px solid rgba(255,255,255,.16) !important;
-}
-.input:focus, .select:focus{
-  border-color: rgba(34,211,238,.35) !important;
-  box-shadow: 0 0 0 4px rgba(34,211,238,.10);
-}
-
-/* 테이블: 스티키 헤더 + hover */
-.table-wrap{ max-height: 560px; }
+/* 테이블 헤더 스티키 */
 .table thead th{
   position: sticky;
   top: 0;
@@ -520,14 +497,11 @@ body::after{
   background: rgba(255,255,255,.06) !important;
   backdrop-filter: blur(8px);
 }
-.table tbody tr:hover td{
-  background: rgba(255,255,255,.035);
-}
 
-/* 대시보드 편의: 탭 줄 자체를 스티키로 (스크롤해도 탭이 보임) */
+/* 탭 줄 스티키(편의) */
 .dash-tabs{
   position: sticky;
-  top: 64px; /* 헤더 높이에 맞춰 */
+  top: 64px;
   z-index: 5;
   padding: 10px 0;
   background: rgba(7, 18, 38, .22);
@@ -535,34 +509,14 @@ body::after{
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
-/* 카드 헤더(검색/드롭다운)도 스티키 */
+/* 카드 툴바 스티키(편의) */
 .card-head{
   position: sticky;
-  top: 118px; /* 헤더+탭 높이 고려 */
+  top: 118px;
   z-index: 4;
   background: rgba(7, 18, 38, .30);
   backdrop-filter: blur(10px);
   border-radius: 14px;
   padding: 10px 10px;
   margin: -6px -6px 12px;
-}
-
-/* 1~3등 강조 */
-.rank-1{ box-shadow: 0 0 0 1px rgba(255,215,0,.22) inset, 0 10px 30px rgba(255,215,0,.08); }
-.rank-2{ box-shadow: 0 0 0 1px rgba(192,192,192,.22) inset, 0 10px 30px rgba(192,192,192,.06); }
-.rank-3{ box-shadow: 0 0 0 1px rgba(205,127,50,.22) inset, 0 10px 30px rgba(205,127,50,.06); }
-
-/* 모바일 최적화 */
-@media (max-width: 520px){
-  .dash-tab{ width: 100%; }
-  .table{ min-width: 520px; }
-  .dash-tabs{ top: 56px; }
-  .card-head{ top: 124px; }
-}
-html, body{
-  background:
-    radial-gradient(1200px 600px at 15% 0%, rgba(56,189,248,.18), transparent 60%),
-    radial-gradient(1200px 600px at 85% 0%, rgba(168,85,247,.12), transparent 60%),
-    radial-gradient(900px 520px at 50% 18%, rgba(16,185,129,.10), transparent 65%),
-    linear-gradient(180deg, #061225 0%, #050e1a 55%, #040910 100%) !important;
 }

@@ -564,103 +564,151 @@ body::after{
 .delta.new{color:rgba(255,255,255,.75)}
 
 
+
 /* =========================
-   SOOP 썸네일 툴팁 + 라이브 이모지
-========================= */
-.soop-name{
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: rgba(255,255,255,.25);
-  text-underline-offset: 3px;
+   시너지표 위젯/툴팁/라이브 표시
+   ========================= */
+.synergy-widgets{
+  display:grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap:12px;
+  margin:12px 0 14px;
 }
-.soop-name:hover{ text-decoration-color: rgba(255,255,255,.55); }
-
-.live-emoji{
-  display:inline-flex;
-  width: 1.2em;
-  justify-content:center;
-  margin-right: 6px;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+@media (max-width: 860px){
+  .synergy-widgets{ grid-template-columns: 1fr; }
 }
 
-.soop-tooltip{
-  position: fixed;
-  z-index: 9999;
-  width: 260px;
-  max-width: 78vw;
-  background: rgba(8, 14, 26, .92);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 14px;
-  box-shadow: 0 18px 44px rgba(0,0,0,.55);
-  overflow: hidden;
-  pointer-events: none;
-  transform: translate(12px, 12px);
-}
-.soop-tooltip .thumb{
-  width:100%;
-  aspect-ratio: 16 / 9;
+.mini-card{
   background: rgba(255,255,255,.06);
-  object-fit: cover;
-  display:block;
-}
-.soop-tooltip .body{
-  padding: 10px 12px 12px;
-}
-.soop-tooltip .title{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-weight: 750;
-  margin:0 0 6px;
-}
-.soop-tooltip .sub{
-  margin:0;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  padding:12px 14px;
 }
 
-.synergy-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap: 14px;
-  width:100%;
+.mini-title{
+  font-size:12px;
+  letter-spacing:.02em;
+  opacity:.85;
+  margin-bottom:6px;
 }
 
-.synergy-calendar{
-  min-width: 220px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px;
+.mini-value{
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.01em;
 }
-.synergy-calendar .cal-top{
+
+.mini-sub{
+  margin-top:6px;
+  font-size:12px;
+}
+
+.calendar-head{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap:12px;
+  margin-bottom:10px;
 }
-.synergy-calendar .cal-title{
-  font-weight: 800;
-  letter-spacing: .2px;
+.calendar-ym{
+  font-size:16px;
+  font-weight:900;
 }
-.synergy-calendar .cal-badge{
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(250, 204, 21, .18);
-  border: 1px solid rgba(250, 204, 21, .35);
+.calendar-badge{
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  background: rgba(255, 80, 105, .15);
+  border:1px solid rgba(255, 80, 105, .35);
   color: rgba(255,255,255,.92);
 }
-.synergy-calendar .cal-mini{
-  display:flex;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--muted);
+
+.calendar-grid{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:6px;
 }
-.synergy-calendar .cal-mini b{
-  color: rgba(255,255,255,.9);
-  font-weight: 800;
+.cal-dow{
+  font-size:11px;
+  opacity:.7;
+  text-align:center;
+}
+.cal-day{
+  text-align:center;
+  font-size:12px;
+  padding:8px 0;
+  border-radius:10px;
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.06);
+}
+.cal-day.is-empty{
+  background: transparent;
+  border-color: transparent;
+}
+.cal-day.is-today{
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.18);
+  font-weight:900;
+}
+
+.synergy-tooltip{
+  position:fixed;
+  z-index:9999;
+  pointer-events:none;
+  width: 260px;
+  background: rgba(10,10,12,.92);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.55);
+}
+.synergy-tooltip img{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius: 12px;
+}
+.synergy-tooltip .tt-title{
+  font-size:12px;
+  margin-top:8px;
+  opacity:.85;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.name-cell{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.live-dot{
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:#ff1f3d;
+  box-shadow:
+    0 0 6px rgba(255,31,61,.95),
+    0 0 16px rgba(255,31,61,.55),
+    0 0 28px rgba(255,31,61,.35);
+  flex:0 0 auto;
+}
+
+/* 이름 호버: 밑줄 대신 볼록(엠보) 느낌 */
+.bj-link{
+  cursor:pointer;
+  text-decoration:none !important;
+  font-weight:700;
+  transition: transform .12s ease, filter .12s ease, text-shadow .12s ease, font-weight .12s ease;
+  will-change: transform;
+}
+.bj-link:hover{
+  font-weight:900;
+  transform: translateY(-1px) scale(1.02);
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.35),
+    0 2px 10px rgba(0,0,0,.55);
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
 }

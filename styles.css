@@ -53,25 +53,25 @@ body::after{
   /* 작은눈 + 중간눈 + 큰눈(가끔) 3레이어 느낌 */
   background-image:
     /* small */
-    radial-gradient(1.6px 1.6px at 40px 30px, rgba(255,255,255,.55) 55%, transparent 60%),
-    radial-gradient(1.4px 1.4px at 180px 120px, rgba(255,255,255,.45) 55%, transparent 60%),
-    radial-gradient(1.8px 1.8px at 320px 80px, rgba(255,255,255,.40) 55%, transparent 60%),
-    radial-gradient(1.5px 1.5px at 520px 160px, rgba(255,255,255,.42) 55%, transparent 60%),
-    radial-gradient(1.7px 1.7px at 760px 110px, rgba(255,255,255,.38) 55%, transparent 60%),
+    radial-gradient(5px 5px at 40px 30px, rgba(255,255,255,.55) 55%, transparent 60%),
+    radial-gradient(5px 5px at 180px 120px, rgba(255,255,255,.45) 55%, transparent 60%),
+    radial-gradient(5px 5px at 320px 80px, rgba(255,255,255,.40) 55%, transparent 60%),
+    radial-gradient(5px 5px at 520px 160px, rgba(255,255,255,.42) 55%, transparent 60%),
+    radial-gradient(5px 57px at 760px 110px, rgba(255,255,255,.38) 55%, transparent 60%),
 
     /* medium */
-    radial-gradient(2.4px 2.4px at 90px 190px, rgba(255,255,255,.40) 55%, transparent 60%),
-    radial-gradient(2.2px 2.2px at 260px 210px, rgba(255,255,255,.34) 55%, transparent 60%),
-    radial-gradient(2.6px 2.6px at 460px 240px, rgba(255,255,255,.30) 55%, transparent 60%),
-    radial-gradient(2.3px 2.3px at 690px 220px, rgba(255,255,255,.32) 55%, transparent 60%),
+    radial-gradient(15px 15px at 90px 190px, rgba(255,255,255,.40) 55%, transparent 60%),
+    radial-gradient(15px 15px at 260px 210px, rgba(255,255,255,.34) 55%, transparent 60%),
+    radial-gradient(15px 15px at 460px 240px, rgba(255,255,255,.30) 55%, transparent 60%),
+    radial-gradient(15px 15px at 690px 220px, rgba(255,255,255,.32) 55%, transparent 60%),
 
     /* big (few) */
-    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
-    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
-    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
-    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
-    radial-gradient(7.2px 7.2px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
-    radial-gradient(6.4px 6.4px at 620px 40px, rgba(255,255,255,.22) 55%, transparent 60%);
+    radial-gradient(25px 25px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(25px 25px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(25px 25px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(25px 25px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(25px 25px at 140px 60px, rgba(255,255,255,.26) 55%, transparent 60%),
+    radial-gradient(20px 20px at 620px 40px, rgba(255,255,255,.22) 55%, transparent 60%);
 
   background-size: 900px 340px;
   animation: yxlSnow 7.5s linear infinite;

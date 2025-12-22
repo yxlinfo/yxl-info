@@ -21,20 +21,20 @@ const DATA = {
     { q: "동률 처리/정렬 규칙은?", a: "점수 내림차순 → 상승분 → 이름. 필요하면 규칙을 여기서 고정." }
   ],
 
-  // 시너지표 데이터(예시). 멤버 12명으로 바꿔 넣어.
+  // 시너지표 데이터(예시). 멤버 11명으로 바꿔 넣어.
   synergy: [
-    { name: "멤버1", role: "멤버", score: 1200, delta: +50, note: "메모" },
-    { name: "멤버2", role: "멤버", score: 1100, delta: -10, note: "" },
-    { name: "멤버3", role: "멤버", score: 980,  delta: 0,   note: "" },
-    { name: "멤버4", role: "멤버", score: 930,  delta: +12, note: "" },
-    { name: "멤버5", role: "멤버", score: 900,  delta: +5,  note: "" },
-    { name: "멤버6", role: "멤버", score: 870,  delta: -3,  note: "" },
-    { name: "멤버7", role: "멤버", score: 860,  delta: +0,  note: "" },
-    { name: "멤버8", role: "멤버", score: 830,  delta: +20, note: "" },
-    { name: "멤버9", role: "멤버", score: 800,  delta: +2,  note: "" },
-    { name: "멤버10", role: "멤버", score: 780, delta: -8,  note: "" },
-    { name: "멤버11", role: "멤버", score: 740, delta: +9,  note: "" },
-    { name: "멤버12", role: "멤버", score: 700, delta: +1,  note: "" }
+    { name: "리윤_♥", role: "멤버", 별풍선: , delta: +50, note: "메모" },
+    { name: "후잉♥", role: "멤버", 별풍선: , delta: -10, note: "" },
+    { name: "하랑짱♥", role: "멤버", 별풍선: ,  delta: 0,   note: "" },
+    { name: "쩔밍♥", role: "멤버", 별풍선: ,  delta: +12, note: "" },
+    { name: "김유정S2", role: "멤버", 별풍선: ,  delta: +5,  note: "" },
+    { name: "서니_♥", role: "멤버", 별풍선: ,  delta: -3,  note: "" },
+    { name: "#율무", role: "멤버", 별풍선: ,  delta: +0,  note: "" },
+    { name: "소다♥", role: "멤버", 별풍선: ,  delta: +20, note: "" },
+    { name: "강소지♥", role: "멤버", 별풍선: ,  delta: +2,  note: "" },
+    { name: "나래님♥", role: "멤버", 별풍선: , delta: -8,  note: "" },
+    { name: "유나연♥", role: "멤버", 별풍선: , delta: +9,  note: "" },
+
   ],
 
   timeline: [

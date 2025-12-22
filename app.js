@@ -4,29 +4,29 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   const YXL_DATA = {
     total: [
-      { name: "", balloons:  },
-      { name: "", balloons:  },
-      { name: "", balloons:  },
-      { name: "", balloons:  },
-      { name: "", balloons:  },
+      { name: "은우♥", balloons: 120000 },
+      { name: "리윤_♥", balloons: 98000 },
+      { name: "후잉♥", balloons: 76000 },
+      { name: "하랑짱♥", balloons: 64000 },
+      { name: "쩔밍♡", balloons: 52000 },
     ],
     seasons: {
       "시즌 1": [
-        { name: "", balloons:  },
-        { name: "", balloons:  },
-        { name: "", balloons:  },
+        { name: "은우♥", balloons: 42000 },
+        { name: "리윤_♥", balloons: 39000 },
+        { name: "후잉♥", balloons: 21000 },
       ],
       "시즌 2": [
-        { name: "", balloons:  },
-        { name: "", balloons:  },
-        { name: "", balloons:  },
+        { name: "하랑짱♥", balloons: 36000 },
+        { name: "쩔밍♡", balloons: 34000 },
+        { name: "리윤_♥", balloons: 18000 },
       ],
     },
     synergy: [
-      { rank: 1, grade: "", streamer: "", balloons:  },
-      { rank: 2, grade: "", streamer: "", balloons:  },
-      { rank: 3, grade: "", streamer: "", balloons:  },
-      { rank: 4, grade: "", streamer: "", balloons:  },
+      { rank: 1, grade: "부장", streamer: "은우♥", balloons: 50000 },
+      { rank: 2, grade: "차장", streamer: "리윤_♥", balloons: 42000 },
+      { rank: 3, grade: "대리", streamer: "후잉♥", balloons: 32000 },
+      { rank: 4, grade: "사원", streamer: "하랑짱♥", balloons: 21000 },
     ],
   };
 
@@ -169,36 +169,35 @@ const withRank = (rows) => {
   /* =========================
      누적 렌더 + 검색
   ========================= */
-function renderTotalTable() {
-  const tbody = document.querySelector("#totalTable tbody");
-  const q = normalize(document.getElementById("totalSearch")?.value);
-  if (!tbody) return;
+  function renderTotalTable() {
+    const tbody = document.querySelector("#totalTable tbody");
+    const q = normalize(document.getElementById("totalSearch")?.value);
+    if (!tbody) return;
 
-  const prevMap = totalPrevMap;
-  const ranked = withRank(YXL_DATA.total);
-  const filtered = q ? ranked.filter((r) => normalize(r.name).includes(q)) : ranked;
+    const prevMap = totalPrevMap;
+    const ranked = withRank(YXL_DATA.total);
+    const filtered = q ? ranked.filter((r) => normalize(r.name).includes(q)) : ranked;
 
-  tbody.innerHTML = filtered.map((r) => {
-    const prevRank = prevMap?.[r.name];
-    const delta = (typeof prevRank === "number") ? (prevRank - r.rank) : null; // +면 상승
-    return `
-      <tr>
-        <td>${rankBadge(r.rank)}</td>
-        <td>${r.name}</td>
-        <td class="num">${numFmt(r.balloons)}</td>
-        <td class="num">${formatDelta(delta)}</td>
-      </tr>
-    `;
-  }).join("");
+    tbody.innerHTML = filtered.map((r) => {
+      const prevRank = prevMap?.[r.name];
+      const delta = (typeof prevRank === "number") ? (prevRank - r.rank) : null; // +면 상승
+      return `
+        <tr>
+          <td>${rankBadge(r.rank)}</td>
+          <td>${r.name}</td>
+          <td class="num">${numFmt(r.balloons)}</td>
+          <td class="num">${formatDelta(delta)}</td>
+        </tr>
+      `;
+    }).join("");
 
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="4" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
+    }
   }
-}
-
   document.getElementById("totalSearch")?.addEventListener("input", renderTotalTable);
 
-  /* =========================
+/* =========================
      시즌 렌더 + 드롭다운 + 검색
   ========================= */
   function initSeasonSelect() {
@@ -521,8 +520,7 @@ function renderTotalTable() {
     setTimeout(tick, Math.random() * 800);
   }
 
-bulbs.forEach(schedule);
+  bulbs.forEach(schedule);
 })();
 
 });
-

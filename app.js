@@ -413,3 +413,28 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSeasonTable();
   renderSynergyTable();
 });
+// ✅ 탭 전환 보험 코드 (맨 아래에 추가)
+(function tabSwitchFix(){
+  const tabWrap = document.querySelector(".dash-tabs");
+  const tabs = tabWrap ? Array.from(tabWrap.querySelectorAll(".dash-tab")) : [];
+  const panels = Array.from(document.querySelectorAll(".dash-panel"));
+
+  if (!tabs.length || !panels.length) return;
+
+  function activateById(id){
+    tabs.forEach(t => t.classList.toggle("is-active", t.dataset.target === id));
+    panels.forEach(p => {
+      const on = p.id === id;
+      p.hidden = !on;
+      p.classList.toggle("is-active", on);
+    });
+  }
+
+  tabs.forEach((t) => {
+    t.addEventListener("click", (e) => {
+      e.preventDefault();
+      const id = t.dataset.target;
+      if (id) activateById(id);
+    });
+  });
+})();

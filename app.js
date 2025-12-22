@@ -331,42 +331,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================
      렌더: 시즌통합랭킹
+     - 시즌 선택 박스 없이 "전체 시즌"을 한 번에 표시
   ========================= */
-  const combinedState = { key: "total", dir: "desc" };
-
-  function initCombinedSeasonSelect() {
-    const select = document.getElementById("combinedSeasonSelect");
-    if (!select) return;
-
-    const seasons = Array.from(new Set(DATA.combined.map((r) => r.season))).sort((a, b) => {
-      const na = Number(String(a).replace(/[^\d]/g, ""));
-      const nb = Number(String(b).replace(/[^\d]/g, ""));
-      if (Number.isFinite(na) && Number.isFinite(nb)) return na - nb;
-      return String(a).localeCompare(String(b), "ko");
-    });
-
-    const options = [`<option value="__all__">전체 시즌</option>`]
-      .concat(seasons.map((s) => `<option value="${s}">${s}</option>`));
-    select.innerHTML = options.join("");
-
-    try {
-      const saved = localStorage.getItem("yxl_combined_season");
-      if (saved && (saved === "__all__" || seasons.includes(saved))) select.value = saved;
-    } catch {}
-  }
+  const combinedState = { key: "season", dir: "asc" };
 
   function renderCombinedTable() {
     const table = document.getElementById("combinedTable");
     const tbody = table?.querySelector("tbody");
-    const select = document.getElementById("combinedSeasonSelect");
     const q = normalize(document.getElementById("combinedSearch")?.value);
-    if (!table || !tbody || !select) return;
-
-    const seasonFilter = select.value || "__all__";
-    try { localStorage.setItem("yxl_combined_season", seasonFilter); } catch {}
+    if (!table || !tbody) return;
 
     let rows = DATA.combined;
-    if (seasonFilter !== "__all__") rows = rows.filter((r) => r.season === seasonFilter);
     if (q) rows = rows.filter((r) => normalize(r.streamer).includes(q));
 
     // 정렬
@@ -395,7 +370,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.getElementById("combinedSearch")?.addEventListener("input", renderCombinedTable);
-  document.getElementById("combinedSeasonSelect")?.addEventListener("change", renderCombinedTable);
 
   document.getElementById("combinedTable")?.querySelectorAll("thead th[data-key]")?.forEach((th) => {
     th.addEventListener("click", () => {
@@ -403,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!key) return;
       if (combinedState.key !== key) {
         combinedState.key = key;
-        combinedState.dir = "asc";
+        combinedState.dir = (key === "season" || key === "rank" || key === "grade" || key === "streamer") ? "asc" : "desc";
       } else {
         combinedState.dir = combinedState.dir === "asc" ? "desc" : "asc";
       }
@@ -745,7 +719,6 @@ document.addEventListener("DOMContentLoaded", () => {
       DATA.seasons = buildSeasonMap(wb);
 
       // UI 초기화
-      initCombinedSeasonSelect();
       initSeasonSelect();
 
       // 최초 렌더

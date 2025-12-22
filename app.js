@@ -353,3 +353,160 @@ function initSynergySort(){
   }
 
   f
+   (function gateAndBgmWithHearts(){
+  const KEY = "yxl_bgm_on";
+
+  const gate = document.getElementById("gate");
+  const gateBtn = document.getElementById("gateBtn");
+  const gateMsg = document.getElementById("gateMsg");
+  const particleLayer = document.getElementById("gateParticles");
+
+  const audio = document.getElementById("bgm");
+  const headerToggle = document.getElementById("bgmToggle");
+
+  if (!gate || !gateBtn || !audio || !particleLayer) return;
+
+  audio.loop = true;
+  audio.preload = "auto";
+  audio.volume = 0.25;
+
+  let floatTimer = null;
+
+  function setHeaderUI(isOn){
+    if (!headerToggle) return;
+    headerToggle.classList.toggle("is-on", isOn);
+    headerToggle.textContent = isOn ? "BGM 정지" : "BGM 재생";
+    headerToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+  }
+
+  function showGate(){
+    gate.classList.remove("is-hidden");
+    gate.setAttribute("aria-hidden", "false");
+    startFloatingHearts();
+  }
+
+  function hideGate(){
+    gate.classList.add("is-hidden");
+    gate.setAttribute("aria-hidden", "true");
+    stopFloatingHearts();
+  }
+
+  async function playSafe({ userInitiated = false } = {}){
+    try{
+      if (audio.readyState < 2) audio.load();
+      await audio.play();
+      localStorage.setItem(KEY, "1");
+      setHeaderUI(true);
+      return true;
+    }catch(e){
+      setHeaderUI(false);
+      if (userInitiated && gateMsg){
+        gateMsg.textContent = "재생이 차단됐어요. 한 번 더 눌러보거나 브라우저 설정/확장프로그램을 확인해주세요.";
+      }
+      return false;
+    }
+  }
+
+  function stop(){
+    audio.pause();
+    audio.currentTime = 0;
+    localStorage.setItem(KEY, "0");
+    setHeaderUI(false);
+  }
+
+  function makeHeart(x, y, opts = {}){
+    const el = document.createElement("div");
+    el.className = "heart";
+    const size = opts.size ?? (12 + Math.random() * 16);
+    const dur = opts.dur ?? (900 + Math.random() * 700);
+    const dx = (Math.random() - 0.5) * (opts.spread ?? 220);
+    const dy = -(opts.rise ?? (160 + Math.random() * 240));
+
+    el.style.setProperty("--size", `${size}px`);
+    el.style.setProperty("--dur", `${dur}ms`);
+    el.style.setProperty("--x0", `${x}px`);
+    el.style.setProperty("--y0", `${y}px`);
+    el.style.setProperty("--x1", `${x + dx}px`);
+    el.style.setProperty("--y1", `${y + dy}px`);
+    el.style.setProperty("--s0", `${0.85 + Math.random() * 0.35}`);
+    el.style.setProperty("--s1", `${1.2 + Math.random() * 0.8}`);
+    el.style.setProperty("--r0", `${(Math.random() - 0.5) * 20}deg`);
+    el.style.setProperty("--r1", `${(Math.random() - 0.5) * 80}deg`);
+
+    particleLayer.appendChild(el);
+    el.addEventListener("animationend", () => el.remove());
+  }
+
+  function makeSpark(x, y){
+    const el = document.createElement("div");
+    el.className = "spark";
+    const dx = (Math.random() - 0.5) * 90;
+    const dy = (Math.random() - 0.5) * 90;
+    el.style.setProperty("--sx0", `${x}px`);
+    el.style.setProperty("--sy0", `${y}px`);
+    el.style.setProperty("--sx1", `${x + dx}px`);
+    el.style.setProperty("--sy1", `${y + dy}px`);
+    particleLayer.appendChild(el);
+    el.addEventListener("animationend", () => el.remove());
+  }
+
+  function burstAtClientPoint(clientX, clientY){
+    const rect = gate.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const heartCount = 22 + Math.floor(Math.random() * 14);
+    for (let i = 0; i < heartCount; i++) makeHeart(x, y, { spread: 280, rise: 220 });
+    for (let i = 0; i < 18; i++) makeSpark(x, y);
+  }
+
+  function startFloatingHearts(){
+    if (floatTimer) return;
+    floatTimer = setInterval(() => {
+      const rect = gate.getBoundingClientRect();
+      const x = 40 + Math.random() * (rect.width - 80);
+      const y = rect.height - (20 + Math.random() * 80);
+      makeHeart(x, y, { spread: 120, rise: 260, dur: 1600 + Math.random() * 900, size: 10 + Math.random() * 10 });
+    }, 220);
+  }
+
+  function stopFloatingHearts(){
+    if (!floatTimer) return;
+    clearInterval(floatTimer);
+    floatTimer = null;
+  }
+
+  gateBtn.addEventListener("click", async (e) => {
+    if (gateMsg) gateMsg.textContent = "";
+    burstAtClientPoint(e.clientX, e.clientY);
+    const ok = await playSafe({ userInitiated: true });
+    if (ok) setTimeout(() => hideGate(), 220);
+  });
+
+  if (headerToggle){
+    headerToggle.addEventListener("click", async () => {
+      if (audio.paused){
+        const ok = await playSafe({ userInitiated: true });
+        if (ok) hideGate();
+      } else {
+        stop();
+        showGate();
+      }
+    });
+  }
+
+  const savedOn = localStorage.getItem(KEY) === "1";
+  if (savedOn){
+    hideGate();
+    playSafe({ userInitiated: false });
+  } else {
+    showGate();
+    setHeaderUI(false);
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    const shouldOn = localStorage.getItem(KEY) === "1";
+    if (!document.hidden && shouldOn && audio.paused) playSafe({ userInitiated: false });
+  });
+})();
+

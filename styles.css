@@ -562,3 +562,9 @@ body::after{
 .delta.down{color:#e05252}
 .delta.same{color:rgba(255,255,255,.65)}
 .delta.new{color:rgba(255,255,255,.75)}
+
+
+/* =========================
+   ✅ Wide Tables (Season/Combined)
+========================= */
+.table.wide{ min-width: 980px; }

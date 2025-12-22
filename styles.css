@@ -565,6 +565,37 @@ body::after{
 
 
 /* =========================
-   ✅ Wide Tables (Season/Combined)
+   Dashboard extras (Synergy / Calendar / Deltas)
 ========================= */
-.table.wide{ min-width: 980px; }
+.table.wide { min-width: 980px; }
+.sort-ind { font-size: 12px; opacity: .85; }
+
+.delta-up { color: inherit; font-weight: 700; }
+.delta-down { color: inherit; font-weight: 700; }
+.delta-same { opacity: .7; }
+.delta-new { font-weight: 700; }
+
+.synergy-top { display:flex; gap:12px; align-items:stretch; margin: 10px 0 12px; }
+.calendar-card{
+  display:flex; gap:12px; align-items:center;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+}
+.cal-icon{ font-size: 22px; line-height:1; }
+.cal-title{ font-size: 12px; opacity:.85; }
+.cal-ym{ font-size: 18px; font-weight: 800; margin-top: 2px; }
+.cal-sub{ font-size: 12px; opacity:.9; margin-top: 4px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size: 11px; font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+}
+.badge-warn{
+  border-color: rgba(255,180,0,.35);
+  background: rgba(255,180,0,.12);
+}

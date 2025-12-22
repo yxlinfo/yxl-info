@@ -1,501 +1,506 @@
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================================================
-     YXL Dashboard
-     - Excel 기반 데이터 로드 (YXL_통합.xlsx)
-       1) 누적기여도 (1번째 시트)
-       2) 시즌통합랭킹 (2번째 시트: S1~S10 YXL_기여도)
-       3) 시즌별 기여도 (3~12번째 시트)
+     ✅ 데이터 소스 (루트에 두세요)
+     - YXL_통합.xlsx : 누적/시즌통합/시즌별
+     - 시너지표.xlsx  : 시너지표(쿼리 결과)
   ========================================================= */
+  const FILE_YXL = "YXL_통합.xlsx";
+  const FILE_SYNERGY = "시너지표.xlsx";
+
+  // 3시간(=10800000ms) 자동 업데이트
+  const AUTO_REFRESH_MS = 3 * 60 * 60 * 1000;
 
   /* =========================
      유틸
   ========================= */
-  const numFmt = (n) => (Number.isFinite(n) ? n : 0).toLocaleString("ko-KR");
-  const normalize = (s) => (s ?? "").toString().trim().toLowerCase();
-
-  const toNumber = (v) => {
-    if (v == null) return 0;
-    if (typeof v === "number") return Number.isFinite(v) ? v : 0;
-    const t = String(v).replace(/,/g, "").trim();
-    if (!t) return 0;
-    const n = Number(t);
-    return Number.isFinite(n) ? n : 0;
+  const qs = (sel, el = document) => el.querySelector(sel);
+  const qsa = (sel, el = document) => [...el.querySelectorAll(sel)];
+  const fmtNum = (v) => {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return v ?? "";
+    return n.toLocaleString("ko-KR");
   };
-
-  const rankBadge = (rank) => {
-    const r = Number(rank) || 0;
-    if (r === 1) return `<span class="rank-badge rank-1"><span class="medal">🥇</span>#1</span>`;
-    if (r === 2) return `<span class="rank-badge rank-2"><span class="medal">🥈</span>#2</span>`;
-    if (r === 3) return `<span class="rank-badge rank-3"><span class="medal">🥉</span>#3</span>`;
-    return `<span class="rank-badge">#${r || "—"}</span>`;
+  const normalize = (v) => String(v ?? "").trim();
+  const toDate = (v) => {
+    if (!v) return null;
+    if (v instanceof Date && !isNaN(v)) return v;
+    const d = new Date(v);
+    return isNaN(d) ? null : d;
   };
+  const ymKey = (d) => d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}` : "";
 
-  const pickKeyByPrefix = (obj, prefix) => {
-    const keys = Object.keys(obj || {});
-    return keys.find((k) => String(k).startsWith(prefix));
-  };
-
-  const withSortIndicator = (table, key, dir) => {
-    table.querySelectorAll("thead th").forEach((th) => {
-      const old = th.querySelector(".sort-ind");
-      if (old) old.remove();
-      if (th.dataset.key === key) {
-        const ind = document.createElement("span");
-        ind.className = "sort-ind";
-        ind.textContent = dir === "asc" ? "▲" : "▼";
-        th.appendChild(ind);
-      }
-    });
-  };
-
-  const compareBy = (key, dir) => {
-    return (a, b) => {
-      const av = a?.[key];
-      const bv = b?.[key];
-
-      const aNum = typeof av === "number" ? av : Number.NaN;
-      const bNum = typeof bv === "number" ? bv : Number.NaN;
-
-      let r = 0;
-      if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) r = aNum - bNum;
-      else r = normalize(av).localeCompare(normalize(bv), "ko");
-
-      return dir === "asc" ? r : -r;
-    };
+  const setUpdatedAt = (date) => {
+    const el = qs("#updatedAt");
+    if (!el) return;
+    const d = date || new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    el.textContent = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
   /* =========================
-     데이터 저장소
+     XLSX 로더
   ========================= */
-  const DATA = {
-    total: [],           // [{rank, streamer, total, deltaText}]
-    combined: [],        // [{season, rank, grade, streamer, pre, r1..r5, total}]
-    seasons: {},         // { "S1": [...], ... }
-    synergy: [
-      // 기존 유지 (원하면 엑셀/JSON으로 교체 가능)
-      { rank: 1, grade: "부장", streamer: "은우♥", balloons: 50000 },
-      { rank: 2, grade: "차장", streamer: "리윤_♥", balloons: 42000 },
-      { rank: 3, grade: "대리", streamer: "후잉♥", balloons: 32000 },
-      { rank: 4, grade: "사원", streamer: "하랑짱♥", balloons: 21000 },
-    ],
-  };
-
-  /* =========================
-     변동사항(누적) - 로컬 저장 (선택)
-  ========================= */
-  const TOTAL_PREV_KEY = "yxl_total_prev_ranks";
-
-  const loadPrevTotalRanks = () => {
-    try {
-      const raw = localStorage.getItem(TOTAL_PREV_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  };
-
-  const saveTotalRanks = (rows) => {
-    try {
-      const map = {};
-      rows.forEach((r) => { if (r?.streamer) map[r.streamer] = Number(r.rank) || 0; });
-      localStorage.setItem(TOTAL_PREV_KEY, JSON.stringify(map));
-    } catch {}
-  };
-
-  const formatDeltaFromPrevRank = (prevRank, currRank) => {
-    if (typeof prevRank !== "number" || !Number.isFinite(prevRank)) return `<span class="delta new">—</span>`;
-    const delta = prevRank - currRank; // +면 상승
-    if (delta > 0) return `<span class="delta up" title="상승 ${delta}계단">▲${delta}</span>`;
-    if (delta < 0) return `<span class="delta down" title="하락 ${Math.abs(delta)}계단">▼${Math.abs(delta)}</span>`;
-    return `<span class="delta same" title="변동 없음">—</span>`;
-  };
-
-  const formatDeltaFromText = (v) => {
-    const t = (v ?? "").toString().trim();
-    if (!t) return "";
-    // 엑셀 변동사항을 그대로 표시하되, ▲/▼만 살짝 스타일을 입힘
-    const mUp = t.match(/^\s*\+?(\d+)\s*$/);
-    const mDown = t.match(/^\s*-(\d+)\s*$/);
-    if (t.includes("▲")) return `<span class="delta up">${t}</span>`;
-    if (t.includes("▼")) return `<span class="delta down">${t}</span>`;
-    if (mUp) return `<span class="delta up">▲${mUp[1]}</span>`;
-    if (mDown) return `<span class="delta down">▼${mDown[1]}</span>`;
-    return `<span class="delta same">${t}</span>`;
-  };
-
-  /* =========================
-     헤더
-  ========================= */
-  const updatedAt = document.getElementById("updatedAt");
-  if (updatedAt) updatedAt.textContent = new Date().toLocaleString("ko-KR");
-
-  /* =========================
-     탭 전환 (hash: #dash=dash-total)
-  ========================= */
-  const tabs = Array.from(document.querySelectorAll(".dash-tab"));
-  const panels = Array.from(document.querySelectorAll(".dash-panel"));
-
-  function readHashDash() {
-    const h = (location.hash || "").replace("#", "");
-    if (!h.startsWith("dash=")) return null;
-    return decodeURIComponent(h.slice(5));
-  }
-
-  function setHashDash(id) {
-    const url = new URL(location.href);
-    url.hash = `dash=${encodeURIComponent(id)}`;
-    history.replaceState(null, "", url.toString());
-  }
-
-  function activatePanel(targetId, { pushHash = true } = {}) {
-    tabs.forEach((btn) => {
-      const on = btn.dataset.target === targetId;
-      btn.classList.toggle("is-active", on);
-      btn.setAttribute("aria-selected", on ? "true" : "false");
-    });
-
-    panels.forEach((p) => {
-      const on = p.id === targetId;
-      p.hidden = !on;
-      p.classList.toggle("is-active", on);
-    });
-
-    try { localStorage.setItem("yxl_dash", targetId); } catch {}
-    if (pushHash) setHashDash(targetId);
-  }
-
-  tabs.forEach((btn) => btn.addEventListener("click", () => activatePanel(btn.dataset.target)));
-
-  let initial = readHashDash();
-  if (!initial) {
-    try { initial = localStorage.getItem("yxl_dash"); } catch {}
-  }
-  if (!initial || !document.getElementById(initial)) initial = tabs[0]?.dataset.target || "dash-total";
-  activatePanel(initial, { pushHash: true });
-
-  window.addEventListener("hashchange", () => {
-    const id = readHashDash();
-    if (id && document.getElementById(id)) activatePanel(id, { pushHash: false });
-  });
-
-  /* =========================
-     Excel 로드 + 파싱
-  ========================= */
-  async function loadWorkbook(url = "YXL_통합.xlsx") {
-    if (!window.XLSX) throw new Error("XLSX 라이브러리가 로드되지 않았습니다.");
-    const res = await fetch(url + "?v=" + Date.now(), { cache: "no-store" });
-    if (!res.ok) throw new Error(`엑셀 파일 로드 실패: HTTP ${res.status}`);
+  async function fetchWorkbook(url) {
+    if (!window.XLSX) throw new Error("XLSX 라이브러리를 찾을 수 없습니다. (index.html에 xlsx 스크립트가 필요)");
+    const res = await fetch(`${url}?v=${Date.now()}`);
+    if (!res.ok) throw new Error(`${url} 불러오기 실패 (${res.status})`);
     const buf = await res.arrayBuffer();
-    return window.XLSX.read(buf, { type: "array" });
+    return window.XLSX.read(buf, { type: "array", cellDates: true });
   }
 
   function sheetToRows(wb, sheetName) {
     const ws = wb.Sheets[sheetName];
     if (!ws) return [];
-    return window.XLSX.utils.sheet_to_json(ws, { defval: "" });
-  }
-
-  function parseTotal(rows) {
-    // 1번째 시트: ['순위','스트리머','누적기여도','변동사항']
-    const prevMap = loadPrevTotalRanks();
-    const parsed = rows
-      .map((r) => {
-        const rank = toNumber(r["순위"]);
-        const streamer = (r["스트리머"] ?? "").toString().trim();
-        const total = toNumber(r["누적기여도"]);
-        const deltaText = (r["변동사항"] ?? "").toString().trim();
-        if (!streamer) return null;
-        return { rank, streamer, total, deltaText, _prevRank: prevMap[streamer] };
-      })
-      .filter(Boolean)
-      // 혹시 엑셀 정렬이 깨졌으면 안전하게 순위 오름차순 정렬
-      .sort((a, b) => (a.rank || 9999) - (b.rank || 9999));
-
-    return parsed;
-  }
-
-  function parseCombined(rows) {
-    // 2번째 시트: ['시즌','순위','직급','스트리머','직급전','1회차'..'5회차','합산기여도']
-    return rows
-      .map((r) => {
-        const season = (r["시즌"] ?? "").toString().trim();
-        const rank = toNumber(r["순위"]);
-        const grade = (r["직급"] ?? "").toString().trim();
-        const streamer = (r["스트리머"] ?? "").toString().trim();
-        if (!season || !streamer) return null;
-        return {
-          season,
-          rank,
-          grade,
-          streamer,
-          pre: toNumber(r["직급전"]),
-          r1: toNumber(r["1회차"]),
-          r2: toNumber(r["2회차"]),
-          r3: toNumber(r["3회차"]),
-          r4: toNumber(r["4회차"]),
-          r5: toNumber(r["5회차"]),
-          total: toNumber(r["합산기여도"]),
-        };
-      })
-      .filter(Boolean);
-  }
-
-  function parseSeasonSheet(rows) {
-    // 시즌1은 컬럼명이 (11.5) 같은 날짜가 붙어있어서 prefix로 찾는다.
-    return rows
-      .map((r) => {
-        const rank = toNumber(r["순위"]);
-        const grade = (r["직급"] ?? "").toString().trim();
-        const streamer = (r["스트리머"] ?? "").toString().trim();
-        if (!streamer) return null;
-
-        const kPre = pickKeyByPrefix(r, "직급전") || "직급전";
-        const k1 = pickKeyByPrefix(r, "1회차") || "1회차";
-        const k2 = pickKeyByPrefix(r, "2회차") || "2회차";
-        const k3 = pickKeyByPrefix(r, "3회차") || "3회차";
-        const k4 = pickKeyByPrefix(r, "4회차") || "4회차";
-        const k5 = pickKeyByPrefix(r, "5회차") || "5회차";
-        const kTot = pickKeyByPrefix(r, "합산기여도") || "합산기여도";
-
-        return {
-          rank,
-          grade,
-          streamer,
-          pre: toNumber(r[kPre]),
-          r1: toNumber(r[k1]),
-          r2: toNumber(r[k2]),
-          r3: toNumber(r[k3]),
-          r4: toNumber(r[k4]),
-          r5: toNumber(r[k5]),
-          total: toNumber(r[kTot]),
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) => (a.rank || 9999) - (b.rank || 9999));
-  }
-
-  function buildSeasonMap(wb) {
-    const map = {};
-    const sheetNames = wb.SheetNames || [];
-    sheetNames.forEach((name) => {
-      // 3~12번째 시트: 시즌별 기여도
-      const m = String(name).match(/시즌\s*(\d+)/);
-      if (!m) return;
-      const seasonNum = Number(m[1]);
-      if (!Number.isFinite(seasonNum)) return;
-      const key = `S${seasonNum}`;
-      const rows = sheetToRows(wb, name);
-      map[key] = parseSeasonSheet(rows);
-    });
-
-    // 정렬된 키로 다시 구성
-    const ordered = {};
-    Object.keys(map)
-      .sort((a, b) => Number(a.replace("S", "")) - Number(b.replace("S", "")))
-      .forEach((k) => { ordered[k] = map[k]; });
-
-    return ordered;
+    // defval: null 로 빈칸도 키가 유지되게
+    return window.XLSX.utils.sheet_to_json(ws, { defval: null });
   }
 
   /* =========================
-     렌더: 누적
+     순위 변동(로컬 저장) 계산
   ========================= */
-  function renderTotalTable() {
-    const tbody = document.querySelector("#totalTable tbody");
-    const q = normalize(document.getElementById("totalSearch")?.value);
-    if (!tbody) return;
+  function applyRankDelta(rows, nameKey, rankKey, storageKey) {
+    let prev = {};
+    try { prev = JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch(e){ prev = {}; }
 
-    const filtered = q ? DATA.total.filter((r) => normalize(r.streamer).includes(q)) : DATA.total;
+    const next = {};
+    const out = rows.map((r) => {
+      const name = normalize(r[nameKey]);
+      const rank = Number(r[rankKey]);
+      if (!name || !Number.isFinite(rank)) return { ...r, __deltaText: "", __deltaClass: "" };
 
-    tbody.innerHTML = filtered.map((r) => {
-      const fromText = formatDeltaFromText(r.deltaText);
-      const fromPrev = formatDeltaFromPrevRank(r._prevRank, r.rank);
-      const deltaHtml = fromText || fromPrev;
+      next[name] = rank;
 
-      return `
-        <tr>
-          <td>${rankBadge(r.rank)}</td>
-          <td>${r.streamer}</td>
-          <td class="num">${numFmt(r.total)}</td>
-          <td class="num">${deltaHtml}</td>
-        </tr>
-      `;
-    }).join("");
-
-    if (!filtered.length) {
-      tbody.innerHTML = `<tr><td colspan="4" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
-    }
-  }
-
-  document.getElementById("totalSearch")?.addEventListener("input", renderTotalTable);
-
-  /* =========================
-     렌더: 시즌통합랭킹
-     - 시즌 선택 박스 없이 "전체 시즌"을 한 번에 표시
-  ========================= */
-  const combinedState = { key: "season", dir: "asc" };
-
-  function renderCombinedTable() {
-    const table = document.getElementById("combinedTable");
-    const tbody = table?.querySelector("tbody");
-    const q = normalize(document.getElementById("combinedSearch")?.value);
-    if (!table || !tbody) return;
-
-    let rows = DATA.combined;
-    if (q) rows = rows.filter((r) => normalize(r.streamer).includes(q));
-
-    // 정렬
-    rows = [...rows].sort(compareBy(combinedState.key, combinedState.dir));
-    withSortIndicator(table, combinedState.key, combinedState.dir);
-
-    tbody.innerHTML = rows.map((r) => `
-      <tr>
-        <td>${r.season}</td>
-        <td>${rankBadge(r.rank)}</td>
-        <td>${r.grade}</td>
-        <td>${r.streamer}</td>
-        <td class="num">${numFmt(r.pre)}</td>
-        <td class="num">${numFmt(r.r1)}</td>
-        <td class="num">${numFmt(r.r2)}</td>
-        <td class="num">${numFmt(r.r3)}</td>
-        <td class="num">${numFmt(r.r4)}</td>
-        <td class="num">${numFmt(r.r5)}</td>
-        <td class="num">${numFmt(r.total)}</td>
-      </tr>
-    `).join("");
-
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="11" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
-    }
-  }
-
-  document.getElementById("combinedSearch")?.addEventListener("input", renderCombinedTable);
-
-  document.getElementById("combinedTable")?.querySelectorAll("thead th[data-key]")?.forEach((th) => {
-    th.addEventListener("click", () => {
-      const key = th.dataset.key;
-      if (!key) return;
-      if (combinedState.key !== key) {
-        combinedState.key = key;
-        combinedState.dir = (key === "season" || key === "rank" || key === "grade" || key === "streamer") ? "asc" : "desc";
-      } else {
-        combinedState.dir = combinedState.dir === "asc" ? "desc" : "asc";
+      if (prev[name] == null) {
+        return { ...r, __deltaText: "NEW", __deltaClass: "delta-new" };
       }
-      renderCombinedTable();
+      const delta = Number(prev[name]) - rank; // +면 상승
+      if (delta > 0) return { ...r, __deltaText: `▲${delta}`, __deltaClass: "delta-up" };
+      if (delta < 0) return { ...r, __deltaText: `▼${Math.abs(delta)}`, __deltaClass: "delta-down" };
+      return { ...r, __deltaText: "—", __deltaClass: "delta-same" };
     });
-  });
 
-  /* =========================
-     렌더: 시즌별
-  ========================= */
-  const seasonState = { key: "rank", dir: "asc" };
-
-  function initSeasonSelect() {
-    const select = document.getElementById("seasonSelect");
-    if (!select) return;
-
-    const keys = Object.keys(DATA.seasons);
-    select.innerHTML = keys.map((k) => `<option value="${k}">${k}</option>`).join("");
-
-    try {
-      const saved = localStorage.getItem("yxl_season");
-      if (saved && keys.includes(saved)) select.value = saved;
-    } catch {}
+    try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch(e){}
+    return out;
   }
 
-  function renderSeasonTable() {
-    const table = document.getElementById("seasonTable");
-    const tbody = table?.querySelector("tbody");
-    const select = document.getElementById("seasonSelect");
-    const q = normalize(document.getElementById("seasonSearch")?.value);
-    if (!table || !tbody || !select) return;
+  /* =========================
+     Tabs
+  ========================= */
+  function initTabs() {
+    const tabs = qsa(".dash-tab");
+    tabs.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tabs.forEach((b) => {
+          b.classList.toggle("is-active", b === btn);
+          b.setAttribute("aria-selected", b === btn ? "true" : "false");
+        });
 
-    const seasonKey = select.value;
-    try { localStorage.setItem("yxl_season", seasonKey); } catch {}
+        const target = btn.dataset.target;
+        qsa(".dash-panel").forEach((p) => {
+          const on = p.id === target;
+          p.classList.toggle("is-active", on);
+          p.hidden = !on;
+        });
+      });
+    });
+  }
 
-    let rows = DATA.seasons[seasonKey] ?? [];
-    if (q) rows = rows.filter((r) => normalize(r.streamer).includes(q));
+  /* =========================
+     Render: 누적 기여도표 (1번 시트)
+  ========================= */
+  function renderTotal(rows) {
+    const table = qs("#totalTable");
+    if (!table) return;
+    const tbody = qs("tbody", table);
+    tbody.innerHTML = "";
 
-    rows = [...rows].sort(compareBy(seasonState.key, seasonState.dir));
-    withSortIndicator(table, seasonState.key, seasonState.dir);
+    const data = applyRankDelta(rows, "스트리머", "순위", "yxl_total_prev_ranks");
 
-    tbody.innerHTML = rows.map((r) => `
-      <tr>
-        <td>${rankBadge(r.rank)}</td>
-        <td>${r.grade}</td>
-        <td>${r.streamer}</td>
-        <td class="num">${numFmt(r.pre)}</td>
-        <td class="num">${numFmt(r.r1)}</td>
-        <td class="num">${numFmt(r.r2)}</td>
-        <td class="num">${numFmt(r.r3)}</td>
-        <td class="num">${numFmt(r.r4)}</td>
-        <td class="num">${numFmt(r.r5)}</td>
-        <td class="num">${numFmt(r.total)}</td>
-      </tr>
-    `).join("");
+    for (const r of data) {
+      const tr = document.createElement("tr");
 
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="10" style="color:rgba(255,255,255,.55); padding:16px;">검색 결과가 없습니다.</td></tr>`;
+      const rank = Number(r["순위"]);
+      const tdRank = document.createElement("td");
+      tdRank.textContent = Number.isFinite(rank) ? rank : "";
+      if (rank === 1) tr.classList.add("top1");
+      if (rank === 2) tr.classList.add("top2");
+      if (rank === 3) tr.classList.add("top3");
+      tr.appendChild(tdRank);
+
+      const tdName = document.createElement("td");
+      tdName.textContent = r["스트리머"] ?? "";
+      tr.appendChild(tdName);
+
+      const tdVal = document.createElement("td");
+      tdVal.style.textAlign = "right";
+      tdVal.textContent = fmtNum(r["누적기여도"]);
+      tr.appendChild(tdVal);
+
+      const tdDelta = document.createElement("td");
+      tdDelta.style.textAlign = "right";
+      tdDelta.textContent = r.__deltaText || "";
+      tdDelta.className = r.__deltaClass || "";
+      tr.appendChild(tdDelta);
+
+      tbody.appendChild(tr);
     }
   }
 
-  document.getElementById("seasonSelect")?.addEventListener("change", renderSeasonTable);
-  document.getElementById("seasonSearch")?.addEventListener("input", renderSeasonTable);
-
-  document.getElementById("seasonTable")?.querySelectorAll("thead th[data-key]")?.forEach((th) => {
-    th.addEventListener("click", () => {
-      const key = th.dataset.key;
-      if (!key) return;
-      if (seasonState.key !== key) {
-        seasonState.key = key;
-        seasonState.dir = "asc";
-      } else {
-        seasonState.dir = seasonState.dir === "asc" ? "desc" : "asc";
-      }
-      renderSeasonTable();
+  function bindTotalSearch(allRows) {
+    const input = qs("#totalSearch");
+    if (!input) return;
+    input.addEventListener("input", () => {
+      const q = normalize(input.value).toLowerCase();
+      if (!q) return renderTotal(allRows);
+      const filtered = allRows.filter((r) => normalize(r["스트리머"]).toLowerCase().includes(q));
+      renderTotal(filtered);
     });
-  });
+  }
 
   /* =========================
-     시너지 정렬 (기존)
+     Render: 시즌통합랭킹 (2번 시트)
+     - 시즌 선택 박스 없이 전체 표시
   ========================= */
-  const synergyState = { key: "rank", dir: "asc" };
+  const integratedSort = { key: "합산기여도", dir: "desc" };
 
-  function renderSynergyTable() {
-    const table = document.getElementById("synergyTable");
+  function compare(a, b, key, dir) {
+    const av = a[key];
+    const bv = b[key];
+    const an = Number(av);
+    const bn = Number(bv);
+    let r = 0;
+    if (Number.isFinite(an) && Number.isFinite(bn)) r = an - bn;
+    else r = normalize(av).localeCompare(normalize(bv), "ko");
+    return dir === "asc" ? r : -r;
+  }
+
+  function renderIntegrated(rows) {
+    const table = qs("#integratedTable");
+    if (!table) return;
+    const tbody = qs("tbody", table);
+    tbody.innerHTML = "";
+
+    const { key, dir } = integratedSort;
+    const data = [...rows].sort((a,b)=>compare(a,b,key,dir));
+
+    for (const r of data) {
+      const tr = document.createElement("tr");
+      const cols = ["시즌","순위","직급","스트리머","직급전","1회차","2회차","3회차","4회차","5회차","합산기여도"];
+      cols.forEach((c) => {
+        const td = document.createElement("td");
+        const isNum = ["순위","직급전","1회차","2회차","3회차","4회차","5회차","합산기여도"].includes(c);
+        if (isNum) td.style.textAlign = "right";
+        td.textContent = isNum ? fmtNum(r[c]) : (r[c] ?? "");
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+  }
+
+  function bindIntegratedSort(rows) {
+    const table = qs("#integratedTable");
+    if (!table) return;
+    qsa("thead th[data-key]", table).forEach((th) => {
+      th.addEventListener("click", () => {
+        const k = th.dataset.key;
+        if (!k) return;
+        if (integratedSort.key === k) integratedSort.dir = integratedSort.dir === "asc" ? "desc" : "asc";
+        else { integratedSort.key = k; integratedSort.dir = "asc"; }
+        renderIntegrated(rows);
+        updateSortIndicators(table, integratedSort);
+      });
+    });
+    updateSortIndicators(table, integratedSort);
+  }
+
+  function updateSortIndicators(table, state) {
+    qsa("thead th", table).forEach((th) => {
+      const old = qs(".sort-ind", th);
+      if (old) old.remove();
+      if (th.dataset.key === state.key) {
+        const s = document.createElement("span");
+        s.className = "sort-ind";
+        s.textContent = state.dir === "asc" ? " ▲" : " ▼";
+        th.appendChild(s);
+      }
+    });
+  }
+
+  function bindIntegratedSearch(allRows) {
+    const input = qs("#integratedSearch");
+    if (!input) return;
+    input.addEventListener("input", () => {
+      const q = normalize(input.value).toLowerCase();
+      if (!q) return renderIntegrated(allRows);
+      const filtered = allRows.filter((r) => normalize(r["스트리머"]).toLowerCase().includes(q));
+      renderIntegrated(filtered);
+    });
+  }
+
+  /* =========================
+     Render: 시즌별 기여도표 (3~12 시트)
+  ========================= */
+  const seasonSort = { key: "합산기여도", dir: "desc" };
+  let seasonSheets = {}; // { displayName: rows }
+
+  function buildSeasonSelect() {
+    const sel = qs("#seasonSelect");
+    if (!sel) return;
+    sel.innerHTML = "";
+    Object.keys(seasonSheets).forEach((name, idx) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      if (idx === 0) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function renderSeasonTable(rows, displayName) {
+    const table = qs("#seasonTable");
     if (!table) return;
 
-    const tbody = table.querySelector("tbody");
-    const { key, dir } = synergyState;
+    const thead = qs("thead", table);
+    const tbody = qs("tbody", table);
+    tbody.innerHTML = "";
 
-    withSortIndicator(table, key, dir);
+    if (!rows || !rows.length) {
+      thead.innerHTML = "<tr><th>데이터가 없습니다</th></tr>";
+      return;
+    }
 
-    const rows = [...DATA.synergy].sort(compareBy(key, dir));
-    tbody.innerHTML = rows.map((r) => `
-      <tr>
-        <td>${rankBadge(r.rank)}</td>
-        <td>${r.grade}</td>
-        <td>${r.streamer}</td>
-        <td class="num">${numFmt(toNumber(r.balloons))}</td>
-      </tr>
-    `).join("");
+    // 컬럼 자동 감지
+    const keys = Object.keys(rows[0]);
+    // 우선순위로 앞으로
+    const preferred = ["순위","직급","스트리머"];
+    const rest = keys.filter(k => !preferred.includes(k));
+    // 합산은 맨 뒤로
+    const sumKey = rest.find(k => k.includes("합산"));
+    const rest2 = rest.filter(k => k !== sumKey);
+    const cols = [...preferred.filter(k=>keys.includes(k)), ...rest2, ...(sumKey ? [sumKey] : [])];
+
+    // 헤더
+    thead.innerHTML = "";
+    const trh = document.createElement("tr");
+    cols.forEach((k) => {
+      const th = document.createElement("th");
+      th.textContent = k;
+      th.dataset.key = k;
+      trh.appendChild(th);
+    });
+    thead.appendChild(trh);
+
+    // 정렬 적용
+    const { key, dir } = seasonSort;
+    const data = [...rows].sort((a,b)=>compare(a,b,key,dir));
+
+    const dataWithDelta = applyRankDelta(data, "스트리머", "순위", `yxl_season_prev_${displayName}`);
+
+    dataWithDelta.forEach((r) => {
+      const tr = document.createElement("tr");
+      cols.forEach((k) => {
+        const td = document.createElement("td");
+        const isNum = Number.isFinite(Number(r[k])) && k !== "직급" && k !== "스트리머";
+        if (isNum) td.style.textAlign = "right";
+        td.textContent = isNum ? fmtNum(r[k]) : (r[k] ?? "");
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    // 헤더 클릭 정렬
+    qsa("thead th[data-key]", table).forEach((th) => {
+      th.onclick = () => {
+        const k = th.dataset.key;
+        if (!k) return;
+        if (seasonSort.key === k) seasonSort.dir = seasonSort.dir === "asc" ? "desc" : "asc";
+        else { seasonSort.key = k; seasonSort.dir = "asc"; }
+        renderSeasonTable(rows, displayName);
+        updateSortIndicators(table, seasonSort);
+      };
+    });
+    updateSortIndicators(table, seasonSort);
   }
 
-  document.getElementById("synergyTable")?.querySelectorAll("thead th[data-key]")?.forEach((th) => {
-    th.addEventListener("click", () => {
-      const key = th.dataset.key;
-      if (!key) return;
-      if (synergyState.key !== key) {
-        synergyState.key = key;
-        synergyState.dir = "asc";
-      } else {
-        synergyState.dir = synergyState.dir === "asc" ? "desc" : "asc";
-      }
-      renderSynergyTable();
-    });
-  });
+  function bindSeasonControls() {
+    const sel = qs("#seasonSelect");
+    const input = qs("#seasonSearch");
+    if (!sel) return;
+
+    const apply = () => {
+      const seasonName = sel.value;
+      const all = seasonSheets[seasonName] || [];
+      const q = normalize(input?.value).toLowerCase();
+      const filtered = q ? all.filter(r => normalize(r["스트리머"]).toLowerCase().includes(q)) : all;
+      renderSeasonTable(filtered, seasonName);
+    };
+
+    sel.addEventListener("change", apply);
+    if (input) input.addEventListener("input", apply);
+
+    // 초기 렌더
+    apply();
+  }
 
   /* =========================
+     Render: 시너지표 (시너지표.xlsx)
+     - 순위, 스트리머, 누적별풍선, 변동사항
+     - 3시간마다 자동 업데이트 문구
+     - 년/월 변경 표시 달력 위젯
+  ========================= */
+  function renderSynergy(rows) {
+    const table = qs("#synergyTable");
+    if (!table) return;
+
+    // 새로고침시간(쿼리 결과) 추출
+    const refreshTime = rows?.length ? toDate(rows[0]["새로고침시간"]) : null;
+    setUpdatedAt(refreshTime || new Date());
+
+    // 달력 위젯
+    const cal = qs("#synergyCalendar");
+    if (cal) {
+      const nowYM = ymKey(refreshTime || new Date());
+      const storeKey = "yxl_synergy_last_ym";
+      const prevYM = localStorage.getItem(storeKey) || "";
+      const changed = prevYM && prevYM !== nowYM;
+
+      cal.innerHTML = `
+        <div class="cal-icon">📅</div>
+        <div class="cal-body">
+          <div class="cal-title">데이터 기준월</div>
+          <div class="cal-ym">${nowYM.replace("-", "년 ")}월</div>
+          <div class="cal-sub">
+            ${prevYM ? `이전: <b>${prevYM.replace("-", "년 ")}월</b>` : "이전 기록 없음"}
+            ${changed ? `<span class="badge badge-warn">월 변경</span>` : ``}
+          </div>
+        </div>
+      `;
+
+      try { localStorage.setItem(storeKey, nowYM); } catch(e){}
+    }
+
+    // 변동사항 계산
+    const mapped = rows.map((r) => ({
+      "순위": r["순위"],
+      "스트리머": r["비제이명"] ?? r["스트리머"] ?? r["BJ"] ?? "",
+      "누적별풍선": r["월별 누적별풍선"] ?? r["누적별풍선"] ?? r["누적"] ?? "",
+      "새로고침시간": r["새로고침시간"]
+    }));
+
+    const data = applyRankDelta(mapped, "스트리머", "순위", "yxl_synergy_prev_ranks");
+
+    const tbody = qs("tbody", table);
+    tbody.innerHTML = "";
+    data.forEach((r) => {
+      const tr = document.createElement("tr");
+
+      const tdRank = document.createElement("td");
+      tdRank.textContent = r["순위"] ?? "";
+      tr.appendChild(tdRank);
+
+      const tdName = document.createElement("td");
+      tdName.textContent = r["스트리머"] ?? "";
+      tr.appendChild(tdName);
+
+      const tdVal = document.createElement("td");
+      tdVal.style.textAlign = "right";
+      tdVal.textContent = fmtNum(r["누적별풍선"]);
+      tr.appendChild(tdVal);
+
+      const tdDelta = document.createElement("td");
+      tdDelta.style.textAlign = "right";
+      tdDelta.textContent = r.__deltaText || "";
+      tdDelta.className = r.__deltaClass || "";
+      tr.appendChild(tdDelta);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function bindSynergySearch(allRowsRaw) {
+    const input = qs("#synergySearch");
+    if (!input) return;
+    input.addEventListener("input", () => {
+      const q = normalize(input.value).toLowerCase();
+      if (!q) return renderSynergy(allRowsRaw);
+      const filtered = allRowsRaw.filter((r) => normalize(r["비제이명"]).toLowerCase().includes(q));
+      renderSynergy(filtered);
+    });
+  }
+
+  /* =========================
+     데이터 로드 + 초기화
+  ========================= */
+  let totalRows = [];
+  let integratedRows = [];
+  let synergyRows = [];
+
+  async function loadAll() {
+    try {
+      const [wbYXL, wbSyn] = await Promise.all([
+        fetchWorkbook(FILE_YXL),
+        fetchWorkbook(FILE_SYNERGY),
+      ]);
+
+      // 1) 누적기여도 (1번 시트)
+      const totalSheet = wbYXL.SheetNames[0];
+      totalRows = sheetToRows(wbYXL, totalSheet);
+
+      // 2) 시즌통합랭킹 (2번 시트)
+      const integratedSheet = wbYXL.SheetNames[1];
+      integratedRows = sheetToRows(wbYXL, integratedSheet);
+
+      // 3) 시즌별(3~12)
+      seasonSheets = {};
+      wbYXL.SheetNames.slice(2, 12).forEach((sn) => {
+        // 표시명은 "시즌1" 같은 느낌으로 정리
+        const m = sn.match(/시즌\s*(\d+)/) || sn.match(/시즌(\d+)/);
+        const display = m ? `시즌 ${m[1]}` : sn.replace(/YXL[_\s]*/g, "");
+        seasonSheets[display] = sheetToRows(wbYXL, sn);
+      });
+
+      // 4) 시너지표.xlsx (쿼리2)
+      const synSheet = wbSyn.SheetNames[0];
+      synergyRows = sheetToRows(wbSyn, synSheet);
+
+      // 렌더
+      renderTotal(totalRows);
+      renderIntegrated(integratedRows);
+      buildSeasonSelect();
+      bindSeasonControls();
+      renderSynergy(synergyRows);
+
+      // 바인딩
+      bindTotalSearch(totalRows);
+      bindIntegratedSearch(integratedRows);
+      bindIntegratedSort(integratedRows);
+      bindSynergySearch(synergyRows);
+
+      // 업데이트 시간(기본)
+      setUpdatedAt(new Date());
+    } catch (err) {
+      console.error(err);
+      const el = qs("#updatedAt");
+      if (el) el.textContent = "엑셀 로드 실패";
+      alert(`엑셀 파일을 불러오지 못했습니다.\n\n- 파일이 index.html과 같은 폴더(루트)에 있는지 확인\n- 파일명: ${FILE_YXL}, ${FILE_SYNERGY}\n\n에러: ${err.message}`);
+    }
+  }
+
+  function scheduleAutoRefresh() {
+    // 안내 문구
+    const msg = qs("#synergyAutoMsg");
+    if (msg) msg.textContent = "3시간마다 자동 업데이트가 됩니다";
+
+    setInterval(() => {
+      loadAll();
+    }, AUTO_REFRESH_MS);
+  }
+
+  initTabs();
+  loadAll();
+  scheduleAutoRefresh();
+
+/* =========================
      ✅ Gate + BGM (첫 방문 클릭 필요, 이후 자동시도)
   ========================= */
   (function gateAndBgm() {
@@ -512,6 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!gate || !gateBtn || !audio || !particleLayer) return;
 
     audio.volume = 0.25;
+
     let floatTimer = null;
 
     function setHeaderUI(isOn) {
@@ -649,99 +655,65 @@ document.addEventListener("DOMContentLoaded", () => {
   })();
 
   /* =========================
-     🎄 Garland Random Twinkle (per-bulb)
-  ========================= */
-  (function initGarlandTwinkle(){
-    const bulbs = Array.from(document.querySelectorAll(".garland .bulb"));
-    if (!bulbs.length) return;
-
-    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (reduced) {
-      bulbs.forEach(b => {
-        b.style.setProperty("--o", "0.95");
-        b.style.setProperty("--s", "1.0");
-        b.style.setProperty("--blur", "18px");
-      });
-      return;
-    }
-
-    function schedule(bulb){
-      const tick = () => {
-        let o = 0.25 + Math.random() * 0.85;
-        let s = 0.85 + Math.random() * 0.55;
-        let blur = 10 + Math.random() * 26;
-
-        if (Math.random() < 0.12) {
-          o *= 0.15;
-          s *= 0.92;
-          blur *= 0.55;
-        }
-
-        bulb.style.setProperty("--o", o.toFixed(2));
-        bulb.style.setProperty("--s", s.toFixed(2));
-        bulb.style.setProperty("--blur", `${Math.round(blur)}px`);
-
-        const next = 90 + Math.random() * 900;
-        setTimeout(tick, next);
-      };
-      setTimeout(tick, Math.random() * 800);
-    }
-
-    bulbs.forEach(schedule);
-  })();
-
-  /* =========================
-     최초 로딩: Excel -> 렌더
+     최초 렌더
   ========================= */
   (async () => {
-    // 로딩 플레이스홀더
-    const setLoading = (sel, colspan) => {
-      const tbody = document.querySelector(`${sel} tbody`);
-      if (!tbody) return;
-      tbody.innerHTML = `<tr><td colspan="${colspan}" style="color:rgba(255,255,255,.55); padding:16px;">데이터 불러오는 중...</td></tr>`;
-    };
-    setLoading("#totalTable", 4);
-    setLoading("#combinedTable", 11);
-    setLoading("#seasonTable", 10);
+    // GitHub Pages에서 Excel 데이터를 쓰고 싶으면: data/total.json 업데이트만 하면 됨
+    await loadTotalFromJSON("data/total.json");
+    renderTotalTable();
+    // 다음 새로고침/업데이트에서 변동사항 계산을 위해 현재 순위를 저장
+    saveTotalRanks(withRank(YXL_DATA.total));
 
-    try {
-      const wb = await loadWorkbook("YXL_통합.xlsx");
-
-      // 1) 누적
-      const totalRows = sheetToRows(wb, "누적기여도");
-      DATA.total = parseTotal(totalRows);
-
-      // 2) 시즌통합랭킹
-      const combinedRows = sheetToRows(wb, "S1~S10 YXL_기여도");
-      DATA.combined = parseCombined(combinedRows);
-
-      // 3) 시즌별
-      DATA.seasons = buildSeasonMap(wb);
-
-      // UI 초기화
-      initSeasonSelect();
-
-      // 최초 렌더
-      renderTotalTable();
-      renderCombinedTable();
-      renderSeasonTable();
-      renderSynergyTable();
-
-      // 다음 업데이트에서 변동사항 계산을 위해 현재 순위 저장
-      saveTotalRanks(DATA.total);
-
-    } catch (e) {
-      console.error(e);
-      const msg = (e && e.message) ? e.message : "데이터 로드 실패";
-      // 사용자에게도 표시
-      const tbody1 = document.querySelector("#totalTable tbody");
-      if (tbody1) tbody1.innerHTML = `<tr><td colspan="4" style="color:rgba(255,170,170,.9); padding:16px;">${msg}<br/>엑셀 파일(YXL_통합.xlsx)이 리포지토리 루트에 있는지 확인해줘.</td></tr>`;
-      const tbody2 = document.querySelector("#combinedTable tbody");
-      if (tbody2) tbody2.innerHTML = `<tr><td colspan="11" style="color:rgba(255,170,170,.9); padding:16px;">${msg}</td></tr>`;
-      const tbody3 = document.querySelector("#seasonTable tbody");
-      if (tbody3) tbody3.innerHTML = `<tr><td colspan="10" style="color:rgba(255,170,170,.9); padding:16px;">${msg}</td></tr>`;
-      // 시너지도 표시
-      renderSynergyTable();
-    }
+    renderSeasonTable();
+    renderSynergyTable();
   })();
+
+/* =========================
+   🎄 Garland Random Twinkle (per-bulb)
+========================= */
+(function initGarlandTwinkle(){
+  const bulbs = Array.from(document.querySelectorAll(".garland .bulb"));
+  if (!bulbs.length) return;
+
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  if (reduced) {
+    // 모션 최소화: 고정 점등
+    bulbs.forEach(b => {
+      b.style.setProperty("--o", "0.95");
+      b.style.setProperty("--s", "1.0");
+      b.style.setProperty("--blur", "18px");
+    });
+    return;
+  }
+
+  function schedule(bulb){
+    const tick = () => {
+      // 기본 밝기/크기 랜덤
+      let o = 0.25 + Math.random() * 0.85;     // opacity
+      let s = 0.85 + Math.random() * 0.55;     // scale
+      let blur = 10 + Math.random() * 26;      // glow size(px)
+
+      // 가끔 “살짝 꺼졌다 켜짐” 느낌 (진짜 전구같이)
+      if (Math.random() < 0.12) {
+        o *= 0.15;
+        s *= 0.92;
+        blur *= 0.55;
+      }
+
+      bulb.style.setProperty("--o", o.toFixed(2));
+      bulb.style.setProperty("--s", s.toFixed(2));
+      bulb.style.setProperty("--blur", `${Math.round(blur)}px`);
+
+      // 다음 깜빡임 간격도 랜덤(전구마다 다르게)
+      const next = 90 + Math.random() * 900; // 90ms ~ 990ms
+      setTimeout(tick, next);
+    };
+
+    // 전구마다 시작 타이밍도 랜덤
+    setTimeout(tick, Math.random() * 800);
+  }
+
+  bulbs.forEach(schedule);
+})();
+
 });

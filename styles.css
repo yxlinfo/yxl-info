@@ -559,3 +559,10 @@ body::after{
   .dash-tabs{ top: 56px; }
   .card-head{ top: 124px; }
 }
+html, body{
+  background:
+    radial-gradient(1200px 600px at 15% 0%, rgba(56,189,248,.18), transparent 60%),
+    radial-gradient(1200px 600px at 85% 0%, rgba(168,85,247,.12), transparent 60%),
+    radial-gradient(900px 520px at 50% 18%, rgba(16,185,129,.10), transparent 65%),
+    linear-gradient(180deg, #061225 0%, #050e1a 55%, #040910 100%) !important;
+}

@@ -4,29 +4,29 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   const YXL_DATA = {
     total: [
-      { name: "", balloons: 120000 },
-      { name: "", balloons: 98000 },
-      { name: "", balloons: 76000 },
-      { name: "", balloons: 64000 },
-      { name: "", balloons: 52000 },
+      { name: "", balloons:  },
+      { name: "", balloons:  },
+      { name: "", balloons:  },
+      { name: "", balloons:  },
+      { name: "", balloons:  },
     ],
     seasons: {
       "시즌 1": [
-        { name: "", balloons: 42000 },
-        { name: "", balloons: 39000 },
-        { name: "", balloons: 21000 },
+        { name: "", balloons:  },
+        { name: "", balloons:  },
+        { name: "", balloons:  },
       ],
       "시즌 2": [
-        { name: "", balloons: 36000 },
-        { name: "", balloons: 34000 },
-        { name: "", balloons: 18000 },
+        { name: "", balloons:  },
+        { name: "", balloons:  },
+        { name: "", balloons:  },
       ],
     },
     synergy: [
-      { rank: 1, grade: "", streamer: "", balloons: 50000 },
-      { rank: 2, grade: "", streamer: "", balloons: 42000 },
-      { rank: 3, grade: "", streamer: "", balloons: 32000 },
-      { rank: 4, grade: "", streamer: "", balloons: 21000 },
+      { rank: 1, grade: "", streamer: "", balloons:  },
+      { rank: 2, grade: "", streamer: "", balloons:  },
+      { rank: 3, grade: "", streamer: "", balloons:  },
+      { rank: 4, grade: "", streamer: "", balloons:  },
     ],
   };
 

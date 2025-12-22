@@ -9,20 +9,18 @@
 </head>
 
 <body>
-  <!-- ✅ BGM 진입 오버레이 -->
-  <div id="bgmGate" class="bgm-gate" aria-hidden="true">
-    <div class="bgm-gate-card">
-      <div class="bgm-gate-title">🎧 음악 재생</div>
-      <div class="bgm-gate-desc">
-        사이트를 이용하려면 먼저 BGM 재생을 눌러주세요.
-      </div>
+  <!-- ✅ 첫 진입 스플래시(클릭하면 하트파티클 + 재생 + 입장) -->
+  <div id="gate" class="gate" aria-hidden="false">
+    <div class="gate-sparkles" aria-hidden="true"></div>
+    <div id="gateParticles" class="gate-particles" aria-hidden="true"></div>
 
-      <button id="bgmStart" class="btn is-on" type="button">
-        음악 재생하고 입장하기
-      </button>
+    <button id="gateBtn" class="gate-btn" type="button">
+      <div class="gate-title">YXL>>ㅛdiv
+      <div class="gate-sub">많관부♥</div>
+      <div class="gate-hint">눌러서 입장하기</div>
+    </button>
 
-      <div id="bgmGateMsg" class="bgm-gate-msg"></div>
-    </div>
+    <div id="gateMsg" class="gate-msg"></div>
   </div>
 
   <!-- Header -->
@@ -38,6 +36,7 @@
 
       <div class="header-actions">
         <button class="btn ghost" id="copyBtn" type="button">링크 복사</button>
+        <!-- (선택) 헤더에서도 끄고 켤 수 있게 유지 -->
         <button class="btn" id="bgmToggle" type="button" aria-pressed="false">BGM 재생</button>
         <span class="updated">업데이트: <b id="updatedAt">-</b></span>
       </div>
@@ -59,7 +58,6 @@
         <p class="muted">누적/시즌/시너지 탭을 눌러 전환하세요.</p>
       </div>
 
-      <!-- 탭 버튼 -->
       <div class="dash-tabs" role="tablist" aria-label="대시보드 선택">
         <button class="dash-tab is-active" role="tab"
           aria-selected="true" aria-controls="dash-total"
@@ -85,7 +83,6 @@
         <div class="card">
           <div class="card-head">
             <h3>누적 기여도표</h3>
-
             <div class="toolbar">
               <div class="input-wrap">
                 <input id="totalSearch" class="input" type="text" placeholder="멤버 이름 검색" autocomplete="off">
@@ -115,10 +112,8 @@
         <div class="card">
           <div class="card-head">
             <h3>시즌별 기여도표</h3>
-
             <div class="toolbar">
               <select id="seasonSelect" class="select"></select>
-
               <div class="input-wrap">
                 <input id="seasonSearch" class="input" type="text" placeholder="멤버 이름 검색" autocomplete="off">
               </div>

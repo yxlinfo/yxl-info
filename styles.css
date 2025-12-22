@@ -172,7 +172,7 @@ body::after{
 }
 .brand{ display:flex; gap:12px; align-items:center; }
 .brand-mark{
-  width:44px; height:44px; border-radius:14px;
+  width:11px; height:11px; border-radius:3.5px;
   display:grid; place-items:center;
   background: rgba(125,211,252,.14);
   border:1px solid var(--accent);

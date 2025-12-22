@@ -461,5 +461,175 @@ document.addEventListener("DOMContentLoaded", () => {
 
   bulbs.forEach(schedule);
 })();
+/* =========================
+   📅 Weekly Calendar (localStorage)
+========================= */
+(function weeklyCalendar(){
+  const grid = document.getElementById("weekGrid");
+  if (!grid) return;
+
+  const weekRange = document.getElementById("weekRange");
+  const prevBtn = document.getElementById("prevWeek");
+  const nextBtn = document.getElementById("nextWeek");
+  const thisBtn = document.getElementById("thisWeek");
+
+  const detail = document.getElementById("weekDetail");
+  const detailDate = document.getElementById("detailDate");
+  const detailTitle = document.getElementById("detailTitle");
+  const detailMemo = document.getElementById("detailMemo");
+  const saveBtn = document.getElementById("saveDetail");
+  const clearBtn = document.getElementById("clearDetail");
+  const closeBtn = document.getElementById("closeDetail");
+
+  const KEY = "yxl_week_events_v1";
+
+  // KST 기준 today
+  const now = new Date();
+  const todayYMD = toYMD(now);
+
+  function toYMD(d){
+    // 로컬(브라우저) 기준 YYYY-MM-DD
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${dd}`;
+  }
+
+  function parseYMD(ymd){
+    const [y,m,d] = ymd.split("-").map(Number);
+    return new Date(y, m-1, d);
+  }
+
+  function startOfWeek(date){
+    // 월요일 시작(한국식): Mon=1
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const day = d.getDay(); // Sun=0
+    const diff = (day === 0 ? -6 : 1 - day); // 월요일로 이동
+    d.setDate(d.getDate() + diff);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+
+  function addDays(date, n){
+    const d = new Date(date);
+    d.setDate(d.getDate()+n);
+    return d;
+  }
+
+  function loadAll(){
+    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); }
+    catch { return {}; }
+  }
+
+  function saveAll(obj){
+    localStorage.setItem(KEY, JSON.stringify(obj));
+  }
+
+  let base = startOfWeek(new Date()); // 현재 보는 주의 월요일
+  let selected = null;
+
+  function formatRange(weekStart){
+    const weekEnd = addDays(weekStart, 6);
+    const s = weekStart.toLocaleDateString("ko-KR", { month:"long", day:"numeric" });
+    const e = weekEnd.toLocaleDateString("ko-KR", { month:"long", day:"numeric" });
+    return `${s} ~ ${e}`;
+  }
+
+  const DOW = ["월","화","수","목","금","토","일"];
+
+  function render(){
+    const data = loadAll();
+    grid.innerHTML = "";
+
+    if (weekRange) weekRange.textContent = formatRange(base);
+
+    for(let i=0;i<7;i++){
+      const d = addDays(base, i);
+      const ymd = toYMD(d);
+      const item = data[ymd];
+
+      const card = document.createElement("div");
+      card.className = "day-card";
+      if (ymd === todayYMD) card.classList.add("is-today");
+      if (item && (item.title || item.memo)) card.classList.add("has-event");
+
+      const top = document.createElement("div");
+      top.className = "day-top";
+      top.innerHTML = `
+        <div class="dow">${DOW[i]}</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="badge-dot"></span>
+          <div class="dnum">${d.getDate()}</div>
+        </div>
+      `;
+
+      const title = document.createElement("div");
+      title.className = "event-title";
+      title.textContent = item?.title ? item.title : "일정 없음";
+
+      const memo = document.createElement("div");
+      memo.className = "event-memo";
+      memo.textContent = item?.memo ? item.memo : "클릭해서 일정 추가하기";
+
+      card.appendChild(top);
+      card.appendChild(title);
+      card.appendChild(memo);
+
+      card.addEventListener("click", () => openDetail(ymd));
+      grid.appendChild(card);
+    }
+  }
+
+  function openDetail(ymd){
+    selected = ymd;
+    const data = loadAll();
+    const item = data[ymd] || { title:"", memo:"" };
+
+    const d = parseYMD(ymd);
+    const label = d.toLocaleDateString("ko-KR", { year:"numeric", month:"long", day:"numeric", weekday:"short" });
+    if (detailDate) detailDate.textContent = label;
+
+    if (detailTitle) detailTitle.value = item.title || "";
+    if (detailMemo) detailMemo.value = item.memo || "";
+
+    if (detail) detail.hidden = false;
+    detail?.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
+
+  function closeDetail(){
+    selected = null;
+    if (detail) detail.hidden = true;
+  }
+
+  saveBtn?.addEventListener("click", () => {
+    if (!selected) return;
+    const data = loadAll();
+
+    data[selected] = {
+      title: (detailTitle?.value || "").trim(),
+      memo: (detailMemo?.value || "").trim(),
+      updatedAt: Date.now(),
+    };
+    saveAll(data);
+    render();
+  });
+
+  clearBtn?.addEventListener("click", () => {
+    if (!selected) return;
+    const data = loadAll();
+    delete data[selected];
+    saveAll(data);
+    closeDetail();
+    render();
+  });
+
+  closeBtn?.addEventListener("click", closeDetail);
+
+  prevBtn?.addEventListener("click", () => { base = addDays(base, -7); closeDetail(); render(); });
+  nextBtn?.addEventListener("click", () => { base = addDays(base, 7); closeDetail(); render(); });
+  thisBtn?.addEventListener("click", () => { base = startOfWeek(new Date()); closeDetail(); render(); });
+
+  render();
+})();
 
 });

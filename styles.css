@@ -25,7 +25,7 @@ body{
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
 }
-.header-inner{ display:flex; align-items:center; padding:14px 0; }
+.header-inner{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; }
 
 .brand{ display:flex; gap:12px; align-items:center; }
 .brand-mark{
@@ -37,6 +37,9 @@ body{
 }
 .brand-title{ font-weight:900; font-size:18px; }
 .brand-sub{ color:var(--muted); font-size:12px; margin-top:2px; }
+
+.header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.updated{ color:var(--muted); font-size:12px; }
 
 .section{ padding:26px 0 40px; }
 .section-head h2{ margin:0 0 6px; }
@@ -74,8 +77,27 @@ body{
   border-color:var(--accent);
   background:rgba(125,211,252,.10);
 }
-
 .dash-panel{ margin-top:10px; }
+
+/* 버튼 */
+.btn{
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.20);
+  color:rgba(255,255,255,.85);
+  cursor:pointer;
+  font-weight:900;
+}
+.btn:hover{ border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.95); }
+.btn.is-on{
+  border-color: var(--accent);
+  background: rgba(125,211,252,.10);
+}
+.btn.ghost{
+  background: transparent;
+}
+
 /* 카드 헤더/툴바 */
 .card-head{
   display:flex;
@@ -85,14 +107,12 @@ body{
   flex-wrap:wrap;
   margin-bottom:12px;
 }
-
 .toolbar{
   display:flex;
   gap:10px;
   align-items:center;
   flex-wrap:wrap;
 }
-
 .input-wrap{ min-width:220px; flex:1; }
 
 .input, .select{
@@ -104,9 +124,7 @@ body{
   color: rgba(255,255,255,.92);
   outline: none;
 }
-
 .select{ width:auto; min-width:180px; }
-
 .input::placeholder{ color: rgba(255,255,255,.45); }
 
 .table-wrap{
@@ -114,28 +132,23 @@ body{
   border-radius:16px;
   border:1px solid rgba(255,255,255,.10);
 }
-
 .table{
   width:100%;
   border-collapse:collapse;
   min-width:560px;
 }
-
 .table th, .table td{
   padding:12px 12px;
   border-bottom:1px solid rgba(255,255,255,.08);
   text-align:left;
   white-space:nowrap;
 }
-
 .table th{
   color: rgba(255,255,255,.75);
   font-weight:900;
   background: rgba(255,255,255,.04);
 }
-
 .table td{ color: rgba(255,255,255,.92); }
-
 .table .num{ text-align:right; font-variant-numeric: tabular-nums; }
 
 .hint{
@@ -155,26 +168,21 @@ body{
   background: rgba(0,0,0,.18);
   font-weight:900;
 }
-
 .rank-badge .medal{ font-size:14px; }
-
 .rank-1{ border-color: rgba(255,215,0,.35); background: rgba(255,215,0,.08); }
 .rank-2{ border-color: rgba(192,192,192,.35); background: rgba(192,192,192,.08); }
 .rank-3{ border-color: rgba(205,127,50,.35); background: rgba(205,127,50,.08); }
 
-/* 시너지 정렬(클릭 가능) */
+/* 시너지 정렬 */
 .table.sortable th{
   cursor:pointer;
   user-select:none;
 }
-
 .table.sortable th:hover{
   background: rgba(125,211,252,.08);
 }
-
 .sort-ind{
   margin-left:6px;
   opacity:.65;
   font-size:12px;
 }
-

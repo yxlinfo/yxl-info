@@ -94,9 +94,7 @@ body{
   border-color: var(--accent);
   background: rgba(125,211,252,.10);
 }
-.btn.ghost{
-  background: transparent;
-}
+.btn.ghost{ background: transparent; }
 
 /* 카드 헤더/툴바 */
 .card-head{
@@ -186,3 +184,49 @@ body{
   opacity:.65;
   font-size:12px;
 }
+
+/* ✅ BGM Gate Overlay */
+.bgm-gate{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(10px);
+}
+.bgm-gate.is-open{ display: grid; }
+
+.bgm-gate-card{
+  width: min(520px, 92vw);
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(11,18,32,.82);
+  padding: 18px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.45);
+}
+.bgm-gate-title{
+  font-weight: 900;
+  font-size: 18px;
+}
+.bgm-gate-desc{
+  margin-top: 8px;
+  color: rgba(255,255,255,.65);
+  line-height: 1.5;
+  font-size: 13px;
+}
+.bgm-gate-card .btn{
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 14px;
+}
+.bgm-gate-msg{
+  margin-top: 10px;
+  font-size: 12px;
+  color: rgba(255,255,255,.65);
+}
+
+/* ✅ 사이트 숨김 상태 */
+#app.is-locked{ display: none; }
+body.is-locked{ overflow: hidden; }

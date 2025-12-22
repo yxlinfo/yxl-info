@@ -670,3 +670,6 @@ body::after{
   .week-grid{ grid-template-columns: 1fr; }
   .day-card{ min-height: 92px; }
 }
+/* 공유 일정: 사이트에서 수정 UI 숨김(보기 전용) */
+.week-detail .detail-actions, #detailTitle, #detailMemo { display:none !important; }
+

@@ -52,26 +52,14 @@
 
 <main class="wrap">
   <section class="section" id="info">
-    <div class="section-head"></div>
-
-    <div class="stage">
-      <div class="scene">
-        <div id="carousel" class="carousel" aria-label="13개의 와이드 대시보드 회전문"></div>
-      </div>
-
-      <div id="caption" class="caption">01</div>
-
-      <div class="controls">
-        <button id="prev">◀</button>
-        <button id="toggle">⏸︎</button>
-        <button id="next">▶</button>
-        <label>
-          Speed
-          <input id="speed" type="range" min="6" max="60" value="22">
-        </label>
-      </div>
-    </div>
-
+    <div class="yxl-slideshow" aria-label="GIF 슬라이드쇼">
+  <div class="yxl-slides" id="yxlSlides"></div>
+  <div class="yxl-ui">
+    <div class="yxl-dots" id="yxlDots"></div>
+  </div>
+  <button class="yxl-nav yxl-prev" id="yxlPrev">‹</button>
+  <button class="yxl-nav yxl-next" id="yxlNext">›</button>
+</div>
   </section>
 </main>
 

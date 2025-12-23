@@ -409,7 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <tr>
             <td>${rank ?? ""}</td>
             <td>
-              <span class="live-emoji" data-streamer="${String(name ?? "")}">❔</span>
+              <span class="live-emoji" data-streamer="${String(name ?? "")}"></span>
               <span class="soop-name" data-streamer="${String(name ?? "")}">${name ?? ""}</span>
             </td>
             <td class="num">${numFmt(balloons)}</td>
@@ -527,7 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.className = "soop-tooltip";
     el.style.display = "none";
     el.innerHTML = `
-      <img class="thumb" alt="SOOP 썸네일" />
+      <img class="thumb" alt="SOOP 썸네일" style="display:none;" />
       <div class="body">
         <p class="title"><span class="t-emoji">❔</span><span class="t-name"></span></p>
         <p class="sub"></p>
@@ -555,19 +555,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const emojiEl = nameEl.closest("td")?.querySelector(".live-emoji");
 
     // default state
-    if (emojiEl) emojiEl.textContent = "⏳";
+    if (emojiEl) emojiEl.textContent = "";
 
     let info = null;
     try {
       info = await resolveSoopInfo(streamerName);
-      if (emojiEl) emojiEl.textContent = info.isLive ? "🟢" : "⚫";
+      if (emojiEl) emojiEl.textContent = info.isLive ? "🔴" : "";
       // 클릭 시 방송국(또는 라이브) 열기
       nameEl.onclick = () => {
         const url = info.isLive && info.live_url ? info.live_url : `https://ch.sooplive.co.kr/${info.user_id}`;
         window.open(url, "_blank", "noopener,noreferrer");
       };
     } catch (e) {
-      if (emojiEl) emojiEl.textContent = "❔";
+      if (emojiEl) emojiEl.textContent = "";
       nameEl.onclick = null;
       nameEl.dataset.soopError = "1";
     }
@@ -586,17 +586,33 @@ document.addEventListener("DOMContentLoaded", () => {
       tName.textContent = streamerName;
 
       if (!info) {
-        tEmoji.textContent = "❔";
+        tEmoji.textContent = "";
         img.removeAttribute("src");
+        img.style.display = "none";
         sub.textContent = "SOOP 정보를 불러오지 못했습니다.";
         return;
       }
 
-      tEmoji.textContent = info.isLive ? "🟢" : "⚫";
-      img.src = info.isLive && info.live_thumb ? info.live_thumb : info.station_logo;
-      sub.textContent = info.isLive
-        ? (info.live_title ? `LIVE · ${info.live_title}` : "LIVE")
-        : "OFFLINE";
+      // 🔴: 방송 ON 표시(라이브만)
+      tEmoji.textContent = info.isLive ? "🔴" : "";
+
+      if (info.isLive) {
+        // 방송중인 사람만 썸네일 표시
+        const src = info.live_thumb || info.station_logo || "";
+        if (src) {
+          img.src = src;
+          img.style.display = "";
+        } else {
+          img.removeAttribute("src");
+          img.style.display = "none";
+        }
+        sub.textContent = info.live_title ? `LIVE · ${info.live_title}` : "LIVE";
+      } else {
+        // 방송 OFF: 썸네일 숨김
+        img.removeAttribute("src");
+        img.style.display = "none";
+        sub.textContent = "OFFLINE";
+      }
     };
 
     const hide = () => {
@@ -768,11 +784,11 @@ document.addEventListener("DOMContentLoaded", () => {
     gateBtn?.addEventListener("click", () => {
       localStorage.setItem("yxl_gate_ok", "1");
       setGate(true);
-
-      // ✅ 입장 클릭(사용자 제스처) 시 무조건 BGM 재생
-      setBgm(true);
+      // auto try play if user previously enabled
+      if (localStorage.getItem(KEY) === "1") setBgm(true);
     });
-bgmToggle?.addEventListener("click", () => {
+
+    bgmToggle?.addEventListener("click", () => {
       const on = localStorage.getItem(KEY) === "1";
       setBgm(!on);
     });

@@ -1,4 +1,56 @@
 
+// ===== Gate + BGM (robust) =====
+(function () {
+  function gateEl() { return document.getElementById("gate"); }
+
+  function showGate() {
+    const g = gateEl();
+    if (!g) return;
+    g.classList.remove("is-hidden");
+    g.style.display = "flex";
+    g.setAttribute("aria-hidden", "false");
+  }
+
+  function hideGate() {
+    const g = gateEl();
+    if (!g) return;
+    g.classList.add("is-hidden");
+    g.style.display = "none";   // CSS가 꼬여도 무조건 숨김
+    g.setAttribute("aria-hidden", "true");
+  }
+
+  async function enter() {
+    const bgm = document.getElementById("bgm");
+    try {
+      if (bgm) await bgm.play();
+    } catch (e) {
+      console.warn("BGM play blocked or missing:", e);
+    }
+    hideGate();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    showGate();
+
+    const btn = document.getElementById("enterBtn");
+    const card = document.getElementById("gateCard");
+    const bgm = document.getElementById("bgm");
+
+    // 클릭 전에는 재생하지 않도록 초기화
+    if (bgm) { try { bgm.pause(); bgm.currentTime = 0; } catch (e) {} }
+
+    if (btn) btn.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation(); enter(); });
+    if (card) {
+      card.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation(); enter(); });
+      card.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); enter(); }
+      });
+    }
+  });
+})();
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Config

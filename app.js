@@ -335,6 +335,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return out;
   }
 
+  function renderSynergyMeta() {
+  const meta = $("#synergyMeta");
+  if (!meta) return;
+
+  let dt = state.synergy.updatedAt;
+  if (!dt) {
+    meta.textContent = "데이터 기준: --";
+    return;
+  }
+
+  dt = dt instanceof Date ? dt : new Date(dt);
+  meta.textContent =
+    `데이터 기준: ${dt.getFullYear()}년 ${dt.getMonth() + 1}월 · ${dt.toLocaleString("ko-KR")}`;
+}
+
   function renderSynergy() {
     const table = $("#synergyTable");
     if (!table) return;

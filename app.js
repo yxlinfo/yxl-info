@@ -1,5 +1,31 @@
 
 document.addEventListener("DOMContentLoaded", () => {
+  // 항상 게이트부터 보여주기
+  setGate(true);
+
+  const btn = document.getElementById("enterBtn");
+  const bgm = document.getElementById("bgm");
+
+  // BGM은 클릭 시에만 재생(브라우저 정책)
+  if (bgm) { bgm.pause(); bgm.currentTime = 0; }
+
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      try {
+        if (bgm) {
+          await bgm.play();
+        }
+      } catch (e) {
+        // 일부 환경에서 재생 실패해도 화면은 열어줌
+        console.warn("BGM play blocked:", e);
+      }
+      setGate(false);
+    });
+  }
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Config
   ========================= */
@@ -119,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
       p.classList.toggle("is-active", isOn);
     });
 
-    localStorage.setItem("yxl_active_tab", targetId);
+    
   }
 
   function initTabs() {
@@ -128,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
       t.addEventListener("click", () => setActiveTab(t.dataset.target));
     });
 
-    const saved = localStorage.getItem("yxl_active_tab");
+    const saved = 
     // 시너지표를 기본으로(요청사항)
     setActiveTab(saved || "dash-synergy");
   }
@@ -184,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   function getSoopCache() {
     try {
-      return JSON.parse(localStorage.getItem(CACHE_KEY_SOOP) || "{}");
+      return JSON.parse( || "{}");
     } catch {
       return {};
     }
@@ -192,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setSoopCache(cache) {
     try {
-      localStorage.setItem(CACHE_KEY_SOOP, JSON.stringify(cache));
+      );
     } catch {}
   }
 
@@ -488,7 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!bgm || !bgmToggle) return;
       bgmToggle.setAttribute("aria-pressed", on ? "true" : "false");
       bgmToggle.textContent = on ? "BGM 일시정지" : "BGM 재생";
-      localStorage.setItem(KEY, on ? "1" : "0");
+      
 
       if (on) {
         const p = bgm.play();
@@ -499,7 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // First visit gate
-    const allowed = localStorage.getItem("yxl_gate_ok") === "1";
+    const allowed =  === "1";
     if (!allowed) {
       setGate(false);
       gateMsg && (gateMsg.textContent = "입장하려면 버튼을 눌러주세요.");
@@ -508,19 +534,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     gateBtn?.addEventListener("click", () => {
-      localStorage.setItem("yxl_gate_ok", "1");
+      
       setGate(true);
       // auto try play if user previously enabled
-      if (localStorage.getItem(KEY) === "1") setBgm(true);
+      if ( === "1") setBgm(true);
     });
 
     bgmToggle?.addEventListener("click", () => {
-      const on = localStorage.getItem(KEY) === "1";
+      const on =  === "1";
       setBgm(!on);
     });
 
     // restore
-    if (localStorage.getItem(KEY) === "1") setBgm(true);
+    if ( === "1") setBgm(true);
   })();
 
   /* =========================

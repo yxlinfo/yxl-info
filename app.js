@@ -1,30 +1,51 @@
 
-// ===== Gate init (always show, close on click + try BGM play) =====
-(function(){
+// ===== Gate init (항상 게이트 표시, 클릭 시 BGM 재생 후 입장) =====
+(function () {
   let gateInited = false;
+
+  function setGate(show) {
+    const g = document.getElementById("gate");
+    if (!g) return;
+    g.classList.toggle("is-hidden", !show);
+  }
+
+  async function enter() {
+    const bgm = document.getElementById("bgm");
+    try {
+      if (bgm) await bgm.play();
+    } catch (e) {
+      console.warn("BGM play blocked or missing:", e);
+    }
+    setGate(false);
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     if (gateInited) return;
     gateInited = true;
 
-    // 항상 게이트부터 보여주기
     setGate(true);
 
     const btn = document.getElementById("enterBtn");
+    const card = document.getElementById("gateCard");
+    const gate = document.getElementById("gate");
     const bgm = document.getElementById("bgm");
 
-    // BGM은 클릭 시에만 재생(브라우저 정책)
+    // 클릭 전에는 재생하지 않도록 초기화
     if (bgm) { try { bgm.pause(); bgm.currentTime = 0; } catch(e){} }
 
-    if (btn) {
-      btn.addEventListener("click", async () => {
-        try {
-          if (bgm) await bgm.play();
-        } catch (e) {
-          console.warn("BGM play blocked or missing:", e);
-        }
-        setGate(false);
+    // 버튼 클릭
+    if (btn) btn.addEventListener("click", (ev) => { ev.stopPropagation(); enter(); });
+
+    // 카드 클릭(버튼 말고 박스 클릭해도 입장)
+    if (card) {
+      card.addEventListener("click", (ev) => { ev.stopPropagation(); enter(); });
+      card.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); enter(); }
       });
     }
+
+    // 배경(오버레이)은 클릭해도 닫히지 않게
+    if (gate) gate.addEventListener("click", () => {});
   });
 })();
 
@@ -508,9 +529,4 @@ document.addEventListener("DOMContentLoaded", () => {
     const bgm = document.getElementById("bgm");
     const bgmToggle = document.getElementById("bgmToggle");
 
-    function setGate(show){
-  const g=document.getElementById("gate");
-  if(!g) return;
-  g.classList.toggle("is-hidden", !show);
-}
-});
+    });

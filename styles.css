@@ -730,4 +730,62 @@ body::after{
   gap: 14px;
   width:100%;
 }
+/* =========================
+   ✅ Header BGM UI: 폭/크기 줄여서 튀어나옴 방지
+========================= */
+
+/* 헤더 오른쪽 영역이 끝에 딱 붙도록 */
+.header-actions{
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* 플레이어 바 자체를 "최대폭 제한" + 컴팩트 */
+.bgm-dash{
+  width: 100%;
+  max-width: min(760px, 100%);
+  padding: 8px 10px;
+  gap: 8px;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+/* 버튼/텍스트 전체 살짝 컴팩트 */
+.bgm-dash .btn{
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.bgm-dash .bgm-mark{
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+/* 헤더 안의 select만 min-width 줄이기 (전역 .select 영향 차단) */
+.bgm-dash .select{
+  min-width: 190px;
+  max-width: 260px;
+}
+
+/* 게이지(Seek/Vol) 폭 줄이기 */
+.bgm-dash input[type="range"]{
+  width: 160px;
+}
+
+/* 화면이 조금 좁아지면 더 줄이고, 필요하면 줄바꿈 */
+@media (max-width: 980px){
+  .bgm-dash{ max-width: 100%; }
+  .bgm-dash input[type="range"]{ width: 130px; }
+  .bgm-dash .select{ min-width: 160px; max-width: 220px; }
+}
+
+@media (max-width: 620px){
+  .bgm-dash{ flex-wrap: wrap; justify-content: flex-end; }
+  .bgm-dash input[type="range"]{ width: 100%; }
+  .bgm-dash .select{ width: 100%; max-width: 100%; }
+}
 

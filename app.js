@@ -345,19 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     dt = dt instanceof Date ? dt : new Date(dt);
-
-    // 중복 표기 제거:
-    // 기존: "2025년 12월 · 2025. 12. 23. 오후 10:03:00" 처럼 년/월이 두 번 보일 수 있음
-    // ko-KR 포맷으로 한 번만 표시
-    const fmt = new Intl.DateTimeFormat("ko-KR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "numeric",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-    meta.textContent = `데이터 기준: ${fmt.format(dt)}`;
+    meta.textContent = `데이터 기준: ${dt.toLocaleString("ko-KR")}`;
   }
 
   function renderSynergy() {
@@ -373,8 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { key: "순위", label: "순위", right: false },
       { key: "비제이명", label: "스트리머", right: false },
       { key: "월별 누적별풍선", label: "누적별풍선", right: true },
-      { key: "변동", label: "변동사항", right: true },
-    ];
+      ];
     thead.innerHTML = `
       <tr>
         ${headers
@@ -389,20 +376,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let rows = [...state.synergy.rows].sort(compareBy(key, dir));
 
+    const maxBalloon = Math.max(0, ...rows.map(r => Number(r["월별 누적별풍선"] ?? 0)));
+
     tbody.innerHTML = rows
       .map((r) => {
         const rank = r["순위"];
         const name = r["비제이명"];
-        const balloons = r["월별 누적별풍선"];
-        const delta = r["변동"];
+        const balloonsNum = Number(r["월별 누적별풍선"] ?? 0);
+        const pct = maxBalloon ? (balloonsNum / maxBalloon) * 100 : 0;
         return `
           <tr>
             <td>${rank ?? ""}</td>
             <td>
               <span class="soop-name" data-streamer="${String(name ?? "")}">${name ?? ""}</span>
             </td>
-            <td class="num">${numFmt(balloons)}</td>
-            <td class="num">${delta ?? ""}</td>
+            <td class="num barcell">
+              <span class="barbg"><span class="barfill" style="width:${pct.toFixed(2)}%"></span></span>
+              <span class="bartext">${numFmt(balloonsNum)}</span>
+            </td>
           </tr>
         `;
       })

@@ -336,9 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderSynergyMeta() {
-    const meta = $("#synergyMeta");
-    const cal = $("#synergyCalendar");
-    if (!meta || !cal) return;
+
 
     let dt = state.synergy.updatedAt;
     if (!dt) {

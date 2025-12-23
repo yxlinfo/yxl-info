@@ -7,9 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const FILE_SYNERGY = "시너지표.xlsx";
   const AUTO_REFRESH_MS = 3 * 60 * 60 * 1000; // 3시간
 
-  const CACHE_KEY_SOOP = "yxl_soop_cache_v1";
-  const CACHE_TTL_MS = 10 * 60 * 1000; // 10분
-
   const state = {
     main: {
       total: [],

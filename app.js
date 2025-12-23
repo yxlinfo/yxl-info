@@ -901,8 +901,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =========================
+     YXL 시작일 D+ 카운트 (로고 옆)
+     - ♥Y X L _ 24.10.01 ~ ing ( d + N일 ) ♥
+     - 시작일 포함(=diff+1) 기준
+  ========================= */
+  function initYxlDday() {
+    const el = document.getElementById("yxlDday");
+    if (!el) return;
+
+    const START_Y = 2024;
+    const START_M = 9;  // 0-indexed (10월)
+    const START_D = 1;
+    const START_DISPLAY = "24.10.01";
+
+    function calcDays() {
+      const now = new Date();
+      // 로컬 날짜 기준(자정 고정)
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const start = new Date(START_Y, START_M, START_D);
+      const diff = Math.floor((today.getTime() - start.getTime()) / 86400000);
+      const dplus = Math.max(0, diff + 1);
+
+      el.textContent = `YXL · ${START_DISPLAY} ~ ing · D+${dplus}`;
+    }
+
+    calcDays();
+    // 자정 넘김 대비(가볍게 10분마다 갱신)
+    setInterval(calcDays, 10 * 60 * 1000);
+  }
+
+
+  /* =========================
      Init
   ========================= */
+  initYxlDday();
   initHallOfFame();
   initTabs();
   initSearchInputs();

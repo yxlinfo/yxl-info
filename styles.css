@@ -565,43 +565,6 @@ body::after{
 /* =========================
    SOOP 썸네일 툴팁 + 라이브 이모지
 ========================= */
-.soop-tooltip{
-  position: fixed;
-  z-index: 9999;
-  width: 260px;
-  max-width: 78vw;
-  background: rgba(8, 14, 26, .92);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 14px;
-  box-shadow: 0 18px 44px rgba(0,0,0,.55);
-  overflow: hidden;
-  pointer-events: none;
-  transform: translate(12px, 12px);
-}
-.soop-tooltip .thumb{
-  width:100%;
-  aspect-ratio: 16 / 9;
-  background: rgba(255,255,255,.06);
-  object-fit: cover;
-  display:block;
-}
-.soop-tooltip .body{
-  padding: 10px 12px 12px;
-}
-.soop-tooltip .title{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-weight: 750;
-  margin:0 0 6px;
-}
-.soop-tooltip .sub{
-  margin:0;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
-}
-
 .synergy-head{
   display:flex;
   align-items:flex-start;

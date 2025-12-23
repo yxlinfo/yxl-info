@@ -565,7 +565,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!map[k]) k = tracks[0]?.key || "bgm";
     localStorage.setItem(KEY_SEL, k);
     if (sel) sel.value = k;
-    updateNowText();
   }
 
   function setPlayUI(on) {

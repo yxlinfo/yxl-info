@@ -53,8 +53,30 @@
       <div class="brand">
    <img class="brand-gif" src="assets/logo.gif" alt="YXL" />
       </div>
+<!-- ✅ 여기(brand 다음, header-inner 끝나기 전) -->
+  <div class="header-actions">
+    <div class="bgm-dash" role="group" aria-label="BGM 컨트롤">
+      <span class="bgm-mark">♫ BGM</span>
 
+      <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
+      <span class="dot">·</span>
+      <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
+      <span class="dot">·</span>
+      <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
 
+      <span class="dot">·</span>
+      <select id="bgmSelect" class="select" aria-label="BGM 선택">
+        <option value="bgm">Justin Bieber - Mistletoe</option>
+        <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
+        <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
+      </select>
+
+      <div id="bgmNow" class="muted bgm-now">♫ Now Playing · —</div>
+    </div>
+
+    <div class="updated">업데이트: <span id="updatedAt">--</span></div>
+  </div>
+  <!-- ✅ 여기까지 -->
     </div>
   </header>
 

@@ -53,33 +53,33 @@
       </div>
 
       <!-- ✅ BGM 대시보드 -->
-      <div class="header-actions">
-        <div class="bgm-dash" role="group" aria-label="BGM 컨트롤">
-          <!-- 1) 상단: 재생 게이지 + 볼륨 게이지 (고정 1줄) -->
-          <div class="bgm-row bgm-top">
-            <span id="bgmTime" class="bgm-time">00:00 / 00:00</span>
-            <input id="bgmSeek" class="bgm-range bgm-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="재생 위치" />
-            <span class="bgm-vol-label">VOL</span>
-            <input id="bgmVol" class="bgm-range bgm-vol" type="range" min="0" max="100" value="30" step="1" aria-label="볼륨" />
-          </div>
-
-          <!-- 2) 하단: BGM, Prev, Play, Next, Select (고정 1줄) -->
-          <div class="bgm-row bgm-bottom">
-            <span class="bgm-mark">♫ BGM</span>
-            <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
-            <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
-            <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
-            <select id="bgmSelect" class="select bgm-select" aria-label="BGM 선택">
-              <option value="bgm">Justin Bieber - Mistletoe</option>
-              <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
-              <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="updated">업데이트: <span id="updatedAt">--</span></div>
+        <div class="header-actions">
+    <div class="bgm-dash" role="group" aria-label="BGM 컨트롤">
+      <!-- Row 1: 재생게이지 + 볼륨게이지 (고정 1줄) -->
+      <div class="bgm-row bgm-row-top">
+        <span id="bgmTime" class="bgm-time">00:00 / 00:00</span>
+        <input id="bgmSeek" class="bgm-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="재생 위치" />
+        <span class="bgm-vol-label">VOL</span>
+        <input id="bgmVol" class="bgm-vol" type="range" min="0" max="100" value="30" step="1" aria-label="볼륨" />
       </div>
-      <!-- ✅ 여기까지 -->
+
+      <!-- Row 2: BGM, Prev, Play, Next, Select (고정 1줄) -->
+      <div class="bgm-row bgm-row-bottom">
+        <span class="bgm-mark">♫ BGM</span>
+        <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
+        <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
+        <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
+        <select id="bgmSelect" class="select bgm-select" aria-label="BGM 선택">
+          <option value="bgm">Justin Bieber - Mistletoe</option>
+          <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
+          <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="updated">업데이트: <span id="updatedAt">--</span></div>
+  </div>
+  <!-- ✅ 여기까지 -->
     </div>
   </header>
 

@@ -808,239 +808,92 @@ body::after{
   .bgm-dash .select{ width: 100%; max-width: 100%; }
 }
 
-/* =====================================================
-   ✅ BGM 헤더 플레이어 레이아웃 FIX (한 줄, 게이지 길게, 오버플로 방지)
-   - 기존 2줄 레이아웃을 덮어씁니다.
-===================================================== */
-.header-actions{
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  min-width: 0;
-}
-
-/* 플레이어는 남는 영역을 꽉 채우되, 내부는 절대 줄바꿈 금지 */
-.bgm-dash{
-  flex: 1 1 auto !important;
-  min-width: 0;
-  width: min(920px, 100%) !important;
-  max-width: 920px !important;
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 8px !important;
-  padding: 10px 10px !important;
-  justify-content: flex-end;
-}
-
-/* 구분점은 좁은 폭에서 자동 숨김 */
-@media (max-width: 980px){
-  .bgm-dash .dot{ display:none; }
-}
-
-/* 게이지 영역도 한 줄 유지 + Seek만 길게 */
-.bgm-gauges{
-  flex: 1 1 auto !important;
-  min-width: 0;
-  width: auto !important;
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 8px !important;
-}
-
-#bgmTime{
-  flex: 0 0 auto;
-  min-width: 92px;
-}
-
-/* ✅ 재생 길이 게이지는 남는 공간 전부 사용 */
-#bgmSeek{
-  flex: 1 1 auto !important;
-  min-width: 280px;
-}
-
-/* ✅ 볼륨은 고정 폭 */
-#bgmVol{
-  flex: 0 0 110px !important;
-  width: 110px !important;
-}
-
-.bgm-vol-label{ margin-left: 6px !important; }
-
-/* 업데이트는 오른쪽에 붙이고 줄바꿈 금지 */
-.updated{
-  white-space: nowrap;
-  margin-left: 10px;
-}
-
-/* 아주 좁은 화면에서는 플레이어가 넘치지 않도록 최소폭 조정 */
-@media (max-width: 740px){
-  #bgmSeek{ min-width: 160px; }
-  #bgmVol{ width: 96px !important; flex-basis: 96px !important; }
-  #bgmTime{ min-width: 84px; }
-}
 
 /* =========================
-   ✅ BGM UI (2-row compact, no overflow)
+   🎧 BGM Dash (2-row fixed, right aligned, no spill)
+   Row1: seek + volume
+   Row2: BGM / Prev / Play / Next / Select
 ========================= */
 .header-actions{
   display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:6px;
-  flex:1;
-  min-width:0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
 
+/* Dash container */
 .bgm-dash{
-  width: min(860px, 100%);
-  margin-left:auto;
-  display:grid;
-  grid-template-rows:auto auto;
-  gap:6px;
-  padding:10px 12px;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.22);
-  box-shadow: 0 12px 34px rgba(0,0,0,.28);
-  min-width:0;
+  width: min(860px, 92vw);
+  padding: 10px 12px;
+  border-radius: 16px;
+  display: grid !important;
+  grid-template-rows: auto auto;
+  row-gap: 6px;
 }
 
-.bgm-row{ min-width:0; }
-.bgm-top{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-}
-.bgm-time{
-  font-size:12px;
-  color: rgba(255,255,255,.78);
-  font-variant-numeric: tabular-nums;
-  white-space:nowrap;
-  flex:0 0 auto;
-}
-.bgm-seek{
-  flex:1 1 auto;
-  min-width:260px;
-}
-
-.bgm-bottom{
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-}
-.bgm-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-}
-.bgm-vol-wrap{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.bgm-vol-label{
-  font-size:12px;
-  letter-spacing:.2px;
-  color: rgba(255,255,255,.75);
-}
-.bgm-vol{ width:130px; }
-
-.bgm-mid{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-  flex-wrap:nowrap;
-}
-.bgm-right{ min-width:0; }
-.bgm-select{
-  width: 320px;
-  max-width: 38vw;
-}
-
-/* range style reuse */
-.bgm-range{
-  height: 6px;
-  accent-color: rgba(125,211,252,.95);
-}
-
-/* 버튼 조금 더 컴팩트 */
-.bgm-dash .btn{
-  padding:9px 12px;
-  font-size:13px;
-}
-
-/* updatedAt은 플레이어 우측 정렬 유지 */
-.updated{ text-align:right; }
-
-/* 좁아질 때는 셀렉트/볼륨을 줄여서 2줄 유지 */
-@media (max-width: 980px){
-  .bgm-select{ width: 260px; }
-  .bgm-vol{ width: 110px; }
-}
-@media (max-width: 760px){
-  .bgm-select{ width: 220px; }
-  .bgm-seek{ min-width: 180px; }
-}
-
-/* =========================================================
-   ✅ BGM UI: 2줄 고정(여백 없이 딱 맞춤)
-   - 1줄: 재생게이지 + 볼륨게이지
-   - 2줄: BGM, Prev, Play, Next, Select
-   ========================================================= */
-
-/* 헤더 우측 정렬(플레이어 + 업데이트) */
-.header-actions{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:6px;
-}
-
-/* 플레이어 크기(현재 느낌 유지) + 우측에 딱 붙이기 */
-.bgm-dash{
-  width: min(560px, 62vw);
-  margin-left:auto;
-  gap:6px;
-}
-
-/* 두 줄 모두 같은 폭, 줄바꿈 금지 */
+/* Two fixed rows */
 .bgm-dash .bgm-row{
-  width:100%;
-  display:flex;
+  width: 100%;
+  display: grid;
+  align-items: center;
+  column-gap: 10px;
+  white-space: nowrap;
+}
+
+/* Row 1: time | seek | VOL | volume */
+.bgm-dash .bgm-row-top{
+  grid-template-columns: 96px 1fr 34px 170px;
+}
+
+.bgm-time{
+  font-size: 12px;
+  color: rgba(255,255,255,.82);
+  font-variant-numeric: tabular-nums;
+}
+
+.bgm-seek{ width: 100%; }
+
+.bgm-vol-label{
+  font-size: 12px;
+  color: rgba(255,255,255,.75);
+  text-align: right;
+  letter-spacing: .2px;
+}
+
+.bgm-vol{ width: 100%; }
+
+/* Row 2: mark | prev | play | next | select */
+.bgm-dash .bgm-row-bottom{
+  grid-template-columns: auto auto auto auto 1fr;
+}
+
+.bgm-dash .bgm-row-bottom .btn{
+  padding: 8px 10px;
+}
+
+.bgm-dash .bgm-mark{
+  display:inline-flex;
   align-items:center;
-  gap:10px;
-  flex-wrap:nowrap;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.20);
+  font-weight: 900;
 }
 
-/* 1줄: 시간/시크는 길게, 볼륨은 고정 */
-.bgm-time{ min-width: 92px; text-align:left; }
-.bgm-seek{ flex:1 1 auto; min-width: 260px; }
-.bgm-vol-label{ min-width: 34px; text-align:center; opacity:.8; font-weight:900; }
-.bgm-vol{ flex:0 0 140px; width:140px; }
-
-/* 2줄: select가 남는 공간을 먹어서 "여백"이 남지 않게 */
-.bgm-mark{ flex:0 0 auto; }
-.bgm-dash .btn{ flex:0 0 auto; }
-.bgm-select{ flex:1 1 auto; min-width: 260px; width:auto; max-width:none; }
-
-/* 화면이 좁아질 때도 2줄 유지(필요한 것만 줄임) */
-@media (max-width: 980px){
-  .bgm-dash{ width: min(520px, 70vw); }
-  .bgm-seek{ min-width: 220px; }
-  .bgm-vol{ flex-basis: 120px; width:120px; }
-  .bgm-select{ min-width: 220px; }
+.bgm-select{
+  width: 100%;
+  min-width: 240px;
 }
-@media (max-width: 760px){
-  .bgm-dash{ width: min(480px, 92vw); }
-  .bgm-time{ min-width: 86px; }
-  .bgm-seek{ min-width: 180px; }
-  .bgm-vol{ flex-basis: 110px; width:110px; }
+
+/* Responsive: keep 2 rows, shrink select/volume */
+@media (max-width: 860px){
+  .bgm-dash{ width: min(760px, 94vw); }
+  .bgm-dash .bgm-row-top{ grid-template-columns: 96px 1fr 34px 150px; }
+  .bgm-select{ min-width: 210px; }
+}
+@media (max-width: 620px){
+  .bgm-dash{ width: min(640px, 96vw); }
+  .bgm-dash .bgm-row-top{ grid-template-columns: 92px 1fr 34px 130px; }
   .bgm-select{ min-width: 180px; }
 }

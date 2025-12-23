@@ -335,11 +335,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return out;
   }
 
-    const last = localStorage.getItem("yxl_synergy_last_ym");
-    const changed = last && last !== ym;
-    localStorage.setItem("yxl_synergy_last_ym", ym);
-
-    cal.innerHTML = `
       <div class="cal-top">
         <div class="cal-title">${dt.getFullYear()}년 ${dt.getMonth() + 1}월</div>
         ${changed ? `<div class="cal-badge">월 변경</div>` : `<div class="cal-badge" style="opacity:.55;">유지</div>`}

@@ -736,10 +736,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const bgm = document.getElementById("bgm");
     const bgmToggle = document.getElementById("bgmToggle");
 
-    function setGate(open) {
+    // ✅ 원하면 false로 바꾸면 "처음 1회만 게이트"로 동작
+    const ALWAYS_GATE = true;
+
+    function showGate(show) {
       if (!gate) return;
-      gate.classList.toggle("is-open", !open);
-      gate.setAttribute("aria-hidden", open ? "true" : "false");
+      gate.classList.toggle("is-hidden", !show);
+      gate.setAttribute("aria-hidden", show ? "false" : "true");
     }
 
     function setBgm(on) {
@@ -750,35 +753,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (on) {
         const p = bgm.play();
-        if (p?.catch) p.catch(() => {});
+        if (p && typeof p.catch === "function") p.catch(() => {});
       } else {
         bgm.pause();
       }
     }
 
-    // First visit gate
-    const allowed = localStorage.getItem("yxl_gate_ok") === "1";
-    if (!allowed) {
-      setGate(false);
-      gateMsg && (gateMsg.textContent = "입장하려면 버튼을 눌러주세요.");
-    } else {
-      setGate(true);
+    function enter() {
+      // "입장"은 사용자 제스처 이벤트 안에서 실행되어야 재생이 확실함
+      localStorage.setItem("yxl_gate_ok", "1");
+      showGate(false);
+      setBgm(true);
     }
 
-    gateBtn?.addEventListener("click", () => {
-      localStorage.setItem("yxl_gate_ok", "1");
-      setGate(true);
-      // auto try play if user previously enabled
-      if (localStorage.getItem(KEY) === "1") setBgm(true);
+    // 초기 표시
+    const allowed = localStorage.getItem("yxl_gate_ok") === "1";
+    showGate(ALWAYS_GATE ? true : !allowed);
+    if (gateMsg) gateMsg.textContent = "입장하려면 버튼을 눌러주세요.";
+
+    // 버튼 클릭 = 입장 + BGM 강제 재생
+    gateBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      enter();
     });
 
+    // 버튼 밖(게이트 배경) 클릭해도 입장되도록 (모바일/오작동 대비)
+    gate?.addEventListener("click", (e) => {
+      if (!gateBtn) return;
+      if (e.target === gate || e.target.classList?.contains("gate-sparkles") || e.target.id === "gateParticles") {
+        enter();
+      }
+    });
+
+    // 상단 토글 버튼
     bgmToggle?.addEventListener("click", () => {
       const on = localStorage.getItem(KEY) === "1";
       setBgm(!on);
     });
 
-    // restore
-    if (localStorage.getItem(KEY) === "1") setBgm(true);
+    // UI 상태 복원(자동재생은 하지 않음)
+    const isOn = localStorage.getItem(KEY) === "1";
+    if (bgmToggle) {
+      bgmToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+      bgmToggle.textContent = isOn ? "BGM 일시정지" : "BGM 재생";
+    }
   })();
 
   /* =========================

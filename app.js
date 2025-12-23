@@ -335,20 +335,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return out;
   }
 
-  function renderSynergyMeta() {
-
-
-    let dt = state.synergy.updatedAt;
-    if (!dt) {
-      meta.textContent = "데이터 기준: --";
-      cal.innerHTML = "";
-      return;
-    }
-    dt = dt instanceof Date ? dt : new Date(dt);
-    const ym = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
-
-    meta.textContent = `데이터 기준: ${dt.getFullYear()}년 ${dt.getMonth() + 1}월 · ${dt.toLocaleString("ko-KR")}`;
-
     const last = localStorage.getItem("yxl_synergy_last_ym");
     const changed = last && last !== ym;
     localStorage.setItem("yxl_synergy_last_ym", ym);

@@ -479,7 +479,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setGate(open) {
       if (!gate) return;
-      gate.classList.toggle("is-open", !open);
+      // open=true => 게이트 닫기(숨김)
+      gate.classList.toggle("is-hidden", open);
       gate.setAttribute("aria-hidden", open ? "true" : "false");
     }
 

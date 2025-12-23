@@ -519,81 +519,172 @@ document.addEventListener("DOMContentLoaded", () => {
       loadAll();
     }, AUTO_REFRESH_MS);
   }
+/* =========================
+   Gate + BGM Dashboard (3 tracks)
+========================= */
+(function gateAndBgm() {
+  const KEY_ON = "yxl_bgm_on";
+  const KEY_SEL = "yxl_bgm_selected";
 
-  /* =========================
-     Gate + BGM (기존 동작 유지)
-  ========================= */
-  (function gateAndBgm() {
-    const KEY = "yxl_bgm_on";
-    const gate = document.getElementById("gate");
-    const gateBtn = document.getElementById("gateBtn");
-    const gateMsg = document.getElementById("gateMsg");
-    const bgm = document.getElementById("bgm");
-    const bgmToggle = document.getElementById("bgmToggle");
+  const gate = document.getElementById("gate");
+  const gateBtn = document.getElementById("gateBtn");
+  const gateMsg = document.getElementById("gateMsg");
 
-    // ✅ 원하면 false로 바꾸면 "처음 1회만 게이트"로 동작
-    const ALWAYS_GATE = true;
+  const a1 = document.getElementById("bgm");
+  const a2 = document.getElementById("bgm2");
+  const a3 = document.getElementById("bgm3");
 
-    function showGate(show) {
-      if (!gate) return;
-      gate.classList.toggle("is-hidden", !show);
-      gate.setAttribute("aria-hidden", show ? "false" : "true");
-    }
+  const btnPlay = document.getElementById("bgmPlay");
+  const btnPrev = document.getElementById("bgmPrev");
+  const btnNext = document.getElementById("bgmNext");
+  const sel = document.getElementById("bgmSelect");
+  const now = document.getElementById("bgmNow");
 
-    function setBgm(on) {
-      if (!bgm || !bgmToggle) return;
-      bgmToggle.setAttribute("aria-pressed", on ? "true" : "false");
-      bgmToggle.textContent = on ? "BGM 일시정지" : "BGM 재생";
-      localStorage.setItem(KEY, on ? "1" : "0");
+  const ALWAYS_GATE = true;
 
-      if (on) {
-        const p = bgm.play();
-        if (p && typeof p.catch === "function") p.catch(() => {});
-      } else {
-        bgm.pause();
+  const tracks = [
+    { key: "bgm", el: a1 },
+    { key: "bgm2", el: a2 },
+    { key: "bgm3", el: a3 },
+  ].filter(t => t.el);
+
+  const map = Object.fromEntries(tracks.map(t => [t.key, t.el]));
+
+  function showGate(show) {
+    if (!gate) return;
+    gate.classList.toggle("is-hidden", !show);
+    gate.setAttribute("aria-hidden", show ? "false" : "true");
+  }
+
+  function gateVisible() {
+    return gate && !gate.classList.contains("is-hidden");
+  }
+
+  function stopAll({ reset = false } = {}) {
+    tracks.forEach(({ el }) => {
+      el.pause();
+      if (reset) {
+        try { el.currentTime = 0; } catch (e) {}
       }
+    });
+  }
+
+  function getSelectedKey() {
+    const saved = localStorage.getItem(KEY_SEL);
+    if (saved && map[saved]) return saved;
+    return tracks[0]?.key || "bgm";
+  }
+
+  function setSelectedKey(k) {
+    if (!map[k]) k = tracks[0]?.key || "bgm";
+    localStorage.setItem(KEY_SEL, k);
+    if (sel) sel.value = k;
+    updateNowText();
+  }
+
+  function updateNowText() {
+    if (!now) return;
+    const label = sel?.selectedOptions?.[0]?.textContent || "—";
+    now.textContent = `♫ Now Playing · ${label}`;
+  }
+
+  function setPlayUI(on) {
+    if (!btnPlay) return;
+    btnPlay.setAttribute("aria-pressed", on ? "true" : "false");
+    btnPlay.textContent = on ? "⏸︎ Pause" : "▶︎ Play";
+  }
+
+  async function playSelected({ reset = true } = {}) {
+    const k = getSelectedKey();
+    const audio = map[k];
+    if (!audio) return;
+
+    stopAll({ reset: false });
+    if (reset) {
+      try { audio.currentTime = 0; } catch (e) {}
     }
+    const p = audio.play();
+    if (p && typeof p.catch === "function") await p.catch(() => {});
+  }
 
-    function enter() {
-      // "입장"은 사용자 제스처 이벤트 안에서 실행되어야 재생이 확실함
-      localStorage.setItem("yxl_gate_ok", "1");
-      showGate(false);
-      setBgm(true);
-    }
+  async function setOn(on) {
+    localStorage.setItem(KEY_ON, on ? "1" : "0");
+    setPlayUI(on);
+    if (on) await playSelected({ reset: false });
+    else stopAll({ reset: false });
+  }
 
-    // 초기 표시
-    const allowed = localStorage.getItem("yxl_gate_ok") === "1";
-    showGate(ALWAYS_GATE ? true : !allowed);
-    if (gateMsg) gateMsg.textContent = "입장하려면 버튼을 눌러주세요.";
+  function moveTrack(dir) {
+    const cur = getSelectedKey();
+    const idx = tracks.findIndex(t => t.key === cur);
+    if (idx < 0) return;
 
-    // 버튼 클릭 = 입장 + BGM 강제 재생
-    gateBtn?.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    const nextIdx = (idx + dir + tracks.length) % tracks.length;
+    setSelectedKey(tracks[nextIdx].key);
+  }
+
+  function enter() {
+    localStorage.setItem("yxl_gate_ok", "1");
+    showGate(false);
+    setOn(true);
+  }
+
+  // 초기 게이트 표시
+  const allowed = localStorage.getItem("yxl_gate_ok") === "1";
+  showGate(ALWAYS_GATE ? true : !allowed);
+  if (gateMsg) gateMsg.textContent = "입장하려면 버튼을 눌러주세요.";
+
+  // 선택/표시 초기화
+  setSelectedKey(getSelectedKey());
+
+  // UI만 복원(자동재생 X)
+  const isOn = localStorage.getItem(KEY_ON) === "1";
+  setPlayUI(isOn);
+
+  // 게이트 버튼
+  gateBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    enter();
+  });
+
+  // 배경 클릭도 입장
+  gate?.addEventListener("click", (e) => {
+    if (e.target === gate || e.target.classList?.contains("gate-sparkles") || e.target.id === "gateParticles") {
       enter();
-    });
-
-    // 버튼 밖(게이트 배경) 클릭해도 입장되도록 (모바일/오작동 대비)
-    gate?.addEventListener("click", (e) => {
-      if (!gateBtn) return;
-      if (e.target === gate || e.target.classList?.contains("gate-sparkles") || e.target.id === "gateParticles") {
-        enter();
-      }
-    });
-
-    // 상단 토글 버튼
-    bgmToggle?.addEventListener("click", () => {
-      const on = localStorage.getItem(KEY) === "1";
-      setBgm(!on);
-    });
-
-    // UI 상태 복원(자동재생은 하지 않음)
-    const isOn = localStorage.getItem(KEY) === "1";
-    if (bgmToggle) {
-      bgmToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
-      bgmToggle.textContent = isOn ? "BGM 일시정지" : "BGM 재생";
     }
-  })();
+  });
+
+  // 재생/일시정지
+  btnPlay?.addEventListener("click", async () => {
+    if (gateVisible()) return enter();
+    const on = localStorage.getItem(KEY_ON) === "1";
+    await setOn(!on);
+  });
+
+  // 이전/다음(스킵)
+  btnPrev?.addEventListener("click", async () => {
+    if (gateVisible()) return enter();
+    moveTrack(-1);
+    const on = localStorage.getItem(KEY_ON) === "1";
+    if (on) await playSelected({ reset: true });
+  });
+
+  btnNext?.addEventListener("click", async () => {
+    if (gateVisible()) return enter();
+    moveTrack(+1);
+    const on = localStorage.getItem(KEY_ON) === "1";
+    if (on) await playSelected({ reset: true });
+  });
+
+  // 셀렉트 변경
+  sel?.addEventListener("change", async () => {
+    if (gateVisible()) return;
+    setSelectedKey(sel.value);
+    const on = localStorage.getItem(KEY_ON) === "1";
+    if (on) await playSelected({ reset: true });
+  });
+})();
 
   /* =========================
      Init

@@ -335,17 +335,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return out;
   }
 
-      <div class="cal-top">
-        <div class="cal-title">${dt.getFullYear()}년 ${dt.getMonth() + 1}월</div>
-        ${changed ? `<div class="cal-badge">월 변경</div>` : `<div class="cal-badge" style="opacity:.55;">유지</div>`}
-      </div>
-      <div class="cal-mini">
-        <div>이전: <b>${last || "—"}</b></div>
-        <div>현재: <b>${ym}</b></div>
-      </div>
-    `;
-  }
-
   function renderSynergy() {
     const table = $("#synergyTable");
     if (!table) return;

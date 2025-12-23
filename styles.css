@@ -388,3 +388,5 @@
   color: rgba(255,255,255,.9);
   font-weight: 800;
 }
+/* Gate 닫힘 상태면 숨김 */
+#gate[aria-hidden="true"] { display: none !important; }

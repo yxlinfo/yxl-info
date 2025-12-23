@@ -55,36 +55,34 @@
       <!-- ✅ BGM 대시보드 -->
       <div class="header-actions">
         <div class="bgm-dash" role="group" aria-label="BGM 컨트롤">
-          <span class="bgm-mark">♫ BGM</span>
+  <!-- 1줄: 재생 길이(가로로 길게) -->
+  <div class="bgm-row bgm-row-top" aria-label="재생 길이">
+    <div class="bgm-gauges bgm-gauges-top" aria-label="재생 게이지">
+      <span id="bgmTime" class="bgm-time" aria-label="재생 시간">00:00 / 00:00</span>
+      <input id="bgmSeek" class="bgm-range bgm-seek" type="range" min="0" max="100" value="0" step="0.01" aria-label="재생 위치" />
+    </div>
+  </div>
 
-          <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
-          <span class="dot">·</span>
-          <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
-          <span class="dot">·</span>
-          <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
+  <!-- 2줄: 나머지(버튼/곡 선택/볼륨) -->
+  <div class="bgm-row bgm-row-bottom" aria-label="재생 컨트롤">
+    <span class="bgm-mark">♫ BGM</span>
 
-          <span class="dot">·</span>
-          <select id="bgmSelect" class="select" aria-label="BGM 선택">
-            <option value="bgm">Justin Bieber - Mistletoe</option>
-            <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
-            <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
-          </select>
+    <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
+    <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
+    <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
 
-          <!-- ✅ 시간/볼륨 게이지 -->
-          <span class="dot">·</span>
-          <div class="bgm-gauges" aria-label="BGM 게이지">
-            <span id="bgmTime" class="bgm-time" aria-label="재생 시간">00:00 / 00:00</span>
+    <select id="bgmSelect" class="select" aria-label="BGM 선택">
+      <option value="bgm">Justin Bieber - Mistletoe</option>
+      <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
+      <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
+    </select>
 
-            <input id="bgmSeek" class="bgm-range bgm-seek" type="range"
-              min="0" max="100" value="0" step="0.1"
-              aria-label="재생 위치 조절" />
-
-            <span class="bgm-vol-label" aria-hidden="true">VOL</span>
-            <input id="bgmVol" class="bgm-range bgm-vol" type="range"
-              min="0" max="100" value="70" step="1"
-              aria-label="볼륨 조절" />
-          </div>
-        </div>
+    <div class="bgm-vol-wrap" aria-label="볼륨">
+      <span class="bgm-vol-label">VOL</span>
+      <input id="bgmVol" class="bgm-range bgm-vol" type="range" min="0" max="100" value="30" step="1" aria-label="볼륨" />
+    </div>
+  </div>
+</div>
 
         <div class="updated">업데이트: <span id="updatedAt">--</span></div>
       </div>

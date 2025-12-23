@@ -803,6 +803,27 @@ document.addEventListener("DOMContentLoaded", () => {
       { gen: "8대부장",  name: "은우",   cnt: "3,102,272개" },
       { gen: "9대부장",  name: "은우",   cnt: "3,611,788개" },
       { gen: "10대부장", name: "지유",   cnt: "4,001,954개" },
+      { gen: "회장님",  name: "지유의냥강조", cnt: "" },
+      { gen: "부회장님",  name: "까스댄스댄스", cnt: "" },
+      { gen: "3등",  name: "바구.", cnt: "" },
+      { gen: "4등",  name: "BIONANO_", cnt: "" },
+      { gen: "5등",  name: "벤카쉐", cnt: "" },
+      { gen: "6등",  name: "#woorinangni", cnt: "" },
+      { gen: "7등",  name: "놀러온더힐잉", cnt: "" },
+      { gen: "8등",  name: "zozo20", cnt: "" },
+      { gen: "9등",  name: "zexke4242", cnt: "" },
+      { gen: "10등",  name: "막시무스™", cnt: "" },
+      { gen: "11등",  name: "BBinnss", cnt: "" },
+      { gen: "12등",  name: "A-landland", cnt: "" },
+      { gen: "13등",  name: "66.큐브~*", cnt: "" },
+      { gen: "14등",  name: "00사용안함00", cnt: "" },
+      { gen: "15등",  name: "[롱]Me낼름", cnt: "" },
+      { gen: "16등",  name: "A-LANY@@", cnt: "" },
+      { gen: "17등",  name: "현자타임보성", cnt: "" },
+      { gen: "18등",  name: "lead-off", cnt: "" },
+      { gen: "19등",  name: "JS2", cnt: "" },
+      { gen: "20등",  name: "낭로우로우로", cnt: "" },
+
     ];
 
     // 모션 최소화 환경에서는 1대만 고정 표시
@@ -811,7 +832,7 @@ document.addEventListener("DOMContentLoaded", () => {
       line.innerHTML = `
         <span class="hofGen">${it.gen}</span>
         <span class="hofName">${it.name}</span>
-        <span class="hofCnt">(${it.cnt})</span>
+        ${it.cnt ? `<span class="hofCnt">(${it.cnt})</span>` : ``}
       `;
       line.style.opacity = "1";
       line.style.transform = "translateY(0)";
@@ -832,7 +853,7 @@ document.addEventListener("DOMContentLoaded", () => {
       line.innerHTML = `
         <span class="hofGen">${item.gen}</span>
         <span class="hofName">${item.name}</span>
-        <span class="hofCnt">(${item.cnt})</span>
+        ${item.cnt ? `<span class="hofCnt">(${item.cnt})</span>` : ``}
       `;
     }
 

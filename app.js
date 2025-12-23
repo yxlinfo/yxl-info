@@ -1,4 +1,26 @@
 
+// ===== SOOP BJID 고정 매핑(11명) =====
+function normSoopName(s) {
+  return String(s || "").replace(/[♥♡]/g, "").trim();
+}
+const SOOP_BJID_MAP = {
+  "리윤_": "sladk51",
+  "후잉": "jaeha010",
+  "하랑짱": "asy1218",
+  "쩔밍": "wnsdus5900",
+  "김유정S2": "tkek55",
+  "서니_": "iluvpp",
+  "#율무": "offside629",
+  "소다": "zbxlzzz",
+  "강소지": "nowsoji",
+  "나래님": "sssukki",
+  "유나연": "jeewon1202",
+};
+function getSoopIdFromName(streamerName) {
+  const key = normSoopName(streamerName);
+  return SOOP_BJID_MAP[key] || null;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Config
@@ -486,36 +508,34 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function resolveSoopInfo(streamerName) {
+    const user_id = getSoopIdFromName(streamerName);
+    if (!user_id) throw new Error(`BJID 매핑 없음: ${streamerName}`);
+
     const cache = getSoopCache();
-    const key = normalize(streamerName);
-    const hit = cache[key];
+    const key = `soop:${user_id}`;
+    const cached = cache.get(key);
     const now = Date.now();
-    if (hit && now - hit.ts < CACHE_TTL_MS) return hit.value;
+    if (cached && now - cached.ts < 10 * 60 * 1000) return cached.value;
 
-    const keyword = encodeURIComponent(streamerName.replace(/[♥♡]/g, "").trim());
-    // 1) bjSearch -> user_id + station_logo
-    const bjUrl = `https://sch.sooplive.co.kr/api.php?m=bjSearch&keyword=${keyword}&nListCnt=10&t=json`;
-    const bjJson = await soopFetchJson(bjUrl);
-    const bj = pickBestBjSearch(bjJson.DATA, streamerName);
-    if (!bj) throw new Error("스트리머 검색 결과 없음");
-
-    // 2) liveSearch -> live 여부 + 썸네일
+    // BJ 검색(bjSearch) 없이: BJID 기준으로 라이브 여부만 확인
+    const keyword = encodeURIComponent(user_id);
     const liveUrl = `https://sch.sooplive.co.kr/api.php?m=liveSearch&keyword=${keyword}&nListCnt=30&t=json`;
     const liveJson = await soopFetchJson(liveUrl);
-    const live = pickBestLiveSearch(liveJson.REAL_BROAD, bj.user_id, streamerName);
+    const list = (liveJson && (liveJson.REAL_BROAD || liveJson.DATA || [])) || [];
+    const live = Array.isArray(list)
+      ? list.find((x) => String(x?.user_id || x?.USER_ID || "").toLowerCase() === user_id.toLowerCase())
+      : null;
 
     const value = {
-      user_id: bj.user_id,
-      user_nick: bj.user_nick,
-      station_logo: bj.station_logo,
+      user_id,
+      station_logo: "",
       isLive: !!live,
-      live_thumb: live?.broad_img || null,
-      live_url: live?.url || null,
-      live_title: live?.broad_title || null,
+      live_url: live ? (live.live_url || live.LIVE_URL || "") : "",
+      live_thumb: live ? (live.live_thumb || live.LIVE_THUMB || "") : "",
+      live_title: live ? (live.live_title || live.LIVE_TITLE || live.broad_title || live.BROAD_TITLE || "") : "",
     };
 
-    cache[key] = { ts: now, value };
-    setSoopCache(cache);
+    cache.set(key, { ts: now, value });
     return value;
   }
 
@@ -529,7 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.innerHTML = `
       <img class="thumb" alt="SOOP 썸네일" style="display:none;" />
       <div class="body">
-        <p class="title"><span class="t-emoji">❔</span><span class="t-name"></span></p>
+        <p class="title"><span class="t-emoji"></span><span class="t-name"></span></p>
         <p class="sub"></p>
       </div>
     `;
@@ -552,7 +572,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function enhanceOneName(nameEl) {
     const streamerName = nameEl.dataset.streamer || nameEl.textContent || "";
-    const emojiEl = nameEl.closest("td")?.querySelector(".live-emoji");
+    
+    const soopId = getSoopIdFromName(streamerName);
+    if (!soopId) return;
+const emojiEl = nameEl.closest("td")?.querySelector(".live-emoji");
 
     // default state
     if (emojiEl) emojiEl.textContent = "";
@@ -563,7 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (emojiEl) emojiEl.textContent = info.isLive ? "🔴" : "";
       // 클릭 시 방송국(또는 라이브) 열기
       nameEl.onclick = () => {
-        const url = info.isLive && info.live_url ? info.live_url : `https://ch.sooplive.co.kr/${info.user_id}`;
+        const url = info.isLive && info.live_url ? info.live_url : `https://ch.sooplive.co.kr/${soopId}`;
         window.open(url, "_blank", "noopener,noreferrer");
       };
     } catch (e) {
@@ -575,6 +598,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tooltip = ensureTooltipEl();
 
     const show = async (ev) => {
+      if (!info || !info.isLive) return;
       tooltip.style.display = "block";
       moveTooltip(tooltip, ev.clientX, ev.clientY);
 
@@ -586,33 +610,18 @@ document.addEventListener("DOMContentLoaded", () => {
       tName.textContent = streamerName;
 
       if (!info) {
-        tEmoji.textContent = "";
+        tEmoji.textContent = "❔";
         img.removeAttribute("src");
-        img.style.display = "none";
         sub.textContent = "SOOP 정보를 불러오지 못했습니다.";
         return;
       }
 
-      // 🔴: 방송 ON 표시(라이브만)
-      tEmoji.textContent = info.isLive ? "🔴" : "";
-
-      if (info.isLive) {
-        // 방송중인 사람만 썸네일 표시
-        const src = info.live_thumb || info.station_logo || "";
-        if (src) {
-          img.src = src;
-          img.style.display = "";
-        } else {
-          img.removeAttribute("src");
-          img.style.display = "none";
-        }
-        sub.textContent = info.live_title ? `LIVE · ${info.live_title}` : "LIVE";
-      } else {
-        // 방송 OFF: 썸네일 숨김
-        img.removeAttribute("src");
-        img.style.display = "none";
-        sub.textContent = "OFFLINE";
-      }
+      tEmoji.textContent = "🔴";
+      img.src = info.live_thumb || "";
+      img.style.display = img.src ? "" : "none";
+      sub.textContent = info.isLive
+        ? (info.live_title ? `LIVE · ${info.live_title}` : "LIVE")
+        : "OFFLINE";
     };
 
     const hide = () => {

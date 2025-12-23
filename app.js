@@ -409,7 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
           <tr>
             <td>${rank ?? ""}</td>
             <td>
-              <span class="live-emoji" data-streamer="${String(name ?? "")}">❔</span>
               <span class="soop-name" data-streamer="${String(name ?? "")}">${name ?? ""}</span>
             </td>
             <td class="num">${numFmt(balloons)}</td>

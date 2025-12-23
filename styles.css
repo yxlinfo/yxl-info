@@ -808,73 +808,183 @@ body::after{
   .bgm-dash .select{ width: 100%; max-width: 100%; }
 }
 
+/* =====================================================
+   ✅ BGM 헤더 플레이어 레이아웃 FIX (한 줄, 게이지 길게, 오버플로 방지)
+   - 기존 2줄 레이아웃을 덮어씁니다.
+===================================================== */
+.header-actions{
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  min-width: 0;
+}
+
+/* 플레이어는 남는 영역을 꽉 채우되, 내부는 절대 줄바꿈 금지 */
+.bgm-dash{
+  flex: 1 1 auto !important;
+  min-width: 0;
+  width: min(920px, 100%) !important;
+  max-width: 920px !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 10px !important;
+  justify-content: flex-end;
+}
+
+/* 구분점은 좁은 폭에서 자동 숨김 */
+@media (max-width: 980px){
+  .bgm-dash .dot{ display:none; }
+}
+
+/* 게이지 영역도 한 줄 유지 + Seek만 길게 */
+.bgm-gauges{
+  flex: 1 1 auto !important;
+  min-width: 0;
+  width: auto !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+#bgmTime{
+  flex: 0 0 auto;
+  min-width: 92px;
+}
+
+/* ✅ 재생 길이 게이지는 남는 공간 전부 사용 */
+#bgmSeek{
+  flex: 1 1 auto !important;
+  min-width: 280px;
+}
+
+/* ✅ 볼륨은 고정 폭 */
+#bgmVol{
+  flex: 0 0 110px !important;
+  width: 110px !important;
+}
+
+.bgm-vol-label{ margin-left: 6px !important; }
+
+/* 업데이트는 오른쪽에 붙이고 줄바꿈 금지 */
+.updated{
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+/* 아주 좁은 화면에서는 플레이어가 넘치지 않도록 최소폭 조정 */
+@media (max-width: 740px){
+  #bgmSeek{ min-width: 160px; }
+  #bgmVol{ width: 96px !important; flex-basis: 96px !important; }
+  #bgmTime{ min-width: 84px; }
+}
 
 /* =========================
-   ✅ BGM UI: 2줄 레이아웃(재생 게이지 길게 + 오른쪽 정렬)
-   - styles.css 맨 아래(또는 기존 BGM 섹션 아래)에 붙여도 OK
+   ✅ BGM UI (2-row compact, no overflow)
 ========================= */
 .header-actions{
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+  flex:1;
+  min-width:0;
 }
 
-/* 플레이어는 오른쪽에 딱 붙이고, 불필요한 오른쪽 여백 줄이기 */
 .bgm-dash{
-  width: min(920px, 100%);
-  margin-left: auto;
-  display: grid;
-  grid-template-rows: auto auto;
-  gap: 8px;
-  padding: 10px 12px;
+  width: min(860px, 100%);
+  margin-left:auto;
+  display:grid;
+  grid-template-rows:auto auto;
+  gap:6px;
+  padding:10px 12px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.22);
+  box-shadow: 0 12px 34px rgba(0,0,0,.28);
+  min-width:0;
 }
 
-/* 1줄: 재생 길이(가로로 최대한 길게) */
-.bgm-row-top{ width: 100%; }
-.bgm-gauges-top{
+.bgm-row{ min-width:0; }
+.bgm-top{
   display:flex;
   align-items:center;
-  gap: 10px;
-  width: 100%;
+  gap:10px;
+  min-width:0;
 }
-#bgmTime{
-  min-width: 98px;
-  text-align: left;
+.bgm-time{
+  font-size:12px;
+  color: rgba(255,255,255,.78);
+  font-variant-numeric: tabular-nums;
+  white-space:nowrap;
+  flex:0 0 auto;
 }
-#bgmSeek{
-  flex: 1 1 auto;
-  min-width: 420px; /* 데스크탑에서 길게 */
+.bgm-seek{
+  flex:1 1 auto;
+  min-width:260px;
 }
 
-/* 2줄: 버튼/선택/볼륨은 오른쪽 정렬, 필요하면 줄바꿈 */
-.bgm-row-bottom{
+.bgm-bottom{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.bgm-left{
   display:flex;
   align-items:center;
-  justify-content:flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap:10px;
+  min-width:0;
 }
-
-/* 곡 선택은 너무 길어지지 않게 */
-.bgm-row-bottom .select{
-  min-width: 260px;
-  max-width: 360px;
-}
-
-/* 볼륨은 '고정 느낌'으로 컴팩트하게 */
 .bgm-vol-wrap{
   display:flex;
   align-items:center;
-  gap: 8px;
+  gap:8px;
 }
-#bgmVol{
-  width: 140px;
+.bgm-vol-label{
+  font-size:12px;
+  letter-spacing:.2px;
+  color: rgba(255,255,255,.75);
+}
+.bgm-vol{ width:130px; }
+
+.bgm-mid{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  flex-wrap:nowrap;
+}
+.bgm-right{ min-width:0; }
+.bgm-select{
+  width: 320px;
+  max-width: 38vw;
 }
 
-/* 화면 좁으면 자연스럽게 축소/줄바꿈 */
+/* range style reuse */
+.bgm-range{
+  height: 6px;
+  accent-color: rgba(125,211,252,.95);
+}
+
+/* 버튼 조금 더 컴팩트 */
+.bgm-dash .btn{
+  padding:9px 12px;
+  font-size:13px;
+}
+
+/* updatedAt은 플레이어 우측 정렬 유지 */
+.updated{ text-align:right; }
+
+/* 좁아질 때는 셀렉트/볼륨을 줄여서 2줄 유지 */
 @media (max-width: 980px){
-  .bgm-dash{ width: 100%; }
-  #bgmSeek{ min-width: 240px; }
-  .bgm-row-bottom .select{ min-width: 200px; max-width: 100%; }
+  .bgm-select{ width: 260px; }
+  .bgm-vol{ width: 110px; }
 }
-
+@media (max-width: 760px){
+  .bgm-select{ width: 220px; }
+  .bgm-seek{ min-width: 180px; }
+}

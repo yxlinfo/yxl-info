@@ -49,8 +49,15 @@
 
     <div class="wrap header-inner">
       <div class="brand">
-        <img class="brand-gif" src="assets/logo.gif" alt="YXL" />
-      </div>
+        <a class="logoBox" href="#" aria-label="YXLINFO 홈">
+          <img class="logoImg" src="assets/logo.gif" alt="YXLINFO" />
+          <div class="logoMeta">
+            <div class="logoTitle">YXLINFO</div>
+            <div class="logoSub">RANK · SYNERGY · ARCHIVE</div>
+          </div>
+          <span class="logoBadge" aria-label="시즌">2025.12</span>
+        </a>
+</div>
 
       <!-- ✅ BGM 대시보드 -->
         <div class="header-actions">
@@ -76,11 +83,21 @@
         </select>
       </div>
     </div>
-
-    <div class="updated">업데이트: <span id="updatedAt">--</span></div>
   </div>
   <!-- ✅ 여기까지 -->
     </div>
+
+  <!-- ✅ Hall of Fame (부장 명예의 전당) -->
+  <div class="wrap hof-strip">
+    <div class="hofMarquee" aria-label="명예의 전당 부장 기록">
+            <div class="yxlDday yxlDday--hof" id="yxlDday" aria-label="YXL 시작일 카운트"></div>
+<div class="hofMarquee__label">명예의 전당</div>
+      <div class="hofMarquee__viewport">
+        <div class="hofMarquee__line" id="hofLine" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
   </header>
 
   <main class="wrap">
@@ -205,7 +222,8 @@
                     <th data-key="순위">순위</th>
                     <th data-key="비제이명">스트리머</th>
                     <th data-key="월별 누적별풍선" style="text-align:right;">누적별풍선</th>
-</tr>
+                    <th data-key="변동" style="text-align:right;">변동사항</th>
+                  </tr>
                 </thead>
                 <tbody></tbody>
               </table>

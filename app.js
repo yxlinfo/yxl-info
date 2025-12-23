@@ -361,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { key: "순위", label: "순위", right: false },
       { key: "비제이명", label: "스트리머", right: false },
       { key: "월별 누적별풍선", label: "누적별풍선", right: true },
-      ];
+    ];
     thead.innerHTML = `
       <tr>
         ${headers
@@ -377,6 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let rows = [...state.synergy.rows].sort(compareBy(key, dir));
 
     const maxBalloon = Math.max(0, ...rows.map(r => Number(r["월별 누적별풍선"] ?? 0)));
+
 
     tbody.innerHTML = rows
       .map((r) => {
@@ -784,9 +785,160 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   })();
 
+
+  /* =========================
+     Hall of Fame (부장 명예의 전당)
+     - 공백 → 1대 → ... → 10대 (1개씩 입장/정지/퇴장)
+     - 10대 끝나면 잠깐 공백 후 1대로 재시작
+  ========================= */
+  function initHallOfFame() {
+    const line = document.getElementById("hofLine");
+    if (!line) return;
+
+    const HOF = [
+      { gen: "1대부장",  name: "류시아", cnt: "4,698,914개" },
+      { gen: "2대부장",  name: "류시아", cnt: "3,070,017개" },
+      { gen: "3대부장",  name: "류시아", cnt: "3,687,480개" },
+      { gen: "4대부장",  name: "유누",   cnt: "2,750,614개" },
+      { gen: "5대부장",  name: "유누",   cnt: "2,800,254개" },
+      { gen: "6대부장",  name: "유누",   cnt: "2,358,342개" },
+      { gen: "7대부장",  name: "루루",   cnt: "2,898,789개" },
+      { gen: "8대부장",  name: "은우",   cnt: "3,102,272개" },
+      { gen: "9대부장",  name: "은우",   cnt: "3,611,788개" },
+      { gen: "10대부장", name: "지유",   cnt: "4,001,954개" },
+      { gen: "회장님", name: "지유의냥강조" },
+      { gen: "부회장님", name: "까스댄스댄스" },
+      { gen: "3등", name: "바구." },
+      { gen: "4등", name: "BIONANO_" },
+      { gen: "5등", name: "벤카쉐" },
+      { gen: "6등", name: "#woorinangni" },
+      { gen: "7등", name: "놀러온더힐잉" },
+      { gen: "8등", name: "zozo20" },
+      { gen: "9등", name: "zexke4242" },
+      { gen: "10등", name: "막시무스™" },
+      { gen: "11등", name: "BBinnss" },
+      { gen: "12등", name: "A-landland" },
+      { gen: "13등", name: "66.큐브~*" },
+      { gen: "14등", name: "00사용안함00" },
+      { gen: "15등", name: "[롱]Me낼름" },
+      { gen: "16등", name: "A-LANY@@" },
+      { gen: "17등", name: "현자타임보성" },
+      { gen: "18등", name: "lead-off" },
+      { gen: "19등", name: "JS2" },
+      { gen: "20등", name: "낭로우로우로" },
+    ];
+
+    // 모션 최소화 환경에서는 1대만 고정 표시
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const it = HOF[0];
+      line.innerHTML = `
+        <span class="hofGen">${it.gen}</span>
+        <span class="hofName">${it.name}</span>
+        ${it.cnt ? `<span class="hofCnt">(${it.cnt})</span>` : ""}
+      `;
+      line.style.opacity = "1";
+      line.style.transform = "translateY(0)";
+      return;
+    }
+
+    const FIRST_BLANK_MS = 1000; // 첫 공백
+    const PER_ITEM_MS = 4500;    // 한 명 사이클(= CSS --hofDur)
+    const GAP_MS = 150;          // 항목 사이 텀
+    const END_BLANK_MS = 1000;   // 10대 끝 공백
+
+    line.style.setProperty("--hofDur", `${PER_ITEM_MS}ms`);
+
+    let i = 0;
+    let timer = null;
+
+    function setLine(item) {
+      const cntHtml = item.cnt ? `<span class="hofCnt">(${item.cnt})</span>` : "";
+      line.innerHTML = `
+        <span class="hofGen">${item.gen}</span>
+        <span class="hofName">${item.name}</span>
+        ${cntHtml}
+      `;
+    }
+
+    function resetToBlank() {
+      line.classList.remove("is-anim");
+      line.innerHTML = "";
+      line.style.opacity = "0";
+      line.style.transform = "translateY(120%)";
+    }
+
+    function playOnce(item) {
+      setLine(item);
+
+      line.classList.remove("is-anim");
+      void line.offsetWidth; // reflow -> 애니메이션 리셋
+      line.classList.add("is-anim");
+    }
+
+    function scheduleNext(delay) {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(tick, delay);
+    }
+
+    function tick() {
+      playOnce(HOF[i]);
+
+      const isLast = i === HOF.length - 1;
+      i = (i + 1) % HOF.length;
+
+      const nextDelay = PER_ITEM_MS + GAP_MS + (isLast ? END_BLANK_MS : 0);
+
+      // 다음 시작 예약
+      scheduleNext(nextDelay);
+
+      // 사이클이 끝난 직후 공백으로 리셋
+      setTimeout(() => {
+        resetToBlank();
+      }, PER_ITEM_MS);
+    }
+
+    // 시작: 공백 -> 1대부터
+    resetToBlank();
+    scheduleNext(FIRST_BLANK_MS);
+  }
+
+
+  /* =========================
+     YXL 시작일 D+ 카운트 (로고 옆)
+     - ♥Y X L _ 24.10.01 ~ ing ( d + N일 ) ♥
+     - 시작일 포함(=diff+1) 기준
+  ========================= */
+  function initYxlDday() {
+    const el = document.getElementById("yxlDday");
+    if (!el) return;
+
+    const START_Y = 2024;
+    const START_M = 9;  // 0-indexed (10월)
+    const START_D = 1;
+    const START_DISPLAY = "24.10.01";
+
+    function calcDays() {
+      const now = new Date();
+      // 로컬 날짜 기준(자정 고정)
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const start = new Date(START_Y, START_M, START_D);
+      const diff = Math.floor((today.getTime() - start.getTime()) / 86400000);
+      const dplus = Math.max(0, diff + 1);
+
+      el.textContent = `YXL · ${START_DISPLAY} ~ ing · D+${dplus}`;
+    }
+
+    calcDays();
+    // 자정 넘김 대비(가볍게 10분마다 갱신)
+    setInterval(calcDays, 10 * 60 * 1000);
+  }
+
+
   /* =========================
      Init
   ========================= */
+  initYxlDday();
+  initHallOfFame();
   initTabs();
   initSearchInputs();
   loadAll();

@@ -385,9 +385,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const name = r["비제이명"];
         const balloonsNum = Number(r["월별 누적별풍선"] ?? 0);
         const pct = maxBalloon ? (balloonsNum / maxBalloon) * 100 : 0;
+        const rankNum = Number(rank ?? 0);
+        const top = rankNum === 1 ? 1 : (rankNum === 2 ? 2 : (rankNum === 3 ? 3 : 0));
+        const trClass = top ? ` class="top${top}"` : "";
+        const rankHtml = top
+          ? `<span class="rank-badge rank-${top}"><span class="medal">${top===1?"🥇":top===2?"🥈":"🥉"}</span><span class="rank-num">${rankNum}</span></span>`
+          : `${rank ?? ""}`;
         return `
-          <tr>
-            <td>${rank ?? ""}</td>
+          <tr${trClass}>
+            <td class="rankcell">${rankHtml}</td>
             <td>
               <span class="soop-name" data-streamer="${String(name ?? "")}">${name ?? ""}</span>
             </td>

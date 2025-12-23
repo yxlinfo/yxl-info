@@ -6,9 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const FILE_MAIN = "YXL_통합.xlsx";
   const FILE_SYNERGY = "시너지표.xlsx";
   const AUTO_REFRESH_MS = 3 * 60 * 60 * 1000; // 3시간
-
-  const CACHE_KEY_SOOP = "yxl_soop_cache_v1";
-  const CACHE_TTL_MS = 10 * 60 * 1000; // 10분
+// 10분
 
   const state = {
     main: {
@@ -408,10 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `
           <tr>
             <td>${rank ?? ""}</td>
-            <td>
-              <span class="live-emoji" data-streamer="${String(name ?? "")}">❔</span>
-              <span class="soop-name" data-streamer="${String(name ?? "")}">${name ?? ""}</span>
-            </td>
+            <td>${name ?? ""}</td>
             <td class="num">${numFmt(balloons)}</td>
             <td class="num">${delta ?? ""}</td>
           </tr>
@@ -430,215 +425,16 @@ document.addEventListener("DOMContentLoaded", () => {
           state.synergySort.dir = state.synergySort.dir === "asc" ? "desc" : "asc";
         }
         renderSynergy();
-        initSoopEnhance(); // rebind after rerender
+// rebind after rerender
       });
     });
 
     renderSynergyMeta();
-    initSoopEnhance();
-  }
+}
 
-  /* =========================
-     SOOP Hover + Live Status
-  ========================= */
-  function getSoopCache() {
-    try {
-      return JSON.parse(localStorage.getItem(CACHE_KEY_SOOP) || "{}");
-    } catch {
-      return {};
-    }
-  }
+  
 
-  function setSoopCache(cache) {
-    try {
-      localStorage.setItem(CACHE_KEY_SOOP, JSON.stringify(cache));
-    } catch {}
-  }
-
-  async function soopFetchJson(url) {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`SOOP API 실패: ${res.status}`);
-    return await res.json();
-  }
-
-  function pickBestBjSearch(dataArr, streamerName) {
-    const target = normalize(streamerName);
-    if (!Array.isArray(dataArr)) return null;
-
-    // exact nick match first
-    let best = dataArr.find((d) => normalize(d.user_nick) === target);
-    if (best) return best;
-
-    // contains match
-    best = dataArr.find((d) => normalize(d.user_nick).includes(target) || target.includes(normalize(d.user_nick)));
-    return best || dataArr[0] || null;
-  }
-
-  function pickBestLiveSearch(realBroadArr, bjid, streamerName) {
-    if (!Array.isArray(realBroadArr)) return null;
-    const target = normalize(streamerName);
-    let best = bjid ? realBroadArr.find((d) => d.user_id === bjid) : null;
-    if (best) return best;
-    best = realBroadArr.find((d) => normalize(d.user_nick) === target);
-    if (best) return best;
-    best = realBroadArr.find((d) => normalize(d.user_nick).includes(target) || target.includes(normalize(d.user_nick)));
-    return best || null;
-  }
-
-  async function resolveSoopInfo(streamerName) {
-    const cache = getSoopCache();
-    const key = normalize(streamerName);
-    const hit = cache[key];
-    const now = Date.now();
-    if (hit && now - hit.ts < CACHE_TTL_MS) return hit.value;
-
-    const keyword = encodeURIComponent(streamerName.replace(/[♥♡]/g, "").trim());
-    // 1) bjSearch -> user_id + station_logo
-    const bjUrl = `https://sch.sooplive.co.kr/api.php?m=bjSearch&keyword=${keyword}&nListCnt=10&t=json`;
-    const bjJson = await soopFetchJson(bjUrl);
-    const bj = pickBestBjSearch(bjJson.DATA, streamerName);
-    if (!bj) throw new Error("스트리머 검색 결과 없음");
-
-    // 2) liveSearch -> live 여부 + 썸네일
-    const liveUrl = `https://sch.sooplive.co.kr/api.php?m=liveSearch&keyword=${keyword}&nListCnt=30&t=json`;
-    const liveJson = await soopFetchJson(liveUrl);
-    const live = pickBestLiveSearch(liveJson.REAL_BROAD, bj.user_id, streamerName);
-
-    const value = {
-      user_id: bj.user_id,
-      user_nick: bj.user_nick,
-      station_logo: bj.station_logo,
-      isLive: !!live,
-      live_thumb: live?.broad_img || null,
-      live_url: live?.url || null,
-      live_title: live?.broad_title || null,
-    };
-
-    cache[key] = { ts: now, value };
-    setSoopCache(cache);
-    return value;
-  }
-
-  function ensureTooltipEl() {
-    let el = document.getElementById("soopTooltip");
-    if (el) return el;
-    el = document.createElement("div");
-    el.id = "soopTooltip";
-    el.className = "soop-tooltip";
-    el.style.display = "none";
-    el.innerHTML = `
-      <img class="thumb" alt="SOOP 썸네일" />
-      <div class="body">
-        <p class="title"><span class="t-emoji">❔</span><span class="t-name"></span></p>
-        <p class="sub"></p>
-      </div>
-    `;
-    document.body.appendChild(el);
-    return el;
-  }
-
-  function moveTooltip(el, x, y) {
-    const pad = 18;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const rect = el.getBoundingClientRect();
-    let nx = x + 12;
-    let ny = y + 12;
-    if (nx + rect.width + pad > vw) nx = x - rect.width - 12;
-    if (ny + rect.height + pad > vh) ny = y - rect.height - 12;
-    el.style.left = nx + "px";
-    el.style.top = ny + "px";
-  }
-
-  async function enhanceOneName(nameEl) {
-    const streamerName = nameEl.dataset.streamer || nameEl.textContent || "";
-    const emojiEl = nameEl.closest("td")?.querySelector(".live-emoji");
-
-    // default state
-    if (emojiEl) emojiEl.textContent = "⏳";
-
-    let info = null;
-    try {
-      info = await resolveSoopInfo(streamerName);
-      if (emojiEl) emojiEl.textContent = info.isLive ? "🟢" : "⚫";
-      // 클릭 시 방송국(또는 라이브) 열기
-      nameEl.onclick = () => {
-        const url = info.isLive && info.live_url ? info.live_url : `https://ch.sooplive.co.kr/${info.user_id}`;
-        window.open(url, "_blank", "noopener,noreferrer");
-      };
-    } catch (e) {
-      if (emojiEl) emojiEl.textContent = "❔";
-      nameEl.onclick = null;
-      nameEl.dataset.soopError = "1";
-    }
-
-    const tooltip = ensureTooltipEl();
-
-    const show = async (ev) => {
-      tooltip.style.display = "block";
-      moveTooltip(tooltip, ev.clientX, ev.clientY);
-
-      const img = tooltip.querySelector(".thumb");
-      const tEmoji = tooltip.querySelector(".t-emoji");
-      const tName = tooltip.querySelector(".t-name");
-      const sub = tooltip.querySelector(".sub");
-
-      tName.textContent = streamerName;
-
-      if (!info) {
-        tEmoji.textContent = "❔";
-        img.removeAttribute("src");
-        sub.textContent = "SOOP 정보를 불러오지 못했습니다.";
-        return;
-      }
-
-      tEmoji.textContent = info.isLive ? "🟢" : "⚫";
-      img.src = info.isLive && info.live_thumb ? info.live_thumb : info.station_logo;
-      sub.textContent = info.isLive
-        ? (info.live_title ? `LIVE · ${info.live_title}` : "LIVE")
-        : "OFFLINE";
-    };
-
-    const hide = () => {
-      tooltip.style.display = "none";
-    };
-
-    nameEl.addEventListener("mouseenter", show);
-    nameEl.addEventListener("mousemove", (ev) => moveTooltip(tooltip, ev.clientX, ev.clientY));
-    nameEl.addEventListener("mouseleave", hide);
-  }
-
-  function initSoopEnhance() {
-    const nameEls = $$(".soop-name");
-    if (!nameEls.length) return;
-
-    // 중복 처리 방지
-    nameEls.forEach((el) => {
-      if (el.dataset.soopBound === "1") return;
-      el.dataset.soopBound = "1";
-    });
-
-    // 유니크 스트리머만 순차 로딩(과도한 요청 방지)
-    const uniq = [];
-    const seen = new Set();
-    nameEls.forEach((el) => {
-      const k = normalize(el.dataset.streamer || el.textContent || "");
-      if (!k || seen.has(k)) return;
-      seen.add(k);
-      uniq.push(el);
-    });
-
-    // 순차 처리
-    (async () => {
-      for (const el of uniq) {
-        await enhanceOneName(el);
-        // 작은 딜레이(서버/브라우저 부담 감소)
-        await new Promise((r) => setTimeout(r, 120));
-      }
-    })();
-  }
-
-  /* =========================
+/* =========================
      Load Excel & Init
   ========================= */
   async function loadMainExcel() {
@@ -736,13 +532,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const bgm = document.getElementById("bgm");
     const bgmToggle = document.getElementById("bgmToggle");
 
-    // ✅ 원하면 false로 바꾸면 "처음 1회만 게이트"로 동작
-    const ALWAYS_GATE = true;
-
-    function showGate(show) {
+    function setGate(open) {
       if (!gate) return;
-      gate.classList.toggle("is-hidden", !show);
-      gate.setAttribute("aria-hidden", show ? "false" : "true");
+      gate.classList.toggle("is-open", !open);
+      gate.setAttribute("aria-hidden", open ? "true" : "false");
     }
 
     function setBgm(on) {
@@ -753,51 +546,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (on) {
         const p = bgm.play();
-        if (p && typeof p.catch === "function") p.catch(() => {});
+        if (p?.catch) p.catch(() => {});
       } else {
         bgm.pause();
       }
     }
 
-    function enter() {
-      // "입장"은 사용자 제스처 이벤트 안에서 실행되어야 재생이 확실함
-      localStorage.setItem("yxl_gate_ok", "1");
-      showGate(false);
-      setBgm(true);
+    // First visit gate
+    const allowed = localStorage.getItem("yxl_gate_ok") === "1";
+    if (!allowed) {
+      setGate(false);
+      gateMsg && (gateMsg.textContent = "입장하려면 버튼을 눌러주세요.");
+    } else {
+      setGate(true);
     }
 
-    // 초기 표시
-    const allowed = localStorage.getItem("yxl_gate_ok") === "1";
-    showGate(ALWAYS_GATE ? true : !allowed);
-    if (gateMsg) gateMsg.textContent = "입장하려면 버튼을 눌러주세요.";
-
-    // 버튼 클릭 = 입장 + BGM 강제 재생
-    gateBtn?.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      enter();
+    gateBtn?.addEventListener("click", () => {
+      localStorage.setItem("yxl_gate_ok", "1");
+      setGate(true);
+      // auto try play if user previously enabled
+      if (localStorage.getItem(KEY) === "1") setBgm(true);
     });
 
-    // 버튼 밖(게이트 배경) 클릭해도 입장되도록 (모바일/오작동 대비)
-    gate?.addEventListener("click", (e) => {
-      if (!gateBtn) return;
-      if (e.target === gate || e.target.classList?.contains("gate-sparkles") || e.target.id === "gateParticles") {
-        enter();
-      }
-    });
-
-    // 상단 토글 버튼
     bgmToggle?.addEventListener("click", () => {
       const on = localStorage.getItem(KEY) === "1";
       setBgm(!on);
     });
 
-    // UI 상태 복원(자동재생은 하지 않음)
-    const isOn = localStorage.getItem(KEY) === "1";
-    if (bgmToggle) {
-      bgmToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
-      bgmToggle.textContent = isOn ? "BGM 일시정지" : "BGM 재생";
-    }
+    // restore
+    if (localStorage.getItem(KEY) === "1") setBgm(true);
   })();
 
   /* =========================

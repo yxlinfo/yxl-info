@@ -555,7 +555,6 @@ body::after{
   filter:none;      /* 그림자 제거(작을수록 지저분해질 수 있음) */
 }
 
-
 /* 변동사항(상승/하락 계단) */
 .delta{display:inline-flex;align-items:center;gap:6px;font-weight:800;justify-content:flex-end}
 .delta.up{color:#18a957}
@@ -563,63 +562,9 @@ body::after{
 .delta.same{color:rgba(255,255,255,.65)}
 .delta.new{color:rgba(255,255,255,.75)}
 
-
 /* =========================
    SOOP 썸네일 툴팁 + 라이브 이모지
 ========================= */
-.soop-name{
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: rgba(255,255,255,.25);
-  text-underline-offset: 3px;
-}
-.soop-name:hover{ text-decoration-color: rgba(255,255,255,.55); }
-
-.live-emoji{
-  display:inline-flex;
-  width: 1.2em;
-  justify-content:center;
-  margin-right: 6px;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
-}
-
-.soop-tooltip{
-  position: fixed;
-  z-index: 9999;
-  width: 260px;
-  max-width: 78vw;
-  background: rgba(8, 14, 26, .92);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 14px;
-  box-shadow: 0 18px 44px rgba(0,0,0,.55);
-  overflow: hidden;
-  pointer-events: none;
-  transform: translate(12px, 12px);
-}
-.soop-tooltip .thumb{
-  width:100%;
-  aspect-ratio: 16 / 9;
-  background: rgba(255,255,255,.06);
-  object-fit: cover;
-  display:block;
-}
-.soop-tooltip .body{
-  padding: 10px 12px 12px;
-}
-.soop-tooltip .title{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-weight: 750;
-  margin:0 0 6px;
-}
-.soop-tooltip .sub{
-  margin:0;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
-}
-
 .synergy-head{
   display:flex;
   align-items:flex-start;

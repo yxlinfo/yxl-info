@@ -62,21 +62,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  async function fetchArrayBuffer(url, opts = {}) {
-    const { allowMissing = false } = opts;
-
+  async function fetchArrayBuffer(url) {
     // 캐시 회피(엑셀 갱신 반영)
     const bust = url.includes("?") ? "&" : "?";
     const res = await fetch(url + bust + "v=" + Date.now(), { cache: "no-store" });
-
-    if (!res.ok) {
-      // 최소 테스트 모드: 엑셀 파일을 안 올려도 페이지가 깨지지 않게 처리
-      if (allowMissing && (res.status === 404 || res.status === 403)) return null;
-      throw new Error(`파일 불러오기 실패: ${url} (${res.status})`);
-    }
+    if (!res.ok) throw new Error(`파일 불러오기 실패: ${url} (${res.status})`);
     return await res.arrayBuffer();
   }
-
 
   function sheetToTable(wb, sheetName) {
     const ws = wb.Sheets[sheetName];
@@ -650,15 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
      Load Excel & Init
   ========================= */
   async function loadMainExcel() {
-    const ab = await fetchArrayBuffer(FILE_MAIN, { allowMissing: true });
-    if (!ab) {
-      state.main.total = [];
-      state.main.integratedHeaders = [];
-      state.main.integrated = [];
-      state.main.seasons = new Map();
-      state.main.seasonSheetNames = [];
-      return;
-    }
+    const ab = await fetchArrayBuffer(FILE_MAIN);
     const wb = XLSX.read(ab, { type: "array" });
     const names = wb.SheetNames;
 
@@ -680,13 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadSynergyExcel() {
-    const ab = await fetchArrayBuffer(FILE_SYNERGY, { allowMissing: true });
-    if (!ab) {
-      state.synergy.rows = [];
-      state.synergy.updatedAt = null;
-      setUpdatedAt(null);
-      return;
-    }
+    const ab = await fetchArrayBuffer(FILE_SYNERGY);
     const wb = XLSX.read(ab, { type: "array" });
     const sn = wb.SheetNames[0]; // 쿼리2
     const t = sheetToTable(wb, sn);
@@ -790,11 +768,11 @@ document.addEventListener("DOMContentLoaded", () => {
     gateBtn?.addEventListener("click", () => {
       localStorage.setItem("yxl_gate_ok", "1");
       setGate(true);
-      // auto try play if user previously enabled
-      if (localStorage.getItem(KEY) === "1") setBgm(true);
-    });
 
-    bgmToggle?.addEventListener("click", () => {
+      // ✅ 입장 클릭(사용자 제스처) 시 무조건 BGM 재생
+      setBgm(true);
+    });
+bgmToggle?.addEventListener("click", () => {
       const on = localStorage.getItem(KEY) === "1";
       setBgm(!on);
     });

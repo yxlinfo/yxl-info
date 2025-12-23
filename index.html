@@ -4,93 +4,200 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YXL.info</title>
-  <link rel="stylesheet" href="styles.css?v=16" />
+ <link rel="stylesheet" href="styles.css?v=16">
 </head>
 <body>
 
-  <!-- Gate (첫 방문 클릭용) -->
+  <!-- ✅ Gate (첫 방문 클릭 필요) -->
   <div id="gate" class="gate" aria-hidden="true">
-    <button id="gateBtn" type="button">입장하기</button>
-    <div id="gateMsg"></div>
+    <div class="gate-sparkles"></div>
+    <div id="gateParticles" class="gate-particles"></div>
+
+    <button id="gateBtn" class="gate-btn" type="button">
+      <div class="gate-title">YXLinfo</div>
+      <div class="gate-sub">많관부♥</div>
+      <div class="gate-hint">눌러서 입장하기 (BGM 재생)</div>
+    </button>
+
+    <div id="gateMsg" class="gate-msg"></div>
   </div>
 
-  <!-- BGM -->
+  <!-- ✅ BGM -->
   <audio id="bgm" preload="auto" loop>
+    <!-- 네가 올린 파일 경로 -->
     <source src="assets/bgm.mp3" type="audio/mpeg" />
   </audio>
 
   <!-- Header -->
   <header class="header">
-    <div class="brand">
-      <img class="brand-gif" src="assets/logo.gif" alt="YXL" />
-    </div>
+    <!-- 🎄 Garland (랜덤 반짝 전구) -->
+<div class="garland" aria-hidden="true">
+  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+</div>
+    <div class="wrap header-inner">
+      <div class="brand">
+   <img class="brand-gif" src="assets/logo.gif" alt="YXL" />
+      </div>
 
-    <div class="header-actions">
-      <button id="bgmToggle" type="button" aria-pressed="false">BGM 재생</button>
-      <div class="updated">업데이트: <span id="updatedAt">--</span></div>
+      <div class="header-actions">
+        <button id="bgmToggle" class="btn" type="button" aria-pressed="false">BGM 재생</button>
+        <div class="updated">업데이트: <span id="updatedAt">--</span></div>
+      </div>
     </div>
   </header>
 
-  <!-- Dashboard -->
-  <main>
-    <!-- Tabs -->
-    <div class="dash-tabs">
-      <button class="dash-tab" type="button" data-target="dash-synergy" aria-selected="false">시너지표</button>
-      <button class="dash-tab" type="button" data-target="dash-total" aria-selected="false">누적 기여도표</button>
-      <button class="dash-tab" type="button" data-target="dash-integrated" aria-selected="false">시즌통합랭킹</button>
-      <button class="dash-tab" type="button" data-target="dash-season" aria-selected="false">시즌별 기여도표</button>
-    </div>
+<main class="wrap">
+  <section class="section" id="info">
 
-    <!-- Panel: Synergy -->
-    <div class="dash-panel" id="dash-synergy" hidden>
-      <div id="synergyMeta"></div>
-      <div id="synergyCalendar" aria-label="월 변경 대시보드"></div>
 
-      <div class="table-wrap">
-        <table id="synergyTable" class="table sortable">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
+    <section class="section">
+      <div class="section-head">
+        <h2>📊 데이터</h2>
+        
       </div>
-    </div>
 
-    <!-- Panel: Total -->
-    <div class="dash-panel" id="dash-total" hidden>
-      <input id="totalSearch" type="search" placeholder="검색" />
-      <div class="table-wrap">
-        <table id="totalTable" class="table">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
+      <!-- Tabs -->
+      <div class="dash-tabs">
+        <button class="dash-tab is-active" type="button" data-target="dash-synergy" aria-selected="true">시너지표</button>
+        <button class="dash-tab" type="button" data-target="dash-total" aria-selected="false">누적 기여도표</button>
+        <button class="dash-tab" type="button" data-target="dash-integrated" aria-selected="false">시즌통합랭킹</button>
+        <button class="dash-tab" type="button" data-target="dash-season" aria-selected="false">시즌별 기여도표</button>
       </div>
-    </div>
 
-    <!-- Panel: Integrated -->
-    <div class="dash-panel" id="dash-integrated" hidden>
-      <input id="integratedSearch" type="search" placeholder="검색" />
-      <div class="table-wrap">
-        <table id="integratedTable" class="table">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
+      <!-- Panel: Total -->
+      <div class="dash-panel" id="dash-total" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 style="margin:0 0 6px;">누적 기여도표</h3>
+              <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
+            </div>
+            <div class="toolbar">
+              <div class="input-wrap">
+                <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
+              </div>
+            </div>
+          </div>
 
-    <!-- Panel: Season -->
-    <div class="dash-panel" id="dash-season" hidden>
-      <select id="seasonSelect"></select>
-      <input id="seasonSearch" type="search" placeholder="검색" />
-      <div class="table-wrap">
-        <table id="seasonTable" class="table">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
+          <div class="table-wrap">
+            <table id="totalTable" class="table">
+              <thead>
+                <tr>
+                  <th>순위</th>
+                  <th>스트리머</th>
+                  <th style="text-align:right;">누적기여도</th>
+                  <th style="text-align:right;">변동사항</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
+        </div>
       </div>
-    </div>
+
+      
+      <!-- Panel: Integrated -->
+      <div class="dash-panel" id="dash-integrated" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 style="margin:0 0 6px;">시즌통합랭킹</h3>
+              <p class="muted" style="margin:0;">S1~S10 통합 데이터(엑셀 2번째 시트)입니다.</p>
+            </div>
+            <div class="toolbar">
+              <div class="input-wrap">
+                <input id="integratedSearch" class="input" placeholder="스트리머 이름 검색" />
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="integratedTable" class="table">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 헤더를 클릭하면 정렬(▲/▼)됩니다.</div>
+        </div>
+      </div>
+
+<!-- Panel: Season -->
+      <div class="dash-panel" id="dash-season" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 style="margin:0 0 6px;">시즌별 기여도표</h3>
+              <p class="muted" style="margin:0;">시즌 선택 + 이름 검색이 가능합니다.</p>
+            </div>
+            <div class="toolbar">
+              <select id="seasonSelect" class="select"></select>
+              <div class="input-wrap">
+                <input id="seasonSearch" class="input" placeholder="멤버 이름 검색" />
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="seasonTable" class="table">
+              <thead></thead>
+
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다.</div>
+        </div>
+      </div>
+
+      <!-- Panel: Synergy -->
+      <div class="dash-panel is-active" id="dash-synergy">
+        <div class="card">
+          <div class="card-head">
+            <div class="synergy-head">
+              <div>
+                <h3 style="margin:0 0 6px;">시너지표</h3>
+                <p class="muted" style="margin:0 0 6px;">3시간마다 자동 업데이트가 됩니다.</p>
+                <div class="muted" id="synergyMeta" style="margin:0;">데이터 기준: --</div>
+              </div>
+              <div class="synergy-calendar" id="synergyCalendar" aria-label="월 변경 대시보드"></div>
+            </div>
+</div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="synergyTable" class="table sortable">
+              <thead>
+              <thead>
+                <tr>
+                  <th data-key="순위">순위</th>
+                  <th data-key="비제이명">스트리머</th>
+                  <th data-key="월별 누적별풍선" style="text-align:right;">누적별풍선</th>
+                  <th data-key="변동" style="text-align:right;">변동사항</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">* 정렬은 클릭할 때마다 ▲/▼ 토글됩니다.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <footer class="section" style="padding-top:0;">
+      <div class="muted">© YXL</div>
+    </footer>
   </main>
 
-  <!-- XLSX + App -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="app.js?v=16"></script>
 </body>
 </html>

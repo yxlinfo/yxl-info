@@ -4,17 +4,32 @@
   --text: rgba(255,255,255,.92);
   --muted: rgba(255,255,255,.65);
   --accent: rgba(125,211,252,.35);
-}*{ box-sizing:border-box; }html, body{ height:100%; }body{
+}
+
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
+body{
   margin:0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
   color: var(--text);
-}html, body{
+}
+
+/* =========================
+   🎄 Xmas Mood Pack (붙여넣기 전용)
+   - styles.css 맨 아래에 그대로 붙여넣기
+========================= */
+
+/* 1) 배경을 크리스마스 톤으로 확 (레드/그린/골드) */
+html, body{
   background:
     radial-gradient(1000px 560px at 18% 10%, rgba(239, 68, 68, .24), transparent 60%),
     radial-gradient(1000px 560px at 82% 12%, rgba(34, 197, 94, .22), transparent 60%),
     radial-gradient(1200px 720px at 50% 0%, rgba(250, 204, 21, .16), transparent 62%),
     linear-gradient(180deg, #071223 0%, #060b14 58%, #04070e 100%) !important;
-}body::before{
+}
+
+/* 2) 트리 전구 보케(빛 번짐) */
+body::before{
   content:"";
   position: fixed;
   inset:-25%;
@@ -29,7 +44,10 @@
     radial-gradient(circle at 92% 70%, rgba(239, 68, 68, .14) 0 130px, transparent 160px);
   filter: blur(26px);
   opacity:.95;
-}body::after{
+}
+
+/* 3) 눈발(크고 잘 보이게) + 약간 반짝 */
+body::after{
   content:"";
   position: fixed;
   inset:0;
@@ -63,13 +81,19 @@
   animation: yxlSnowXmas 7.8s linear infinite;
   opacity: 1;
   filter: blur(.15px);
-}@keyframes yxlSnowXmas{
+}
+
+@keyframes yxlSnowXmas{
   from{ transform: translate3d(0,-95px,0); }
   to{ transform: translate3d(0,440px,0); }
-}.header{
+}
+
+/* 4) 크리스마스 가랜드(상단 전구 줄) */
+.header{
   position: sticky;
   overflow: visible;
-}.header::before{
+}
+.header::before{
   content:"";
   position:absolute;
   left:0; right:0;
@@ -97,24 +121,37 @@
   filter: drop-shadow(0 6px 14px rgba(0,0,0,.45));
   opacity:.9;
   animation: garlandTwinkle 2.6s ease-in-out infinite alternate;
-}@keyframes garlandTwinkle{
+}
+@keyframes garlandTwinkle{
   from{ opacity:.65; transform: translateY(0); }
   to{ opacity:1; transform: translateY(-1px); }
-}.card{
+}
+
+/* 5) 카드/탭도 크리스마스 포인트 살짝 */
+.card{
   border-color: rgba(255,255,255,.16) !important;
   box-shadow: 0 18px 55px rgba(0,0,0,.32);
-}.dash-tab.is-active{
+}
+.dash-tab.is-active{
   background: linear-gradient(90deg,
     rgba(239, 68, 68, .14),
     rgba(34, 197, 94, .12),
     rgba(250, 204, 21, .10)
   ) !important;
-}.header, main, .wrap{ position: relative; z-index: 1; }.wrap{ width:min(1080px, 92vw); margin:0 auto; }.header{
+}
+/* 컨텐츠 레이어 올리기 */
+.header, main, .wrap { position: relative; z-index: 1; }
+
+.wrap{ width:min(1080px, 92vw); margin:0 auto; }
+
+/* Header */
+.header{
   position:sticky; top:0; z-index:10;
   background: rgba(8, 16, 30, .62);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255,255,255,.14);
-}.header::after{
+}
+.header::after{
   content:"";
   position:absolute; left:0; right:0; bottom:-1px;
   height:2px;
@@ -128,22 +165,39 @@
   );
   opacity:.65;
   pointer-events:none;
-}.header-inner{
+}
+.header-inner{
   display:flex; align-items:center; justify-content:space-between;
   gap:16px; padding:14px 0;
-}.brand{ display:flex; gap:12px; align-items:center; }.brand-gif{
+}
+.brand{ display:flex; gap:12px; align-items:center; }
+.brand-gif{
   height:15px;
   width:auto;
-}.header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }.updated{ color:var(--muted); font-size:12px; }.section{ padding:26px 0 40px; }.section-head h2{ margin:0 0 6px; }.muted{ color:var(--muted); margin:0; }.card{
+}
+.header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.updated{ color:var(--muted); font-size:12px; }
+
+/* Sections */
+.section{ padding:26px 0 40px; }
+.section-head h2{ margin:0 0 6px; }
+.muted{ color:var(--muted); margin:0; }
+
+/* Card */
+.card{
   padding:16px;
   border-radius:18px;
   background: rgba(255,255,255,.055);
   border:1px solid rgba(255,255,255,.14);
   box-shadow: 0 18px 50px rgba(0,0,0,.30);
-}.dash-tabs{
+}
+
+/* Tabs */
+.dash-tabs{
   display:flex; gap:10px; flex-wrap:wrap;
   margin:14px 0 14px;
-}.dash-tab{
+}
+.dash-tab{
   padding:10px 12px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
@@ -151,7 +205,9 @@
   color:var(--muted);
   cursor:pointer;
   font-weight:900;
-}.dash-tab:hover{ color:rgba(255,255,255,.92); border-color:rgba(255,255,255,.22); }.dash-tab.is-active{
+}
+.dash-tab:hover{ color:rgba(255,255,255,.92); border-color:rgba(255,255,255,.22); }
+.dash-tab.is-active{
   color:rgba(255,255,255,.95);
   border-color:rgba(255,255,255,.18);
   background: linear-gradient(90deg,
@@ -160,7 +216,11 @@
     rgba(250, 204, 21, .10)
   );
   box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset;
-}.dash-panel{ margin-top:10px; }.btn{
+}
+.dash-panel{ margin-top:10px; }
+
+/* Buttons */
+.btn{
   padding:10px 12px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
@@ -168,14 +228,23 @@
   color:rgba(255,255,255,.85);
   cursor:pointer;
   font-weight:900;
-}.btn:hover{ border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.95); }.card-head{
+}
+.btn:hover{ border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.95); }
+.btn.is-on{ border-color: var(--accent); background: rgba(125,211,252,.10); }
+.btn.ghost{ background: transparent; }
+
+/* Card head / toolbar */
+.card-head{
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
   gap:12px;
   flex-wrap:wrap;
   margin-bottom:12px;
-}.toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }.input-wrap{ min-width:220px; flex:1; }.input, .select{
+}
+.toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.input-wrap{ min-width:220px; flex:1; }
+.input, .select{
   width:100%;
   padding:10px 12px;
   border-radius:12px;
@@ -183,24 +252,61 @@
   background: rgba(0,0,0,.20);
   color: rgba(255,255,255,.92);
   outline: none;
-}.select{ width:auto; min-width:180px; }.input::placeholder{ color: rgba(255,255,255,.45); }.table-wrap{
+}
+.select{ width:auto; min-width:180px; }
+.input::placeholder{ color: rgba(255,255,255,.45); }
+
+/* Table */
+.table-wrap{
   overflow:auto;
   border-radius:16px;
   border:1px solid rgba(255,255,255,.10);
-}.table{
+}
+.table{
   width:100%;
   border-collapse:collapse;
   min-width:560px;
-}.table th, .table td{
+}
+.table th, .table td{
   padding:12px 12px;
   border-bottom:1px solid rgba(255,255,255,.08);
   text-align:left;
   white-space:nowrap;
-}.table th{
+}
+.table th{
   color: rgba(255,255,255,.75);
   font-weight:900;
   background: rgba(255,255,255,.04);
-}.table td{ color: rgba(255,255,255,.92); }.table .num{ text-align:right; font-variant-numeric: tabular-nums; }.hint{ margin-top:10px; color: rgba(255,255,255,.55); font-size:12px; }.table.sortable th{ cursor:pointer; user-select:none; }.table.sortable th:hover{ background: rgba(125,211,252,.08); }.gate{
+}
+.table td{ color: rgba(255,255,255,.92); }
+.table .num{ text-align:right; font-variant-numeric: tabular-nums; }
+.hint{ margin-top:10px; color: rgba(255,255,255,.55); font-size:12px; }
+
+/* Top 1~3 badge */
+.rank-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  font-weight:900;
+}
+.rank-badge .medal{ font-size:14px; }
+.rank-1{ border-color: rgba(255,215,0,.35); background: rgba(255,215,0,.08); }
+.rank-2{ border-color: rgba(192,192,192,.35); background: rgba(192,192,192,.08); }
+.rank-3{ border-color: rgba(205,127,50,.35); background: rgba(205,127,50,.08); }
+
+/* Sortable */
+.table.sortable th{ cursor:pointer; user-select:none; }
+.table.sortable th:hover{ background: rgba(125,211,252,.08); }
+.sort-ind{ margin-left:6px; opacity:.65; font-size:12px; }
+
+/* =========================
+   ✅ Gate (스플래시)
+========================= */
+.gate{
   position: fixed;
   inset: 0;
   z-index: 99999;
@@ -213,7 +319,13 @@
     radial-gradient(900px 500px at 80% 30%, rgba(34,197,94,.16), transparent 60%),
     rgba(0,0,0,.78);
   backdrop-filter: blur(14px);
-}.gate-sparkles{
+}
+
+/* Gate 닫힘 상태면 숨김 (JS는 aria-hidden을 토글함) */
+#gate[aria-hidden="true"]{ display:none !important; }
+.gate.is-hidden{ display:none; }
+
+.gate-sparkles{
   position:absolute; inset:0;
   pointer-events:none;
   background:
@@ -225,10 +337,15 @@
     radial-gradient(circle at 40% 82%, rgba(255,255,255,.55) 0 1px, transparent 2px);
   opacity:.45;
   animation: sparkleMove 6.5s ease-in-out infinite alternate;
-}@keyframes sparkleMove{
+}
+@keyframes sparkleMove{
   from{ transform: translate3d(0,0,0) scale(1); opacity:.35; }
   to{ transform: translate3d(0,-8px,0) scale(1.05); opacity:.55; }
-}.gate-particles{ position:absolute; inset:0; pointer-events:none; }.gate-btn{
+}
+
+.gate-particles{ position:absolute; inset:0; pointer-events:none; }
+
+.gate-btn{
   position: relative;
   z-index: 2;
   width: min(540px, 94vw);
@@ -241,7 +358,8 @@
   color: rgba(255,255,255,.95);
   box-shadow: 0 22px 80px rgba(0,0,0,.58), 0 0 0 1px rgba(255,255,255,.06) inset;
   overflow:hidden;
-}.gate-btn::before{
+}
+.gate-btn::before{
   content:"";
   position:absolute;
   inset:-2px;
@@ -255,32 +373,103 @@
   filter: blur(18px);
   animation: btnAura 4.5s ease-in-out infinite alternate;
   z-index: 0;
-}@keyframes btnAura{
+}
+@keyframes btnAura{
   from{ transform: translate3d(-10px, 6px, 0); }
   to{ transform: translate3d(10px, -6px, 0); }
-}.gate-btn > *{ position: relative; z-index: 1; }.gate-title{
+}
+.gate-btn > *{ position: relative; z-index: 1; }
+
+.gate-title{
   font-weight: 1000;
   font-size: 36px;
   letter-spacing: .6px;
   text-shadow: 0 10px 30px rgba(0,0,0,.45);
-}.gate-sub{
+}
+.gate-sub{
   margin-top: 6px;
   font-weight: 900;
   font-size: 22px;
   color: rgba(255,255,255,.85);
   text-shadow: 0 10px 30px rgba(0,0,0,.45);
-}.gate-hint{
+}
+.gate-hint{
   margin-top: 14px;
   font-size: 13px;
   color: rgba(255,255,255,.70);
-}.gate-btn:active{ transform: scale(.995); }.gate-msg{
+}
+.gate-btn:active{ transform: scale(.995); }
+
+.gate-msg{
   position: relative;
   z-index: 2;
   margin-top: 12px;
   font-size: 12px;
   color: rgba(255,255,255,.80);
   text-align:center;
-}@media (max-width: 520px){.dash-tab{ width: 100%; }.table{ min-width: 520px; }}.header::before{ content:none !important; }.garland{
+}
+
+/* hearts */
+.heart{
+  position:absolute;
+  left:0; top:0;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+  opacity: .95;
+  animation: heartFly var(--dur, 1200ms) ease-out forwards;
+}
+@keyframes heartFly{
+  0%{
+    transform: translate(var(--x0), var(--y0)) scale(var(--s0, .9)) rotate(var(--r0, 0deg));
+    opacity: .95;
+  }
+  70%{ opacity: .95; }
+  100%{
+    transform: translate(var(--x1), var(--y1)) scale(var(--s1, 1.4)) rotate(var(--r1, 30deg));
+    opacity: 0;
+  }
+}
+.heart::before{
+  content: "♥";
+  font-weight: 1000;
+  font-size: var(--size, 18px);
+  color: rgba(255, 105, 180, .95);
+  text-shadow: 0 0 14px rgba(255,105,180,.45), 0 0 24px rgba(168,85,247,.22);
+}
+
+/* spark */
+.spark{
+  position:absolute;
+  left:0; top:0;
+  width: 6px; height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 0 12px rgba(255,255,255,.75), 0 0 22px rgba(56,189,248,.35);
+  transform: translate(-50%, -50%);
+  opacity: .9;
+  animation: sparkPop 700ms ease-out forwards;
+}
+@keyframes sparkPop{
+  0%{ transform: translate(var(--sx0), var(--sy0)) scale(.6); opacity:.9; }
+  100%{ transform: translate(var(--sx1), var(--sy1)) scale(0); opacity:0; }
+}
+
+/* Mobile */
+@media (max-width: 520px){
+  .dash-tab{ width: 100%; }
+  .table{ min-width: 520px; }
+}
+/* =========================
+   🎄 Random Garland Lights (DOM + JS)
+   - styles.css 맨 아래에 붙여넣기
+========================= */
+
+/* 예전 가랜드(pseudo) 겹침 방지 */
+.header::before{ content:none !important; }
+
+/* 전구 줄 컨테이너 */
+.garland{
   position:absolute;
   left:0; right:0;
   top:-10px;
@@ -292,7 +481,10 @@
   pointer-events:none;
   z-index: 12;
   opacity:.95;
-}.garland::before{
+}
+
+/* 와이어(줄) */
+.garland::before{
   content:"";
   position:absolute;
   left:8px; right:8px;
@@ -306,7 +498,10 @@
   box-shadow: 0 6px 18px rgba(0,0,0,.35);
   border-radius:999px;
   opacity:.9;
-}.bulb{
+}
+
+/* 전구 공통 */
+.bulb{
   position:relative;
   width:9px;
   height:9px;
@@ -319,7 +514,10 @@
     0 0 calc(var(--blur, 18px) * 1.6) rgba(255,255,255,.10);
   filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
   transition: opacity 120ms linear, transform 120ms linear, box-shadow 120ms linear;
-}.bulb::before{
+}
+
+/* 전구 소켓(윗부분) */
+.bulb::before{
   content:"";
   position:absolute;
   left:50%; top:-5px;
@@ -329,64 +527,143 @@
   background: rgba(0,0,0,.35);
   border: 1px solid rgba(255,255,255,.10);
   box-shadow: 0 6px 14px rgba(0,0,0,.28);
-}.bulb.r{ --c: rgba(239, 68, 68, .95); }.bulb.g{ --c: rgba(34, 197, 94, .92); }.bulb.y{ --c: rgba(250, 204, 21, .95); }.bulb.b{ --c: rgba(56, 189, 248, .85); }.garland{
+}
+
+/* 색상 클래스 */
+.bulb.r{ --c: rgba(239, 68, 68, .95); }
+.bulb.g{ --c: rgba(34, 197, 94, .92); }
+.bulb.y{ --c: rgba(250, 204, 21, .95); }
+.bulb.b{ --c: rgba(56, 189, 248, .85); }
+
+/* 전체 줄이 살짝 흔들리는 느낌(과하지 않게) */
+.garland{
   animation: garlandSway 4.8s ease-in-out infinite alternate;
-}@keyframes garlandSway{
+}
+@keyframes garlandSway{
   from{ transform: translateY(0); }
   to{ transform: translateY(-1px); }
-}@media (prefers-reduced-motion: reduce){.garland{ animation:none; }.bulb{ transition:none; }}.brand-gif{
+}
+
+/* 모션 최소화 옵션 */
+@media (prefers-reduced-motion: reduce){
+  .garland{ animation:none; }
+  .bulb{ transition:none; }
+}
+/* ✅ 헤더 로고 GIF 크기 줄이기 */
+.brand-gif{
   height:45px;   /* 원하는 크기 */
   width:auto;
   display:block;
   border-radius:0;  /* 아주 작으니 둥글게 필요 없으면 0 */
   filter:none;      /* 그림자 제거(작을수록 지저분해질 수 있음) */
-}.soop-name{
+}
+
+
+/* 변동사항(상승/하락 계단) */
+.delta{display:inline-flex;align-items:center;gap:6px;font-weight:800;justify-content:flex-end}
+.delta.up{color:#18a957}
+.delta.down{color:#e05252}
+.delta.same{color:rgba(255,255,255,.65)}
+.delta.new{color:rgba(255,255,255,.75)}
+
+
+/* =========================
+   SOOP 썸네일 툴팁 + 라이브 이모지
+========================= */
+.soop-name{
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: rgba(255,255,255,.25);
   text-underline-offset: 3px;
-}.soop-name:hover{ text-decoration-color: rgba(255,255,255,.55); }.live-emoji{
+}
+.soop-name:hover{ text-decoration-color: rgba(255,255,255,.55); }
+
+.live-emoji{
   display:inline-flex;
   width: 1.2em;
   justify-content:center;
   margin-right: 6px;
   filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
-}.synergy-head{
+}
+
+.soop-tooltip{
+  position: fixed;
+  z-index: 9999;
+  width: 260px;
+  max-width: 78vw;
+  background: rgba(8, 14, 26, .92);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.55);
+  overflow: hidden;
+  pointer-events: none;
+  transform: translate(12px, 12px);
+}
+.soop-tooltip .thumb{
+  width:100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(255,255,255,.06);
+  object-fit: cover;
+  display:block;
+}
+.soop-tooltip .body{
+  padding: 10px 12px 12px;
+}
+.soop-tooltip .title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight: 750;
+  margin:0 0 6px;
+}
+.soop-tooltip .sub{
+  margin:0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.synergy-head{
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
   gap: 14px;
   width:100%;
-}.synergy-calendar{
+}
+
+.synergy-calendar{
   min-width: 220px;
   padding: 10px 12px;
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.12);
   border-radius: 16px;
-}.synergy-calendar .cal-top{
+}
+.synergy-calendar .cal-top{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap: 10px;
   margin-bottom: 8px;
-}.synergy-calendar .cal-title{
+}
+.synergy-calendar .cal-title{
   font-weight: 800;
   letter-spacing: .2px;
-}.synergy-calendar .cal-badge{
+}
+.synergy-calendar .cal-badge{
   font-size: 12px;
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(250, 204, 21, .18);
   border: 1px solid rgba(250, 204, 21, .35);
   color: rgba(255,255,255,.92);
-}.synergy-calendar .cal-mini{
+}
+.synergy-calendar .cal-mini{
   display:flex;
   gap: 10px;
   font-size: 12px;
   color: var(--muted);
-}.synergy-calendar .cal-mini b{
+}
+.synergy-calendar .cal-mini b{
   color: rgba(255,255,255,.9);
   font-weight: 800;
 }
-/* Gate 닫힘 상태면 숨김 */
-#gate[aria-hidden="true"] { display: none !important; }

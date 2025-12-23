@@ -609,3 +609,8 @@ body::after{
   color: rgba(255,255,255,.9);
   font-weight: 800;
 }
+
+/* ===== Emergency Gate hardening ===== */
+.gate{ z-index: 999999; pointer-events: auto; }
+.gate-card{ pointer-events: auto; cursor: pointer; }
+.gate.is-hidden{ display:none !important; }

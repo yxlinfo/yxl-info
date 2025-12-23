@@ -524,7 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnPrev = document.getElementById("bgmPrev");
   const btnNext = document.getElementById("bgmNext");
   const sel = document.getElementById("bgmSelect");
-  const now = document.getElementById("bgmNow");
+
 
   const ALWAYS_GATE = true;
 
@@ -566,12 +566,6 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem(KEY_SEL, k);
     if (sel) sel.value = k;
     updateNowText();
-  }
-
-  function updateNowText() {
-    if (!now) return;
-    const label = sel?.selectedOptions?.[0]?.textContent || "—";
-    now.textContent = `♫ Now Playing · ${label}`;
   }
 
   function setPlayUI(on) {

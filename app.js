@@ -699,22 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hookAudioEvents();
     syncGaugesToAudio();
 
-    // ✅ 곡이 끝나면 자동으로 다음 곡 재생(루프 비활성화)
-    tracks.forEach(({ key, el }) => {
-      // HTML의 loop 속성을 무시하고 "끝나면 다음곡"으로
-      el.loop = false;
-      el.addEventListener("ended", async () => {
-        // 선택된 트랙이 끝났고, 현재 ON 상태일 때만 다음 곡으로
-        if (getSelectedKey() !== key) return;
-        if (localStorage.getItem(KEY_ON) !== "1") return;
-
-        moveTrack(+1);
-        localStorage.setItem(KEY_ON, "1");
-        setPlayUI(true);
-        await playSelected({ reset: true });
-      });
-    });
-/* ---------- 게이트 ---------- */
+    /* ---------- 게이트 ---------- */
     gateBtn?.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -737,20 +722,20 @@ document.addEventListener("DOMContentLoaded", () => {
     btnPrev?.addEventListener("click", async () => {
       if (gateVisible()) return enter();
       moveTrack(-1);
-      // ✅ 이전/다음은 '선택만'이 아니라 즉시 재생
-      localStorage.setItem(KEY_ON, "1");
-      setPlayUI(true);
-      await playSelected({ reset: true });
+      const on = localStorage.getItem(KEY_ON) === "1";
+      if (on) await playSelected({ reset: true });
+      else syncGaugesToAudio();
     });
-btnNext?.addEventListener("click", async () => {
+
+    btnNext?.addEventListener("click", async () => {
       if (gateVisible()) return enter();
       moveTrack(+1);
-      // ✅ 이전/다음은 '선택만'이 아니라 즉시 재생
-      localStorage.setItem(KEY_ON, "1");
-      setPlayUI(true);
-      await playSelected({ reset: true });
+      const on = localStorage.getItem(KEY_ON) === "1";
+      if (on) await playSelected({ reset: true });
+      else syncGaugesToAudio();
     });
-sel?.addEventListener("change", async () => {
+
+    sel?.addEventListener("change", async () => {
       if (gateVisible()) return;
       setSelectedKey(sel.value);
       const on = localStorage.getItem(KEY_ON) === "1";

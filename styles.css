@@ -566,7 +566,6 @@ body::after{
 
 }
 
-
 .synergy-head{
   display:flex;
   align-items:flex-start;
@@ -575,39 +574,3 @@ body::after{
   width:100%;
 }
 
-.synergy-calendar{
-  min-width: 220px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px;
-}
-.synergy-calendar .cal-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.synergy-calendar .cal-title{
-  font-weight: 800;
-  letter-spacing: .2px;
-}
-.synergy-calendar .cal-badge{
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(250, 204, 21, .18);
-  border: 1px solid rgba(250, 204, 21, .35);
-  color: rgba(255,255,255,.92);
-}
-.synergy-calendar .cal-mini{
-  display:flex;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.synergy-calendar .cal-mini b{
-  color: rgba(255,255,255,.9);
-  font-weight: 800;
-}

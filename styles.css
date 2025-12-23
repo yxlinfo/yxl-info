@@ -563,8 +563,165 @@ body::after{
 .delta.same{color:rgba(255,255,255,.65)}
 .delta.new{color:rgba(255,255,255,.75)}
 
+/* =========================
+   🎧 BGM Header UI (Pretty)
+   - 헤더 오른쪽 BGM 컨트롤 영역을 더 보기 좋게
+========================= */
 
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
 }
+
+/* BGM 컨트롤 박스 */
+.bgm-dash{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  box-shadow: 0 10px 26px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.06) inset;
+  backdrop-filter: blur(10px);
+}
+
+/* “♫ BGM” 뱃지 */
+.bgm-dash .bgm-mark{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:1000;
+  font-size:12px;
+  color: rgba(255,255,255,.92);
+  border:1px solid rgba(255,255,255,.14);
+  background: linear-gradient(90deg,
+    rgba(239,68,68,.14),
+    rgba(34,197,94,.12),
+    rgba(250,204,21,.12)
+  );
+  box-shadow: 0 0 0 1px rgba(255,255,255,.05) inset;
+}
+
+/* dot 구분자 */
+.bgm-dash .dot{
+  opacity:.55;
+  margin: 0 2px;
+}
+
+/* BGM 버튼(기존 .btn 기반이지만 헤더용으로 더 작게) */
+.bgm-dash .btn{
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.90);
+  font-weight:1000;
+  line-height:1;
+}
+.bgm-dash .btn:hover{
+  border-color: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.06);
+}
+.bgm-dash .btn:active{
+  transform: translateY(1px);
+}
+
+/* 셀렉트(곡 선택) */
+.bgm-dash .select{
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.20);
+  color: rgba(255,255,255,.92);
+  min-width: 260px;
+  max-width: 360px;
+}
+
+/* ===== 추가 UI(게이지) 지원: HTML에 bgmSeek/bgmVol/bgmTime가 있을 때만 적용 ===== */
+.bgm-dash .bgm-gauges{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-left: 6px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255,255,255,.10);
+}
+
+#bgmTime{
+  font-size:12px;
+  color: rgba(255,255,255,.70);
+  font-variant-numeric: tabular-nums;
+  min-width: 96px;
+  text-align:center;
+}
+
+/* range 공통(Seek/Vol) */
+#bgmSeek, #bgmVol{
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  outline: none;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.20) inset;
+}
+
+#bgmSeek{ width: 220px; }
+#bgmVol{ width: 90px; }
+
+#bgmSeek::-webkit-slider-thumb,
+#bgmVol::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(0,0,0,.25);
+  box-shadow: 0 10px 22px rgba(0,0,0,.35);
+  cursor: pointer;
+}
+
+#bgmSeek::-moz-range-thumb,
+#bgmVol::-moz-range-thumb{
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(0,0,0,.25);
+  box-shadow: 0 10px 22px rgba(0,0,0,.35);
+  cursor: pointer;
+}
+
+#bgmSeek::-moz-range-track,
+#bgmVol::-moz-range-track{
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+/* 좁은 화면에서는 줄바꿈/폭 자동 */
+@media (max-width: 720px){
+  .bgm-dash{
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .bgm-dash .select{
+    min-width: 180px;
+    max-width: none;
+    flex: 1;
+  }
+  #bgmSeek{ width: min(60vw, 260px); }
+}
+
 
 .synergy-head{
   display:flex;

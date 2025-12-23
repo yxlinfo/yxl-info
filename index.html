@@ -26,8 +26,18 @@
   <audio id="bgm" preload="auto" loop>
     <!-- 네가 올린 파일 경로 -->
     <source src="assets/bgm.mp3" type="audio/mpeg" />
+    
   </audio>
 
+  <!-- ✅ BGM 2 / 3 추가 -->
+  <audio id="bgm2" preload="auto" loop>
+    <source src="assets/bgm2.mp3" type="audio/mpeg" />
+  </audio>
+
+  <audio id="bgm3" preload="auto" loop>
+    <source src="assets/bgm3.mp3" type="audio/mpeg" />
+  </audio>
+  
   <!-- Header -->
   <header class="header">
     <!-- 🎄 Garland (랜덤 반짝 전구) -->
@@ -45,6 +55,12 @@
 
       <div class="header-actions">
         <button id="bgmToggle" class="btn" type="button" aria-pressed="false">BGM 재생</button>
+        <select id="bgmSelect" class="select" aria-label="BGM 선택">
+    <option value="bgm">Justin Bieber - Mistletoe</option>
+    <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
+    <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
+  </select>
+        
         <div class="updated">업데이트: <span id="updatedAt">--</span></div>
       </div>
     </div>

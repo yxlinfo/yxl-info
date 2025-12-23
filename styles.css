@@ -731,61 +731,79 @@ body::after{
   width:100%;
 }
 /* =========================
-   ✅ Header BGM UI: 폭/크기 줄여서 튀어나옴 방지
+   ✅ BGM 게이지 튀어나옴 방지 (헤더용)
 ========================= */
 
-/* 헤더 오른쪽 영역이 끝에 딱 붙도록 */
+/* 업데이트 텍스트는 아래 줄로 내려서 플레이어 폭 확보 */
 .header-actions{
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.header-actions .updated{
+  order: 2;
+  width: 100%;
+  text-align: right;
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: .85;
+}
+.header-actions .bgm-dash{
+  order: 1;
 }
 
-/* 플레이어 바 자체를 "최대폭 제한" + 컴팩트 */
+/* 플레이어(바)는 내용이 넘치면 줄바꿈 허용 + 내부폭 자동 */
 .bgm-dash{
   width: 100%;
   max-width: min(760px, 100%);
-  padding: 8px 10px;
-  gap: 8px;
-  border-radius: 16px;
   box-sizing: border-box;
+  flex-wrap: wrap;          /* ✅ 넘치면 다음 줄로 */
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;         /* ✅ 혹시 남는 삐져나옴 제거 */
 }
 
-/* 버튼/텍스트 전체 살짝 컴팩트 */
-.bgm-dash .btn{
-  padding: 8px 10px;
-  font-size: 12px;
-}
-
-.bgm-dash .bgm-mark{
-  font-size: 12px;
-  padding: 6px 10px;
-}
-
-/* 헤더 안의 select만 min-width 줄이기 (전역 .select 영향 차단) */
+/* 셀렉트/게이지가 가로폭을 너무 크게 먹지 않게 */
 .bgm-dash .select{
-  min-width: 190px;
+  flex: 0 1 240px;          /* ✅ 줄어들 수 있게 */
+  min-width: 160px;
   max-width: 260px;
 }
 
-/* 게이지(Seek/Vol) 폭 줄이기 */
-.bgm-dash input[type="range"]{
-  width: 160px;
+/* 재생 게이지 */
+#bgmSeek{
+  flex: 1 1 240px;          /* ✅ 남는 공간을 먹되 줄어듦 */
+  min-width: 140px;
+  max-width: 280px;
+  width: auto;
 }
 
-/* 화면이 조금 좁아지면 더 줄이고, 필요하면 줄바꿈 */
+/* 볼륨 게이지 */
+#bgmVol{
+  flex: 0 1 140px;
+  min-width: 90px;
+  max-width: 150px;
+  width: auto;
+}
+
+/* 시간표시가 너무 길면 줄어들지 않게만 */
+#bgmTime{
+  flex: 0 0 auto;
+  font-size: 11px;
+  opacity: .9;
+}
+
+/* 화면이 더 좁아지면 게이지 폭 더 줄이기 */
 @media (max-width: 980px){
-  .bgm-dash{ max-width: 100%; }
-  .bgm-dash input[type="range"]{ width: 130px; }
-  .bgm-dash .select{ min-width: 160px; max-width: 220px; }
+  #bgmSeek{ min-width: 120px; max-width: 220px; }
+  #bgmVol{ min-width: 80px;  max-width: 120px; }
+  .bgm-dash .select{ min-width: 140px; max-width: 220px; }
 }
 
+/* 모바일에서는 게이지는 100%로 내려가게 */
 @media (max-width: 620px){
-  .bgm-dash{ flex-wrap: wrap; justify-content: flex-end; }
-  .bgm-dash input[type="range"]{ width: 100%; }
+  #bgmSeek, #bgmVol{ width: 100%; max-width: 100%; }
   .bgm-dash .select{ width: 100%; max-width: 100%; }
 }
-

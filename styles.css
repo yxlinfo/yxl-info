@@ -189,6 +189,14 @@ body::after{
   text-shadow: 0 6px 14px rgba(0,0,0,.35);
 }
 
+/* (HOF 라인에 배치될 때) 라벨 옆에 깔끔하게 붙도록 폭/정렬만 약간 조정 */
+.yxlDday--hof{
+  flex: 0 0 auto;
+  max-width: 260px;
+  font-size: 12px;
+  opacity: .88;
+}
+
 @media (max-width: 520px){
   .yxlDday{ display:none; }
 }

@@ -897,3 +897,142 @@ body::after{
   .bgm-dash .bgm-row-top{ grid-template-columns: 92px 1fr 34px 130px; }
   .bgm-select{ min-width: 180px; }
 }
+
+
+
+/* =========================
+   🏛️ Hall of Fame (부장 명예의 전당)
+   - 공백 → 1대 → ... → 10대 : 1개씩 입장/정지/퇴장
+   - 업데이트 영역(.updated)은 건드리지 않음
+========================= */
+
+.hof-strip{
+  padding: 0 0 12px;
+}
+
+/* 한 줄 기념판 */
+.hofMarquee{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.18);
+  box-shadow: 0 12px 34px rgba(0,0,0,.26), 0 0 0 1px rgba(255,255,255,.05) inset;
+  backdrop-filter: blur(10px);
+}
+
+/* 라벨은 고정 폭(업데이트와 무관) */
+.hofMarquee__label{
+  flex: 0 0 auto;
+  font-weight: 1000;
+  font-size: 12px;
+  letter-spacing: .4px;
+  opacity: .85;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+}
+
+/* 표시 창: 한 줄만 */
+.hofMarquee__viewport{
+  position:relative;
+  height:44px;
+  overflow:hidden;
+  flex:1;
+  min-width: 0;
+  mask-image: linear-gradient(to top, transparent, black 28%, black 72%, transparent);
+}
+
+.hofMarquee__line{
+  position:absolute;
+  left:0; right:0;
+  top:0;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+
+  opacity:0;
+  transform: translateY(120%);
+  will-change: transform, opacity;
+}
+
+/* 텍스트 파츠 */
+.hofGen{
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
+  font-size: 12px;
+  font-weight: 1000;
+  opacity: .95;
+  box-shadow: 0 10px 22px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+
+.hofName{
+  font-size: 18px;
+  font-weight: 1100;
+  letter-spacing:.2px;
+
+  /* 기념판 느낌: 얇은 외곽 + 은은한 광 */
+  background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.58));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 0.6px rgba(0,0,0,.45);
+  text-shadow:
+    0 1px 0 rgba(0,0,0,.35),
+    0 8px 18px rgba(0,0,0,.35),
+    0 0 18px rgba(255,255,255,.10);
+}
+
+.hofCnt{
+  font-size: 14px;
+  opacity:.92;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 8px 18px rgba(0,0,0,.35);
+}
+
+/* 1개씩: 입장 → 정지 → 퇴장 */
+.hofMarquee__line.is-anim{
+  animation: hofOneCycle var(--hofDur, 4500ms) ease-in-out forwards;
+}
+
+@keyframes hofOneCycle{
+  0%   { transform: translateY(120%);  opacity:0; }
+  18%  { transform: translateY(0%);    opacity:1; }   /* 등장 */
+  78%  { transform: translateY(0%);    opacity:1; }   /* 중앙 정지(가독) */
+  100% { transform: translateY(-120%); opacity:0; }   /* 퇴장 */
+}
+
+/* 전환 순간: 샤인(빛 스윕) */
+.hofMarquee__line::after{
+  content:"";
+  position:absolute;
+  top:-40%;
+  left:-60%;
+  width:50%;
+  height:180%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.22), transparent);
+  transform: rotate(12deg);
+  opacity:0;
+  pointer-events:none;
+}
+.hofMarquee__line.is-anim::after{
+  animation: hofShine .8s ease forwards;
+}
+@keyframes hofShine{
+  0%   { left:-60%; opacity:0; }
+  20%  { opacity:1; }
+  100% { left:140%; opacity:0; }
+}
+
+/* 접근성 */
+@media (prefers-reduced-motion: reduce){
+  .hofMarquee__line.is-anim{ animation:none; opacity:1; transform:none; }
+  .hofMarquee__line::after{ display:none; }
+}

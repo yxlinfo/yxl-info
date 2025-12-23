@@ -782,9 +782,107 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   })();
 
+
+  /* =========================
+     Hall of Fame (부장 명예의 전당)
+     - 공백 → 1대 → ... → 10대 (1개씩 입장/정지/퇴장)
+     - 10대 끝나면 잠깐 공백 후 1대로 재시작
+  ========================= */
+  function initHallOfFame() {
+    const line = document.getElementById("hofLine");
+    if (!line) return;
+
+    const HOF = [
+      { gen: "1대부장",  name: "류시아", cnt: "4,698,914개" },
+      { gen: "2대부장",  name: "류시아", cnt: "3,070,017개" },
+      { gen: "3대부장",  name: "류시아", cnt: "3,687,480개" },
+      { gen: "4대부장",  name: "유누",   cnt: "2,750,614개" },
+      { gen: "5대부장",  name: "유누",   cnt: "2,800,254개" },
+      { gen: "6대부장",  name: "유누",   cnt: "2,358,342개" },
+      { gen: "7대부장",  name: "루루",   cnt: "2,898,789개" },
+      { gen: "8대부장",  name: "은우",   cnt: "3,102,272개" },
+      { gen: "9대부장",  name: "은우",   cnt: "3,611,788개" },
+      { gen: "10대부장", name: "지유",   cnt: "4,001,954개" },
+    ];
+
+    // 모션 최소화 환경에서는 1대만 고정 표시
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const it = HOF[0];
+      line.innerHTML = `
+        <span class="hofGen">${it.gen}</span>
+        <span class="hofName">${it.name}</span>
+        <span class="hofCnt">(${it.cnt})</span>
+      `;
+      line.style.opacity = "1";
+      line.style.transform = "translateY(0)";
+      return;
+    }
+
+    const FIRST_BLANK_MS = 1000; // 첫 공백
+    const PER_ITEM_MS = 4500;    // 한 명 사이클(= CSS --hofDur)
+    const GAP_MS = 150;          // 항목 사이 텀
+    const END_BLANK_MS = 1000;   // 10대 끝 공백
+
+    line.style.setProperty("--hofDur", `${PER_ITEM_MS}ms`);
+
+    let i = 0;
+    let timer = null;
+
+    function setLine(item) {
+      line.innerHTML = `
+        <span class="hofGen">${item.gen}</span>
+        <span class="hofName">${item.name}</span>
+        <span class="hofCnt">(${item.cnt})</span>
+      `;
+    }
+
+    function resetToBlank() {
+      line.classList.remove("is-anim");
+      line.innerHTML = "";
+      line.style.opacity = "0";
+      line.style.transform = "translateY(120%)";
+    }
+
+    function playOnce(item) {
+      setLine(item);
+
+      line.classList.remove("is-anim");
+      void line.offsetWidth; // reflow -> 애니메이션 리셋
+      line.classList.add("is-anim");
+    }
+
+    function scheduleNext(delay) {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(tick, delay);
+    }
+
+    function tick() {
+      playOnce(HOF[i]);
+
+      const isLast = i === HOF.length - 1;
+      i = (i + 1) % HOF.length;
+
+      const nextDelay = PER_ITEM_MS + GAP_MS + (isLast ? END_BLANK_MS : 0);
+
+      // 다음 시작 예약
+      scheduleNext(nextDelay);
+
+      // 사이클이 끝난 직후 공백으로 리셋
+      setTimeout(() => {
+        resetToBlank();
+      }, PER_ITEM_MS);
+    }
+
+    // 시작: 공백 -> 1대부터
+    resetToBlank();
+    scheduleNext(FIRST_BLANK_MS);
+  }
+
+
   /* =========================
      Init
   ========================= */
+  initHallOfFame();
   initTabs();
   initSearchInputs();
   loadAll();

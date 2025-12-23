@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YXL.info</title>
- <link rel="stylesheet" href="styles.css?v=17">
+  <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
 
@@ -24,10 +24,7 @@
 
   <!-- ✅ BGM -->
   <audio id="bgm" preload="auto" loop>
-    
-    <!-- 네가 올린 파일 경로 -->
     <source src="assets/bgm.mp3" type="audio/mpeg" />
-    
   </audio>
 
   <!-- ✅ BGM 2 / 3 추가 -->
@@ -38,192 +35,205 @@
   <audio id="bgm3" preload="auto" loop>
     <source src="assets/bgm3.mp3" type="audio/mpeg" />
   </audio>
-  
+
   <!-- Header -->
   <header class="header">
     <!-- 🎄 Garland (랜덤 반짝 전구) -->
-<div class="garland" aria-hidden="true">
-  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-  <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
-</div>
-    <div class="wrap header-inner">
-      <div class="brand">
-   <img class="brand-gif" src="assets/logo.gif" alt="YXL" />
-      </div>
-<!-- ✅ 여기(brand 다음, header-inner 끝나기 전) -->
-  <div class="header-actions">
-    <div class="bgm-dash" role="group" aria-label="BGM 컨트롤">
-      <span class="bgm-mark">♫ BGM</span>
-
-      <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
-      <span class="dot">·</span>
-      <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
-      <span class="dot">·</span>
-      <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
-
-      <span class="dot">·</span>
-      <select id="bgmSelect" class="select" aria-label="BGM 선택">
-        <option value="bgm">Justin Bieber - Mistletoe</option>
-        <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
-        <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
-      </select>
-
+    <div class="garland" aria-hidden="true">
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
+      <span class="bulb r"></span><span class="bulb y"></span><span class="bulb g"></span><span class="bulb b"></span>
     </div>
 
-    <div class="updated">업데이트: <span id="updatedAt">--</span></div>
-  </div>
-  <!-- ✅ 여기까지 -->
+    <div class="wrap header-inner">
+      <div class="brand">
+        <img class="brand-gif" src="assets/logo.gif" alt="YXL" />
+      </div>
+
+      <!-- ✅ BGM 대시보드 -->
+      <div class="header-actions">
+        <div class="bgm-dash" role="group" aria-label="BGM 컨트롤">
+          <span class="bgm-mark">♫ BGM</span>
+
+          <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
+          <span class="dot">·</span>
+          <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
+          <span class="dot">·</span>
+          <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
+
+          <span class="dot">·</span>
+          <select id="bgmSelect" class="select" aria-label="BGM 선택">
+            <option value="bgm">Justin Bieber - Mistletoe</option>
+            <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
+            <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
+          </select>
+
+          <!-- ✅ 시간/볼륨 게이지 -->
+          <span class="dot">·</span>
+          <div class="bgm-gauges" aria-label="BGM 게이지">
+            <span id="bgmTime" class="bgm-time" aria-label="재생 시간">00:00 / 00:00</span>
+
+            <input id="bgmSeek" class="bgm-range bgm-seek" type="range"
+              min="0" max="100" value="0" step="0.1"
+              aria-label="재생 위치 조절" />
+
+            <span class="bgm-vol-label" aria-hidden="true">VOL</span>
+            <input id="bgmVol" class="bgm-range bgm-vol" type="range"
+              min="0" max="100" value="70" step="1"
+              aria-label="볼륨 조절" />
+          </div>
+        </div>
+
+        <div class="updated">업데이트: <span id="updatedAt">--</span></div>
+      </div>
+      <!-- ✅ 여기까지 -->
     </div>
   </header>
 
-<main class="wrap">
-  <section class="section" id="info">
+  <main class="wrap">
+    <section class="section" id="info">
 
-
-    <section class="section">
-      <div class="section-head">
-        <h2>📊 데이터</h2>
-        
-      </div>
-
-      <!-- Tabs -->
-      <div class="dash-tabs">
-        <button class="dash-tab is-active" type="button" data-target="dash-synergy" aria-selected="true">시너지표</button>
-        <button class="dash-tab" type="button" data-target="dash-total" aria-selected="false">누적 기여도표</button>
-        <button class="dash-tab" type="button" data-target="dash-integrated" aria-selected="false">시즌통합랭킹</button>
-        <button class="dash-tab" type="button" data-target="dash-season" aria-selected="false">시즌별 기여도표</button>
-      </div>
-
-      <!-- Panel: Total -->
-      <div class="dash-panel" id="dash-total" hidden>
-        <div class="card">
-          <div class="card-head">
-            <div>
-              <h3 style="margin:0 0 6px;">누적 기여도표</h3>
-              <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
-            </div>
-            <div class="toolbar">
-              <div class="input-wrap">
-                <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
-              </div>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table id="totalTable" class="table">
-              <thead>
-                <tr>
-                  <th>순위</th>
-                  <th>스트리머</th>
-                  <th style="text-align:right;">누적기여도</th>
-                  <th style="text-align:right;">변동사항</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
+      <section class="section">
+        <div class="section-head">
+          <h2>📊 데이터</h2>
         </div>
-      </div>
 
-      
-      <!-- Panel: Integrated -->
-      <div class="dash-panel" id="dash-integrated" hidden>
-        <div class="card">
-          <div class="card-head">
-            <div>
-              <h3 style="margin:0 0 6px;">시즌통합랭킹</h3>
-              <p class="muted" style="margin:0;"></p>
-            </div>
-            <div class="toolbar">
-              <div class="input-wrap">
-                <input id="integratedSearch" class="input" placeholder="스트리머 이름 검색" />
-              </div>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table id="integratedTable" class="table">
-              <thead></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div class="hint">* 헤더를 클릭하면 정렬(▲/▼)됩니다.</div>
+        <!-- Tabs -->
+        <div class="dash-tabs">
+          <button class="dash-tab is-active" type="button" data-target="dash-synergy" aria-selected="true">시너지표</button>
+          <button class="dash-tab" type="button" data-target="dash-total" aria-selected="false">누적 기여도표</button>
+          <button class="dash-tab" type="button" data-target="dash-integrated" aria-selected="false">시즌통합랭킹</button>
+          <button class="dash-tab" type="button" data-target="dash-season" aria-selected="false">시즌별 기여도표</button>
         </div>
-      </div>
 
-<!-- Panel: Season -->
-      <div class="dash-panel" id="dash-season" hidden>
-        <div class="card">
-          <div class="card-head">
-            <div>
-              <h3 style="margin:0 0 6px;">시즌별 기여도표</h3>
-              <p class="muted" style="margin:0;">시즌 선택 + 이름 검색이 가능합니다.</p>
-            </div>
-            <div class="toolbar">
-              <select id="seasonSelect" class="select"></select>
-              <div class="input-wrap">
-                <input id="seasonSearch" class="input" placeholder="멤버 이름 검색" />
-              </div>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table id="seasonTable" class="table">
-              <thead></thead>
-
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다.</div>
-        </div>
-      </div>
-
-      <!-- Panel: Synergy -->
-      <div class="dash-panel is-active" id="dash-synergy">
-        <div class="card">
-          <div class="card-head">
-            <div class="synergy-head">
+        <!-- Panel: Total -->
+        <div class="dash-panel" id="dash-total" hidden>
+          <div class="card">
+            <div class="card-head">
               <div>
-                <h3 style="margin:0 0 6px;">시너지표</h3>
-                <p class="muted" style="margin:0 0 6px;">3시간마다 자동 업데이트가 됩니다.</p>
-                <div class="muted" id="synergyMeta" style="margin:0;">데이터 기준: --</div>
+                <h3 style="margin:0 0 6px;">누적 기여도표</h3>
+                <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
               </div>
-</div>
-          </div>
+              <div class="toolbar">
+                <div class="input-wrap">
+                  <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
+                </div>
+              </div>
+            </div>
 
-          <div class="table-wrap">
-            <table id="synergyTable" class="table sortable">
-              <thead>
-              <tr>
-                  <th data-key="순위">순위</th>
-                  <th data-key="비제이명">스트리머</th>
-                  <th data-key="월별 누적별풍선" style="text-align:right;">누적별풍선</th>
-                  <th data-key="변동" style="text-align:right;">변동사항</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
+            <div class="table-wrap">
+              <table id="totalTable" class="table">
+                <thead>
+                  <tr>
+                    <th>순위</th>
+                    <th>스트리머</th>
+                    <th style="text-align:right;">누적기여도</th>
+                    <th style="text-align:right;">변동사항</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
 
-          <div class="hint">* 정렬은 클릭할 때마다 ▲/▼ 토글됩니다.</div>
+            <div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
+          </div>
         </div>
-      </div>
 
+        <!-- Panel: Integrated -->
+        <div class="dash-panel" id="dash-integrated" hidden>
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 style="margin:0 0 6px;">시즌통합랭킹</h3>
+                <p class="muted" style="margin:0;"></p>
+              </div>
+              <div class="toolbar">
+                <div class="input-wrap">
+                  <input id="integratedSearch" class="input" placeholder="스트리머 이름 검색" />
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table id="integratedTable" class="table">
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="hint">* 헤더를 클릭하면 정렬(▲/▼)됩니다.</div>
+          </div>
+        </div>
+
+        <!-- Panel: Season -->
+        <div class="dash-panel" id="dash-season" hidden>
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 style="margin:0 0 6px;">시즌별 기여도표</h3>
+                <p class="muted" style="margin:0;">시즌 선택 + 이름 검색이 가능합니다.</p>
+              </div>
+              <div class="toolbar">
+                <select id="seasonSelect" class="select"></select>
+                <div class="input-wrap">
+                  <input id="seasonSearch" class="input" placeholder="멤버 이름 검색" />
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table id="seasonTable" class="table">
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다.</div>
+          </div>
+        </div>
+
+        <!-- Panel: Synergy -->
+        <div class="dash-panel is-active" id="dash-synergy">
+          <div class="card">
+            <div class="card-head">
+              <div class="synergy-head">
+                <div>
+                  <h3 style="margin:0 0 6px;">시너지표</h3>
+                  <p class="muted" style="margin:0 0 6px;">3시간마다 자동 업데이트가 됩니다.</p>
+                  <div class="muted" id="synergyMeta" style="margin:0;">데이터 기준: --</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table id="synergyTable" class="table sortable">
+                <thead>
+                <tr>
+                    <th data-key="순위">순위</th>
+                    <th data-key="비제이명">스트리머</th>
+                    <th data-key="월별 누적별풍선" style="text-align:right;">누적별풍선</th>
+                    <th data-key="변동" style="text-align:right;">변동사항</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="hint">* 정렬은 클릭할 때마다 ▲/▼ 토글됩니다.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <footer class="section" style="padding-top:0;">
+        <div class="muted">© YXL</div>
+      </footer>
     </section>
-
-    <footer class="section" style="padding-top:0;">
-      <div class="muted">© YXL</div>
-    </footer>
   </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="app.js?v=17"></script>
 </body>
 </html>

@@ -1,26 +1,4 @@
 
-// ===== SOOP BJID 고정 매핑(11명) =====
-function normSoopName(s) {
-  return String(s || "").replace(/[♥♡]/g, "").trim();
-}
-const SOOP_BJID_MAP = {
-  "리윤_": "sladk51",
-  "후잉": "jaeha010",
-  "하랑짱": "asy1218",
-  "쩔밍": "wnsdus5900",
-  "김유정S2": "tkek55",
-  "서니_": "iluvpp",
-  "#율무": "offside629",
-  "소다": "zbxlzzz",
-  "강소지": "nowsoji",
-  "나래님": "sssukki",
-  "유나연": "jeewon1202",
-};
-function getSoopIdFromName(streamerName) {
-  const key = normSoopName(streamerName);
-  return SOOP_BJID_MAP[key] || null;
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Config
@@ -28,9 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const FILE_MAIN = "YXL_통합.xlsx";
   const FILE_SYNERGY = "시너지표.xlsx";
   const AUTO_REFRESH_MS = 3 * 60 * 60 * 1000; // 3시간
-
-  const CACHE_KEY_SOOP = "yxl_soop_cache_v1";
-  const CACHE_TTL_MS = 10 * 60 * 1000; // 10분
 
   const state = {
     main: {
@@ -430,10 +405,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `
           <tr>
             <td>${rank ?? ""}</td>
-            <td>
-              <span class="live-emoji" data-streamer="${String(name ?? "")}"></span>
-              <span class="soop-name" data-streamer="${String(name ?? "")}">${name ?? ""}</span>
-            </td>
+            <td>${name ?? ""}</td>
             <td class="num">${numFmt(balloons)}</td>
             <td class="num">${delta ?? ""}</td>
           </tr>
@@ -452,13 +424,11 @@ document.addEventListener("DOMContentLoaded", () => {
           state.synergySort.dir = state.synergySort.dir === "asc" ? "desc" : "asc";
         }
         renderSynergy();
-        initSoopEnhance(); // rebind after rerender
-      });
+});
     });
 
     renderSynergyMeta();
-    initSoopEnhance();
-  }
+}
 
   /* =========================
      SOOP Hover + Live Status
@@ -508,34 +478,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function resolveSoopInfo(streamerName) {
-    const user_id = getSoopIdFromName(streamerName);
-    if (!user_id) throw new Error(`BJID 매핑 없음: ${streamerName}`);
-
     const cache = getSoopCache();
-    const key = `soop:${user_id}`;
-    const cached = cache.get(key);
+    const key = normalize(streamerName);
+    const hit = cache[key];
     const now = Date.now();
-    if (cached && now - cached.ts < 10 * 60 * 1000) return cached.value;
+    if (hit && now - hit.ts < CACHE_TTL_MS) return hit.value;
 
-    // BJ 검색(bjSearch) 없이: BJID 기준으로 라이브 여부만 확인
-    const keyword = encodeURIComponent(user_id);
+    const keyword = encodeURIComponent(streamerName.replace(/[♥♡]/g, "").trim());
+    // 1) bjSearch -> user_id + station_logo
+    const bjUrl = `https://sch.sooplive.co.kr/api.php?m=bjSearch&keyword=${keyword}&nListCnt=10&t=json`;
+    const bjJson = await soopFetchJson(bjUrl);
+    const bj = pickBestBjSearch(bjJson.DATA, streamerName);
+    if (!bj) throw new Error("스트리머 검색 결과 없음");
+
+    // 2) liveSearch -> live 여부 + 썸네일
     const liveUrl = `https://sch.sooplive.co.kr/api.php?m=liveSearch&keyword=${keyword}&nListCnt=30&t=json`;
     const liveJson = await soopFetchJson(liveUrl);
-    const list = (liveJson && (liveJson.REAL_BROAD || liveJson.DATA || [])) || [];
-    const live = Array.isArray(list)
-      ? list.find((x) => String(x?.user_id || x?.USER_ID || "").toLowerCase() === user_id.toLowerCase())
-      : null;
+    const live = pickBestLiveSearch(liveJson.REAL_BROAD, bj.user_id, streamerName);
 
     const value = {
-      user_id,
-      station_logo: "",
+      user_id: bj.user_id,
+      user_nick: bj.user_nick,
+      station_logo: bj.station_logo,
       isLive: !!live,
-      live_url: live ? (live.live_url || live.LIVE_URL || "") : "",
-      live_thumb: live ? (live.live_thumb || live.LIVE_THUMB || "") : "",
-      live_title: live ? (live.live_title || live.LIVE_TITLE || live.broad_title || live.BROAD_TITLE || "") : "",
+      live_thumb: live?.broad_img || null,
+      live_url: live?.url || null,
+      live_title: live?.broad_title || null,
     };
 
-    cache.set(key, { ts: now, value });
+    cache[key] = { ts: now, value };
+    setSoopCache(cache);
     return value;
   }
 
@@ -547,9 +519,9 @@ document.addEventListener("DOMContentLoaded", () => {
     el.className = "soop-tooltip";
     el.style.display = "none";
     el.innerHTML = `
-      <img class="thumb" alt="SOOP 썸네일" style="display:none;" />
+      <img class="thumb" alt="SOOP 썸네일" />
       <div class="body">
-        <p class="title"><span class="t-emoji"></span><span class="t-name"></span></p>
+        <p class="title"><span class="t-emoji">❔</span><span class="t-name"></span></p>
         <p class="sub"></p>
       </div>
     `;
@@ -572,25 +544,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function enhanceOneName(nameEl) {
     const streamerName = nameEl.dataset.streamer || nameEl.textContent || "";
-    
-    const soopId = getSoopIdFromName(streamerName);
-    if (!soopId) return;
-const emojiEl = nameEl.closest("td")?.querySelector(".live-emoji");
+    const emojiEl = nameEl.closest("td")?.querySelector(".live-emoji");
 
     // default state
-    if (emojiEl) emojiEl.textContent = "";
+    if (emojiEl) emojiEl.textContent = "⏳";
 
     let info = null;
     try {
       info = await resolveSoopInfo(streamerName);
-      if (emojiEl) emojiEl.textContent = info.isLive ? "🔴" : "";
+      if (emojiEl) emojiEl.textContent = info.isLive ? "🟢" : "⚫";
       // 클릭 시 방송국(또는 라이브) 열기
       nameEl.onclick = () => {
-        const url = info.isLive && info.live_url ? info.live_url : `https://ch.sooplive.co.kr/${soopId}`;
+        const url = info.isLive && info.live_url ? info.live_url : `https://ch.sooplive.co.kr/${info.user_id}`;
         window.open(url, "_blank", "noopener,noreferrer");
       };
     } catch (e) {
-      if (emojiEl) emojiEl.textContent = "";
+      if (emojiEl) emojiEl.textContent = "❔";
       nameEl.onclick = null;
       nameEl.dataset.soopError = "1";
     }
@@ -598,7 +567,6 @@ const emojiEl = nameEl.closest("td")?.querySelector(".live-emoji");
     const tooltip = ensureTooltipEl();
 
     const show = async (ev) => {
-      if (!info || !info.isLive) return;
       tooltip.style.display = "block";
       moveTooltip(tooltip, ev.clientX, ev.clientY);
 
@@ -616,9 +584,8 @@ const emojiEl = nameEl.closest("td")?.querySelector(".live-emoji");
         return;
       }
 
-      tEmoji.textContent = "🔴";
-      img.src = info.live_thumb || "";
-      img.style.display = img.src ? "" : "none";
+      tEmoji.textContent = info.isLive ? "🟢" : "⚫";
+      img.src = info.isLive && info.live_thumb ? info.live_thumb : info.station_logo;
       sub.textContent = info.isLive
         ? (info.live_title ? `LIVE · ${info.live_title}` : "LIVE")
         : "OFFLINE";

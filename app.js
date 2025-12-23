@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Config
@@ -261,7 +260,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // filter: streamer column if present
     if (q) {
-      const nameKey = headers.find((h) => normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버");
+      const nameKey = headers.find(
+        (h) => normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버"
+      );
       if (nameKey) rows = rows.filter((r) => normalize(r[nameKey]).includes(q));
     }
 
@@ -336,19 +337,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderSynergyMeta() {
-  const meta = $("#synergyMeta");
-  if (!meta) return;
+    const meta = $("#synergyMeta");
+    if (!meta) return;
 
-  let dt = state.synergy.updatedAt;
-  if (!dt) {
-    meta.textContent = "데이터 기준: --";
-    return;
+    let dt = state.synergy.updatedAt;
+    if (!dt) {
+      meta.textContent = "데이터 기준: --";
+      return;
+    }
+
+    dt = dt instanceof Date ? dt : new Date(dt);
+    meta.textContent = `데이터 기준: ${dt.getFullYear()}년 ${dt.getMonth() + 1}월 · ${dt.toLocaleString("ko-KR")}`;
   }
-
-  dt = dt instanceof Date ? dt : new Date(dt);
-  meta.textContent =
-    `데이터 기준: ${dt.getFullYear()}년 ${dt.getMonth() + 1}월 · ${dt.toLocaleString("ko-KR")}`;
-}
 
   function renderSynergy() {
     const table = $("#synergyTable");
@@ -358,13 +358,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const thead = table.querySelector("thead");
     const { key, dir } = state.synergySort;
 
-    // sort indicator (thead rebuild)
     const headers = [
       { key: "순위", label: "순위", right: false },
       { key: "비제이명", label: "스트리머", right: false },
       { key: "월별 누적별풍선", label: "누적별풍선", right: true },
       { key: "변동", label: "변동사항", right: true },
     ];
+
     thead.innerHTML = `
       <tr>
         ${headers
@@ -398,7 +398,6 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .join("");
 
-    // header sort handlers
     thead.querySelectorAll("th[data-key]").forEach((th) => {
       th.addEventListener("click", () => {
         const k = th.dataset.key;
@@ -409,15 +408,12 @@ document.addEventListener("DOMContentLoaded", () => {
           state.synergySort.dir = state.synergySort.dir === "asc" ? "desc" : "asc";
         }
         renderSynergy();
-
       });
     });
 
     renderSynergyMeta();
-
   }
 
- 
   /* =========================
      Load Excel & Init
   ========================= */
@@ -426,16 +422,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const wb = XLSX.read(ab, { type: "array" });
     const names = wb.SheetNames;
 
-    // Sheet 1: 누적기여도
     const t1 = sheetToTable(wb, names[0]);
     state.main.total = t1.rows;
 
-    // Sheet 2: S1~S10 YXL_기여도
     const t2 = sheetToTable(wb, names[1]);
     state.main.integratedHeaders = t2.headers;
     state.main.integrated = t2.rows;
 
-    // Sheets 3~12: 시즌별
     state.main.seasonSheetNames = names.slice(2, 12);
     state.main.seasons.clear();
     state.main.seasonSheetNames.forEach((sn) => {
@@ -446,12 +439,10 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadSynergyExcel() {
     const ab = await fetchArrayBuffer(FILE_SYNERGY);
     const wb = XLSX.read(ab, { type: "array" });
-    const sn = wb.SheetNames[0]; // 쿼리2
+    const sn = wb.SheetNames[0];
     const t = sheetToTable(wb, sn);
 
-    // updatedAt: take first non-empty '새로고침시간'
     const upd = t.rows.find((r) => r["새로고침시간"])?.["새로고침시간"];
-    // XLSX may parse dates as numbers; use XLSX.SSF.parse_date_code
     let dt = null;
     if (upd) {
       if (typeof upd === "number" && XLSX.SSF) {
@@ -504,165 +495,260 @@ document.addEventListener("DOMContentLoaded", () => {
       loadAll();
     }, AUTO_REFRESH_MS);
   }
-/* =========================
-   Gate + BGM Dashboard (3 tracks)
-========================= */
-(function gateAndBgm() {
-  const KEY_ON = "yxl_bgm_on";
-  const KEY_SEL = "yxl_bgm_selected";
 
-  const gate = document.getElementById("gate");
-  const gateBtn = document.getElementById("gateBtn");
-  const gateMsg = document.getElementById("gateMsg");
+  /* =========================
+     Gate + BGM Dashboard (3 tracks) + Seek/Volume
+  ========================= */
+  (function gateAndBgm() {
+    const KEY_ON = "yxl_bgm_on";
+    const KEY_SEL = "yxl_bgm_selected";
+    const KEY_VOL = "yxl_bgm_volume"; // ✅ 추가
 
-  const a1 = document.getElementById("bgm");
-  const a2 = document.getElementById("bgm2");
-  const a3 = document.getElementById("bgm3");
+    const gate = document.getElementById("gate");
+    const gateBtn = document.getElementById("gateBtn");
+    const gateMsg = document.getElementById("gateMsg");
 
-  const btnPlay = document.getElementById("bgmPlay");
-  const btnPrev = document.getElementById("bgmPrev");
-  const btnNext = document.getElementById("bgmNext");
-  const sel = document.getElementById("bgmSelect");
+    const a1 = document.getElementById("bgm");
+    const a2 = document.getElementById("bgm2");
+    const a3 = document.getElementById("bgm3");
 
+    const btnPlay = document.getElementById("bgmPlay");
+    const btnPrev = document.getElementById("bgmPrev");
+    const btnNext = document.getElementById("bgmNext");
+    const sel = document.getElementById("bgmSelect");
 
-  const ALWAYS_GATE = true;
+    // ✅ 게이지 요소(HTML에 있어야 함)
+    const seek = document.getElementById("bgmSeek");
+    const vol = document.getElementById("bgmVol");
+    const timeEl = document.getElementById("bgmTime");
+    let isSeeking = false;
 
-  const tracks = [
-    { key: "bgm", el: a1 },
-    { key: "bgm2", el: a2 },
-    { key: "bgm3", el: a3 },
-  ].filter(t => t.el);
+    const ALWAYS_GATE = true;
 
-  const map = Object.fromEntries(tracks.map(t => [t.key, t.el]));
+    const tracks = [
+      { key: "bgm", el: a1 },
+      { key: "bgm2", el: a2 },
+      { key: "bgm3", el: a3 },
+    ].filter((t) => t.el);
 
-  function showGate(show) {
-    if (!gate) return;
-    gate.classList.toggle("is-hidden", !show);
-    gate.setAttribute("aria-hidden", show ? "false" : "true");
-  }
+    const map = Object.fromEntries(tracks.map((t) => [t.key, t.el]));
 
-  function gateVisible() {
-    return gate && !gate.classList.contains("is-hidden");
-  }
+    function showGate(show) {
+      if (!gate) return;
+      gate.classList.toggle("is-hidden", !show);
+      gate.setAttribute("aria-hidden", show ? "false" : "true");
+    }
 
-  function stopAll({ reset = false } = {}) {
-    tracks.forEach(({ el }) => {
-      el.pause();
-      if (reset) {
-        try { el.currentTime = 0; } catch (e) {}
+    function gateVisible() {
+      return gate && !gate.classList.contains("is-hidden");
+    }
+
+    function stopAll({ reset = false } = {}) {
+      tracks.forEach(({ el }) => {
+        el.pause();
+        if (reset) {
+          try {
+            el.currentTime = 0;
+          } catch (e) {}
+        }
+      });
+    }
+
+    function getSelectedKey() {
+      const saved = localStorage.getItem(KEY_SEL);
+      if (saved && map[saved]) return saved;
+      return tracks[0]?.key || "bgm";
+    }
+
+    function setSelectedKey(k) {
+      if (!map[k]) k = tracks[0]?.key || "bgm";
+      localStorage.setItem(KEY_SEL, k);
+      if (sel) sel.value = k;
+      syncSeekUI(); // ✅ 추가: 선택 바뀌면 UI 동기화
+    }
+
+    function setPlayUI(on) {
+      if (!btnPlay) return;
+      btnPlay.setAttribute("aria-pressed", on ? "true" : "false");
+      btnPlay.textContent = on ? "⏸︎ Pause" : "▶︎ Play";
+    }
+
+    // ✅ 시간 포맷/시킹 UI
+    function fmtTime(sec) {
+      sec = Number(sec);
+      if (!Number.isFinite(sec) || sec < 0) sec = 0;
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    function getActiveAudio() {
+      const k = getSelectedKey();
+      return map[k];
+    }
+
+    function syncSeekUI() {
+      const a = getActiveAudio();
+      if (!a) return;
+
+      if (seek) {
+        const dur = Number(a.duration);
+        seek.max = Number.isFinite(dur) && dur > 0 ? String(dur) : "0";
+        if (!isSeeking) seek.value = String(a.currentTime || 0);
+      }
+
+      if (timeEl) {
+        const cur = a.currentTime || 0;
+        const dur = Number(a.duration);
+        timeEl.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+      }
+    }
+
+    // ✅ 볼륨 적용/저장
+    function applyVolume() {
+      const saved = Number(localStorage.getItem(KEY_VOL));
+      const v = Number.isFinite(saved) ? Math.min(1, Math.max(0, saved)) : 0.6;
+
+      tracks.forEach(({ el }) => {
+        el.volume = v;
+      });
+
+      if (vol) vol.value = String(Math.round(v * 100));
+    }
+
+    vol?.addEventListener("input", () => {
+      const v = Math.min(1, Math.max(0, Number(vol.value) / 100));
+      localStorage.setItem(KEY_VOL, String(v));
+      tracks.forEach(({ el }) => (el.volume = v));
+    });
+
+    // ✅ seek 드래그
+    seek?.addEventListener("pointerdown", () => {
+      isSeeking = true;
+    });
+    seek?.addEventListener("pointerup", () => {
+      isSeeking = false;
+    });
+    seek?.addEventListener("input", () => {
+      const a = getActiveAudio();
+      if (!a) return;
+      const t = Number(seek.value);
+      if (Number.isFinite(t)) {
+        a.currentTime = t;
+        syncSeekUI();
       }
     });
-  }
 
-  function getSelectedKey() {
-    const saved = localStorage.getItem(KEY_SEL);
-    if (saved && map[saved]) return saved;
-    return tracks[0]?.key || "bgm";
-  }
+    // 오디오 이벤트로 UI 갱신
+    tracks.forEach(({ el }) => {
+      el.addEventListener("loadedmetadata", syncSeekUI);
+      el.addEventListener("timeupdate", syncSeekUI);
+      el.addEventListener("ended", syncSeekUI);
+    });
 
-  function setSelectedKey(k) {
-    if (!map[k]) k = tracks[0]?.key || "bgm";
-    localStorage.setItem(KEY_SEL, k);
-    if (sel) sel.value = k;
-  }
+    async function playSelected({ reset = true } = {}) {
+      const k = getSelectedKey();
+      const audio = map[k];
+      if (!audio) return;
 
-  function setPlayUI(on) {
-    if (!btnPlay) return;
-    btnPlay.setAttribute("aria-pressed", on ? "true" : "false");
-    btnPlay.textContent = on ? "⏸︎ Pause" : "▶︎ Play";
-  }
+      stopAll({ reset: false });
+      if (reset) {
+        try {
+          audio.currentTime = 0;
+        } catch (e) {}
+      }
 
-  async function playSelected({ reset = true } = {}) {
-    const k = getSelectedKey();
-    const audio = map[k];
-    if (!audio) return;
-
-    stopAll({ reset: false });
-    if (reset) {
-      try { audio.currentTime = 0; } catch (e) {}
+      const p = audio.play();
+      if (p && typeof p.catch === "function") await p.catch(() => {});
+      syncSeekUI(); // ✅ 추가
     }
-    const p = audio.play();
-    if (p && typeof p.catch === "function") await p.catch(() => {});
-  }
 
-  async function setOn(on) {
-    localStorage.setItem(KEY_ON, on ? "1" : "0");
-    setPlayUI(on);
-    if (on) await playSelected({ reset: false });
-    else stopAll({ reset: false });
-  }
+    async function setOn(on) {
+      localStorage.setItem(KEY_ON, on ? "1" : "0");
+      setPlayUI(on);
+      if (on) await playSelected({ reset: false });
+      else stopAll({ reset: false });
+      syncSeekUI(); // ✅ 추가
+    }
 
-  function moveTrack(dir) {
-    const cur = getSelectedKey();
-    const idx = tracks.findIndex(t => t.key === cur);
-    if (idx < 0) return;
+    function moveTrack(dir) {
+      const cur = getSelectedKey();
+      const idx = tracks.findIndex((t) => t.key === cur);
+      if (idx < 0) return;
 
-    const nextIdx = (idx + dir + tracks.length) % tracks.length;
-    setSelectedKey(tracks[nextIdx].key);
-  }
+      const nextIdx = (idx + dir + tracks.length) % tracks.length;
+      setSelectedKey(tracks[nextIdx].key);
+    }
 
-  function enter() {
-    localStorage.setItem("yxl_gate_ok", "1");
-    showGate(false);
-    setOn(true);
-  }
+    function enter() {
+      localStorage.setItem("yxl_gate_ok", "1");
+      showGate(false);
+      setOn(true);
+    }
 
-  // 초기 게이트 표시
-  const allowed = localStorage.getItem("yxl_gate_ok") === "1";
-  showGate(ALWAYS_GATE ? true : !allowed);
-  if (gateMsg) gateMsg.textContent = "입장하려면 버튼을 눌러주세요.";
+    // 초기 게이트 표시
+    const allowed = localStorage.getItem("yxl_gate_ok") === "1";
+    showGate(ALWAYS_GATE ? true : !allowed);
+    if (gateMsg) gateMsg.textContent = "입장하려면 버튼을 눌러주세요.";
 
-  // 선택/표시 초기화
-  setSelectedKey(getSelectedKey());
+    // 선택/표시 초기화
+    setSelectedKey(getSelectedKey());
 
-  // UI만 복원(자동재생 X)
-  const isOn = localStorage.getItem(KEY_ON) === "1";
-  setPlayUI(isOn);
+    // 볼륨 복원
+    applyVolume();
 
-  // 게이트 버튼
-  gateBtn?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    enter();
-  });
+    // UI만 복원(자동재생 X)
+    const isOn = localStorage.getItem(KEY_ON) === "1";
+    setPlayUI(isOn);
+    syncSeekUI();
 
-  // 배경 클릭도 입장
-  gate?.addEventListener("click", (e) => {
-    if (e.target === gate || e.target.classList?.contains("gate-sparkles") || e.target.id === "gateParticles") {
+    // 게이트 버튼
+    gateBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       enter();
-    }
-  });
+    });
 
-  // 재생/일시정지
-  btnPlay?.addEventListener("click", async () => {
-    if (gateVisible()) return enter();
-    const on = localStorage.getItem(KEY_ON) === "1";
-    await setOn(!on);
-  });
+    // 배경 클릭도 입장
+    gate?.addEventListener("click", (e) => {
+      if (e.target === gate || e.target.classList?.contains("gate-sparkles") || e.target.id === "gateParticles") {
+        enter();
+      }
+    });
 
-  // 이전/다음(스킵)
-  btnPrev?.addEventListener("click", async () => {
-    if (gateVisible()) return enter();
-    moveTrack(-1);
-    const on = localStorage.getItem(KEY_ON) === "1";
-    if (on) await playSelected({ reset: true });
-  });
+    // 재생/일시정지
+    btnPlay?.addEventListener("click", async () => {
+      if (gateVisible()) return enter();
+      const on = localStorage.getItem(KEY_ON) === "1";
+      await setOn(!on);
+    });
 
-  btnNext?.addEventListener("click", async () => {
-    if (gateVisible()) return enter();
-    moveTrack(+1);
-    const on = localStorage.getItem(KEY_ON) === "1";
-    if (on) await playSelected({ reset: true });
-  });
+    // 이전/다음(스킵)
+    btnPrev?.addEventListener("click", async () => {
+      if (gateVisible()) return enter();
+      moveTrack(-1);
+      const on = localStorage.getItem(KEY_ON) === "1";
+      if (on) await playSelected({ reset: true });
+      else syncSeekUI();
+    });
 
-  // 셀렉트 변경
-  sel?.addEventListener("change", async () => {
-    if (gateVisible()) return;
-    setSelectedKey(sel.value);
-    const on = localStorage.getItem(KEY_ON) === "1";
-    if (on) await playSelected({ reset: true });
-  });
-})();
+    btnNext?.addEventListener("click", async () => {
+      if (gateVisible()) return enter();
+      moveTrack(+1);
+      const on = localStorage.getItem(KEY_ON) === "1";
+      if (on) await playSelected({ reset: true });
+      else syncSeekUI();
+    });
+
+    // 셀렉트 변경
+    sel?.addEventListener("change", async () => {
+      if (gateVisible()) return;
+      setSelectedKey(sel.value);
+      const on = localStorage.getItem(KEY_ON) === "1";
+      if (on) await playSelected({ reset: true });
+      else syncSeekUI();
+    });
+  })();
 
   /* =========================
      Init

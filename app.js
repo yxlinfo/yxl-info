@@ -430,12 +430,12 @@ document.addEventListener("DOMContentLoaded", () => {
           state.synergySort.dir = state.synergySort.dir === "asc" ? "desc" : "asc";
         }
         renderSynergy();
-        initSoopEnhance(); // rebind after rerender
+
       });
     });
 
     renderSynergyMeta();
-    initSoopEnhance();
+
   }
 
  

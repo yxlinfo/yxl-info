@@ -945,14 +945,6 @@ document.addEventListener("DOMContentLoaded", () => {
      - app.js 안에서 일정 데이터만 수정하면 전체 사용자에게 동일하게 반영됩니다.
   ========================= */
   const YXL_SCHEDULE = [
-    { date: "2025-12-22", time: "17:00", type: "엑셀", title: "YXL S11 1회차" },
-    { date: "2025-12-25", time: "17:00", type: "엑셀", title: "YXL S11 2회차" },
-    { date: "2025-12-28", time: "19:00", type: "이벤트", title: "Y계열 연말어워즈" },
-    { date: "2025-12-25", time: "21:00", type: "합방", title: "하랑e 연수a 시장" },
-    { date: "2025-12-25", time: "23:00", type: "생일", title: "하랑짱 생일" },
-    { date: "2026-01-01", time: "17:00", type: "엑셀", title: "YXL S11 3회차" },
-    { date: "2026-01-05", time: "17:00", type: "엑셀", title: "YXL S11 4회차" },
-    
     // 예시) { date: "2025-12-24", time: "21:00", type: "합방", title: "합동 방송" },
     // 예시) { date: "2025-12-26", time: "",      type: "회의", title: "주간 회의" },
   ];
@@ -1080,7 +1072,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // - 엑셀일정: 파란 블록
     // - 합방: 보라 블록
     // - 이벤트: 노란 블록
-    const BDAY_EMOJI = "🎉"; // (필요시 배지에만 사용)
+    const BDAY_EMOJI = "🍰"; // (필요시 배지에만 사용)
 
     const getTypeText = (e) => (e?.type ?? "").toString().trim();
 
@@ -1226,7 +1218,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return `
               <div class="schDetailItem schBlock ${blockClass(kind)}">
                 <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
-                <span class="schBlockTitle">${escapeHtml(e.title || "")}</span>
+                <span class="schBlockTitle" title="${escapeHtml(e.title || "")}">${escapeHtml(e.title || "")}</span>
                 ${showTag ? `<span class="schBlockTag">${escapeHtml(t)}</span>` : ""}
               </div>
             `;
@@ -1285,7 +1277,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       const kind = eventKind(e);
                       return `<div class="schBlock ${blockClass(kind)}">
                                 <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
-                                <span class="schBlockTitle">${escapeHtml(e.title || "")}</span>
+                                <span class="schBlockTitle" title="${escapeHtml(e.title || "")}">${escapeHtml(e.title || "")}</span>
                               </div>`;
                     })
                     .join("")}

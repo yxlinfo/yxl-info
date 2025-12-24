@@ -627,6 +627,41 @@ body::after{
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap:10px;
 }
+
+/* ✅ 요일/월일을 블록 위로(가시성 개선) */
+.schCol{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+  cursor:pointer;
+}
+.schHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:6px 8px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.16);
+  font-variant-numeric: tabular-nums;
+  opacity:.92;
+}
+.schHeadLeft{
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+  min-width:0;
+}
+.schHead .schDate{ opacity:.9; }
+.schCol.is-active .schHead{
+  border-color: rgba(255,255,255,.22);
+  background: rgba(0,0,0,.18);
+  opacity:1;
+}
+
+
 .schDay{
   position:relative;
   border:1px solid rgba(255,255,255,.10);
@@ -700,7 +735,11 @@ body::after{
 .schDay.is-weekend .schDow,
 .schDay.is-weekend .schDate,
 .schDay.is-holiday .schDow,
-.schDay.is-holiday .schDate{
+.schDay.is-holiday .schDate,
+.schCol.is-weekend .schDow,
+.schCol.is-weekend .schDate,
+.schCol.is-holiday .schDow,
+.schCol.is-holiday .schDate{
   color: rgba(255, 120, 120, .95);
   opacity: 1;
 }

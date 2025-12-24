@@ -1264,6 +1264,20 @@ function renderNextBar(){
         const isWeekend = day === 0 || day === 6;
         const isHoliday = isKoreanHoliday(ymd);
 
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+
+        // ✅ 그리드 1칸 = (상단 헤더) + (일정 블록 카드)
+        const col = document.createElement("div");
+        col.className =
+          "schCol" +
+          (ymd === toYMD(today) ? " is-today" : "") +
+          (ymd === activeYMD ? " is-active" : "") +
+          (ymd === nextYMD ? " is-next" : "") +
+          (isWeekend ? " is-weekend" : "") +
+          (isHoliday ? " is-holiday" : "");
+
+        // 일정 블록 카드(클릭 영역) — 안에는 일정만
         const card = document.createElement("div");
         card.className =
           "schDay" +
@@ -1273,9 +1287,12 @@ function renderNextBar(){
           (isWeekend ? " is-weekend" : "") +
           (isHoliday ? " is-holiday" : "");
 
-        card.innerHTML = `
-          <div class="schTop">
-            <div class="schDow">${DOW[i]}</div>
+        col.innerHTML = `
+          <div class="schHead">
+            <div class="schHeadLeft">
+              <span class="schDate">${mm}.${dd}</span>
+              <span class="schDow">${DOW[i]}</span>
+            </div>
             <div class="schRight">
               ${hasBirthday ? `<span class="schBdayBadge" aria-label="생일">${BDAY_EMOJI}</span>` : ""}
               ${
@@ -1283,9 +1300,11 @@ function renderNextBar(){
                   ? `<span class="schCount" aria-label="일정 ${evCount}개">${evCount}</span>`
                   : ""
               }
-              <div class="schDate">${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}</div>
             </div>
           </div>
+        `;
+
+        card.innerHTML = `
           ${
             evCount > 0
               ? (Math.min(shownCount,2) > 0
@@ -1302,7 +1321,7 @@ function renderNextBar(){
                     .join("")}
                   ${moreCount > 0 ? `<div class="schPvMore">+${moreCount}개 더</div>` : ""}
                 </div>`
-                  : `<div class=\"schPreview\"><div class=\"schPvMore\">+${evCount}개</div></div>`
+                  : `<div class="schPreview"><div class="schPvMore">+${evCount}개</div></div>`
                 )
               : `<div class="schDots" aria-hidden="true">
                   ${Array.from({ length: Math.min(evCount, 3) })
@@ -1312,17 +1331,19 @@ function renderNextBar(){
           }
         `;
 
-        card.addEventListener("click", () => {
+        col.addEventListener("click", () => {
           activeYMD = ymd;
           renderWeek();
           renderDetail(activeYMD);
         });
 
-        grid.appendChild(card);
+        col.appendChild(card);
+        grid.appendChild(col);
       }
 
       // 상단 '다음 일정' 바 갱신
       renderNextBar();
+
     }
 
     btnPrev?.addEventListener("click", () => {

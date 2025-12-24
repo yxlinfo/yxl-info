@@ -882,6 +882,30 @@ body::after{
   margin-bottom:12px;
 }
 .toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:nowrap; }
+/* 시즌통합랭킹: 플레이어/비플레이어 토글 */
+.seg-toggle{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:999px;
+  overflow:hidden;
+  background: rgba(0,0,0,.18);
+}
+.seg-btn{
+  appearance:none;
+  border:0;
+  background: transparent;
+  color: rgba(255,255,255,.90);
+  padding:9px 12px;
+  font-weight:700;
+  cursor:pointer;
+  line-height:1;
+}
+.seg-btn:hover{ background: rgba(255,255,255,.06); }
+.seg-btn.active{
+  background: rgba(255,255,255,.12);
+}
+
 .input-wrap{ min-width:220px; flex:1; }
 .input, .select{
   width:100%;

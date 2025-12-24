@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const state = {
     main: {
       total: [],
+      integratedAll: [],
       integrated: [],
       seasons: new Map(), // sheetName -> { headers, rows }
       seasonSheetNames: [],
@@ -17,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rows: [],
       updatedAt: null,
     },
+    integratedView: "player", // player | nonplayer
     // sorting state
     synergySort: { key: "순위", dir: "asc" },
     integratedSort: { key: null, dir: "asc" },
@@ -170,7 +172,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const q = normalize($("#integratedSearch")?.value);
 
     const headers = state.main.integratedHeaders || [];
-    let rows = [...state.main.integrated];
+const BAN_RANKS = new Set(["대표", "이사", "웨이터"].map(normalize));
+let rows = [...(state.main.integratedAll || state.main.integrated || [])];
+
+// ✅ 플레이어/비플레이어 필터
+if (state.integratedView === "player") {
+  rows = rows.filter((r) => !BAN_RANKS.has(normalize(r["직급"])));
+} else if (state.integratedView === "nonplayer") {
+  rows = rows.filter((r) => BAN_RANKS.has(normalize(r["직급"])));
+}
+
 
     if (q) {
       const streamerKey = headers.find((h) => normalize(h) === "스트리머");
@@ -435,10 +446,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const t1 = sheetToTable(wb, names[0]);
     state.main.total = t1.rows;
 
-    // Sheet 2: S1~S10 YXL_기여도
-    const t2 = sheetToTable(wb, names[1]);
-    state.main.integratedHeaders = t2.headers;
-    state.main.integrated = t2.rows;
+    // Sheet 2: 시즌통합랭킹
+const t2 = sheetToTable(wb, names[1]);
+
+// ✅ UI 표는 이 5개 컬럼만 사용
+const KEEP = ["순위", "시즌", "직급", "스트리머", "합산기여도"];
+state.main.integratedHeaders = KEEP;
+
+// 원본 시트에서 필요한 컬럼만 뽑아 통합 저장
+state.main.integratedAll = t2.rows.map((r) => {
+  const o = {};
+  KEEP.forEach((k) => (o[k] = r[k] ?? ""));
+  return o;
+});
+
+// (legacy) 다른 코드가 참조할 수 있어 빈 배열 유지
+state.main.integrated = state.main.integratedAll;
+
 
     // Sheets 3~12: 시즌별
     state.main.seasonSheetNames = names.slice(2, 12);
@@ -494,6 +518,33 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("데이터 로딩 중 오류가 발생했습니다.\n\n" + (e?.message || e));
     }
   }
+
+function initIntegratedViewToggle() {
+  const box = $("#integratedViewToggle");
+  if (!box) return;
+
+  // restore
+  const saved = localStorage.getItem("yxl_integrated_view");
+  if (saved === "player" || saved === "nonplayer") state.integratedView = saved;
+
+  const btns = Array.from(box.querySelectorAll("[data-view]"));
+  const setActive = () => {
+    btns.forEach((b) => b.classList.toggle("active", b.dataset.view === state.integratedView));
+  };
+
+  setActive();
+
+  btns.forEach((b) => {
+    b.addEventListener("click", () => {
+      const v = b.dataset.view;
+      if (v !== "player" && v !== "nonplayer") return;
+      state.integratedView = v;
+      localStorage.setItem("yxl_integrated_view", v);
+      setActive();
+      renderIntegrated();
+    });
+  });
+}
 
   function initSearchInputs() {
     $("#totalSearch")?.addEventListener("input", renderTotal);
@@ -1379,6 +1430,7 @@ function renderNextBar(){
   initHallOfFame();
   initYxlSchedule();
   initTabs();
+  initIntegratedViewToggle();
   initSearchInputs();
   loadAll();
   startAutoRefresh();

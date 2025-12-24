@@ -76,11 +76,19 @@
         <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
         <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
         <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
-        <select id="bgmSelect" class="select bgm-select" aria-label="BGM 선택">
-          <option value="bgm">Justin Bieber - Mistletoe</option>
-          <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
-          <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
-        </select>
+        <!-- ✅ 커스텀 드롭다운(UI 통일) -->
+        <div class="cselect cselect--sm" data-native="bgmSelect">
+          <button class="cselect-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="cselect-label">BGM 선택</span>
+            <span class="cselect-arrow" aria-hidden="true">▾</span>
+          </button>
+          <div class="cselect-menu" role="listbox" aria-label="BGM 선택"></div>
+          <select id="bgmSelect" class="select bgm-select cselect-native" aria-label="BGM 선택" aria-hidden="true" tabindex="-1">
+            <option value="bgm">Justin Bieber - Mistletoe</option>
+            <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
+            <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -231,7 +239,15 @@
                 <p class="muted" style="margin:0;">시즌 선택 + 이름 검색이 가능합니다.</p>
               </div>
               <div class="toolbar">
-                <select id="seasonSelect" class="select"></select>
+                <!-- ✅ 커스텀 드롭다운(UI 통일) -->
+                <div class="cselect" data-native="seasonSelect">
+                  <button class="cselect-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="cselect-label">시즌 선택</span>
+                    <span class="cselect-arrow" aria-hidden="true">▾</span>
+                  </button>
+                  <div class="cselect-menu" role="listbox" aria-label="시즌 선택"></div>
+                  <select id="seasonSelect" class="select cselect-native" aria-hidden="true" tabindex="-1"></select>
+                </div>
                 <div class="input-wrap">
                   <input id="seasonSearch" class="input" placeholder="멤버 이름 검색" />
                 </div>

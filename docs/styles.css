@@ -607,18 +607,9 @@ body::after{
   background: rgba(255,255,255,.055);
 }
 .schDay.is-next::before{
-  content:"NEXT";
-  position:absolute;
-  top:10px;
-  right:10px;
-  font-size:10px;
-  font-weight:900;
-  letter-spacing:.3px;
-  padding:2px 7px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(0,0,0,.18);
-  opacity:.85;
+  /* ✅ NEXT 라벨 제거(테두리 강조만 유지) */
+  content:"";
+  display:none;
 }
 
 .schGrid{
@@ -714,17 +705,44 @@ body::after{
 .schDate{ font-size:12px; opacity:.75; font-variant-numeric: tabular-nums; }
 .schDots{ display:flex; gap:4px; flex-wrap:nowrap; align-items:center; }
 .schDot{ width:6px; height:6px; border-radius:50%; background: rgba(255,255,255,.28); }
-.schDay.is-today{ border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.06); }
+.schCol.is-today .schHead{
+  border-color: rgba(125,211,252,.30);
+  background: rgba(125,211,252,.08);
+  box-shadow: 0 0 0 1px rgba(125,211,252,.10) inset;
+}
+.schDay.is-today{
+  border-color: rgba(125,211,252,.40);
+  background: rgba(125,211,252,.06);
+  box-shadow:
+    0 0 0 1px rgba(125,211,252,.14) inset,
+    0 0 0 3px rgba(125,211,252,.08),
+    0 12px 30px rgba(0,0,0,.30);
+}
+.schDay.is-today::before{
+  content:"TODAY";
+  position:absolute;
+  top:10px;
+  right:10px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.3px;
+  padding:2px 7px;
+  border-radius:999px;
+  border:1px solid rgba(125,211,252,.24);
+  background: rgba(0,0,0,.18);
+  color: rgba(255,255,255,.92);
+  opacity:.9;
+}
 .schDay.is-today::after{
   content:"";
   position:absolute;
   top:10px;
   left:10px;
-  width:6px;
-  height:6px;
+  width:8px;
+  height:8px;
   border-radius:50%;
-  background: rgba(255,255,255,.78);
-  box-shadow: 0 0 0 2px rgba(0,0,0,.22);
+  background: rgba(125,211,252,.95);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.22), 0 0 18px rgba(125,211,252,.35);
 }
 .schDay.is-active{
   border-color: rgba(255,255,255,.30);
@@ -894,6 +912,76 @@ body::after{
 }
 .select{ width:auto; min-width:180px; }
 .input::placeholder{ color: rgba(255,255,255,.45); }
+
+/* =========================
+   Custom Select (드롭다운 UI 통일)
+========================= */
+.cselect{ position:relative; min-width:180px; }
+.cselect--sm{ min-width: 220px; max-width: 260px; }
+.cselect-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.20);
+  color: rgba(255,255,255,.92);
+  cursor:pointer;
+  font-weight:900;
+}
+.cselect-btn:hover{ border-color: rgba(255,255,255,.22); }
+.cselect.is-open .cselect-btn{
+  border-color: rgba(125,211,252,.28);
+  box-shadow: 0 0 0 3px rgba(125,211,252,.10);
+}
+.cselect-label{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cselect-arrow{ opacity:.85; font-size:12px; }
+.cselect-menu{
+  position:absolute;
+  top: calc(100% + 8px);
+  left:0;
+  width:100%;
+  max-height: 320px;
+  overflow:auto;
+  padding:6px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(12, 14, 18, .94);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 50px rgba(0,0,0,.55);
+  z-index: 80;
+  display:none;
+}
+.cselect.is-open .cselect-menu{ display:block; }
+.cselect-option{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 10px;
+  border-radius:12px;
+  border:1px solid transparent;
+  color: rgba(255,255,255,.86);
+  cursor:pointer;
+  user-select:none;
+}
+.cselect-option:hover{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.10); }
+.cselect-option[aria-selected="true"]{
+  background: rgba(125,211,252,.14);
+  border-color: rgba(125,211,252,.18);
+  color: rgba(255,255,255,.95);
+}
+.cselect-native{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
 
 /* Segmented toggle (플레이어 / 비플레이어) */
 .segmented{

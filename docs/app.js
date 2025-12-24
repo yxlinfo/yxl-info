@@ -44,9 +44,133 @@ document.addEventListener("DOMContentLoaded", () => {
       .trim()
       .toLowerCase();
 
+  /* =========================
+     Custom Select (드롭다운 UI 통일)
+  ========================= */
+  const _cselect = new Map();
+  let _cselectGlobalWired = false;
+
+  function setupCustomSelect(nativeId) {
+    // 이미 세팅되어 있으면 옵션만 다시 빌드
+    if (_cselect.has(nativeId)) {
+      rebuildCustomSelect(nativeId);
+      return;
+    }
+    const select = document.getElementById(nativeId);
+    if (!select) return;
+    const wrap = select.closest(".cselect");
+    if (!wrap) return;
+
+    const btn = wrap.querySelector(".cselect-btn");
+    const label = wrap.querySelector(".cselect-label");
+    const menu = wrap.querySelector(".cselect-menu");
+    if (!btn || !label || !menu) return;
+
+    const close = () => {
+      wrap.classList.remove("is-open");
+      btn.setAttribute("aria-expanded", "false");
+    };
+    const open = () => {
+      wrap.classList.add("is-open");
+      btn.setAttribute("aria-expanded", "true");
+    };
+    const toggle = () => (wrap.classList.contains("is-open") ? close() : open());
+
+    const rebuild = () => {
+      const opts = Array.from(select.options);
+      const cur = select.value;
+
+      const curOpt = opts.find((o) => o.value === cur) || opts[0];
+      label.textContent = curOpt ? curOpt.textContent : "선택";
+
+      menu.innerHTML = "";
+      opts.forEach((o) => {
+        const item = document.createElement("div");
+        item.className = "cselect-option";
+        item.setAttribute("role", "option");
+        item.setAttribute("aria-selected", o.value === cur ? "true" : "false");
+        item.textContent = o.textContent;
+        item.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          if (select.value !== o.value) {
+            select.value = o.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          rebuild();
+          close();
+        });
+        menu.appendChild(item);
+      });
+    };
+
+    // 버튼 동작
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      // 다른 셀렉트가 열려있으면 닫기
+      _cselect.forEach((inst, k) => {
+        if (k !== nativeId) inst.close();
+      });
+      toggle();
+    });
+
+    // native select 값이 바뀌면 라벨/메뉴 동기화
+    select.addEventListener("change", () => {
+      if (wrap.classList.contains("is-open")) close();
+      rebuild();
+    });
+
+    // 전역: 바깥 클릭/ESC 닫기
+    if (!_cselectGlobalWired) {
+      _cselectGlobalWired = true;
+      document.addEventListener("click", (ev) => {
+        _cselect.forEach((inst) => {
+          if (inst.wrap && !inst.wrap.contains(ev.target)) inst.close();
+        });
+      });
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") {
+          _cselect.forEach((inst) => inst.close());
+        }
+      });
+    }
+
+    const inst = { wrap, select, btn, menu, label, rebuild, open, close };
+    _cselect.set(nativeId, inst);
+    rebuild();
+  }
+
+  function rebuildCustomSelect(nativeId) {
+    const inst = _cselect.get(nativeId);
+    if (inst && inst.rebuild) inst.rebuild();
+  }
+
+
+  const toNumber = (v) => {
+    if (typeof v === "number") return v;
+    const s = (v ?? "").toString().replace(/,/g, "").trim();
+    if (!s) return NaN;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : NaN;
+  };
+
+  const scoreNumber = (v) => {
+    const n = toNumber(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const normalizeRoleLabel = (role) => {
+    const raw = (role ?? "").toString().trim();
+    // 흔한 오타 교정: '웨아터' -> '웨이터'
+    if (normalize(raw) === "웨아터") return "웨이터";
+    return raw;
+  };
+
+
   // 시즌통합랭킹: 플레이어/비플레이어 구분
   const INTEGRATED_KEEP = ["순위", "시즌", "직급", "스트리머", "합산기여도"];
-  const INTEGRATED_BAN_RANKS = new Set(["대표", "이사", "웨이터", "웨아터", "참가자", "총장대행", "팀장", "신분"].map(normalize));
+  const INTEGRATED_BAN_RANKS = new Set(["대표", "이사", "웨이터", "웨아터", "참가자", "총장대행", "신분"].map(normalize));
   const INTEGRATED_VIEW_KEY = "yxl_integrated_view"; // 'player' | 'bplayer'
 
   function getIntegratedView() {
@@ -54,12 +178,23 @@ document.addEventListener("DOMContentLoaded", () => {
     return v === "bplayer" ? "bplayer" : "player";
   }
 
+
+  const INTEGRATED_TEAMLEAD_BPLAYER_EXCEPT = new Set(["섭이", "차돈"].map(normalize));
+
+  function integratedIsBPlayer(row) {
+    const role = normalize(normalizeRoleLabel(row?.["직급"]));
+    const name = normalize(row?.["스트리머"]);
+    const teamLeadException = role === "팀장" && INTEGRATED_TEAMLEAD_BPLAYER_EXCEPT.has(name);
+    return INTEGRATED_BAN_RANKS.has(role) || teamLeadException;
+  }
+
+
   function compareBy(key, dir = "asc") {
     return (a, b) => {
-      const av = a?.[key] ?? "";
-      const bv = b?.[key] ?? "";
-      const aNum = Number(av);
-      const bNum = Number(bv);
+      const av = key === "순위" && a?._calcRank != null ? a._calcRank : (a?.[key] ?? "");
+      const bv = key === "순위" && b?._calcRank != null ? b._calcRank : (b?.[key] ?? "");
+      const aNum = toNumber(av);
+      const bNum = toNumber(bv);
       let r = 0;
 
       if (Number.isFinite(aNum) && Number.isFinite(bNum)) r = aNum - bNum;
@@ -182,16 +317,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const headers = state.main.integratedHeaders || [];
     const view = getIntegratedView();
-    let rows = [...state.main.integratedAll];
+    const sumKey = "합산기여도";
 
-    // 플레이어/비플레이어
-    rows = rows.filter((r) => {
-      const jr = normalize(r["직급"]);
-      const isB = INTEGRATED_BAN_RANKS.has(jr);
+    // 1) 플레이어/비플레이어 분리 (팀장은 기본 플레이어, 단 섭이/차돈(팀장)은 비플레이어)
+    let base = [...state.main.integratedAll];
+    base = base.map((r) => ({ ...r, "직급": normalizeRoleLabel(r["직급"]) }));
+
+    let ranked = base.filter((r) => {
+      const isB = integratedIsBPlayer(r);
       return view === "bplayer" ? isB : !isB;
     });
 
-    if (q) {
+    // 2) 합산기여도 내림차순으로 정렬 후, 순위 재부여
+    ranked = ranked
+      .map((r) => ({ ...r, _score: scoreNumber(r[sumKey]) }))
+      .sort((a, b) => {
+        const d = b._score - a._score;
+        if (d !== 0) return d;
+        return normalize(a["스트리머"]).localeCompare(normalize(b["스트리머"]), "ko");
+      });
+    ranked.forEach((r, i) => {
+      r._calcRank = i + 1;
+    });
+
+    let rows = ranked;
+if (q) {
       const streamerKey = headers.find((h) => normalize(h) === "스트리머");
       if (streamerKey) rows = rows.filter((r) => normalize(r[streamerKey]).includes(q));
     }
@@ -199,6 +349,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // sort
     if (state.integratedSort.key) {
       rows.sort(compareBy(state.integratedSort.key, state.integratedSort.dir));
+    } else {
+      rows.sort((a, b) => (Number(a._calcRank) || 0) - (Number(b._calcRank) || 0));
     }
 
     thead.innerHTML = `
@@ -215,7 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tbody.innerHTML = rows
       .map((r) => {
-        const rankNum = Number(r["순위"] ?? 0);
+        const rankNum = Number(r._calcRank ?? r["순위"] ?? 0);
         const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
         const trClass = top ? ` class="top${top}"` : "";
         return `<tr${trClass}>${headers
@@ -225,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // ✅ 순위: 왼쪽정렬 + 1~3등 배지
             if (keyNorm === "순위") {
-              const rn = Number(v ?? 0);
+              const rn = Number(r._calcRank ?? v ?? 0);
               const t = rn === 1 ? 1 : rn === 2 ? 2 : rn === 3 ? 3 : 0;
               const rankHtml = t
                 ? `<span class="rank-badge rank-${t}"><span class="medal">${t === 1 ? "🥇" : t === 2 ? "🥈" : "🥉"}</span><span class="rank-num">${rn}</span></span>`
@@ -274,10 +426,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("yxl_season_sheet");
     if (saved && state.main.seasonSheetNames.includes(saved)) sel.value = saved;
 
-    sel.addEventListener("change", () => {
-      localStorage.setItem("yxl_season_sheet", sel.value);
-      renderSeason();
-    });
+    // change handler 1회만 바인딩(자동 리프레시에서 중복 방지)
+    if (!sel.dataset.bound) {
+      sel.addEventListener("change", () => {
+        localStorage.setItem("yxl_season_sheet", sel.value);
+        renderSeason();
+      });
+      sel.dataset.bound = "1";
+    }
+
+    // 커스텀 드롭다운 동기화
+    setupCustomSelect("seasonSelect");
+    rebuildCustomSelect("seasonSelect");
   }
 
   function renderSeason() {
@@ -296,6 +456,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const headers = sheet.headers;
     let rows = [...sheet.rows];
+
+    // ✅ 합산기여도 기준 순위 재구성(내림차순)
+    const sumKey = headers.find((h) => normalize(h) === "합산기여도") || headers.find((h) => normalize(h) === "누적기여도");
+    if (sumKey) {
+      const rankedAll = rows
+        .map((r) => ({ ...r, _score: scoreNumber(r[sumKey]) }))
+        .sort((a, b) => {
+          const d = b._score - a._score;
+          if (d !== 0) return d;
+          // 동일 점수면 이름으로 안정 정렬
+          const nk = headers.find((h) => normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버");
+          const an = nk ? a[nk] : a["스트리머"];
+          const bn = nk ? b[nk] : b["스트리머"];
+          return normalize(an).localeCompare(normalize(bn), "ko");
+        });
+      rankedAll.forEach((r, i) => (r._calcRank = i + 1));
+      rows = rankedAll;
+    }
 
     const rankKey = headers.find((h) => normalize(h) === "순위");
 
@@ -323,7 +501,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // sort
-    if (state.seasonSort.key) rows.sort(compareBy(state.seasonSort.key, state.seasonSort.dir));
+    if (state.seasonSort.key) {
+      rows.sort(compareBy(state.seasonSort.key, state.seasonSort.dir));
+    } else if (rows.length && rows[0]?._calcRank != null) {
+      rows.sort((a, b) => (Number(a._calcRank) || 0) - (Number(b._calcRank) || 0));
+    }
 
     thead.innerHTML = `
       <tr>
@@ -339,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tbody.innerHTML = rows
       .map((r) => {
-        const rankNum = rankKey ? Number(r[rankKey] ?? 0) : 0;
+        const rankNum = Number(r._calcRank ?? (rankKey ? r[rankKey] : 0) ?? 0);
         const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
         const trClass = top ? ` class="top${top}"` : "";
 
@@ -350,7 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // ✅ 순위: 왼쪽정렬 + 1~3등 배지
             if (rankKey && h === rankKey) {
-              const rn = Number(v ?? 0);
+              const rn = Number(r._calcRank ?? v ?? 0);
               const t = rn === 1 ? 1 : rn === 2 ? 2 : rn === 3 ? 3 : 0;
               const rankHtml = t
                 ? `<span class="rank-badge rank-${t}"><span class="medal">${t === 1 ? "🥇" : t === 2 ? "🥈" : "🥉"}</span><span class="rank-num">${rn}</span></span>`
@@ -520,6 +702,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.main.integratedAll = t2.rows.map((r) => {
       const o = {};
       INTEGRATED_KEEP.forEach((k) => (o[k] = r[k] ?? ""));
+      o["직급"] = normalizeRoleLabel(o["직급"]);
       return o;
     });
 
@@ -643,6 +826,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnNext = document.getElementById("bgmNext");
     const sel = document.getElementById("bgmSelect");
 
+    // ✅ 드롭다운 UI 통일(커스텀 셀렉트)
+    setupCustomSelect("bgmSelect");
+
     // ✅ gauges
     const seek = document.getElementById("bgmSeek");
     const time = document.getElementById("bgmTime");
@@ -688,6 +874,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!map[k]) k = tracks[0]?.key || "bgm";
       localStorage.setItem(KEY_SEL, k);
       if (sel) sel.value = k;
+      rebuildCustomSelect("bgmSelect");
       syncGaugesToAudio(); // ✅ 선택 바뀌면 게이지 동기화
     }
 

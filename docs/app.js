@@ -803,31 +803,60 @@ if (q) {
   }
 
   function initIntegratedToggle() {
+    // ✅ 지원: (1) segmented 버튼 방식(#integratedViewToggle) (2) select 방식(#integratedViewSelect, 커스텀 드롭다운 포함)
     const wrap = document.getElementById("integratedViewToggle");
-    if (!wrap) return;
+    const sel = document.getElementById("integratedViewSelect");
 
-    const btns = Array.from(wrap.querySelectorAll("button[data-view]"));
-    if (!btns.length) return;
+    const btns = wrap ? Array.from(wrap.querySelectorAll("button[data-view]")) : [];
 
     const apply = (view, doRender = true) => {
-      localStorage.setItem(INTEGRATED_VIEW_KEY, view);
-      btns.forEach((b) => {
-        const on = b.dataset.view === view;
-        b.classList.toggle("is-active", on);
-        b.setAttribute("aria-selected", on ? "true" : "false");
-      });
+      const v = view === "bplayer" ? "bplayer" : "player";
+      localStorage.setItem(INTEGRATED_VIEW_KEY, v);
+
+      // 버튼 UI 동기화
+      if (btns.length) {
+        btns.forEach((b) => {
+          const on = b.dataset.view === v;
+          b.classList.toggle("is-active", on);
+          b.setAttribute("aria-selected", on ? "true" : "false");
+        });
+      }
+
+      // 셀렉트 UI 동기화
+      if (sel) {
+        sel.value = v;
+        // 커스텀 셀렉트 라벨 동기화(있다면)
+        if (_cselect.has("integratedViewSelect")) rebuildCustomSelect("integratedViewSelect");
+      }
+
       if (doRender) renderIntegrated();
     };
 
-    // initial state (don't render yet - loadAll will render)
+    // 초기값 반영(렌더는 loadAll()에서)
     apply(getIntegratedView(), false);
 
-    wrap.addEventListener("click", (e) => {
-      const btn = e.target?.closest?.("button[data-view]");
-      if (!btn || !wrap.contains(btn)) return;
-      e.preventDefault();
-      apply(btn.dataset.view);
-    });
+    // (A) segmented 버튼 클릭
+    if (wrap && btns.length) {
+      wrap.addEventListener("click", (e) => {
+        const btn = e.target?.closest?.("button[data-view]");
+        if (!btn || !wrap.contains(btn)) return;
+        e.preventDefault();
+        apply(btn.dataset.view);
+      });
+    }
+
+    // (B) select 변경
+    if (sel) {
+      // 중복 바인딩 방지
+      if (!sel.dataset.bound) {
+        sel.dataset.bound = "1";
+        sel.addEventListener("change", () => {
+          apply(sel.value);
+        });
+      }
+      // 커스텀 드롭다운(있으면) 세팅
+      setupCustomSelect("integratedViewSelect");
+    }
 }
 
   /* =========================

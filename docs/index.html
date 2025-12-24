@@ -209,9 +209,16 @@
                 <p class="muted" style="margin:0;"></p>
               </div>
               <div class="toolbar">
-                <div id="integratedViewToggle" class="segmented" role="tablist" aria-label="시즌통합랭킹 보기">
-                  <button class="seg-btn" type="button" data-view="player" role="tab" aria-selected="true">플레이어</button>
-                  <button class="seg-btn" type="button" data-view="bplayer" role="tab" aria-selected="false">비플레이어</button>
+                <div class="cselect cselect--sm" data-native="integratedViewSelect">
+                  <button class="cselect-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="cselect-label">플레이어</span>
+                    <span class="cselect-arrow" aria-hidden="true">▾</span>
+                  </button>
+                  <div class="cselect-menu" role="listbox" aria-label="플레이어 선택"></div>
+                  <select id="integratedViewSelect" class="select cselect-native" aria-label="플레이어 선택" aria-hidden="true" tabindex="-1">
+                    <option value="player">플레이어</option>
+                    <option value="bplayer">비플레이어</option>
+                  </select>
                 </div>
                 <div class="input-wrap">
                   <input id="integratedSearch" class="input" placeholder="스트리머 이름 검색" />

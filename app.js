@@ -1068,6 +1068,76 @@ document.addEventListener("DOMContentLoaded", () => {
         .slice()
         .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
 
+
+// 다가오는 일정(가까운 일정) 표시용: 오늘 이후 가장 빠른 일정
+function parseEventDate(e){
+  const t = (e.time ?? "").toString().trim();
+  const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "00:00";
+  // KST 기준으로 날짜가 어긋나지 않도록 date는 ymd 기준으로만 사용(시간은 표시용)
+  return new Date(`${e.date}T${hhmm}:00`);
+}
+
+function getUpcoming(maxItems = 3){
+  const now = kstDate00(); // 오늘 00:00 기준
+  const list = YXL_SCHEDULE
+    .slice()
+    .filter(e => (e.date ?? "").toString().trim().length === 10)
+    .map(e => ({...e, __dt: parseEventDate(e)}))
+    .filter(e => {
+      // 오늘 포함, 과거 제외(날짜 기준)
+      const d0 = new Date(`${e.date}T00:00:00`);
+      return d0.getTime() >= now.getTime();
+    })
+    .sort((a,b)=> a.__dt.getTime() - b.__dt.getTime());
+
+  return list.slice(0, maxItems);
+}
+
+// 가장 가까운 일정의 날짜(YYYY-MM-DD) — 주간 카드에서 NEXT 강조용
+const nextEvent = getUpcoming(1)[0];
+const nextYMD = nextEvent ? nextEvent.date : null;
+
+function renderUpcoming(){
+  const box = document.getElementById("schUpcoming");
+  if (!box) return;
+
+  const up = getUpcoming(3);
+  if (!up.length){
+    box.innerHTML = `
+      <div class="schUpcoming__label">다가오는 일정</div>
+      <div class="schUpcoming__empty">등록된 일정 없음</div>
+    `;
+    return;
+  }
+
+  const dowMap = ["일","월","화","수","목","금","토"];
+  const today00 = kstDate00();
+  const items = up.map(e=>{
+    const d0 = new Date(`${e.date}T00:00:00`);
+    const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
+    const dtag = diff === 0 ? "D-Day" : `D-${diff}`;
+    const d = new Date(`${e.date}T00:00:00`);
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    const dow = dowMap[d.getDay()];
+    const t = (e.time ?? "").toString().trim();
+    const timeText = t ? `${t} · ` : "";
+    const typeText = (e.type ?? "").toString().trim();
+    const head = `${mm}.${dd} (${dow}) · ${timeText}${typeText ? typeText + " · " : ""}`;
+    return `
+      <div class="schUpcoming__item">
+        <span class="schUpcoming__d">${dtag}</span>
+        <span class="schUpcoming__text">${escapeHtml(head + (e.title ?? ""))}</span>
+      </div>
+    `;
+  }).join("");
+
+  box.innerHTML = `
+    <div class="schUpcoming__label">다가오는 일정</div>
+    <div class="schUpcoming__list">${items}</div>
+  `;
+}
+
     // 타입 칩(라벨) 매핑: 일정 데이터에 type을 적으면 자동 표시됩니다.
     // 권장: "합방", "회의", "이벤트", "공지"
     function typeClass(type) {
@@ -1119,6 +1189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderWeek() {
       rangeEl.textContent = fmtRange(weekMon);
       grid.innerHTML = "";
+      renderUpcoming();
 
       for (let i = 0; i < 7; i++) {
         const d = addDays(weekMon, i);
@@ -1135,6 +1206,7 @@ document.addEventListener("DOMContentLoaded", () => {
           "schDay" +
           (ymd === toYMD(today) ? " is-today" : "") +
           (ymd === activeYMD ? " is-active" : "") +
+          (ymd === nextYMD ? " is-next" : "") +
           (isWeekend ? " is-weekend" : "") +
           (isHoliday ? " is-holiday" : "");
 
@@ -1150,13 +1222,26 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="schDate">${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}</div>
             </div>
           </div>
-          <div class="schDateBig">${String(d.getDate()).padStart(2, "0")}</div>
-          <div class="schDots" aria-hidden="true">
-            ${Array.from({ length: Math.min(evCount, 3) })
-              .map(() => `<span class="schDot"></span>`)
-              .join("")}
-            ${evCount > 3 ? `<span class="schDot" style="width:14px;border-radius:8px;"></span>` : ""}
-          </div>
+          ${
+            evCount > 0
+              ? `<div class="schPreview">
+                  ${eventsFor(ymd)
+                    .slice(0, 2)
+                    .map(
+                      (e) => `<div class="schPvLine">
+                                <span class="schPvTime">${escapeHtml(e.time || "—")}</span>
+                                <span class="schPvTitle">${escapeHtml(e.title || "")}</span>
+                              </div>`
+                    )
+                    .join("")}
+                  ${evCount > 2 ? `<div class="schPvMore">+${evCount - 2}개 더</div>` : ""}
+                </div>`
+              : `<div class="schDots" aria-hidden="true">
+                  ${Array.from({ length: Math.min(evCount, 3) })
+                    .map(() => `<span class="schDot"></span>`)
+                    .join("")}
+                </div>`
+          }
         `;
 
         card.addEventListener("click", () => {
@@ -1192,6 +1277,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderWeek();
     renderDetail(activeYMD);
+    renderUpcoming();
   }
 
 

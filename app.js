@@ -946,8 +946,10 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   const YXL_SCHEDULE = [
     { date: "2025-12-22", time: "17:00", type: "엑셀", title: "YXL S11 1회차" },
-    { date: "2025-12-24", time: "17:00", type: "엑셀", title: "YXL S11 2회차" },
-    { date: "2025-12-28", time: "", type: "이벤트", title: "Y계열 연말어워즈" },
+    { date: "2025-12-25", time: "17:00", type: "엑셀", title: "YXL S11 2회차" },
+    { date: "2025-12-28", time: "19:00", type: "이벤트", title: "Y계열 연말어워즈" },
+    { date: "2025-12-25", time: "27:00", type: "합방", title: "하랑e 연수a 시장" },
+    { date: "2025-12-25", time: "23:00", type: "생일", title: "하랑짱 생일" },
     { date: "2026-01-01", time: "17:00", type: "엑셀", title: "YXL S11 3회차" },
     { date: "2026-01-05", time: "17:00", type: "엑셀", title: "YXL S11 4회차" },
     

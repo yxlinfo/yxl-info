@@ -945,10 +945,6 @@ document.addEventListener("DOMContentLoaded", () => {
      - app.js 안에서 일정 데이터만 수정하면 전체 사용자에게 동일하게 반영됩니다.
   ========================= */
   const YXL_SCHEDULE = [
-    { date: "2025-12-22", time: "17:00", type: "액샐", title: "YXL S11 1회차" },
-{ date: "2025-12-25", time: "17:00", type: "엑셀", title: "YXL S11 2회차" },
-{ date: "2026-01-01", time: "17:00", type: "엑셀", title: "YXL S11 3회차" },
-{ date: "2026-01-05", time: "17:00", type: "엑셀", title: "YXL S11 4회차" },
     // 예시) { date: "2025-12-24", time: "21:00", type: "합방", title: "합동 방송" },
     // 예시) { date: "2025-12-26", time: "",      type: "회의", title: "주간 회의" },
   ];
@@ -1077,76 +1073,89 @@ document.addEventListener("DOMContentLoaded", () => {
     const isBirthday = (e) => (e?.type ?? "").toString().trim() === "생일";
 
 
-// 다가오는 일정(가까운 일정) 표시용: 오늘 이후 가장 빠른 일정
-function parseEventDate(e){
-  const t = (e.time ?? "").toString().trim();
-  const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "00:00";
-  // KST 기준으로 날짜가 어긋나지 않도록 date는 ymd 기준으로만 사용(시간은 표시용)
-  return new Date(`${e.date}T${hhmm}:00`);
-}
+    // 엑셀 일정(달력 표시용)
+    // - type 값에 "엑셀일정"(권장) 또는 "엑셀"/"엑셀 ..." 처럼 "엑셀"이 포함되면 엑셀 일정으로 인식합니다.
+    const isExcelEvent = (e) => {
+      const t = (e?.type ?? "").toString().trim();
+      if (!t) return false;
+      return t === "엑셀일정" || t === "엑셀" || t.includes("엑셀");
+    };
 
-function getUpcoming(maxItems = 3){
-  const now = kstDate00(); // 오늘 00:00 기준
-  const list = YXL_SCHEDULE
-    .slice()
-    .filter(e => (e.date ?? "").toString().trim().length === 10)
-    .map(e => ({...e, __dt: parseEventDate(e)}))
-    .filter(e => {
-      // 오늘 포함, 과거 제외(날짜 기준)
-      const d0 = new Date(`${e.date}T00:00:00`);
-      return d0.getTime() >= now.getTime();
-    })
-    .sort((a,b)=> a.__dt.getTime() - b.__dt.getTime());
+    // 달력(주간 카드)에는 '엑셀일정' / '생일'만 노출
+    const isPinnedForCalendar = (e) => isBirthday(e) || isExcelEvent(e);
 
-  return list.slice(0, maxItems);
-}
 
-// 가장 가까운 일정의 날짜(YYYY-MM-DD) — 주간 카드에서 NEXT 강조용
-const nextEvent = getUpcoming(1)[0];
-const nextYMD = nextEvent ? nextEvent.date : null;
+    // ===== (재창조) 이번주 하이라이트 =====
+    // - 길게 늘어지는 '다가오는 일정 리스트' 대신, "가까운 엑셀 일정"만 1~2개 고정 노출
+    function parseEventDate(e){
+      const t = (e.time ?? "").toString().trim();
+      const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "00:00";
+      return new Date(`${e.date}T${hhmm}:00`);
+    }
 
-function renderUpcoming(){
-  const box = document.getElementById("schUpcoming");
-  if (!box) return;
+    function getUpcomingExcelAll({ daysLimit = 21 } = {}){
+      const now = kstDate00(); // 오늘 00:00 기준
+      const until = addDays(now, daysLimit);
 
-  const up = getUpcoming(3);
-  if (!up.length){
-    box.innerHTML = `
-      <div class="schUpcoming__label">다가오는 일정</div>
-      <div class="schUpcoming__empty">등록된 일정 없음</div>
-    `;
-    return;
-  }
+      return YXL_SCHEDULE
+        .slice()
+        .filter(e => (e?.date ?? "").toString().trim().length === 10)
+        .filter(isExcelEvent)
+        .map(e => ({...e, __dt: parseEventDate(e)}))
+        .filter(e => {
+          const d0 = new Date(`${e.date}T00:00:00`);
+          return d0.getTime() >= now.getTime() && d0.getTime() <= until.getTime();
+        })
+        .sort((a,b)=> a.__dt.getTime() - b.__dt.getTime());
+    }
 
-  const dowMap = ["일","월","화","수","목","금","토"];
-  const today00 = kstDate00();
-  const items = up.map(e=>{
-    const d0 = new Date(`${e.date}T00:00:00`);
-    const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
-    const dtag = diff === 0 ? "D-Day" : `D-${diff}`;
-    const d = new Date(`${e.date}T00:00:00`);
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const dd = String(d.getDate()).padStart(2,"0");
-    const dow = dowMap[d.getDay()];
-    const t = (e.time ?? "").toString().trim();
-    const timeText = t ? `${t} · ` : "";
-    const typeText = (e.type ?? "").toString().trim();
-    const bday = isBirthday(e);
-    const titleText = `${bday ? BDAY_EMOJI + " " : ""}${e.title ?? ""}`;
-    const head = `${mm}.${dd} (${dow}) · ${timeText}${typeText ? typeText + " · " : ""}`;
-    return `
-      <div class="schUpcoming__item">
-        <span class="schUpcoming__d">${dtag}</span>
-        <span class="schUpcoming__text${bday ? " is-bday" : ""}">${escapeHtml(head + titleText)}</span>
-      </div>
-    `;
-  }).join("");
+    // 가장 가까운 '엑셀 일정' 날짜(YYYY-MM-DD) — 주간 카드에서 NEXT 강조용
+    const nextExcel = getUpcomingExcelAll({ daysLimit: 60 })[0];
+    const nextYMD = nextExcel ? nextExcel.date : null;
 
-  box.innerHTML = `
-    <div class="schUpcoming__label">다가오는 일정</div>
-    <div class="schUpcoming__list">${items}</div>
-  `;
-}
+    function renderHighlight(){
+      const box = document.getElementById("schHighlight");
+      if (!box) return;
+
+      const listAll = getUpcomingExcelAll({ daysLimit: 21 });
+      const shown = listAll.slice(0, 2);
+      const moreN = Math.max(0, listAll.length - shown.length);
+
+      if (!shown.length){
+        box.innerHTML = `
+          <div class="schHighlight__label">이번주 하이라이트</div>
+          <div class="schHlEmpty">가까운 엑셀 일정 없음</div>
+        `;
+        return;
+      }
+
+      const dowMap = ["일","월","화","수","목","금","토"];
+      const today00 = kstDate00();
+
+      const items = shown.map(e=>{
+        const d0 = new Date(`${e.date}T00:00:00`);
+        const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
+        const dtag = diff === 0 ? "D-Day" : `D-${diff}`;
+        const d = d0;
+        const mm = String(d.getMonth()+1).padStart(2,"0");
+        const dd = String(d.getDate()).padStart(2,"0");
+        const dow = dowMap[d.getDay()];
+        const t = (e.time ?? "").toString().trim();
+        const timeText = t ? `${t} · ` : "";
+        const titleText = (e.title ?? "").toString();
+        return `
+          <div class="schHlItem" title="${escapeHtml(titleText)}">
+            <span class="schHlD">${dtag}</span>
+            <span class="schHlText">${escapeHtml(`${mm}.${dd} (${dow}) · ${timeText}${titleText}`)}</span>
+          </div>
+        `;
+      }).join("");
+
+      box.innerHTML = `
+        <div class="schHighlight__label">이번주 하이라이트</div>
+        <div class="schHighlight__items">${items}${moreN ? `<span class="schHlMore">+${moreN}개</span>` : ""}</div>
+      `;
+    }
 
     // 타입 칩(라벨) 매핑: 일정 데이터에 type을 적으면 자동 표시됩니다.
     // 권장: "합방", "회의", "이벤트", "공지"
@@ -1166,10 +1175,9 @@ function renderUpcoming(){
       const d = new Date(`${ymd}T00:00:00`);
       const idx = d.getDay() === 0 ? 6 : d.getDay() - 1;
       const title = `${ymd.replaceAll("-", ".")} (${DOW[idx]})`;
-
-      // 상세(아래 리스트)는 "여러 개 일정"일 때만 보여줍니다.
-      // (달력 카드/다가오는 일정에서 이미 1건은 충분히 보이므로 중복 방지)
-      if (ev.length < 2) {
+      // 상세(아래 리스트)는 '달력에 표시되지 않은 일정'이 있거나, 일정이 2개 이상일 때만 노출합니다.
+      // - 달력 카드(엑셀일정/생일)와 중복되어 화면이 답답해지는 걸 방지
+      if (ev.length === 0 || (ev.length === 1 && isPinnedForCalendar(ev[0]))) {
         detailEl.classList.remove("is-show");
         detailEl.innerHTML = "";
         return;
@@ -1200,7 +1208,6 @@ function renderUpcoming(){
     function renderWeek() {
       rangeEl.textContent = fmtRange(weekMon);
       grid.innerHTML = "";
-      renderUpcoming();
 
       for (let i = 0; i < 7; i++) {
         const d = addDays(weekMon, i);
@@ -1208,6 +1215,9 @@ function renderUpcoming(){
         const dayEvents = eventsFor(ymd);
         const evCount = dayEvents.length;
         const hasBirthday = dayEvents.some(isBirthday);
+        const shownEvents = dayEvents.filter(isPinnedForCalendar);
+        const shownCount = shownEvents.length;
+        const moreCount = Math.max(0, evCount - Math.min(shownCount, 2));
 
         // 토/일(주말) + 한국 공휴일(대체 포함) 강조
         const day = d.getDay(); // 0=일 ... 6=토
@@ -1238,8 +1248,9 @@ function renderUpcoming(){
           </div>
           ${
             evCount > 0
-              ? `<div class="schPreview">
-                  ${dayEvents
+              ? (Math.min(shownCount,2) > 0
+                  ? `<div class="schPreview">
+                  ${shownEvents
                     .slice(0, 2)
                     .map(
                       (e) => `<div class="schPvLine">
@@ -1248,8 +1259,10 @@ function renderUpcoming(){
                               </div>`
                     )
                     .join("")}
-                  ${evCount > 2 ? `<div class="schPvMore">+${evCount - 2}개 더</div>` : ""}
+                  ${moreCount > 0 ? `<div class="schPvMore">+${moreCount}개 더</div>` : ""}
                 </div>`
+                  : `<div class=\"schPreview\"><div class=\"schPvMore\">+${evCount}개</div></div>`
+                )
               : `<div class="schDots" aria-hidden="true">
                   ${Array.from({ length: Math.min(evCount, 3) })
                     .map(() => `<span class="schDot"></span>`)
@@ -1291,7 +1304,6 @@ function renderUpcoming(){
 
     renderWeek();
     renderDetail(activeYMD);
-    renderUpcoming();
   }
 
 

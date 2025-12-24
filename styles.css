@@ -411,52 +411,62 @@ body::after{
   opacity:.85;
   white-space:nowrap;
 }
-/* ✅ 다가오는 일정(상단) */
-.schUpcoming{
+/* ✅ 이번주 하이라이트(재창조) */
+.schHighlight{
   margin-top:10px;
-  padding:10px 12px;
-  border-radius:14px;
+  padding:12px 12px;
+  border-radius:16px;
   border:1px solid rgba(255,255,255,.10);
   background:rgba(0,0,0,.16);
   display:flex;
-  gap:10px;
-  align-items:flex-start;
+  gap:12px;
+  align-items:center;
 }
-.schUpcoming__label{
+.schHighlight__label{
   font-size:12px;
   font-weight:900;
-  opacity:.75;
+  opacity:.78;
   white-space:nowrap;
-  padding-top:1px;
 }
-.schUpcoming__list{
+.schHighlight__items{
   display:flex;
-  flex-direction:column;
-  gap:6px;
+  gap:10px;
+  flex-wrap:wrap;
   min-width:0;
   flex:1 1 auto;
 }
-.schUpcoming__item{
+.schHlItem{
   display:flex;
+  align-items:center;
   gap:8px;
-  align-items:baseline;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
   min-width:0;
+  max-width:100%;
 }
-.schUpcoming__d{
+.schHlD{
   font-size:11px;
   font-weight:900;
   opacity:.78;
   white-space:nowrap;
   font-variant-numeric: tabular-nums;
 }
-.schUpcoming__text{
+.schHlText{
   font-size:12.5px;
   opacity:.92;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
-.schUpcoming__empty{
+.schHlMore{
+  font-size:11px;
+  font-weight:900;
+  opacity:.65;
+  white-space:nowrap;
+}
+.schHlEmpty{
   font-size:12.5px;
   opacity:.70;
 }
@@ -498,7 +508,7 @@ body::after{
 /* 생일(🍰) 강조 */
 .schPvTitle.is-bday,
 .schTitle.is-bday,
-.schUpcoming__text.is-bday{
+.schHlText.is-bday{
   color: rgba(255, 180, 180, .98);
   font-weight:900;
   opacity:1;

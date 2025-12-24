@@ -169,10 +169,6 @@
                 <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
               </div>
               <div class="toolbar">
-                <div id="integratedViewToggle" class="seg-toggle" role="group" aria-label="플레이어/비플레이어">
-                  <button type="button" class="seg-btn active" data-view="player">플레이어</button>
-                  <button type="button" class="seg-btn" data-view="nonplayer">비플레이어</button>
-                </div>
                 <div class="input-wrap">
                   <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
                 </div>
@@ -205,9 +201,9 @@
                 <p class="muted" style="margin:0;"></p>
               </div>
               <div class="toolbar">
-                <div id="integratedViewToggle" class="seg-toggle" role="group" aria-label="플레이어/비플레이어">
-                  <button type="button" class="seg-btn active" data-view="player">플레이어</button>
-                  <button type="button" class="seg-btn" data-view="nonplayer">비플레이어</button>
+                <div id="integratedViewToggle" class="segmented" role="tablist" aria-label="시즌통합랭킹 보기">
+                  <button class="seg-btn" type="button" data-view="player" role="tab" aria-selected="true">플레이어</button>
+                  <button class="seg-btn" type="button" data-view="bplayer" role="tab" aria-selected="false">비플레이어</button>
                 </div>
                 <div class="input-wrap">
                   <input id="integratedSearch" class="input" placeholder="스트리머 이름 검색" />
@@ -222,7 +218,7 @@
               </table>
             </div>
 
-            <div class="hint">* 헤더를 클릭하면 정렬(▲/▼)됩니다.</div>
+            <div class="hint">* 플레이어/비플레이어 선택 + 헤더 클릭 정렬(▲/▼). 1~3등은 특별 표시가 적용됩니다.</div>
           </div>
         </div>
 
@@ -249,7 +245,7 @@
               </table>
             </div>
 
-            <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다.</div>
+            <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다. 1~3등은 특별 표시가 적용됩니다.</div>
           </div>
         </div>
 

@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const state = {
     main: {
       total: [],
-      integratedAll: [],
-      integrated: [],
+      integratedHeaders: [],
+      integratedAll: [], // cleaned rows (UI columns only)
       seasons: new Map(), // sheetName -> { headers, rows }
       seasonSheetNames: [],
     },
@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
       rows: [],
       updatedAt: null,
     },
-    integratedView: "player", // player | nonplayer
     // sorting state
     synergySort: { key: "순위", dir: "asc" },
     integratedSort: { key: null, dir: "asc" },
@@ -44,6 +43,16 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/\s+/g, " ")
       .trim()
       .toLowerCase();
+
+  // 시즌통합랭킹: 플레이어/비플레이어 구분
+  const INTEGRATED_KEEP = ["순위", "시즌", "직급", "스트리머", "합산기여도"];
+  const INTEGRATED_BAN_RANKS = new Set(["대표", "이사", "웨이터", "웨아터", "참가자", "총장대행", "팀장", "신분"].map(normalize));
+  const INTEGRATED_VIEW_KEY = "yxl_integrated_view"; // 'player' | 'bplayer'
+
+  function getIntegratedView() {
+    const v = localStorage.getItem(INTEGRATED_VIEW_KEY);
+    return v === "bplayer" ? "bplayer" : "player";
+  }
 
   function compareBy(key, dir = "asc") {
     return (a, b) => {
@@ -172,16 +181,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const q = normalize($("#integratedSearch")?.value);
 
     const headers = state.main.integratedHeaders || [];
-const BAN_RANKS = new Set(["대표", "이사", "웨이터"].map(normalize));
-let rows = [...(state.main.integratedAll || state.main.integrated || [])];
+    const view = getIntegratedView();
+    let rows = [...state.main.integratedAll];
 
-// ✅ 플레이어/비플레이어 필터
-if (state.integratedView === "player") {
-  rows = rows.filter((r) => !BAN_RANKS.has(normalize(r["직급"])));
-} else if (state.integratedView === "nonplayer") {
-  rows = rows.filter((r) => BAN_RANKS.has(normalize(r["직급"])));
-}
-
+    // 플레이어/비플레이어
+    rows = rows.filter((r) => {
+      const jr = normalize(r["직급"]);
+      const isB = INTEGRATED_BAN_RANKS.has(jr);
+      return view === "bplayer" ? isB : !isB;
+    });
 
     if (q) {
       const streamerKey = headers.find((h) => normalize(h) === "스트리머");
@@ -207,9 +215,29 @@ if (state.integratedView === "player") {
 
     tbody.innerHTML = rows
       .map((r) => {
-        return `<tr>${headers
+        const rankNum = Number(r["순위"] ?? 0);
+        const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
+        const trClass = top ? ` class="top${top}"` : "";
+        return `<tr${trClass}>${headers
           .map((h) => {
+            const keyNorm = normalize(h);
             const v = r[h];
+
+            // ✅ 순위: 왼쪽정렬 + 1~3등 배지
+            if (keyNorm === "순위") {
+              const rn = Number(v ?? 0);
+              const t = rn === 1 ? 1 : rn === 2 ? 2 : rn === 3 ? 3 : 0;
+              const rankHtml = t
+                ? `<span class="rank-badge rank-${t}"><span class="medal">${t === 1 ? "🥇" : t === 2 ? "🥈" : "🥉"}</span><span class="rank-num">${rn}</span></span>`
+                : `${v ?? ""}`;
+              return `<td class="rankcell">${rankHtml}</td>`;
+            }
+
+            // 스트리머: 강조(span)
+            if (keyNorm === "스트리머") {
+              return `<td><span class="soop-name">${v ?? ""}</span></td>`;
+            }
+
             const isNum = typeof v === "number" || (v !== "" && !Number.isNaN(Number(v)));
             return `<td${isNum ? ' class="num"' : ""}>${isNum ? numFmt(v) : (v ?? "")}</td>`;
           })
@@ -240,7 +268,7 @@ if (state.integratedView === "player") {
     if (!sel) return;
 
     sel.innerHTML = state.main.seasonSheetNames
-      .map((n) => `<option value="${n}">${n}</option>`)
+      .map((n, i) => `<option value="${n}">YXL 시즌${i + 1}</option>`)
       .join("");
 
     const saved = localStorage.getItem("yxl_season_sheet");
@@ -269,6 +297,25 @@ if (state.integratedView === "player") {
     const headers = sheet.headers;
     let rows = [...sheet.rows];
 
+    const rankKey = headers.find((h) => normalize(h) === "순위");
+
+    // 표시 순서 보정: 순위 / 직급 / 스트리머 우선 (시즌 2~6 등 컬럼 순서가 뒤섞여도 UI는 통일)
+    const roleKey = headers.find((h) => normalize(h) === "직급");
+    const nameKeyForOrder = headers.find(
+      (h) =>
+        normalize(h) === "스트리머" ||
+        normalize(h) === "비제이명" ||
+        normalize(h) === "멤버"
+    );
+
+    let displayHeaders = headers;
+    if (rankKey && roleKey && nameKeyForOrder) {
+      const rest = headers.filter(
+        (h) => h !== rankKey && h !== roleKey && h !== nameKeyForOrder
+      );
+      displayHeaders = [rankKey, roleKey, nameKeyForOrder, ...rest];
+    }
+
     // filter: streamer column if present
     if (q) {
       const nameKey = headers.find((h) => normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버");
@@ -280,7 +327,7 @@ if (state.integratedView === "player") {
 
     thead.innerHTML = `
       <tr>
-        ${headers
+        ${displayHeaders
           .map((h) => {
             const isActive = state.seasonSort.key === h;
             const ind = isActive ? (state.seasonSort.dir === "asc" ? " ▲" : " ▼") : "";
@@ -292,9 +339,30 @@ if (state.integratedView === "player") {
 
     tbody.innerHTML = rows
       .map((r) => {
-        return `<tr>${headers
+        const rankNum = rankKey ? Number(r[rankKey] ?? 0) : 0;
+        const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
+        const trClass = top ? ` class="top${top}"` : "";
+
+        return `<tr${trClass}>${displayHeaders
           .map((h) => {
+            const keyNorm = normalize(h);
             const v = r[h];
+
+            // ✅ 순위: 왼쪽정렬 + 1~3등 배지
+            if (rankKey && h === rankKey) {
+              const rn = Number(v ?? 0);
+              const t = rn === 1 ? 1 : rn === 2 ? 2 : rn === 3 ? 3 : 0;
+              const rankHtml = t
+                ? `<span class="rank-badge rank-${t}"><span class="medal">${t === 1 ? "🥇" : t === 2 ? "🥈" : "🥉"}</span><span class="rank-num">${rn}</span></span>`
+                : `${v ?? ""}`;
+              return `<td class="rankcell">${rankHtml}</td>`;
+            }
+
+            // 이름 컬럼은 span으로
+            if (keyNorm === "스트리머" || keyNorm === "비제이명" || keyNorm === "멤버") {
+              return `<td><span class="soop-name">${v ?? ""}</span></td>`;
+            }
+
             const isNum = v !== "" && !Number.isNaN(Number(v));
             return `<td${isNum ? ' class="num"' : ""}>${isNum ? numFmt(v) : (v ?? "")}</td>`;
           })
@@ -447,22 +515,13 @@ if (state.integratedView === "player") {
     state.main.total = t1.rows;
 
     // Sheet 2: 시즌통합랭킹
-const t2 = sheetToTable(wb, names[1]);
-
-// ✅ UI 표는 이 5개 컬럼만 사용
-const KEEP = ["순위", "시즌", "직급", "스트리머", "합산기여도"];
-state.main.integratedHeaders = KEEP;
-
-// 원본 시트에서 필요한 컬럼만 뽑아 통합 저장
-state.main.integratedAll = t2.rows.map((r) => {
-  const o = {};
-  KEEP.forEach((k) => (o[k] = r[k] ?? ""));
-  return o;
-});
-
-// (legacy) 다른 코드가 참조할 수 있어 빈 배열 유지
-state.main.integrated = state.main.integratedAll;
-
+    const t2 = sheetToTable(wb, names[1]);
+    state.main.integratedHeaders = INTEGRATED_KEEP;
+    state.main.integratedAll = t2.rows.map((r) => {
+      const o = {};
+      INTEGRATED_KEEP.forEach((k) => (o[k] = r[k] ?? ""));
+      return o;
+    });
 
     // Sheets 3~12: 시즌별
     state.main.seasonSheetNames = names.slice(2, 12);
@@ -519,38 +578,39 @@ state.main.integrated = state.main.integratedAll;
     }
   }
 
-function initIntegratedViewToggle() {
-  const box = $("#integratedViewToggle");
-  if (!box) return;
-
-  // restore
-  const saved = localStorage.getItem("yxl_integrated_view");
-  if (saved === "player" || saved === "nonplayer") state.integratedView = saved;
-
-  const btns = Array.from(box.querySelectorAll("[data-view]"));
-  const setActive = () => {
-    btns.forEach((b) => b.classList.toggle("active", b.dataset.view === state.integratedView));
-  };
-
-  setActive();
-
-  btns.forEach((b) => {
-    b.addEventListener("click", () => {
-      const v = b.dataset.view;
-      if (v !== "player" && v !== "nonplayer") return;
-      state.integratedView = v;
-      localStorage.setItem("yxl_integrated_view", v);
-      setActive();
-      renderIntegrated();
-    });
-  });
-}
-
   function initSearchInputs() {
     $("#totalSearch")?.addEventListener("input", renderTotal);
     $("#integratedSearch")?.addEventListener("input", renderIntegrated);
     $("#seasonSearch")?.addEventListener("input", renderSeason);
   }
+
+  function initIntegratedToggle() {
+    const wrap = document.getElementById("integratedViewToggle");
+    if (!wrap) return;
+
+    const btns = Array.from(wrap.querySelectorAll("button[data-view]"));
+    if (!btns.length) return;
+
+    const apply = (view, doRender = true) => {
+      localStorage.setItem(INTEGRATED_VIEW_KEY, view);
+      btns.forEach((b) => {
+        const on = b.dataset.view === view;
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      if (doRender) renderIntegrated();
+    };
+
+    // initial state (don't render yet - loadAll will render)
+    apply(getIntegratedView(), false);
+
+    wrap.addEventListener("click", (e) => {
+      const btn = e.target?.closest?.("button[data-view]");
+      if (!btn || !wrap.contains(btn)) return;
+      e.preventDefault();
+      apply(btn.dataset.view);
+    });
+}
 
   /* =========================
      Auto refresh (3 hours)
@@ -1430,8 +1490,8 @@ function renderNextBar(){
   initHallOfFame();
   initYxlSchedule();
   initTabs();
-  initIntegratedViewToggle();
   initSearchInputs();
+  initIntegratedToggle();
   loadAll();
   startAutoRefresh();
 });

@@ -949,6 +949,55 @@ document.addEventListener("DOMContentLoaded", () => {
     // 예시) { date: "2025-12-26", time: "",      type: "회의", title: "주간 회의" },
   ];
 
+  // 한국 공휴일(표기용)
+  // - 고정 공휴일(매년 동일): 01-01, 03-01, 05-05, 06-06, 08-15, 10-03, 10-09, 12-25
+  // - 설/추석/부처님오신날/대체/선거일 등은 아래 Set에 연도별로 추가
+  const KOREA_SPECIAL_HOLIDAYS = new Set([
+    // ===== 2024 =====
+    "2024-02-09", "2024-02-10", "2024-02-11", "2024-02-12", // 설날 연휴
+    "2024-04-10", // 제22대 국회의원선거
+    "2024-05-06", // 어린이날 대체공휴일
+    "2024-05-15", // 부처님오신날
+    "2024-09-16", "2024-09-17", "2024-09-18", // 추석 연휴
+
+    // ===== 2025 =====
+    "2025-01-27", // 임시공휴일(일회성)
+    "2025-01-28", "2025-01-29", "2025-01-30", // 설날 연휴
+    "2025-03-03", // 삼일절 대체공휴일
+    "2025-05-06", // 어린이날/부처님오신날 대체공휴일
+    "2025-06-03", // 대통령선거일
+    "2025-10-05", "2025-10-06", "2025-10-07", // 추석 연휴
+    "2025-10-08", // 추석 대체공휴일
+
+    // ===== 2026 =====
+    "2026-02-16", "2026-02-17", "2026-02-18", // 설날 연휴
+    "2026-03-02", // 삼일절 대체공휴일
+    "2026-05-24", // 부처님오신날
+    "2026-05-25", // 부처님오신날 대체공휴일
+    "2026-06-03", // 선거일
+    "2026-08-17", // 광복절 대체공휴일
+    "2026-09-24", "2026-09-25", "2026-09-26", // 추석 연휴
+    "2026-10-05", // 개천절 대체공휴일
+  ]);
+
+  function isKoreanHoliday(ymd) {
+    // 고정 공휴일
+    const md = ymd.slice(5); // "MM-DD"
+    if (
+      md === "01-01" ||
+      md === "03-01" ||
+      md === "05-05" ||
+      md === "06-06" ||
+      md === "08-15" ||
+      md === "10-03" ||
+      md === "10-09" ||
+      md === "12-25"
+    ) {
+      return true;
+    }
+    return KOREA_SPECIAL_HOLIDAYS.has(ymd);
+  }
+
   function escapeHtml(s) {
     return String(s)
       .replaceAll("&", "&amp;")
@@ -1076,11 +1125,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const ymd = toYMD(d);
         const evCount = eventsFor(ymd).length;
 
+        // 토/일(주말) + 한국 공휴일(대체 포함) 강조
+        const day = d.getDay(); // 0=일 ... 6=토
+        const isWeekend = day === 0 || day === 6;
+        const isHoliday = isKoreanHoliday(ymd);
+
         const card = document.createElement("div");
         card.className =
           "schDay" +
           (ymd === toYMD(today) ? " is-today" : "") +
-          (ymd === activeYMD ? " is-active" : "");
+          (ymd === activeYMD ? " is-active" : "") +
+          (isWeekend ? " is-weekend" : "") +
+          (isHoliday ? " is-holiday" : "");
 
         card.innerHTML = `
           <div class="schTop">

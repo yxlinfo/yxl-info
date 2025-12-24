@@ -471,6 +471,23 @@ body::after{
   border-color: rgba(255,255,255,.30);
   box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset;
 }
+
+/* 토/일 + 공휴일(대체 포함) 표기 */
+.schDay.is-weekend .schDow,
+.schDay.is-weekend .schDate,
+.schDay.is-holiday .schDow,
+.schDay.is-holiday .schDate{
+  color: rgba(255, 120, 120, .95);
+  opacity: 1;
+}
+
+.schDay.is-holiday:not(.is-active){
+  border-color: rgba(255, 120, 120, .22);
+}
+
+.schDay.is-holiday .schCount{
+  border-color: rgba(255, 120, 120, .25);
+}
 .schDetail{
   margin-top:12px;
   padding-top:12px;

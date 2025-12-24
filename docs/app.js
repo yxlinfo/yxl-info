@@ -457,47 +457,82 @@ if (q) {
     const headers = sheet.headers;
     let rows = [...sheet.rows];
 
+    // ✅ 시즌별 기여도표: "플레이어"만 노출 (비플레이어는 제외)
+    // - 팀장 기본은 플레이어, 단 스트리머가 '섭이','차돈'이면 비플레이어
+    // - 직급 오타 '웨아터' -> '웨이터' 정정
+    const _srcRoleKey =
+      headers.find((h) => normalize(h) === "직급" || normalize(h) === "직위") || "직급";
+    const _srcNameKey =
+      headers.find((h) =>
+        normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버"
+      ) || "스트리머";
+    const _srcBeforeKey = headers.find((h) => normalize(h) === "직급전") || "직급전";
+    const _srcRounds = [1, 2, 3, 4, 5].map((n) => {
+      return headers.find((h) => normalize(h) === `${n}회차`) || `${n}회차`;
+    });
+    const _srcSumKey =
+      headers.find((h) => normalize(h) === "합산기여도") ||
+      headers.find((h) => normalize(h) === "누적기여도") ||
+      "합산기여도";
+
+    // 표 컬럼(고정)
+    const SEASON_KEEP = [
+      "순위",
+      "직급",
+      "스트리머",
+      "직급전",
+      "1회차",
+      "2회차",
+      "3회차",
+      "4회차",
+      "5회차",
+      "합산기여도",
+    ];
+
+    // 원본 -> 표준 키로 정규화
+    rows = rows
+      .map((r) => {
+        const roleVal = normalizeRoleLabel(r?.[_srcRoleKey] ?? r?.["직급"]);
+        const nameVal = r?.[_srcNameKey] ?? r?.["스트리머"] ?? "";
+        const o = {
+          순위: r?.["순위"] ?? r?.["랭킹"] ?? "",
+          직급: roleVal ?? "",
+          스트리머: nameVal ?? "",
+          직급전: r?.[_srcBeforeKey] ?? r?.["직급전"] ?? "",
+          "1회차": r?.[_srcRounds[0]] ?? r?.["1회차"] ?? "",
+          "2회차": r?.[_srcRounds[1]] ?? r?.["2회차"] ?? "",
+          "3회차": r?.[_srcRounds[2]] ?? r?.["3회차"] ?? "",
+          "4회차": r?.[_srcRounds[3]] ?? r?.["4회차"] ?? "",
+          "5회차": r?.[_srcRounds[4]] ?? r?.["5회차"] ?? "",
+          합산기여도: r?.[_srcSumKey] ?? r?.["합산기여도"] ?? r?.["누적기여도"] ?? "",
+        };
+        return o;
+      })
+      .filter((r) => !integratedIsBPlayer({ 직급: r.직급, 스트리머: r.스트리머 }));
+
     // ✅ 합산기여도 기준 순위 재구성(내림차순)
-    const sumKey = headers.find((h) => normalize(h) === "합산기여도") || headers.find((h) => normalize(h) === "누적기여도");
-    if (sumKey) {
+    // ✅ 합산기여도 기준 순위 재구성(내림차순) — 플레이어만 기준
+    const sumKey = "합산기여도";
+    {
       const rankedAll = rows
         .map((r) => ({ ...r, _score: scoreNumber(r[sumKey]) }))
         .sort((a, b) => {
           const d = b._score - a._score;
           if (d !== 0) return d;
-          // 동일 점수면 이름으로 안정 정렬
-          const nk = headers.find((h) => normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버");
-          const an = nk ? a[nk] : a["스트리머"];
-          const bn = nk ? b[nk] : b["스트리머"];
-          return normalize(an).localeCompare(normalize(bn), "ko");
+          return normalize(a["스트리머"]).localeCompare(normalize(b["스트리머"]), "ko");
         });
       rankedAll.forEach((r, i) => (r._calcRank = i + 1));
       rows = rankedAll;
     }
 
-    const rankKey = headers.find((h) => normalize(h) === "순위");
+    const rankKey = "순위";
+    const roleKey = "직급";
+    const nameKeyForOrder = "스트리머";
+    let displayHeaders = SEASON_KEEP;
 
-    // 표시 순서 보정: 순위 / 직급 / 스트리머 우선 (시즌 2~6 등 컬럼 순서가 뒤섞여도 UI는 통일)
-    const roleKey = headers.find((h) => normalize(h) === "직급");
-    const nameKeyForOrder = headers.find(
-      (h) =>
-        normalize(h) === "스트리머" ||
-        normalize(h) === "비제이명" ||
-        normalize(h) === "멤버"
-    );
-
-    let displayHeaders = headers;
-    if (rankKey && roleKey && nameKeyForOrder) {
-      const rest = headers.filter(
-        (h) => h !== rankKey && h !== roleKey && h !== nameKeyForOrder
-      );
-      displayHeaders = [rankKey, roleKey, nameKeyForOrder, ...rest];
-    }
-
-    // filter: streamer column if present
+    // filter: streamer
     if (q) {
-      const nameKey = headers.find((h) => normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버");
-      if (nameKey) rows = rows.filter((r) => normalize(r[nameKey]).includes(q));
+      rows = rows.filter((r) => normalize(r["스트리머"]).includes(q));
     }
 
     // sort
@@ -1571,7 +1606,7 @@ function renderNextBar(){
           "schCol" +
           (ymd === toYMD(today) ? " is-today" : "") +
           (ymd === activeYMD ? " is-active" : "") +
-          (ymd === nextYMD ? " is-next" : "") +
+          "" +
           (isWeekend ? " is-weekend" : "") +
           (isHoliday ? " is-holiday" : "");
 
@@ -1581,7 +1616,7 @@ function renderNextBar(){
           "schDay" +
           (ymd === toYMD(today) ? " is-today" : "") +
           (ymd === activeYMD ? " is-active" : "") +
-          (ymd === nextYMD ? " is-next" : "") +
+          "" +
           (isWeekend ? " is-weekend" : "") +
           (isHoliday ? " is-holiday" : "");
 

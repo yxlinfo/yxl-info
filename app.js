@@ -945,8 +945,8 @@ document.addEventListener("DOMContentLoaded", () => {
      - app.js 안에서 일정 데이터만 수정하면 전체 사용자에게 동일하게 반영됩니다.
   ========================= */
   const YXL_SCHEDULE = [
-    // 예시) { date: "2025-12-24", time: "21:00", title: "합동 방송" },
-    // 예시) { date: "2025-12-26", time: "",      title: "주간 회의" },
+    // 예시) { date: "2025-12-24", time: "21:00", type: "합방", title: "합동 방송" },
+    // 예시) { date: "2025-12-26", time: "",      type: "회의", title: "주간 회의" },
   ];
 
   function escapeHtml(s) {
@@ -1019,6 +1019,19 @@ document.addEventListener("DOMContentLoaded", () => {
         .slice()
         .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
 
+    // 타입 칩(라벨) 매핑: 일정 데이터에 type을 적으면 자동 표시됩니다.
+    // 권장: "합방", "회의", "이벤트", "공지"
+    function typeClass(type) {
+      const t = (type ?? "").toString().trim();
+      if (!t) return "";
+      const k = t.toLowerCase();
+      if (k.includes("합") || k.includes("collab")) return "t-joint";
+      if (k.includes("회의") || k.includes("meeting")) return "t-meet";
+      if (k.includes("이벤트") || k.includes("event")) return "t-event";
+      if (k.includes("공지") || k.includes("notice")) return "t-notice";
+      return "t-etc";
+    }
+
     function renderDetail(ymd) {
       const ev = eventsFor(ymd);
       const d = new Date(`${ymd}T00:00:00`);
@@ -1026,20 +1039,31 @@ document.addEventListener("DOMContentLoaded", () => {
       const title = `${ymd.replaceAll("-", ".")} (${DOW[idx]})`;
 
       if (!ev.length) {
-        detailEl.innerHTML = `<div style="font-weight:900;opacity:.9;margin-bottom:6px;">${title}</div><div>등록된 일정 없음</div>`;
+        detailEl.innerHTML = `
+          <div class="schDetailTitle">${title}</div>
+          <div class="schEmpty">등록된 일정 없음</div>
+        `;
         return;
       }
 
       detailEl.innerHTML =
-        `<div style="font-weight:900;opacity:.9;margin-bottom:6px;">${title}</div>` +
+        `<div class="schDetailTitle">${title}</div>` +
         ev
-          .map(
-            (e) =>
-              `<div style="padding:6px 0;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:10px;">
-                <span style="width:64px;opacity:.85;white-space:nowrap;font-variant-numeric:tabular-nums;">${e.time || "—"}</span>
-                <span>${escapeHtml(e.title || "")}</span>
-              </div>`
-          )
+          .map((e) => {
+            const chip = (e.type ?? "").toString().trim();
+            const chipHtml = chip
+              ? `<span class="schChip ${typeClass(chip)}">${escapeHtml(chip)}</span>`
+              : "";
+            return `
+              <div class="schRow">
+                <span class="schTime">${escapeHtml(e.time || "—")}</span>
+                <span class="schText">
+                  ${chipHtml}
+                  <span class="schTitle">${escapeHtml(e.title || "")}</span>
+                </span>
+              </div>
+            `;
+          })
           .join("");
     }
 
@@ -1061,13 +1085,20 @@ document.addEventListener("DOMContentLoaded", () => {
         card.innerHTML = `
           <div class="schTop">
             <div class="schDow">${DOW[i]}</div>
-            <div class="schDate">${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}</div>
+            <div class="schRight">
+              ${
+                evCount > 0
+                  ? `<span class="schCount" aria-label="일정 ${evCount}개">${evCount}</span>`
+                  : ""
+              }
+              <div class="schDate">${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}</div>
+            </div>
           </div>
-          <div class="schDots">
-            ${Array.from({ length: Math.min(evCount, 6) })
+          <div class="schDots" aria-hidden="true">
+            ${Array.from({ length: Math.min(evCount, 3) })
               .map(() => `<span class="schDot"></span>`)
               .join("")}
-            ${evCount > 6 ? `<span class="schDot" style="width:14px;border-radius:8px;"></span>` : ""}
+            ${evCount > 3 ? `<span class="schDot" style="width:14px;border-radius:8px;"></span>` : ""}
           </div>
         `;
 

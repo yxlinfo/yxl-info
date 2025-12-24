@@ -583,9 +583,9 @@ body::after{
   background: rgba(255,255,255,.35);
 }
 .schBlock--etc{
-  /* 그외: 파란색(엑셀보다 은은하게) */
-  background: rgba(70, 150, 255, .18);
-  border-color: rgba(70, 150, 255, .28);
+  /* 기타: 회색 */
+  background: rgba(200, 205, 215, .16);
+  border-color: rgba(200, 205, 215, .24);
 }
 
 /* 생일(🍰) 강조 */
@@ -1690,12 +1690,25 @@ display:flex;
 .bgm-dash *{ min-width:0; }
 
 
-/* ===== 주간 기간 옆 블록 색상 안내(모양만) ===== */
+/* ===== 주간 기간 옆 블록 색상 안내 ===== */
 .schLegend{
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:10px;
   margin-left:10px;
+}
+.schLegendItem{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:800;
+  opacity:.86;
+  user-select:none;
+}
+.schLegendLabel{
+  line-height:1;
+  white-space:nowrap;
 }
 .schLegendSwatch{
   width:12px;
@@ -1720,6 +1733,7 @@ display:flex;
   border-color: rgba(255, 214, 80, .55);
 }
 .schLegendSwatch--etc{
-  background: rgba(70, 150, 255, .18);
-  border-color: rgba(70, 150, 255, .28);
+  /* 기타: 회색 */
+  background: rgba(200, 205, 215, .22);
+  border-color: rgba(200, 205, 215, .32);
 }

@@ -946,7 +946,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   const YXL_SCHEDULE = [
     { date: "2025-12:22", time: "17:00", type:"합방", title: "YXL S11 1회차" },
-    { date: "2025-12:25", time: "17:00", type:"합방", title: "YXL S11 2회차" }
+    { date: "2025-12:25", time: "17:00", type:"합방", title: "YXL S11 2회차" };
 
     // 예시) { date: "2025-12-24", time: "21:00", type: "합방", title: "합동 방송" },
     // 예시) { date: "2025-12-26", time: "",      type: "회의", title: "주간 회의" },

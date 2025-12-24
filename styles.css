@@ -505,6 +505,75 @@ body::after{
   opacity:.65;
 }
 
+/* ✅ 일정 블록(타입별 색상) */
+.schBlock{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 8px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:transparent;
+  min-width:0;
+}
+.schBlockTime{
+  font-size:10.5px;
+  font-weight:900;
+  opacity:.92;
+  white-space:nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.schBlockTitle{
+  font-size:11.5px;
+  font-weight:800;
+  opacity:.95;
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.schBlockTag{
+  margin-left:auto;
+  font-size:10px;
+  font-weight:900;
+  opacity:.80;
+  padding:2px 7px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.18);
+  white-space:nowrap;
+}
+
+/* 타입별 블록 컬러 */
+.schBlock--birthday{
+  background: rgba(235, 70, 70, .44);
+  border-color: rgba(235, 70, 70, .55);
+}
+.schBlock--excel{
+  background: rgba(70, 150, 255, .34);
+  border-color: rgba(70, 150, 255, .50);
+}
+.schBlock--joint{
+  background: rgba(165, 95, 255, .34);
+  border-color: rgba(165, 95, 255, .50);
+}
+.schBlock--event{
+  background: rgba(245, 203, 65, .72);
+  border-color: rgba(245, 203, 65, .80);
+  color: rgba(20,20,20,.92);
+}
+.schBlock--event .schBlockTime,
+.schBlock--event .schBlockTitle{ opacity:.98; }
+.schBlock--event .schBlockTag{
+  color: rgba(20,20,20,.92);
+  border-color: rgba(20,20,20,.18);
+  background: rgba(255,255,255,.35);
+}
+.schBlock--etc{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.12);
+}
+
 /* 생일(🍰) 강조 */
 .schPvTitle.is-bday,
 .schTitle.is-bday,
@@ -638,6 +707,15 @@ body::after{
 
 /* 상세 리스트(선택한 날짜) */
 .schDetailTitle{ font-weight:900; opacity:.9; margin-bottom:6px; }
+
+.schDetailItem{
+  width:100%;
+  margin-top:8px;
+}
+.schDetailItem + .schDetailItem{
+  margin-top:8px;
+}
+
 .schEmpty{ opacity:.75; }
 .schRow{
   padding:8px 0;

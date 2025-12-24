@@ -1067,25 +1067,46 @@ document.addEventListener("DOMContentLoaded", () => {
         .filter((e) => e.date === ymd)
         .slice()
         .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+    // 색상 블록 분류(타입 기반)
+    // - 생일: 빨간 블록
+    // - 엑셀일정: 파란 블록
+    // - 합방: 보라 블록
+    // - 이벤트: 노란 블록
+    const BDAY_EMOJI = "🍰"; // (필요시 배지에만 사용)
 
-    // 생일 강조(🍰)
-    const BDAY_EMOJI = "🍰";
-    const isBirthday = (e) => (e?.type ?? "").toString().trim() === "생일";
+    const getTypeText = (e) => (e?.type ?? "").toString().trim();
 
-
-    // 엑셀 일정(달력 표시용)
-    // - type 값에 "엑셀일정"(권장) 또는 "엑셀"/"엑셀 ..." 처럼 "엑셀"이 포함되면 엑셀 일정으로 인식합니다.
-    const isExcelEvent = (e) => {
-      const t = (e?.type ?? "").toString().trim();
-      if (!t) return false;
-      return t === "엑셀일정" || t === "엑셀" || t.includes("엑셀");
+    const eventKind = (e) => {
+      const t = getTypeText(e);
+      if (!t) return "other";
+      if (t === "생일" || t.includes("생일")) return "birthday";
+      if (t === "엑셀일정" || t === "엑셀" || t.includes("엑셀")) return "excel";
+      if (t.includes("합방")) return "joint";
+      if (t.includes("이벤트")) return "event";
+      return "other";
     };
 
-    // 달력(주간 카드)에는 '엑셀일정' / '생일'만 노출
-    const isPinnedForCalendar = (e) => isBirthday(e) || isExcelEvent(e);
+    const blockClass = (kind) => {
+      switch (kind) {
+        case "birthday": return "schBlock--birthday";
+        case "excel":    return "schBlock--excel";
+        case "joint":    return "schBlock--joint";
+        case "event":    return "schBlock--event";
+        default:         return "schBlock--etc";
+      }
+    };
 
+    const isBirthday = (e) => eventKind(e) === "birthday";
 
-    // ===== (재창조) 이번주 하이라이트 =====
+    // 엑셀 일정(하이라이트/NEXT 강조용)
+    const isExcelEvent = (e) => eventKind(e) === "excel";
+
+    // 달력(주간 카드)에는 아래 4종만 블록으로 노출
+    const isPinnedForCalendar = (e) => {
+      const k = eventKind(e);
+      return k === "birthday" || k === "excel" || k === "joint" || k === "event";
+    };
+// ===== (재창조) 이번주 하이라이트 =====
     // - 길게 늘어지는 '다가오는 일정 리스트' 대신, "가까운 엑셀 일정"만 1~2개 고정 노출
     function parseEventDate(e){
       const t = (e.time ?? "").toString().trim();
@@ -1136,6 +1157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const d0 = new Date(`${e.date}T00:00:00`);
         const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
         const dtag = diff === 0 ? "D-Day" : `D-${diff}`;
+
         const d = d0;
         const mm = String(d.getMonth()+1).padStart(2,"0");
         const dd = String(d.getDate()).padStart(2,"0");
@@ -1143,8 +1165,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const t = (e.time ?? "").toString().trim();
         const timeText = t ? `${t} · ` : "";
         const titleText = (e.title ?? "").toString();
+
         return `
-          <div class="schHlItem" title="${escapeHtml(titleText)}">
+          <div class="schHlItem schBlock schBlock--excel" title="${escapeHtml(titleText)}">
             <span class="schHlD">${dtag}</span>
             <span class="schHlText">${escapeHtml(`${mm}.${dd} (${dow}) · ${timeText}${titleText}`)}</span>
           </div>
@@ -1188,17 +1211,15 @@ document.addEventListener("DOMContentLoaded", () => {
         `<div class="schDetailTitle">${title}</div>` +
         ev
           .map((e) => {
-            const chip = (e.type ?? "").toString().trim();
-            const chipHtml = chip
-              ? `<span class="schChip ${typeClass(chip)}">${escapeHtml(chip)}</span>`
-              : "";
+            const kind = eventKind(e);
+            const t = getTypeText(e);
+            const showTag = kind === "other" && !!t;
+
             return `
-              <div class="schRow">
-                <span class="schTime">${escapeHtml(e.time || "—")}</span>
-                <span class="schText">
-                  ${chipHtml}
-                  <span class="schTitle${isBirthday(e) ? " is-bday" : ""}">${escapeHtml(`${isBirthday(e) ? BDAY_EMOJI + " " : ""}${e.title || ""}`)}</span>
-                </span>
+              <div class="schDetailItem schBlock ${blockClass(kind)}">
+                <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
+                <span class="schBlockTitle">${escapeHtml(e.title || "")}</span>
+                ${showTag ? `<span class="schBlockTag">${escapeHtml(t)}</span>` : ""}
               </div>
             `;
           })
@@ -1252,12 +1273,13 @@ document.addEventListener("DOMContentLoaded", () => {
                   ? `<div class="schPreview">
                   ${shownEvents
                     .slice(0, 2)
-                    .map(
-                      (e) => `<div class="schPvLine">
-                                <span class="schPvTime">${escapeHtml(e.time || "—")}</span>
-                                <span class="schPvTitle${isBirthday(e) ? " is-bday" : ""}">${escapeHtml(`${isBirthday(e) ? BDAY_EMOJI + " " : ""}${e.title || ""}`)}</span>
-                              </div>`
-                    )
+                    .map((e) => {
+                      const kind = eventKind(e);
+                      return `<div class="schBlock ${blockClass(kind)}">
+                                <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
+                                <span class="schBlockTitle">${escapeHtml(e.title || "")}</span>
+                              </div>`;
+                    })
                     .join("")}
                   ${moreCount > 0 ? `<div class="schPvMore">+${moreCount}개 더</div>` : ""}
                 </div>`

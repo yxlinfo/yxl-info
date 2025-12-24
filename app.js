@@ -941,10 +941,178 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =========================
+     YXL 주간 일정 (섹션: 🗓️ YXL 일정)
+     - app.js 안에서 일정 데이터만 수정하면 전체 사용자에게 동일하게 반영됩니다.
+  ========================= */
+  const YXL_SCHEDULE = [
+    // 예시) { date: "2025-12-24", time: "21:00", title: "합동 방송" },
+    // 예시) { date: "2025-12-26", time: "",      title: "주간 회의" },
+  ];
+
+  function escapeHtml(s) {
+    return String(s)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // KST 기준으로 날짜(00:00)를 잡아 주간이 어긋나지 않게
+  function kstDate00() {
+    const s = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    return new Date(`${s}T00:00:00`);
+  }
+
+  function toYMD(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const da = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${da}`;
+  }
+
+  function addDays(d, n) {
+    const x = new Date(d);
+    x.setDate(x.getDate() + n);
+    return x;
+  }
+
+  function startOfWeekMon(d) {
+    const x = new Date(d);
+    const day = x.getDay(); // 0 Sun ... 6 Sat
+    const diff = day === 0 ? -6 : 1 - day; // Monday 기준
+    x.setDate(x.getDate() + diff);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  }
+
+  function fmtRange(mon) {
+    const sun = addDays(mon, 6);
+    const a = `${mon.getFullYear()}.${String(mon.getMonth() + 1).padStart(2, "0")}.${String(mon.getDate()).padStart(2, "0")}`;
+    const b = `${sun.getFullYear()}.${String(sun.getMonth() + 1).padStart(2, "0")}.${String(sun.getDate()).padStart(2, "0")}`;
+    return `${a} ~ ${b}`;
+  }
+
+  function initYxlSchedule() {
+    const grid = document.getElementById("schGrid");
+    const rangeEl = document.getElementById("schRange");
+    const detailEl = document.getElementById("schDetail");
+    if (!grid || !rangeEl || !detailEl) return;
+
+    const btnPrev = document.getElementById("schPrev");
+    const btnNext = document.getElementById("schNext");
+    const btnToday = document.getElementById("schToday");
+
+    const DOW = ["월", "화", "수", "목", "금", "토", "일"];
+    const today = kstDate00();
+    let weekMon = startOfWeekMon(today);
+    let activeYMD = toYMD(today);
+
+    const eventsFor = (ymd) =>
+      YXL_SCHEDULE
+        .filter((e) => e.date === ymd)
+        .slice()
+        .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+
+    function renderDetail(ymd) {
+      const ev = eventsFor(ymd);
+      const d = new Date(`${ymd}T00:00:00`);
+      const idx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+      const title = `${ymd.replaceAll("-", ".")} (${DOW[idx]})`;
+
+      if (!ev.length) {
+        detailEl.innerHTML = `<div style="font-weight:900;opacity:.9;margin-bottom:6px;">${title}</div><div>등록된 일정 없음</div>`;
+        return;
+      }
+
+      detailEl.innerHTML =
+        `<div style="font-weight:900;opacity:.9;margin-bottom:6px;">${title}</div>` +
+        ev
+          .map(
+            (e) =>
+              `<div style="padding:6px 0;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:10px;">
+                <span style="width:64px;opacity:.85;white-space:nowrap;font-variant-numeric:tabular-nums;">${e.time || "—"}</span>
+                <span>${escapeHtml(e.title || "")}</span>
+              </div>`
+          )
+          .join("");
+    }
+
+    function renderWeek() {
+      rangeEl.textContent = fmtRange(weekMon);
+      grid.innerHTML = "";
+
+      for (let i = 0; i < 7; i++) {
+        const d = addDays(weekMon, i);
+        const ymd = toYMD(d);
+        const evCount = eventsFor(ymd).length;
+
+        const card = document.createElement("div");
+        card.className =
+          "schDay" +
+          (ymd === toYMD(today) ? " is-today" : "") +
+          (ymd === activeYMD ? " is-active" : "");
+
+        card.innerHTML = `
+          <div class="schTop">
+            <div class="schDow">${DOW[i]}</div>
+            <div class="schDate">${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}</div>
+          </div>
+          <div class="schDots">
+            ${Array.from({ length: Math.min(evCount, 6) })
+              .map(() => `<span class="schDot"></span>`)
+              .join("")}
+            ${evCount > 6 ? `<span class="schDot" style="width:14px;border-radius:8px;"></span>` : ""}
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          activeYMD = ymd;
+          renderWeek();
+          renderDetail(activeYMD);
+        });
+
+        grid.appendChild(card);
+      }
+    }
+
+    btnPrev?.addEventListener("click", () => {
+      weekMon = addDays(weekMon, -7);
+      activeYMD = toYMD(weekMon);
+      renderWeek();
+      renderDetail(activeYMD);
+    });
+
+    btnNext?.addEventListener("click", () => {
+      weekMon = addDays(weekMon, 7);
+      activeYMD = toYMD(weekMon);
+      renderWeek();
+      renderDetail(activeYMD);
+    });
+
+    btnToday?.addEventListener("click", () => {
+      weekMon = startOfWeekMon(kstDate00());
+      activeYMD = toYMD(kstDate00());
+      renderWeek();
+      renderDetail(activeYMD);
+    });
+
+    renderWeek();
+    renderDetail(activeYMD);
+  }
+
+
+  /* =========================
      Init
   ========================= */
   initYxlDday();
   initHallOfFame();
+  initYxlSchedule();
   initTabs();
   initSearchInputs();
   loadAll();

@@ -310,6 +310,109 @@ body::after{
 .section-head h2{ margin:0 0 6px; }
 .muted{ color:var(--muted); margin:0; }
 
+/* ✅ 상위 섹션 네비 (YXL 일정 / 데이터) */
+.sectionNav{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin: 10px 0 6px;
+}
+.sectionNav__btn{
+  display:inline-flex;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.20);
+  color: rgba(255,255,255,.90);
+  text-decoration:none;
+  font-weight:900;
+  font-size:12px;
+  opacity:.92;
+}
+.sectionNav__btn:hover{
+  opacity:1;
+  border-color: rgba(255,255,255,.22);
+}
+
+/* sticky 헤더에 가려지지 않게 */
+#secSchedule, #secData{ scroll-margin-top: 200px; }
+
+/* ✅ YXL 주간 일정 카드 */
+.scheduleCard{ padding:16px; }
+.scheduleHead{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.schBtn{
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.20);
+  color: rgba(255,255,255,.85);
+  cursor:pointer;
+  font-weight:900;
+  font-size:12px;
+  white-space:nowrap;
+}
+.schBtn:hover{ border-color: rgba(255,255,255,.22); color: rgba(255,255,255,.95); }
+.schRange{
+  min-width: 170px;
+  text-align:center;
+  font-size:12px;
+  opacity:.85;
+  white-space:nowrap;
+}
+.schGrid{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap:10px;
+}
+.schDay{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:rgba(255,255,255,.04);
+  padding:10px;
+  min-height:66px;
+  cursor:pointer;
+  opacity:.92;
+}
+.schDay:hover{ background: rgba(255,255,255,.06); opacity:1; }
+.schTop{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:6px;
+}
+.schDow{ font-size:12px; font-weight:900; opacity:.86; }
+.schDate{ font-size:12px; opacity:.75; font-variant-numeric: tabular-nums; }
+.schDots{ display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+.schDot{ width:6px; height:6px; border-radius:50%; background: rgba(255,255,255,.28); }
+.schDay.is-today{ border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.06); }
+.schDay.is-active{
+  border-color: rgba(255,255,255,.30);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset;
+}
+.schDetail{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,.10);
+  font-size:12.5px;
+  opacity:.92;
+}
+
+@media (max-width: 860px){
+  .schGrid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 520px){
+  .schGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .schRange{ min-width: 120px; }
+}
+
 /* Card */
 .card{
   padding:16px;

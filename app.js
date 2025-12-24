@@ -945,8 +945,6 @@ document.addEventListener("DOMContentLoaded", () => {
      - app.js 안에서 일정 데이터만 수정하면 전체 사용자에게 동일하게 반영됩니다.
   ========================= */
   const YXL_SCHEDULE = [
-    { date: "2025-12-22", time: "17:00", type: "액샐", title: "YXL S11 1회차" },
-{ date: "2025-12-25", time: "17:00", type: "엑셀", title: "YXL S11 2회차" },
     // 예시) { date: "2025-12-24", time: "21:00", type: "합방", title: "합동 방송" },
     // 예시) { date: "2025-12-26", time: "",      type: "회의", title: "주간 회의" },
   ];
@@ -1070,6 +1068,10 @@ document.addEventListener("DOMContentLoaded", () => {
         .slice()
         .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
 
+    // 생일 강조(🍰)
+    const BDAY_EMOJI = "🍰";
+    const isBirthday = (e) => (e?.type ?? "").toString().trim() === "생일";
+
 
 // 다가오는 일정(가까운 일정) 표시용: 오늘 이후 가장 빠른 일정
 function parseEventDate(e){
@@ -1125,11 +1127,13 @@ function renderUpcoming(){
     const t = (e.time ?? "").toString().trim();
     const timeText = t ? `${t} · ` : "";
     const typeText = (e.type ?? "").toString().trim();
+    const bday = isBirthday(e);
+    const titleText = `${bday ? BDAY_EMOJI + " " : ""}${e.title ?? ""}`;
     const head = `${mm}.${dd} (${dow}) · ${timeText}${typeText ? typeText + " · " : ""}`;
     return `
       <div class="schUpcoming__item">
         <span class="schUpcoming__d">${dtag}</span>
-        <span class="schUpcoming__text">${escapeHtml(head + (e.title ?? ""))}</span>
+        <span class="schUpcoming__text${bday ? " is-bday" : ""}">${escapeHtml(head + titleText)}</span>
       </div>
     `;
   }).join("");
@@ -1159,14 +1163,15 @@ function renderUpcoming(){
       const idx = d.getDay() === 0 ? 6 : d.getDay() - 1;
       const title = `${ymd.replaceAll("-", ".")} (${DOW[idx]})`;
 
-      if (!ev.length) {
-        detailEl.innerHTML = `
-          <div class="schDetailTitle">${title}</div>
-          <div class="schEmpty">등록된 일정 없음</div>
-        `;
+      // 상세(아래 리스트)는 "여러 개 일정"일 때만 보여줍니다.
+      // (달력 카드/다가오는 일정에서 이미 1건은 충분히 보이므로 중복 방지)
+      if (ev.length < 2) {
+        detailEl.classList.remove("is-show");
+        detailEl.innerHTML = "";
         return;
       }
 
+      detailEl.classList.add("is-show");
       detailEl.innerHTML =
         `<div class="schDetailTitle">${title}</div>` +
         ev
@@ -1180,7 +1185,7 @@ function renderUpcoming(){
                 <span class="schTime">${escapeHtml(e.time || "—")}</span>
                 <span class="schText">
                   ${chipHtml}
-                  <span class="schTitle">${escapeHtml(e.title || "")}</span>
+                  <span class="schTitle${isBirthday(e) ? " is-bday" : ""}">${escapeHtml(`${isBirthday(e) ? BDAY_EMOJI + " " : ""}${e.title || ""}`)}</span>
                 </span>
               </div>
             `;
@@ -1196,7 +1201,9 @@ function renderUpcoming(){
       for (let i = 0; i < 7; i++) {
         const d = addDays(weekMon, i);
         const ymd = toYMD(d);
-        const evCount = eventsFor(ymd).length;
+        const dayEvents = eventsFor(ymd);
+        const evCount = dayEvents.length;
+        const hasBirthday = dayEvents.some(isBirthday);
 
         // 토/일(주말) + 한국 공휴일(대체 포함) 강조
         const day = d.getDay(); // 0=일 ... 6=토
@@ -1216,6 +1223,7 @@ function renderUpcoming(){
           <div class="schTop">
             <div class="schDow">${DOW[i]}</div>
             <div class="schRight">
+              ${hasBirthday ? `<span class="schBdayBadge" aria-label="생일">${BDAY_EMOJI}</span>` : ""}
               ${
                 evCount > 0
                   ? `<span class="schCount" aria-label="일정 ${evCount}개">${evCount}</span>`
@@ -1227,12 +1235,12 @@ function renderUpcoming(){
           ${
             evCount > 0
               ? `<div class="schPreview">
-                  ${eventsFor(ymd)
+                  ${dayEvents
                     .slice(0, 2)
                     .map(
                       (e) => `<div class="schPvLine">
                                 <span class="schPvTime">${escapeHtml(e.time || "—")}</span>
-                                <span class="schPvTitle">${escapeHtml(e.title || "")}</span>
+                                <span class="schPvTitle${isBirthday(e) ? " is-bday" : ""}">${escapeHtml(`${isBirthday(e) ? BDAY_EMOJI + " " : ""}${e.title || ""}`)}</span>
                               </div>`
                     )
                     .join("")}

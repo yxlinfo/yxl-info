@@ -495,6 +495,15 @@ body::after{
   opacity:.65;
 }
 
+/* 생일(🍰) 강조 */
+.schPvTitle.is-bday,
+.schTitle.is-bday,
+.schUpcoming__text.is-bday{
+  color: rgba(255, 180, 180, .98);
+  font-weight:900;
+  opacity:1;
+}
+
 /* ✅ 가장 가까운 일정(Next) 강조 */
 .schDay.is-next{
   border-color: rgba(255,255,255,.32);
@@ -542,6 +551,20 @@ body::after{
 }
 .schDow{ font-size:12px; font-weight:900; opacity:.86; }
 .schRight{ display:flex; align-items:center; gap:8px; }
+.schBdayBadge{
+  min-width:18px;
+  height:18px;
+  padding:0 6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.18);
+  font-size:12px;
+  line-height:1;
+  opacity:.92;
+}
 .schCount{
   min-width:18px;
   height:18px;
@@ -594,12 +617,14 @@ body::after{
   border-color: rgba(255, 120, 120, .25);
 }
 .schDetail{
+  display:none;
   margin-top:12px;
   padding-top:12px;
   border-top:1px solid rgba(255,255,255,.10);
   font-size:12.5px;
   opacity:.92;
 }
+.schDetail.is-show{ display:block; }
 
 /* 상세 리스트(선택한 날짜) */
 .schDetailTitle{ font-weight:900; opacity:.9; margin-bottom:6px; }

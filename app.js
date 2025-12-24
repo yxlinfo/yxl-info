@@ -1080,7 +1080,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // - 엑셀일정: 파란 블록
     // - 합방: 보라 블록
     // - 이벤트: 노란 블록
-    const BDAY_EMOJI = "🍰"; // (필요시 배지에만 사용)
+    const BDAY_EMOJI = "🎉"; // (필요시 배지에만 사용)
 
     const getTypeText = (e) => (e?.type ?? "").toString().trim();
 

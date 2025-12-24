@@ -1102,85 +1102,99 @@ document.addEventListener("DOMContentLoaded", () => {
     const isExcelEvent = (e) => eventKind(e) === "excel";
 
     // 달력(주간 카드)에는 아래 4종만 블록으로 노출
-    const isPinnedForCalendar = (e) => {
-      const k = eventKind(e);
-      return k === "birthday" || k === "excel" || k === "joint" || k === "event";
-    };
-// ===== (재창조) 이번주 하이라이트 =====
-    // - 길게 늘어지는 '다가오는 일정 리스트' 대신, "가까운 엑셀 일정"만 1~2개 고정 노출
-    function parseEventDate(e){
-      const t = (e.time ?? "").toString().trim();
-      const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "00:00";
-      return new Date(`${e.date}T${hhmm}:00`);
-    }
+    const isPinnedForCalendar = (_e) => true;
+// ===== 다음 일정(전체 일정 기준) =====
+// - 빈 공간으로 보이던 하이라이트 영역을 "가장 가까운 일정 1건" 안내 바(Bar)로 사용합니다.
+// - 길게 늘어지는 리스트는 금지: 기본은 1건만 노출하고, 7일 이내 추가 일정은 +N개로 요약합니다.
 
-    function getUpcomingExcelAll({ daysLimit = 21 } = {}){
-      const now = kstDate00(); // 오늘 00:00 기준
-      const until = addDays(now, daysLimit);
+function kstNow(){
+  // Asia/Seoul 기준 현재 시각(Date)
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false
+  }).formatToParts(new Date());
 
-      return YXL_SCHEDULE
-        .slice()
-        .filter(e => (e?.date ?? "").toString().trim().length === 10)
-        .filter(isExcelEvent)
-        .map(e => ({...e, __dt: parseEventDate(e)}))
-        .filter(e => {
-          const d0 = new Date(`${e.date}T00:00:00`);
-          return d0.getTime() >= now.getTime() && d0.getTime() <= until.getTime();
-        })
-        .sort((a,b)=> a.__dt.getTime() - b.__dt.getTime());
-    }
+  const get = (t) => parts.find(p => p.type === t)?.value || "00";
+  const y = get("year"), mo = get("month"), d = get("day");
+  const h = get("hour"), mi = get("minute"), s = get("second");
+  return new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`);
+}
 
-    // 가장 가까운 '엑셀 일정' 날짜(YYYY-MM-DD) — 주간 카드에서 NEXT 강조용
-    const nextExcel = getUpcomingExcelAll({ daysLimit: 60 })[0];
-    const nextYMD = nextExcel ? nextExcel.date : null;
+function parseEventDateKST(e){
+  const t = (e.time ?? "").toString().trim();
+  const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "23:59";
+  return new Date(`${e.date}T${hhmm}:00+09:00`);
+}
 
-    function renderHighlight(){
-      const box = document.getElementById("schHighlight");
-      if (!box) return;
+function getUpcomingAll(){
+  const now = kstNow();
+  return YXL_SCHEDULE
+    .slice()
+    .filter(e => (e?.date ?? "").toString().trim().length === 10)
+    .map(e => ({ ...e, __dt: parseEventDateKST(e) }))
+    .filter(e => !Number.isNaN(e.__dt?.getTime?.()) && e.__dt.getTime() >= now.getTime())
+    .sort((a,b) => a.__dt.getTime() - b.__dt.getTime());
+}
 
-      const listAll = getUpcomingExcelAll({ daysLimit: 21 });
-      const shown = listAll.slice(0, 2);
-      const moreN = Math.max(0, listAll.length - shown.length);
+// 가장 가까운 일정 날짜(YYYY-MM-DD) — 주간 카드에서 NEXT 강조용
+const nextAny = getUpcomingAll()[0];
+const nextYMD = nextAny ? nextAny.date : null;
 
-      if (!shown.length){
-        box.innerHTML = `
-          <div class="schHighlight__label">이번주 하이라이트</div>
-          <div class="schHlEmpty">가까운 엑셀 일정 없음</div>
-        `;
-        return;
-      }
+function renderNextBar(){
+  const box = document.getElementById("schHighlight");
+  if (!box) return;
 
-      const dowMap = ["일","월","화","수","목","금","토"];
-      const today00 = kstDate00();
+  const list = getUpcomingAll();
+  if (!list.length){
+    box.classList.add("is-empty");
+    box.innerHTML = "";
+    return;
+  }
+  box.classList.remove("is-empty");
 
-      const items = shown.map(e=>{
-        const d0 = new Date(`${e.date}T00:00:00`);
-        const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
-        const dtag = diff === 0 ? "D-Day" : `D-${diff}`;
+  const first = list[0];
 
-        const d = d0;
-        const mm = String(d.getMonth()+1).padStart(2,"0");
-        const dd = String(d.getDate()).padStart(2,"0");
-        const dow = dowMap[d.getDay()];
-        const t = (e.time ?? "").toString().trim();
-        const timeText = t ? `${t} · ` : "";
-        const titleText = (e.title ?? "").toString();
+  // 7일 이내 추가 일정 개수 요약(+N)
+  const now = kstNow();
+  const until = new Date(now.getTime() + 7 * 86400000);
+  const moreN = Math.max(
+    0,
+    list.filter(e => e.__dt.getTime() < until.getTime()).length - 1
+  );
 
-        return `
-          <div class="schHlItem schBlock schBlock--excel" title="${escapeHtml(titleText)}">
-            <span class="schHlD">${dtag}</span>
-            <span class="schHlText">${escapeHtml(`${mm}.${dd} (${dow}) · ${timeText}${titleText}`)}</span>
-          </div>
-        `;
-      }).join("");
+  const dowMap = ["일","월","화","수","목","금","토"];
+  const today00 = kstDate00();
+  const d0 = new Date(`${first.date}T00:00:00+09:00`);
+  const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
+  const dtag = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
 
-      box.innerHTML = `
-        <div class="schHighlight__label">이번주 하이라이트</div>
-        <div class="schHighlight__items">${items}${moreN ? `<span class="schHlMore">+${moreN}개</span>` : ""}</div>
-      `;
-    }
+  const mm = String(d0.getMonth()+1).padStart(2,"0");
+  const dd = String(d0.getDate()).padStart(2,"0");
+  const dow = dowMap[d0.getDay()];
 
-    // 타입 칩(라벨) 매핑: 일정 데이터에 type을 적으면 자동 표시됩니다.
+  const t = (first.time ?? "").toString().trim();
+  const timeText = t ? `${t} · ` : "";
+
+  const kind = eventKind(first);
+  const titleText = (first.title ?? "").toString();
+  const typeText = getTypeText(first);
+  const typeBadge = typeText ? ` · ${typeText}` : "";
+
+  box.innerHTML = `
+    <div class="schHighlight__label">다음 일정</div>
+    <div class="schHighlight__items">
+      <div class="schHlItem schBlock ${blockClass(kind)}" title="${escapeHtml(titleText)}">
+        <span class="schHlD">${dtag}</span>
+        <span class="schHlText">${escapeHtml(`${mm}.${dd} (${dow}) · ${timeText}${titleText}${typeBadge}`)}</span>
+      </div>
+      ${moreN ? `<span class="schHlMore">+${moreN}개</span>` : ""}
+    </div>
+  `;
+}
+
+// 타입 칩(라벨) 매핑: 일정 데이터에 type을 적으면 자동 표시됩니다.
     // 권장: "합방", "회의", "이벤트", "공지"
     function typeClass(type) {
       const t = (type ?? "").toString().trim();
@@ -1301,6 +1315,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         grid.appendChild(card);
       }
+
+      // 상단 '다음 일정' 바 갱신
+      renderNextBar();
     }
 
     btnPrev?.addEventListener("click", () => {

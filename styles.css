@@ -343,9 +343,49 @@ body::after{
 .scheduleHead{
   display:flex;
   align-items:center;
-  justify-content:center;
-  gap:8px;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
 }
+
+.schRangeWrap{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  min-width:0;
+}
+
+.schRangeLabel{
+  font-size:12px;
+  font-weight:900;
+  opacity:.7;
+  white-space:nowrap;
+}
+
+.schControls{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:0 0 auto;
+}
+
+.schIconBtn{
+  width:36px;
+  height:36px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.20);
+  color: rgba(255,255,255,.85);
+  cursor:pointer;
+  font-weight:900;
+  font-size:18px;
+  line-height:1;
+  opacity:.9;
+}
+.schIconBtn:hover{ opacity:1; }
 .schBtn{
   padding:10px 12px;
   border-radius:999px;
@@ -357,10 +397,16 @@ body::after{
   font-size:12px;
   white-space:nowrap;
 }
+
+.schBtn--today{
+  height:36px;
+  padding:0 12px;
+  border-radius:12px;
+}
 .schBtn:hover{ border-color: rgba(255,255,255,.22); color: rgba(255,255,255,.95); }
 .schRange{
   min-width: 170px;
-  text-align:center;
+  text-align:left;
   font-size:12px;
   opacity:.85;
   white-space:nowrap;

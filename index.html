@@ -103,12 +103,6 @@
   <main class="wrap">
     <section class="section" id="info">
 
-      <!-- ✅ 상단 큰 틀 네비 (YXL 일정 / 데이터) -->
-      <nav class="sectionNav" aria-label="섹션 이동">
-        <a class="sectionNav__btn" href="#secSchedule">🗓️ YXL 일정</a>
-        <a class="sectionNav__btn" href="#secData">📊 데이터</a>
-      </nav>
-
       <!-- ✅ 1) YXL 일정 (주간) -->
       <section class="section" id="secSchedule">
         <div class="section-head">
@@ -117,12 +111,17 @@
 
         <div class="card scheduleCard" aria-label="YXL 주간 일정">
           <div class="scheduleHead">
-            <button class="schBtn" id="schPrev" type="button" aria-label="이전 주">‹</button>
-            <div class="schRange" id="schRange">—</div>
-            <button class="schBtn" id="schNext" type="button" aria-label="다음 주">›</button>
-            <button class="schBtn" id="schToday" type="button">이번주</button>
-          </div>
+            <div class="schRangeWrap">
+              <span class="schRangeLabel">주간</span>
+              <div class="schRange" id="schRange">—</div>
+            </div>
 
+            <div class="schControls">
+              <button class="schIconBtn" id="schPrev" type="button" aria-label="이전 주">‹</button>
+              <button class="schIconBtn" id="schNext" type="button" aria-label="다음 주">›</button>
+              <button class="schBtn schBtn--today" id="schToday" type="button">이번주</button>
+            </div>
+          </div>
           <div class="schGrid" id="schGrid"></div>
           <div class="schDetail" id="schDetail"></div>
         </div>

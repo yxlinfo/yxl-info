@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YXL.info</title>
-  <link rel="stylesheet" href="styles.css?v=31">
+  <link rel="stylesheet" href="styles.css?v=32">
 </head>
 <body>
 
@@ -122,10 +122,10 @@
           <h2>🗓️ YXL 일정</h2>
         </div>
 
-        <div class="card scheduleCard" aria-label="YXL 주간 일정">
+        <div class="card scheduleCard" aria-label="YXL 월간 일정">
           <div class="scheduleHead">
             <div class="schRangeWrap">
-              <span class="schRangeLabel">주간</span>
+              <span class="schRangeLabel">월간</span>
               <div class="schRange" id="schRange">—</div>
               <div class="schLegend" aria-label="블록 색상 안내">
                 <span class="schLegendItem" title="엑셀">
@@ -149,12 +149,13 @@
             </div>
 
             <div class="schControls">
-              <button class="schIconBtn" id="schPrev" type="button" aria-label="이전 주">‹</button>
-              <button class="schIconBtn" id="schNext" type="button" aria-label="다음 주">›</button>
-              <button class="schBtn schBtn--today" id="schToday" type="button">이번주</button>
+              <button class="schIconBtn" id="schPrev" type="button" aria-label="이전 달">‹</button>
+              <button class="schIconBtn" id="schNext" type="button" aria-label="다음 달">›</button>
+              <button class="schBtn schBtn--today" id="schToday" type="button">이번달</button>
             </div>
           </div>
           <div class="schHighlight" id="schHighlight" aria-label="다음 일정"></div>
+          <div class="schDowRow" id="schDowRow" aria-label="요일"></div>
           <div class="schGrid" id="schGrid"></div>
           <div class="schDetail" id="schDetail"></div>
         </div>
@@ -179,16 +180,14 @@
             <div class="card-head">
               <div>
                 <h3 style="margin:0 0 6px;">누적 기여도표</h3>
-                <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다. · <span class="legend-current">현재 멤버</span></p>
+                <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
               </div>
-              
-<div class="toolbar total-toolbar">
-  <div class="input-wrap">
-    <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
-  </div>
-  <div class="total-credit muted">자료 제공 : 지케이님</div>
-</div>
+              <div class="toolbar">
+                <div class="input-wrap">
+                  <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
+                </div>
               </div>
+            </div>
 
             <div class="table-wrap">
               <table id="totalTable" class="table">
@@ -196,10 +195,8 @@
                   <tr>
                     <th>순위</th>
                     <th>스트리머</th>
-                    <th class="center">누적기여도</th>
-                    <th class="center">변동</th>
-                    <th class="center">근속일수</th>
-                  </tr>
+                    <th style="text-align:right;">누적기여도</th>
+</tr>
                 </thead>
                 <tbody></tbody>
               </table>
@@ -320,6 +317,6 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=31"></script>
+  <script src="app.js?v=32"></script>
 </body>
 </html>

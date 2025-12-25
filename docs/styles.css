@@ -614,8 +614,28 @@ body::after{
   display:none;
 }
 
-.schGrid{
+.schDowRow{
   margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap:10px;
+}
+.schDowCell{
+  text-align:center;
+  font-size:12px;
+  font-weight:900;
+  padding:6px 0;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.14);
+  opacity:.92;
+}
+.schDowCell.is-weekend{
+  color: rgba(255, 120, 120, .95);
+}
+
+.schGrid{
+  margin-top:10px;
   display:grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap:10px;
@@ -629,6 +649,7 @@ body::after{
   min-width:0;
   cursor:pointer;
 }
+.schCol.is-out{ opacity:.62; }
 .schHead{
   display:flex;
   align-items:center;
@@ -1146,46 +1167,6 @@ select.select option{
 }
 #integratedTable .rank-badge .medal,
 #seasonTable .rank-badge .medal{ font-size:13px; }
-/* Total(누적 기여도표): apply same Top 1~3 effects */
-#totalTable tr.top1 td{ background: rgba(255,215,0,.04); }
-#totalTable tr.top2 td{ background: rgba(192,192,192,.035); }
-#totalTable tr.top3 td{ background: rgba(205,127,50,.035); }
-
-#totalTable tr.top1 .soop-name,
-#totalTable tr.top2 .soop-name,
-#totalTable tr.top3 .soop-name{
-  font-weight: 900;
-}
-
-#totalTable td.rankcell{ white-space:nowrap; text-align:left; }
-#totalTable .rank-badge{ padding:4px 8px; font-size:12px; }
-#totalTable .rank-badge .medal{ font-size:13px; }
-
-/* 누적기여도: 현재 멤버(파란색) */
-#totalTable .soop-name.is-current{
-  color: rgba(96,165,250,.95);
-  font-weight: 900;
-}
-
-/* 누적기여도: 가운데 정렬용 */
-#totalTable th.center,
-#totalTable td.center{ text-align:center !important; }
-
-/* 누적기여도: 툴바(검색 + 크레딧) */
-.toolbar.total-toolbar{
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
-.total-credit{
-  font-size: 12px;
-  opacity: .85;
-  white-space: nowrap;
-}
-.legend-current{
-  color: rgba(96,165,250,.95);
-  font-weight: 900;
-}
 
 
 /* Sortable */
@@ -2640,3 +2621,19 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 
 /* 시즌별 기여도표 헤더 가운데 정렬 */
 #seasonTable th.th-center{ text-align:center; }
+
+/* 월간 달력: 다른 달 날짜(앞/뒤 채움칸) 은 살짝 흐리게 */
+.schDay.is-out{ opacity:.55; }
+.schCol.is-out.is-active{ opacity:1; }
+.schCol.is-out.is-active .schDay{ opacity:.92; }
+
+
+/* =========================
+   월간 달력(일~토): 7열 고정 + 모바일 가로 스크롤
+========================= */
+.scheduleCard{ overflow-x:auto; }
+.schDowRow, .schGrid{ grid-template-columns: repeat(7, minmax(0, 1fr)) !important; }
+@media (max-width: 860px){
+  .schDowRow, .schGrid{ gap:8px; min-width: 760px; }
+  .schDay{ padding:8px; }
+}

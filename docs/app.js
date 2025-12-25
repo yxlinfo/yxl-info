@@ -270,7 +270,15 @@ document.addEventListener("DOMContentLoaded", () => {
       t.addEventListener("click", () => setActiveTab(t.dataset.target));
     });
 
-    /* 시너지표를 기본으로(요청사항): 저장된 탭 무시하고 항상 시너지표로 시작 */
+    /* ✅ 접속 시 항상 '시너지표'가 기본 페이지 */
+    ["yxl_active_tab", "yxl_active_dash", "activeDash", "yxl_last_tab"].forEach((k) => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+    // URL 해시(#...)로 특정 탭이 지정돼도 무조건 시너지표로 덮어씀
+    if (location.hash) {
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { location.hash = ""; }
+    }
+
     setActiveTab("dash-synergy");
 }
 
@@ -1134,9 +1142,9 @@ if (q) {
     });
 
     sel?.addEventListener("change", async () => {
-      if (gateVisible()) return;
       setSelectedKey(sel.value);
-      const on = localStorage.getItem(KEY_ON) === "1";
+      if (gateVisible()) return; // 게이트 중엔 저장/표시만, 재생은 X
+const on = localStorage.getItem(KEY_ON) === "1";
       if (on) await playSelected({ reset: true });
       else syncGaugesToAudio();
     });
@@ -1783,6 +1791,16 @@ function renderNextBar(){
   initTabs();
   initSearchInputs();
   initIntegratedToggle();
+  // ✅ 로고(헤더) 클릭 시 새로고침
+  const logoRefresh = document.getElementById("logoRefresh");
+  logoRefresh?.addEventListener("click", (e) => {
+    e.preventDefault();
+    // 캐시 문제 있으면 아래 2줄로 바꿔도 됨:
+    // const url = location.pathname + location.search;
+    // location.replace(url);
+    location.reload();
+  });
+
   loadAll();
   startAutoRefresh();
 });

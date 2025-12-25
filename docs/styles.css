@@ -1722,6 +1722,7 @@ html.theme-light body{ color: var(--text); }
 /* ✅ Light mode: 유리/다크 패널류를 전부 밝게 뒤집기 */
 html.theme-light :is(
   .card,
+  .hofMarquee,
   .bgm-dash,
   .logoBox,
   .logoBadge,
@@ -2096,6 +2097,14 @@ html.theme-light .theme-toggle{
 }
 
 
+
+
+/* ✅ 헤더 배경도 라이트로 (상단 영역) */
+html.theme-light .header{
+  background: rgba(255,255,255,.72) !important;
+  border-bottom-color: rgba(0,0,0,.10) !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.06) !important;
+}
 /* ✅ Custom Select Scrollbar (드롭다운 스크롤바 톤 맞추기) */
 .cselect-menu{
   scrollbar-width: thin; /* Firefox */

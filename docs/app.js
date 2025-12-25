@@ -392,7 +392,8 @@ if (q) {
           .map((h) => {
             const isActive = state.integratedSort.key === h;
             const ind = isActive ? (state.integratedSort.dir === "asc" ? " ▲" : " ▼") : "";
-            return `<th data-key="${h}">${h}${ind}</th>`;
+            const cls = (h === sumKey) ? ' class="th-center"' : '';
+            return `<th${cls} data-key="${h}">${h}${ind}</th>`;
           })
           .join("")}
       </tr>
@@ -572,7 +573,7 @@ if (q) {
     let displayHeaders = SEASON_KEEP;
 
     // 헤더 가운데 정렬(요청: 직급전, 1~4회차, 합산기여도)
-    const SEASON_CENTER_HEADERS = new Set(["직급전","1회차","2회차","3회차","4회차","합산기여도"]);
+    const SEASON_CENTER_HEADERS = new Set(["직급전","1회차","2회차","3회차","4회차","5회차"]);
 
     // filter: streamer
     if (q) {

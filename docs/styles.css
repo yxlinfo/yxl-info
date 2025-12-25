@@ -680,7 +680,7 @@ body::after{
   border-radius:14px;
   background:rgba(255,255,255,.04);
   padding:10px;
-  min-height:66px;
+  min-height: 150px;
   cursor:pointer;
   opacity:.92;
 }
@@ -2659,6 +2659,8 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 
 /* 시즌별 기여도표 헤더 가운데 정렬 */
 #seasonTable th.th-center{ text-align:center; }
+#totalTable th.th-center{ text-align:center; }
+#integratedTable th.th-center{ text-align:center; }
 
 .schCol.is-out{ opacity:.62; }
 

@@ -2467,23 +2467,76 @@ body.theme-light .cselect-menu::-webkit-scrollbar-thumb:active{ background: rgba
 }
 
 /* =========================================================
-   PATCH: Data(📊) 섹션 텍스트/숫자 외곽선(입체감) 강화
-   - 범위: #secData 내부(탭 + 모든 표 포함)
-   - 전역 적용 X
+   PATCH v27: 데이터 탭 가독성 개선 (라이트모드)
+   - 표 스크롤바/우측 깨짐(흰 박스) 개선: table-wrap scrollbar + 배경
+   - 데이터 탭/표 텍스트(숫자 포함) 테두리(외곽선 느낌) + 약한 입체감
+   - 라이트모드 1~5위(회장/부회장/3~5등) 붉은 강조
 ========================================================= */
-:root{
-  /* 다크모드(밝은 글자)에서: 검정 테두리 */
-  --dataStroke: rgba(0,0,0,.58);
-  --dataDepth:  rgba(0,0,0,.16);
+
+/* 1) table-wrap 자체 배경/테두리 + 스크롤바 스타일 */
+.table-wrap{
+  scrollbar-gutter: auto;
 }
-html.theme-light, body.theme-light{
-  /* 라이트모드(어두운 글자)에서: 흰 테두리 */
-  --dataStroke: rgba(255,255,255,.88);
-  --dataDepth:  rgba(0,0,0,.10);
+.table-wrap::-webkit-scrollbar{
+  width: 12px;
+  height: 12px;
+}
+.table-wrap::-webkit-scrollbar-button{ width:0; height:0; display:none; }
+
+/* 다크 기본 */
+.table-wrap{
+  background: rgba(255,255,255,.03);
+}
+.table-wrap::-webkit-scrollbar-track{
+  background: rgba(255,255,255,.07);
+  border-radius: 999px;
+  margin: 10px;
+}
+.table-wrap::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.18);
+  border-radius: 999px;
+  border: 3px solid rgba(10,12,16,.9);
+  background-clip: padding-box;
+}
+.table-wrap{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.20) rgba(255,255,255,.07); }
+
+/* 라이트모드 */
+.theme-light .table-wrap,
+html.theme-light .table-wrap{
+  background: rgba(0,0,0,.015);
+  border-color: rgba(0,0,0,.14);
+}
+.theme-light .table-wrap::-webkit-scrollbar-track,
+html.theme-light .table-wrap::-webkit-scrollbar-track{
+  background: rgba(0,0,0,.06);
+}
+.theme-light .table-wrap::-webkit-scrollbar-thumb,
+html.theme-light .table-wrap::-webkit-scrollbar-thumb{
+  background: rgba(0,0,0,.22);
+  border-color: rgba(255,255,255,.86);
+}
+.theme-light .table-wrap{
+  scrollbar-color: rgba(0,0,0,.28) rgba(0,0,0,.06);
 }
 
-/* #secData 내 텍스트 전반(숫자 포함) */
-#secData :is(h1,h2,h3,h4,h5,h6,p,span,a,button,small,strong,em,li,label,th,td,div){
+/* 2) 데이터(#secData) 안의 탭/표 텍스트(숫자 포함) 외곽선 느낌 */
+:root{
+  --dataStroke: rgba(0,0,0,.62);
+  --dataDepth:  rgba(0,0,0,.14);
+}
+.theme-light, html.theme-light{
+  --dataStroke: rgba(255,255,255,.96);
+  --dataDepth:  rgba(0,0,0,.10);
+}
+#secData .dash-tab,
+#secData .seg-btn,
+#secData .table th,
+#secData .table td,
+#secData .table .num,
+#secData .soop-name,
+#secData .rank-badge,
+#secData .dataMeta{
+  font-weight: 800;
   text-shadow:
     1px 0   0 var(--dataStroke),
    -1px 0   0 var(--dataStroke),
@@ -2493,27 +2546,42 @@ html.theme-light, body.theme-light{
    -1px 1px 0 var(--dataStroke),
     1px -1px 0 var(--dataStroke),
    -1px -1px 0 var(--dataStroke),
-    0   3px 10px var(--dataDepth);
+    0 10px 18px var(--dataDepth);
+}
+#secData .table .num{ font-variant-numeric: tabular-nums; }
+
+/* 3) 라이트모드: 1~5위(회장/부회장/3~5등) 붉은 강조 */
+.theme-light #secData .table tbody tr.top1,
+.theme-light #secData .table tbody tr.top2,
+.theme-light #secData .table tbody tr.top3,
+.theme-light #secData .table tbody tr.top4,
+.theme-light #secData .table tbody tr.top5{
+  background: linear-gradient(90deg, rgba(239,68,68,.10), rgba(239,68,68,0) 55%);
+}
+.theme-light #secData .table tbody tr.top1 .soop-name,
+.theme-light #secData .table tbody tr.top2 .soop-name,
+.theme-light #secData .table tbody tr.top3 .soop-name,
+.theme-light #secData .table tbody tr.top4 .soop-name,
+.theme-light #secData .table tbody tr.top5 .soop-name,
+.theme-light #secData .table tbody tr.top1 .num,
+.theme-light #secData .table tbody tr.top2 .num,
+.theme-light #secData .table tbody tr.top3 .num,
+.theme-light #secData .table tbody tr.top4 .num,
+.theme-light #secData .table tbody tr.top5 .num{
+  color: #b91c1c; /* red-700 */
+}
+.theme-light #secData .table tbody tr.top1 .rankcell,
+.theme-light #secData .table tbody tr.top2 .rankcell,
+.theme-light #secData .table tbody tr.top3 .rankcell,
+.theme-light #secData .table tbody tr.top4 .rankcell,
+.theme-light #secData .table tbody tr.top5 .rankcell{
+  color: #991b1b;
 }
 
-/* 표 숫자 정렬/가독성 */
-#secData .num{
-  font-variant-numeric: tabular-nums;
-  letter-spacing: .1px;
-}
-
-/* SVG/아이콘 내부엔 텍스트 섀도우 적용하지 않음 */
-#secData svg,
-#secData svg *{
-  text-shadow: none !important;
-}
-
-/* 라이트모드에서 탭 선택 구분(최소한으로) */
-html.theme-light #secData .dash-tab{
-  border: 1px solid rgba(0,0,0,.14);
-}
-html.theme-light #secData .dash-tab.is-active{
-  border: 1px solid rgba(0,0,0,.22);
-  box-shadow: 0 10px 20px rgba(0,0,0,.10);
-  transform: translateY(-1px);
+/* (옵션) 라이트모드에서 top1~3 배지도 레드 엣지 */
+.theme-light #secData .rank-badge.rank-1,
+.theme-light #secData .rank-badge.rank-2,
+.theme-light #secData .rank-badge.rank-3{
+  border-color: rgba(239,68,68,.38);
+  background: rgba(239,68,68,.10);
 }

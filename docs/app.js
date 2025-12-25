@@ -375,8 +375,9 @@ if (q) {
     tbody.innerHTML = rows
       .map((r) => {
         const rankNum = Number(r._calcRank ?? r["순위"] ?? 0);
-        const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
-        const trClass = top ? ` class="top${top}"` : "";
+        const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+        const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
+        const trClass = topRow ? ` class="top${topRow}"` : "";
         return `<tr${trClass}>${headers
           .map((h) => {
             const keyNorm = normalize(h);
@@ -564,8 +565,9 @@ if (q) {
     tbody.innerHTML = rows
       .map((r) => {
         const rankNum = Number(r._calcRank ?? (rankKey ? r[rankKey] : 0) ?? 0);
-        const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
-        const trClass = top ? ` class="top${top}"` : "";
+        const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+        const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
+        const trClass = topRow ? ` class="top${topRow}"` : "";
 
         return `<tr${trClass}>${displayHeaders
           .map((h) => {
@@ -689,8 +691,9 @@ if (q) {
         const balloonsNum = Number(r["월별 누적별풍선"] ?? 0);
         const pct = maxBalloon ? (balloonsNum / maxBalloon) * 100 : 0;
         const rankNum = Number(rank ?? 0);
-        const top = rankNum === 1 ? 1 : (rankNum === 2 ? 2 : (rankNum === 3 ? 3 : 0));
-        const trClass = top ? ` class="top${top}"` : "";
+        const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+        const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
+        const trClass = topRow ? ` class="top${topRow}"` : "";
         const rankHtml = top
           ? `<span class="rank-badge rank-${top}"><span class="medal">${top===1?"🥇":top===2?"🥈":"🥉"}</span><span class="rank-num">${rankNum}</span></span>`
           : `${rank ?? ""}`;
@@ -916,7 +919,7 @@ if (q) {
       }
     }
     // 초기 적용
-    applyTheme(localStorage.getItem(THEME_KEY) || "dark");
+    applyTheme(localStorage.getItem(THEME_KEY) || "light");
     // 클릭 토글
     if (themeBtn){
       themeBtn.addEventListener("click", () => {

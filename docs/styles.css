@@ -11,7 +11,6 @@ html, body{ height:100%; }
 body{
   margin:0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
-  color-scheme: dark;
   color: var(--text);
 }
 
@@ -168,10 +167,10 @@ body::after{
   pointer-events:none;
 }
 .header-inner{
-  display:flex; align-items: stretch; justify-content:space-between;
+  display:flex; align-items:flex-start; justify-content:space-between;
   gap:16px; padding:14px 0;
 }
-.brand{ display:flex; gap:12px; align-items: stretch; }
+.brand{ display:flex; gap:12px; align-items:center; }
 
 /* --- YXL 시작일 D+ 표시 (로고 옆) --- */
 .yxlDday{
@@ -216,7 +215,6 @@ body::after{
     0 0 0 1px rgba(255,255,255,.06) inset,
     0 10px 22px rgba(0,0,0,.35);
   min-height: 60px;
-  height: 100%;
   overflow:hidden;
   min-width:0;
   color: inherit;
@@ -326,7 +324,7 @@ body::after{
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.20);
-  color: var(--text);
+  color: rgba(255,255,255,.90);
   text-decoration:none;
   font-weight:900;
   font-size:12px;
@@ -380,7 +378,7 @@ body::after{
   border-radius:12px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.20);
-  color: var(--text);
+  color: rgba(255,255,255,.85);
   cursor:pointer;
   font-weight:900;
   font-size:18px;
@@ -393,7 +391,7 @@ body::after{
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.20);
-  color: var(--text);
+  color: rgba(255,255,255,.85);
   cursor:pointer;
   font-weight:900;
   font-size:12px;
@@ -405,7 +403,7 @@ body::after{
   padding:0 12px;
   border-radius:12px;
 }
-.schBtn:hover{ border-color: rgba(255,255,255,.22); color: var(--text); }
+.schBtn:hover{ border-color: rgba(255,255,255,.22); color: rgba(255,255,255,.95); }
 .schRange{
   min-width: 170px;
   text-align:left;
@@ -578,12 +576,12 @@ body::after{
 .schBlock--event{
   background: rgba(245, 203, 65, .72);
   border-color: rgba(245, 203, 65, .80);
-  color: var(--text);
+  color: rgba(20,20,20,.92);
 }
 .schBlock--event .schBlockTime,
 .schBlock--event .schBlockTitle{ opacity:.98; }
 .schBlock--event .schBlockTag{
-  color: var(--text);
+  color: rgba(20,20,20,.92);
   border-color: rgba(20,20,20,.18);
   background: rgba(255,255,255,.35);
 }
@@ -732,7 +730,7 @@ body::after{
   border-radius:999px;
   border:1px solid rgba(125,211,252,.24);
   background: rgba(0,0,0,.18);
-  color: var(--text);
+  color: rgba(255,255,255,.92);
   opacity:.9;
 }
 .schDay.is-today::after{
@@ -865,9 +863,9 @@ body::after{
   cursor:pointer;
   font-weight:900;
 }
-.dash-tab:hover{ color: var(--text); border-color:rgba(255,255,255,.22); }
+.dash-tab:hover{ color:rgba(255,255,255,.92); border-color:rgba(255,255,255,.22); }
 .dash-tab.is-active{
-  color: var(--text);
+  color:rgba(255,255,255,.95);
   border-color:rgba(255,255,255,.18);
   background: linear-gradient(90deg,
     rgba(239, 68, 68, .12),
@@ -884,11 +882,11 @@ body::after{
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.20);
-  color: var(--text);
+  color:rgba(255,255,255,.85);
   cursor:pointer;
   font-weight:900;
 }
-.btn:hover{ border-color:rgba(255,255,255,.22); color: var(--text); }
+.btn:hover{ border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.95); }
 .btn.is-on{ border-color: var(--accent); background: rgba(125,211,252,.10); }
 .btn.ghost{ background: transparent; }
 
@@ -909,7 +907,7 @@ body::after{
   border-radius:12px;
   border:1px solid rgba(255,255,255,.14);
   background: rgba(0,0,0,.20);
-  color: var(--text);
+  color: rgba(255,255,255,.92);
   outline: none;
 }
 
@@ -930,10 +928,10 @@ select.select:focus{
 }
 select.select option{
   background: #0b0f14;
-  color: var(--text);
+  color: rgba(255,255,255,.92);
 }
 .select{ width:auto; min-width:180px; }
-.input::placeholder{ color: var(--muted); }
+.input::placeholder{ color: rgba(255,255,255,.45); }
 
 /* =========================
    Custom Select (드롭다운 UI 통일)
@@ -950,7 +948,7 @@ select.select option{
   border-radius:12px;
   border:1px solid rgba(255,255,255,.14);
   background: rgba(0,0,0,.20);
-  color: var(--text);
+  color: rgba(255,255,255,.92);
   cursor:pointer;
   font-weight:900;
 }
@@ -987,7 +985,7 @@ select.select option{
   padding:9px 10px;
   border-radius:12px;
   border:1px solid transparent;
-  color: var(--text);
+  color: rgba(255,255,255,.86);
   cursor:pointer;
   user-select:none;
 }
@@ -995,7 +993,7 @@ select.select option{
 .cselect-option[aria-selected="true"]{
   background: rgba(125,211,252,.14);
   border-color: rgba(125,211,252,.18);
-  color: var(--text);
+  color: rgba(255,255,255,.95);
 }
 .cselect-native{
   position:absolute;
@@ -1017,16 +1015,16 @@ select.select option{
 .seg-btn{
   border:0;
   background: transparent;
-  color: var(--text);
+  color: rgba(255,255,255,.78);
   padding:10px 12px;
   font-weight:900;
   cursor:pointer;
   line-height:1;
 }
-.seg-btn:hover{ color: var(--text); background: rgba(255,255,255,.06); }
+.seg-btn:hover{ color: rgba(255,255,255,.95); background: rgba(255,255,255,.06); }
 .seg-btn.is-active{
   background: rgba(125,211,252,.14);
-  color: var(--text);
+  color: rgba(255,255,255,.95);
 }
 
 /* Table */
@@ -1047,11 +1045,11 @@ select.select option{
   white-space:nowrap;
 }
 .table th{
-  color: var(--text);
+  color: rgba(255,255,255,.75);
   font-weight:900;
   background: rgba(255,255,255,.04);
 }
-.table td{ color: var(--text); }
+.table td{ color: rgba(255,255,255,.92); }
 .table .num{ text-align:right; font-variant-numeric: tabular-nums; }
 /* Synergy: value bar inside numeric cell (fills space when '변동사항' removed) */
 .table td.barcell{
@@ -1082,7 +1080,7 @@ select.select option{
   display:block;
   text-align:right;
 }
-.hint{ margin-top:10px; color: var(--muted); font-size:12px; }
+.hint{ margin-top:10px; color: rgba(255,255,255,.55); font-size:12px; }
 
 /* Top 1~3 badge */
 .rank-badge{
@@ -1202,7 +1200,7 @@ select.select option{
   padding: 28px 18px 24px;
   cursor: pointer;
   text-align: center;
-  color: var(--text);
+  color: rgba(255,255,255,.95);
   box-shadow: 0 22px 80px rgba(0,0,0,.58), 0 0 0 1px rgba(255,255,255,.06) inset;
   overflow:hidden;
 }
@@ -1237,13 +1235,13 @@ select.select option{
   margin-top: 6px;
   font-weight: 900;
   font-size: 22px;
-  color: var(--text);
+  color: rgba(255,255,255,.85);
   text-shadow: 0 10px 30px rgba(0,0,0,.45);
 }
 .gate-hint{
   margin-top: 14px;
   font-size: 13px;
-  color: var(--muted);
+  color: rgba(255,255,255,.70);
 }
 .gate-btn:active{ transform: scale(.995); }
 
@@ -1252,7 +1250,7 @@ select.select option{
   z-index: 2;
   margin-top: 12px;
   font-size: 12px;
-  color: var(--text);
+  color: rgba(255,255,255,.80);
   text-align:center;
 }
 
@@ -1410,8 +1408,8 @@ select.select option{
 .delta{display:inline-flex;align-items:center;gap:6px;font-weight:800;justify-content:flex-end}
 .delta.up{color:#18a957}
 .delta.down{color:#e05252}
-.delta.same{color:var(--muted)}
-.delta.new{color:var(--text)}
+.delta.same{color:rgba(255,255,255,.65)}
+.delta.new{color:rgba(255,255,255,.75)}
 
 /* =========================
    🎧 BGM Header UI (Pretty)
@@ -1450,7 +1448,7 @@ display:flex;
   border-radius:999px;
   font-weight:1000;
   font-size:12px;
-  color: var(--text);
+  color: rgba(255,255,255,.92);
   border:1px solid rgba(255,255,255,.14);
   background: linear-gradient(90deg,
     rgba(239,68,68,.14),
@@ -1472,7 +1470,7 @@ display:flex;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background: rgba(255,255,255,.04);
-  color: var(--text);
+  color: rgba(255,255,255,.90);
   font-weight:1000;
   line-height:1;
 }
@@ -1490,7 +1488,7 @@ display:flex;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.14);
   background: rgba(0,0,0,.20);
-  color: var(--text);
+  color: rgba(255,255,255,.92);
   min-width: 260px;
   max-width: 360px;
 }
@@ -1507,7 +1505,7 @@ display:flex;
 
 #bgmTime{
   font-size:12px;
-  color: var(--muted);
+  color: rgba(255,255,255,.70);
   font-variant-numeric: tabular-nums;
   min-width: 96px;
   text-align:center;
@@ -1677,7 +1675,7 @@ display:flex;
   justify-content: center;
   border: 1px solid rgba(255,255,255,.14);
   background: rgba(0,0,0,.18);
-  color: var(--text);
+  color: rgba(255,255,255,.92);
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06) inset;
   backdrop-filter: blur(10px);
@@ -1686,173 +1684,24 @@ display:flex;
 .theme-toggle:active{ transform: translateY(1px); }
 .theme-toggle .theme-icon{ font-size: 16px; line-height: 1; }
 
-/* ✅ 라이트 테마(기본은 다크)
-   - 요구사항: "흰색 ↔ 검은색"만 제대로 뒤집히도록
-   - 배경/탭/기타 텍스트까지 전부 라이트에 맞게 일괄 오버라이드
-*/
-html.theme-light, html.theme-light body{
-  color-scheme: light;
-
-  /* text palette */
-  --card: rgba(255,255,255,.86);
-  --line: rgba(0,0,0,.18);
-  --line-soft: rgba(0,0,0,.12);
-  --lift: 0 12px 28px rgba(0,0,0,.10);
-  --lift-outline: 0 0 0 1px rgba(0,0,0,.08);
-  --lift-inset: 0 0 0 1px rgba(255,255,255,.55) inset;
-  --text: rgba(0,0,0,.92);
-  --muted: rgba(0,0,0,.70);
+/* ✅ 라이트 테마(기본은 다크) */
+body.theme-light{
+  --card: rgba(0,0,0,.04);
+  --line: rgba(0,0,0,.10);
+  --text: rgba(0,0,0,.88);
+  --muted: rgba(0,0,0,.55);
   --accent: rgba(2,132,199,.22);
-
-  /* ✅ 배경도 라이트로 강제(기존 html,body !important 배경을 덮어씀) */
-  background:
-    radial-gradient(1200px 700px at 10% 10%, rgba(2,132,199,.10), transparent 55%),
-    radial-gradient(900px 600px at 90% 20%, rgba(34,197,94,.08), transparent 55%),
-    linear-gradient(180deg, rgba(255,255,255,1), rgba(245,247,250,1)) !important;
+  background: radial-gradient(1200px 700px at 10% 10%, rgba(2,132,199,.10), transparent 55%),
+              radial-gradient(900px 600px at 90% 20%, rgba(34,197,94,.08), transparent 55%),
+              linear-gradient(180deg, rgba(255,255,255,1), rgba(245,247,250,1));
 }
-
-/* ✅ (라이트 모드) 다크 장식 레이어(눈발/보케/가랜드)는 끄기 */
-html.theme-light body::before,
-html.theme-light body::after{
-  content: none !important;
-}
-html.theme-light .header::before{
-  content: none !important;
-}
-
-/* ✅ (라이트 모드) 기본 텍스트 컬러 보장 */
-html.theme-light body{ color: var(--text); }
-
-/* ✅ Light mode: 유리/다크 패널류를 전부 밝게 뒤집기 */
-html.theme-light :is(
-  .card,
-  .hofMarquee,
-  .bgm-dash,
-  .logoBox,
-  .logoBadge,
-  .sectionNav__btn,
-  .schIconBtn,
-  .schBtn,
-  .dash-tab,
-  .btn,
-  .btn.ghost,
-  .input,
-  .select,
-  .cselect-btn,
-  .cselect-menu
-){
-  background: var(--card) !important;
-  border-color: var(--line) !important;
-  color: var(--text) !important;
-  box-shadow: var(--lift), var(--lift-outline), var(--lift-inset) !important;
-}
-
-/* hover 계열 */
-html.theme-light :is(.btn:hover, .btn.ghost:hover, .sectionNav__btn:hover, .schIconBtn:hover, .schBtn:hover, .dash-tab:hover){
-  background: rgba(0,0,0,.06) !important;
-  border-color: rgba(0,0,0,.16) !important;
-}
-
-/* ✅ 탭 활성 상태도 라이트에서 텍스트가 검정으로 유지되도록 */
-html.theme-light .dash-tab.is-active{
-  color: var(--text) !important;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.06) inset !important;
-}
-
-
-/* ✅ 라이트 모드: 표(테이블)도 '판'처럼 입체감 + 경계선 강화 */
-html.theme-light .table-wrap{
-  background: var(--card) !important;
-  border-color: var(--line) !important;
-  box-shadow: var(--lift), var(--lift-outline), var(--lift-inset) !important;
-}
-html.theme-light .table{
-  color: var(--text) !important;
-}
-html.theme-light .table th{
-  background: rgba(0,0,0,.04) !important;
-  color: var(--text) !important;
-  border-bottom: 1px solid rgba(0,0,0,.14) !important;
-  text-shadow: 0 1px 0 rgba(255,255,255,.80), 0 1px 2px rgba(0,0,0,.18);
-}
-html.theme-light .table td{
-  color: var(--text) !important;
-  border-bottom: 1px solid rgba(0,0,0,.10) !important;
-}
-html.theme-light .table tr:nth-child(even) td{
-  background: rgba(0,0,0,.018);
-}
-html.theme-light .table tr:hover td{
-  background: rgba(0,0,0,.04) !important;
-}
-
-/* ✅ 라이트 모드: 탭/버튼/라벨 텍스트에 은은한 테두리(입체감) */
-html.theme-light :is(
-  .dash-tab,
-  .sectionNav__btn,
-  .schBtn,
-  .schIconBtn,
-  .btn,
-  .btn.ghost,
-  .logoBadge,
-  .cselect-btn,
-  .cselect-menu,
-  .seg-btn
-){
-  text-shadow: 0 1px 0 rgba(255,255,255,.82), 0 1px 2px rgba(0,0,0,.18);
-}
-
-/* ✅ 칩/보조 UI(흰색 반투명 → 검은색 반투명) */
-html.theme-light :is(.schChip, .hofGen){
-  background: rgba(0,0,0,.06) !important;
-  border-color: rgba(0,0,0,.10) !important;
-  color: var(--text) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,.06), 0 0 0 1px rgba(255,255,255,.35) inset !important;
-}
-
-/* ✅ 로고 타이틀(그라데이션/투명 텍스트 → 라이트에서는 검정 텍스트) */
-html.theme-light .logoTitle{
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  color: var(--text) !important;
-  -webkit-text-stroke: 0 !important;
-  text-shadow: 0 6px 14px rgba(0,0,0,.12) !important;
-}
-
-/* ✅ 명예의전당 이름(그라데이션/투명 텍스트 → 라이트에서는 검정 텍스트) */
-html.theme-light .hofName{
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  color: var(--text) !important;
-  -webkit-text-stroke: 0 !important;
-  text-shadow: 0 8px 18px rgba(0,0,0,.12) !important;
-}
-
-/* ✅ D+ 반짝임: 라이트에서는 '흰색' 스윕을 '검정' 스윕으로(골드는 유지) */
-html.theme-light .yxlDday::after{
-  background: linear-gradient(90deg,
-    rgba(0,0,0,0) 0%,
-    rgba(0,0,0,.55) 18%,
-    rgba(250,204,21,.75) 34%,
-    rgba(0,0,0,.55) 50%,
-    rgba(0,0,0,0) 72%) !important;
-  filter: drop-shadow(0 0 10px rgba(0,0,0,.12)) !important;
-  opacity: .35 !important;
-}
-html.theme-light .yxlDday::before{
-  mix-blend-mode: normal !important;
-  opacity: .20 !important;
-}
-
-/* ✅ theme toggle 버튼도 라이트에 맞게 */
-html.theme-light .theme-toggle{
+body.theme-light .theme-toggle{
   border-color: rgba(0,0,0,.12);
-  background: rgba(255,255,255,.78);
-  color: var(--text);
+  background: rgba(255,255,255,.72);
+  color: rgba(0,0,0,.86);
   box-shadow: 0 8px 18px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.04) inset;
 }
+
 /* =========================
    🎧 BGM Dash (2-row fixed, right aligned, no spill)
    Row1: seek + volume
@@ -1891,7 +1740,7 @@ html.theme-light .theme-toggle{
 
 .bgm-time{
   font-size: 12px;
-  color: var(--text);
+  color: rgba(255,255,255,.82);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1899,7 +1748,7 @@ html.theme-light .theme-toggle{
 
 .bgm-vol-label{
   font-size: 12px;
-  color: var(--text);
+  color: rgba(255,255,255,.75);
   text-align: right;
   letter-spacing: .2px;
 }
@@ -2144,14 +1993,6 @@ html.theme-light .theme-toggle{
 }
 
 
-
-
-/* ✅ 헤더 배경도 라이트로 (상단 영역) */
-html.theme-light .header{
-  background: rgba(255,255,255,.72) !important;
-  border-bottom-color: rgba(0,0,0,.10) !important;
-  box-shadow: 0 10px 24px rgba(0,0,0,.06) !important;
-}
 /* ✅ Custom Select Scrollbar (드롭다운 스크롤바 톤 맞추기) */
 .cselect-menu{
   scrollbar-width: thin; /* Firefox */
@@ -2184,191 +2025,3 @@ body.theme-light .cselect-menu::-webkit-scrollbar-thumb{
 }
 body.theme-light .cselect-menu::-webkit-scrollbar-thumb:hover{ background: rgba(2,132,199,.72); }
 body.theme-light .cselect-menu::-webkit-scrollbar-thumb:active{ background: rgba(2,132,199,.88); }
-
-
-/* =========================
-   ✨ Extra Sparkle: YXL 시작일/경과일 + Hall of Fame Award Mood
-   - 요청사항: YXL 시작일/경과일 반짝임 강화
-   - 명예의 전당을 '시상식/어워드' 무드로
-   - 회장/부회장/3~5등은 빨간계열로 특별 강조
-========================= */
-
-/* --- YXL D+ 텍스트: 글로우 + 샤인 스윕 + 은은한 스파클 --- */
-.yxlDday{
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 2px 0;
-  animation: yxlDdayGlow 1.9s ease-in-out infinite;
-}
-.yxlDday::after{
-  content: attr(data-text);
-  position:absolute;
-  inset:0;
-  background: linear-gradient(90deg,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,.85) 18%,
-    rgba(250,204,21,.85) 34%,
-    rgba(255,255,255,.85) 50%,
-    rgba(255,255,255,0) 72%);
-  background-size: 260% 100%;
-  -webkit-background-clip:text;
-  background-clip:text;
-  color: transparent;
-  opacity:.55;
-  filter: drop-shadow(0 0 12px rgba(255,255,255,.16));
-  animation: yxlDdayShine 3.8s linear infinite;
-  pointer-events:none;
-}
-.yxlDday::before{
-  content:"";
-  position:absolute;
-  inset:-6px -10px;
-  background:
-    radial-gradient(circle at 18% 55%, rgba(255,255,255,.22), transparent 46%),
-    radial-gradient(circle at 62% 35%, rgba(250,204,21,.18), transparent 52%),
-    radial-gradient(circle at 88% 62%, rgba(255,255,255,.18), transparent 48%);
-  opacity:.55;
-  mix-blend-mode: screen;
-  animation: yxlDdaySparkle 2.9s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes yxlDdayShine{
-  0%   { background-position: 200% 0; }
-  100% { background-position: -80% 0; }
-}
-@keyframes yxlDdayGlow{
-  0%,100%{
-    text-shadow:
-      0 6px 14px rgba(0,0,0,.35),
-      0 0 10px rgba(255,255,255,.14);
-  }
-  50%{
-    text-shadow:
-      0 6px 14px rgba(0,0,0,.35),
-      0 0 18px rgba(250,204,21,.22),
-      0 0 22px rgba(255,255,255,.18);
-  }
-}
-@keyframes yxlDdaySparkle{
-  0%,100%{ transform: translateX(-4px); opacity:.35; }
-  50%    { transform: translateX(6px);  opacity:.70; }
-}
-
-/* --- HOF: 어워드 무드(스포트라이트/골드 샤인) --- */
-.hofMarquee{
-  position: relative;
-  overflow: hidden;
-}
-.hofMarquee > *{ position: relative; z-index: 1; }
-.hofMarquee::before{
-  content:"";
-  position:absolute;
-  inset:-70% -30%;
-  z-index:0;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(250,204,21,.18), transparent 55%),
-    radial-gradient(circle at 22% 90%, rgba(239,68,68,.12), transparent 62%),
-    radial-gradient(circle at 82% 10%, rgba(56,189,248,.10), transparent 60%);
-  transform: rotate(10deg);
-  animation: hofSpot 6.2s ease-in-out infinite;
-  pointer-events:none;
-}
-.hofMarquee::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
-  opacity:.35;
-  animation: hofSweep 4.8s linear infinite;
-  pointer-events:none;
-}
-@keyframes hofSpot{
-  0%,100%{ transform: translateX(-6%) rotate(10deg); opacity:.50; }
-  50%    { transform: translateX(6%)  rotate(10deg); opacity:.90; }
-}
-@keyframes hofSweep{
-  0%   { transform: translateX(-80%); opacity:.10; }
-  35%  { opacity:.38; }
-  100% { transform: translateX(120%); opacity:.10; }
-}
-
-/* 라벨(명예의 전당): 골드 톤 + 샤인 */
-.hofMarquee__label{
-  position:relative;
-  overflow:hidden;
-  border-color: rgba(250,204,21,.22);
-  background: linear-gradient(180deg, rgba(250,204,21,.22), rgba(255,255,255,.05));
-  text-shadow: 0 0 10px rgba(250,204,21,.18);
-}
-.hofMarquee__label::after{
-  content:"";
-  position:absolute;
-  inset:-40% -60%;
-  background: linear-gradient(120deg, transparent, rgba(255,255,255,.30), transparent);
-  transform: rotate(10deg);
-  opacity:0;
-  animation: hofLabelShine 3.8s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes hofLabelShine{
-  0%   { transform: translateX(-20%) rotate(10deg); opacity:0; }
-  20%  { opacity:1; }
-  55%  { transform: translateX(35%) rotate(10deg); opacity:0; }
-  100% { opacity:0; }
-}
-
-/* ✅ 특별 랭크(회장/부회장/3~5등): 빨간계열 강조 */
-.hofMarquee__line.is-special .hofGen{
-  border-color: rgba(239,68,68,.38);
-  background: rgba(239,68,68,.14);
-  box-shadow:
-    0 12px 26px rgba(239,68,68,.16),
-    0 0 0 1px rgba(255,255,255,.06) inset;
-}
-.hofMarquee__line.is-special .hofName{
-  background: linear-gradient(180deg, rgba(255,236,236,.96), rgba(255,120,120,.62));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-stroke: 0.6px rgba(0,0,0,.45);
-  text-shadow:
-    0 1px 0 rgba(0,0,0,.35),
-    0 10px 26px rgba(0,0,0,.40),
-    0 0 22px rgba(239,68,68,.18);
-}
-.hofMarquee__line.is-special.is-anim .hofName{
-  animation: awardPulse 1.15s ease-in-out infinite;
-}
-@keyframes awardPulse{
-  0%,100%{ filter: drop-shadow(0 0 10px rgba(239,68,68,.10)); transform: translateZ(0) scale(1); }
-  50%    { filter: drop-shadow(0 0 18px rgba(239,68,68,.22)); transform: translateZ(0) scale(1.03); }
-}
-
-/* 회장/부회장은 조금 더 강하게 */
-.hofMarquee__line.is-president .hofGen,
-.hofMarquee__line.is-vice .hofGen{
-  background: rgba(239,68,68,.18);
-  border-color: rgba(248,113,113,.46);
-  box-shadow:
-    0 14px 30px rgba(239,68,68,.20),
-    0 0 0 1px rgba(255,255,255,.07) inset;
-}
-.hofMarquee__line.is-president .hofName,
-.hofMarquee__line.is-vice .hofName{
-  text-shadow:
-    0 1px 0 rgba(0,0,0,.35),
-    0 12px 30px rgba(0,0,0,.42),
-    0 0 26px rgba(239,68,68,.24);
-}
-
-/* 접근성: 모션 줄이기 환경에서는 과한 애니메이션 OFF */
-@media (prefers-reduced-motion: reduce){
-  .yxlDday{ animation:none; }
-  .yxlDday::after, .yxlDday::before{ animation:none; }
-  .hofMarquee::before, .hofMarquee::after{ animation:none; }
-  .hofMarquee__label::after{ animation:none; }
-  .hofMarquee__line.is-special.is-anim .hofName{ animation:none; }
-}

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YXL.info</title>
-  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
 
@@ -49,7 +49,7 @@
 
     <div class="wrap header-inner">
       <div class="brand">
-        <a id="logoRefresh" class="logoBox" href="#" aria-label="YXLINFO 홈">
+        <a class="logoBox" href="#" aria-label="YXLINFO 홈">
           <img class="logoImg" src="assets/logo.gif" alt="YXLINFO" />
           <div class="logoMeta">
             <div class="logoTitle">YXLINFO</div>
@@ -92,7 +92,11 @@
           <span class="theme-icon" aria-hidden="true">🌙</span>
         </button>
       </div>
-
+<select id="bgmSelect" class="select bgm-select cselect-native" aria-label="BGM 선택" aria-hidden="true" tabindex="-1">
+            <option value="bgm">Justin Bieber - Mistletoe</option>
+            <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
+            <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
+          </select>
         </div>
       </div>
     </div>
@@ -316,6 +320,6 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=22"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>

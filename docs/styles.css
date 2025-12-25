@@ -975,6 +975,56 @@ select.select option{
   z-index: 80;
   display:none;
 }
+/* ✅ Custom Select Scrollbar (드롭다운 스크롤바 톤 맞추기) */
+.cselect-menu{
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(125,211,252,.55) rgba(255,255,255,.08);
+}
+.cselect-menu::-webkit-scrollbar{
+  width: 10px;
+}
+.cselect-menu::-webkit-scrollbar-track{
+  background: rgba(255,255,255,.08);
+  border-radius: 999px;
+  margin: 8px 0;
+}
+.cselect-menu::-webkit-scrollbar-thumb{
+  background: rgba(125,211,252,.55);
+  border-radius: 999px;
+  border: 2px solid rgba(12, 14, 18, .94);
+  background-clip: padding-box;
+}
+.cselect-menu::-webkit-scrollbar-thumb:hover{
+  background: rgba(125,211,252,.72);
+}
+.cselect-menu::-webkit-scrollbar-thumb:active{
+  background: rgba(125,211,252,.88);
+}
+/* 스크롤바 위/아래 화살표(버튼) 숨김 */
+.cselect-menu::-webkit-scrollbar-button{
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* (있다면) 라이트 모드용 */
+body.theme-light .cselect-menu{
+  scrollbar-color: rgba(2,132,199,.55) rgba(0,0,0,.08);
+}
+body.theme-light .cselect-menu::-webkit-scrollbar-track{
+  background: rgba(0,0,0,.08);
+}
+body.theme-light .cselect-menu::-webkit-scrollbar-thumb{
+  background: rgba(2,132,199,.55);
+  border-color: rgba(255,255,255,.92);
+}
+body.theme-light .cselect-menu::-webkit-scrollbar-thumb:hover{
+  background: rgba(2,132,199,.72);
+}
+body.theme-light .cselect-menu::-webkit-scrollbar-thumb:active{
+  background: rgba(2,132,199,.88);
+}
+
 .cselect.is-open .cselect-menu{ display:block; }
 .cselect-option{
   width:100%;

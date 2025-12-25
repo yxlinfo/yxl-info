@@ -1,3 +1,14 @@
+// Global header normalizer (avoid ReferenceError across merged patches)
+function normalizeHeader(s){
+  return (s ?? '')
+    .toString()
+    .replace(/[♥♡]/g, '')
+    .replace(/\s+/g, '')
+    .replace(/[^0-9a-zA-Z가-힣]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Config
@@ -43,6 +54,19 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/\s+/g, " ")
       .trim()
       .toLowerCase();
+
+
+  // Local alias (uses global normalizeHeader if available)
+  const normalizeHeaderSafe = (v) => {
+    if (typeof normalizeHeader === "function") return normalizeHeader(v);
+    return (v ?? "")
+      .toString()
+      .replace(/[♥♡]/g, "")
+      .replace(/\s+/g, "")
+      .replace(/[^0-9a-zA-Z가-힣]/g, "")
+      .trim()
+      .toLowerCase();
+  };
 
   /* =========================
      Custom Select (드롭다운 UI 통일)
@@ -270,11 +294,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2) 정규화 키로 조회(캐시)
     if (!row.__nmap) {
       const m = {};
-      Object.keys(row).forEach((k) => (m[normalizeHeader(k)] = row[k]));
+      Object.keys(row).forEach((k) => (m[normalizeHeaderSafe(k)] = row[k]));
       row.__nmap = m;
     }
     for (const k of aliases) {
-      const nk = normalizeHeader(k);
+      const nk = normalizeHeaderSafe(k);
       if (nk && nk in row.__nmap) return row.__nmap[nk];
     }
     return "";
@@ -571,7 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let rows = ranked;
 if (q) {
-      const streamerKey = headers.find((h) => normalizeHeader(h) === "스트리머");
+      const streamerKey = headers.find((h) => normalizeHeaderSafe(h) === "스트리머");
       if (streamerKey) rows = rows.filter((r) => normalize(r[streamerKey]).includes(q));
     }
 
@@ -691,17 +715,17 @@ if (q) {
     // - 팀장 기본은 플레이어, 단 스트리머가 '섭이','차돈'이면 비플레이어
     // - 직급 오타 '웨아터' -> '웨이터' 정정
     const _srcRoleKey =
-      headers.find((h) => normalizeHeader(h) === "직급" || normalizeHeader(h) === "직위") || "직급";
+      headers.find((h) => normalizeHeaderSafe(h) === "직급" || normalizeHeaderSafe(h) === "직위") || "직급";
     const _srcNameKey =
-      headers.find((h) => normalizeHeader(h) === "스트리머" || normalizeHeader(h) === "비제이명" || normalizeHeader(h) === "멤버"
+      headers.find((h) => normalizeHeaderSafe(h) === "스트리머" || normalizeHeaderSafe(h) === "비제이명" || normalizeHeaderSafe(h) === "멤버"
       ) || "스트리머";
-    const _srcBeforeKey = headers.find((h) => normalizeHeader(h) === "직급전") || "직급전";
+    const _srcBeforeKey = headers.find((h) => normalizeHeaderSafe(h) === "직급전") || "직급전";
     const _srcRounds = [1, 2, 3, 4, 5].map((n) => {
-      return headers.find((h) => normalizeHeader(h) === `${n}회차`) || `${n}회차`;
+      return headers.find((h) => normalizeHeaderSafe(h) === `${n}회차`) || `${n}회차`;
     });
     const _srcSumKey =
-      headers.find((h) => normalizeHeader(h) === "합산기여도") ||
-      headers.find((h) => normalizeHeader(h) === "누적기여도") ||
+      headers.find((h) => normalizeHeaderSafe(h) === "합산기여도") ||
+      headers.find((h) => normalizeHeaderSafe(h) === "누적기여도") ||
       "합산기여도";
 
     // 표 컬럼(고정)
@@ -983,15 +1007,15 @@ if (q) {
 
     // ✅ 시트 이름으로 찾기(순서 의존 제거)
     const pickSheet = (cands) => {
-      const normNames = names.map((n) => normalizeHeader(n));
+      const normNames = names.map((n) => normalizeHeaderSafe(n));
       for (const c of cands) {
-        const nc = normalizeHeader(c);
+        const nc = normalizeHeaderSafe(c);
         const idx = normNames.findIndex((x) => x === nc);
         if (idx >= 0) return names[idx];
       }
       // 부분일치도 허용
       for (const c of cands) {
-        const nc = normalizeHeader(c);
+        const nc = normalizeHeaderSafe(c);
         const idx = normNames.findIndex((x) => x.includes(nc));
         if (idx >= 0) return names[idx];
       }
@@ -1018,7 +1042,7 @@ if (q) {
 
     // 시즌별 시트: "시즌숫자"가 들어간 시트들 자동 탐색(누적/통합 제외)
     const seasonNames = names.filter((n) => {
-      const nn = normalizeHeader(n);
+      const nn = normalizeHeaderSafe(n);
       if (!nn) return false;
       if (totalSheet && n === totalSheet) return false;
       if (integratedSheet && n === integratedSheet) return false;

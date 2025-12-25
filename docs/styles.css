@@ -614,28 +614,8 @@ body::after{
   display:none;
 }
 
-.schDowRow{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap:10px;
-}
-.schDowCell{
-  text-align:center;
-  font-size:12px;
-  font-weight:900;
-  padding:6px 0;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.14);
-  opacity:.92;
-}
-.schDowCell.is-weekend{
-  color: rgba(255, 120, 120, .95);
-}
-
 .schGrid{
-  margin-top:10px;
+  margin-top:12px;
   display:grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap:10px;
@@ -649,7 +629,6 @@ body::after{
   min-width:0;
   cursor:pointer;
 }
-.schCol.is-out{ opacity:.62; }
 .schHead{
   display:flex;
   align-items:center;
@@ -2621,19 +2600,3 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 
 /* 시즌별 기여도표 헤더 가운데 정렬 */
 #seasonTable th.th-center{ text-align:center; }
-
-/* 월간 달력: 다른 달 날짜(앞/뒤 채움칸) 은 살짝 흐리게 */
-.schDay.is-out{ opacity:.55; }
-.schCol.is-out.is-active{ opacity:1; }
-.schCol.is-out.is-active .schDay{ opacity:.92; }
-
-
-/* =========================
-   월간 달력(일~토): 7열 고정 + 모바일 가로 스크롤
-========================= */
-.scheduleCard{ overflow-x:auto; }
-.schDowRow, .schGrid{ grid-template-columns: repeat(7, minmax(0, 1fr)) !important; }
-@media (max-width: 860px){
-  .schDowRow, .schGrid{ gap:8px; min-width: 760px; }
-  .schDay{ padding:8px; }
-}

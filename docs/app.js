@@ -258,7 +258,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
     if (!grid.length) return { headers: [], rows: [] };
 
-    const headers = grid[0].map((h) => (h ?? "").toString().trim());
+    const normalizeHeader = (h) => {
+      let s = (h ?? "").toString();
+      // remove zero-width spaces
+      s = s.replace(/\u200B/g, "");
+      s = s.trim().replace(/\s+/g, " ");
+      // strip trailing parentheses like "1회차(11.11)" -> "1회차"
+      s = s.replace(/\s*[\(\（].*$/, "");
+      return s.trim();
+    };
+
+    const rawHeaders = grid[0].map((h) => (h ?? "").toString());
+    let headers = rawHeaders.map(normalizeHeader);
+
+    // ensure uniqueness after normalization
+    const seen = new Map();
+    headers = headers.map((h) => {
+      const key = (h ?? "").toString().trim();
+      if (!key) return "";
+      const n = (seen.get(key) ?? 0) + 1;
+      seen.set(key, n);
+      return n > 1 ? `${key}__${n}` : key;
+    });
     const rows = grid
       .slice(1)
       .filter((r) => r.some((v) => (v ?? "").toString().trim() !== ""))
@@ -381,8 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const rank = getRank(r, idx);
         const name = String(getName(r) ?? "").trim();
         const total = getTotal(r);
-        const delta = String(getDelta(r) ?? "").trim() || "-";
-        const tenure = String(getTenure(r) ?? "").trim() || "-";
+        const delta = String(getDelta(r) ?? "").trim() || "";
+        const tenure = String(getTenure(r) ?? "").trim() || "";
 
         const isTop = rank <= 3;
         const isCurrent = CURRENT_MEMBERS.has(normalize(name));
@@ -832,12 +853,44 @@ if (q) {
     const wb = XLSX.read(ab, { type: "array" });
     const names = wb.SheetNames;
 
-    // Sheet 1: 누적기여도
-    const t1 = sheetToTable(wb, names[0]);
+    // --- Sheet picking (do NOT depend on sheet order) ---
+    const pick = (pred, fallback) => {
+      const found = names.find((n) => {
+        try { return pred(n); } catch (e) { return false; }
+      });
+      return found || fallback;
+    };
+
+    const totalSheet = pick((n) => normalize(n) === "누적기여도" || normalize(n).includes("누적기여도"), names[0]);
+    const integratedSheet = pick(
+      (n) =>
+        normalize(n).includes("시즌통합") ||
+        normalize(n).includes("s1~s10") ||
+        normalize(n).includes("s1-s10") ||
+        normalize(n).includes("s1～s10") ||
+        normalize(n).includes("s1") && normalize(n).includes("s10") && normalize(n).includes("기여도"),
+      names[1] || names[0]
+    );
+
+    const seasonSheetsRaw = names.filter((n) => {
+      const nn = normalize(n);
+      return nn.includes("시즌") && nn.includes("기여도");
+    });
+
+    const getSeasonNo = (name) => {
+      const m = String(name).match(/시즌\s*(\d+)/);
+      return m ? Number(m[1]) : 9999;
+    };
+
+    const seasonSheets = (seasonSheetsRaw.length ? seasonSheetsRaw : names.slice(2)).slice()
+      .sort((a, b) => getSeasonNo(a) - getSeasonNo(b));
+
+    // Sheet: 누적기여도
+    const t1 = sheetToTable(wb, totalSheet);
     state.main.total = t1.rows;
 
-    // Sheet 2: 시즌통합랭킹
-    const t2 = sheetToTable(wb, names[1]);
+    // Sheet: 시즌통합랭킹
+    const t2 = sheetToTable(wb, integratedSheet);
     state.main.integratedHeaders = INTEGRATED_KEEP;
     state.main.integratedAll = t2.rows.map((r) => {
       const o = {};
@@ -847,7 +900,7 @@ if (q) {
     });
 
     // Sheets 3~12: 시즌별
-    state.main.seasonSheetNames = names.slice(2, 12);
+    state.main.seasonSheetNames = seasonSheets;
     state.main.seasons.clear();
     state.main.seasonSheetNames.forEach((sn) => {
       state.main.seasons.set(sn, sheetToTable(wb, sn));

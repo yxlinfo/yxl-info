@@ -907,9 +907,9 @@ body::after{
   width:100%;
   padding:10px 12px;
   border-radius:12px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.20);
-  color: var(--text);
+  border:1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.85);
+  color: #111;
   outline: none;
 }
 
@@ -2726,7 +2726,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 .schModal__backdrop{
   position:absolute;
   inset:0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0,0,0,.25);
   backdrop-filter: blur(2px);
 }
 .schModal__panel{
@@ -2738,8 +2738,9 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
   max-height: min(70vh, 520px);
   overflow:auto;
   border-radius:18px;
-  border:1px solid rgba(255,255,255,.16);
-  background: rgba(12, 14, 18, .96);
+  border:1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.98);
+  color: #111;
   box-shadow: 0 24px 80px rgba(0,0,0,.65);
   padding:14px;
 }
@@ -2765,7 +2766,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
   cursor:pointer;
   font-weight:1000;
 }
-.schModal__close:hover{ background: rgba(255,255,255,.06); }
+.schModal__close:hover{ background: rgba(0,0,0,.06); }
 .schModal__body{ display:flex; flex-direction:column; gap:8px; }
 .schModalEmpty{ color: var(--muted); font-size:13px; padding: 8px 2px; }
 

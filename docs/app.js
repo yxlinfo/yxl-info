@@ -1247,13 +1247,24 @@ if (q) {
     let timer = null;
 
     function setLine(item) {
-      const cntHtml = item.cnt ? `<span class="hofCnt">(${item.cnt})</span>` : "";
-      line.innerHTML = `
-        <span class="hofGen">${item.gen}</span>
-        <span class="hofName">${item.name}</span>
-        ${cntHtml}
-      `;
-    }
+  const cntHtml = item.cnt ? `<span class="hofCnt">(${item.cnt})</span>` : "";
+  line.innerHTML = `
+    <span class="hofGen">${item.gen}</span>
+    <span class="hofName">${item.name}</span>
+    ${cntHtml}
+  `;
+
+  // ✅ 특별 랭크(회장/부회장/Top5) 강조 클래스
+  const isPresident = item.gen === "회장님";
+  const isVice = item.gen === "부회장님";
+  const isTop5 = item.gen === "3등" || item.gen === "4등" || item.gen === "5등";
+  const isSpecial = isPresident || isVice || isTop5;
+
+  line.classList.toggle("is-president", isPresident);
+  line.classList.toggle("is-vice", isVice);
+  line.classList.toggle("is-top5", isTop5);
+  line.classList.toggle("is-special", isSpecial);
+}
 
     function resetToBlank() {
       line.classList.remove("is-anim");
@@ -1320,8 +1331,10 @@ if (q) {
       const diff = Math.floor((today.getTime() - start.getTime()) / 86400000);
       const dplus = Math.max(0, diff + 1);
 
-      el.textContent = `YXL · ${START_DISPLAY} ~ ing · D+${dplus}`;
-    }
+      const txt = `YXL · ${START_DISPLAY} ~ ing · D+${dplus}`;
+      el.textContent = txt;
+      el.dataset.text = txt;
+}
 
     calcDays();
     // 자정 넘김 대비(가볍게 10분마다 갱신)

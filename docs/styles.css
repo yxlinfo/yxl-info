@@ -1410,8 +1410,8 @@ select.select option{
 .delta{display:inline-flex;align-items:center;gap:6px;font-weight:800;justify-content:flex-end}
 .delta.up{color:#18a957}
 .delta.down{color:#e05252}
-.delta.same{color:rgba(255,255,255,.65)}
-.delta.new{color:rgba(255,255,255,.75)}
+.delta.same{color:var(--muted)}
+.delta.new{color:var(--text)}
 
 /* =========================
    🎧 BGM Header UI (Pretty)
@@ -1686,53 +1686,125 @@ display:flex;
 .theme-toggle:active{ transform: translateY(1px); }
 .theme-toggle .theme-icon{ font-size: 16px; line-height: 1; }
 
-/* ✅ 라이트 테마(기본은 다크) */
-body.theme-light{
+/* ✅ 라이트 테마(기본은 다크)
+   - 요구사항: "흰색 ↔ 검은색"만 제대로 뒤집히도록
+   - 배경/탭/기타 텍스트까지 전부 라이트에 맞게 일괄 오버라이드
+*/
+html.theme-light, html.theme-light body{
   color-scheme: light;
-  --card: rgba(255,255,255,.78);
+
+  /* text palette */
+  --card: rgba(255,255,255,.86);
   --line: rgba(0,0,0,.12);
   --text: rgba(0,0,0,.92);
   --muted: rgba(0,0,0,.70);
   --accent: rgba(2,132,199,.22);
-  background: radial-gradient(1200px 700px at 10% 10%, rgba(2,132,199,.10), transparent 55%),
-              radial-gradient(900px 600px at 90% 20%, rgba(34,197,94,.08), transparent 55%),
-              linear-gradient(180deg, rgba(255,255,255,1), rgba(245,247,250,1));
+
+  /* ✅ 배경도 라이트로 강제(기존 html,body !important 배경을 덮어씀) */
+  background:
+    radial-gradient(1200px 700px at 10% 10%, rgba(2,132,199,.10), transparent 55%),
+    radial-gradient(900px 600px at 90% 20%, rgba(34,197,94,.08), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,1), rgba(245,247,250,1)) !important;
 }
 
-/* ✅ Light mode: flip dark glass panels & text to light */
-body.theme-light .card,
-body.theme-light .bgm-dash,
-body.theme-light .logoBox,
-body.theme-light .sectionNav__btn,
-body.theme-light .btn,
-body.theme-light .btn-ghost,
-body.theme-light .input,
-body.theme-light .select,
-body.theme-light .cselect-btn,
-body.theme-light .cselect-menu,
-body.theme-light .tabs,
-body.theme-light .tab{
+/* ✅ (라이트 모드) 다크 장식 레이어(눈발/보케/가랜드)는 끄기 */
+html.theme-light body::before,
+html.theme-light body::after{
+  content: none !important;
+}
+html.theme-light .header::before{
+  content: none !important;
+}
+
+/* ✅ (라이트 모드) 기본 텍스트 컬러 보장 */
+html.theme-light body{ color: var(--text); }
+
+/* ✅ Light mode: 유리/다크 패널류를 전부 밝게 뒤집기 */
+html.theme-light :is(
+  .card,
+  .bgm-dash,
+  .logoBox,
+  .logoBadge,
+  .sectionNav__btn,
+  .schIconBtn,
+  .schBtn,
+  .dash-tab,
+  .btn,
+  .btn.ghost,
+  .input,
+  .select,
+  .cselect-btn,
+  .cselect-menu
+){
   background: var(--card) !important;
   border-color: var(--line) !important;
   color: var(--text) !important;
   box-shadow: 0 10px 22px rgba(0,0,0,.10), 0 0 0 1px rgba(255,255,255,.40) inset !important;
 }
-body.theme-light .btn-ghost:hover,
-body.theme-light .sectionNav__btn:hover,
-body.theme-light .tab:hover{
+
+/* hover 계열 */
+html.theme-light :is(.btn:hover, .btn.ghost:hover, .sectionNav__btn:hover, .schIconBtn:hover, .schBtn:hover, .dash-tab:hover){
   background: rgba(0,0,0,.06) !important;
-}
-body.theme-light .cselect-menu{
-  background: rgba(255,255,255,.92) !important;
+  border-color: rgba(0,0,0,.16) !important;
 }
 
-body.theme-light .theme-toggle{
+/* ✅ 탭 활성 상태도 라이트에서 텍스트가 검정으로 유지되도록 */
+html.theme-light .dash-tab.is-active{
+  color: var(--text) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.06) inset !important;
+}
+
+/* ✅ 칩/보조 UI(흰색 반투명 → 검은색 반투명) */
+html.theme-light :is(.schChip, .hofGen){
+  background: rgba(0,0,0,.06) !important;
+  border-color: rgba(0,0,0,.10) !important;
+  color: var(--text) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06), 0 0 0 1px rgba(255,255,255,.35) inset !important;
+}
+
+/* ✅ 로고 타이틀(그라데이션/투명 텍스트 → 라이트에서는 검정 텍스트) */
+html.theme-light .logoTitle{
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  color: var(--text) !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: 0 6px 14px rgba(0,0,0,.12) !important;
+}
+
+/* ✅ 명예의전당 이름(그라데이션/투명 텍스트 → 라이트에서는 검정 텍스트) */
+html.theme-light .hofName{
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  color: var(--text) !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: 0 8px 18px rgba(0,0,0,.12) !important;
+}
+
+/* ✅ D+ 반짝임: 라이트에서는 '흰색' 스윕을 '검정' 스윕으로(골드는 유지) */
+html.theme-light .yxlDday::after{
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,.55) 18%,
+    rgba(250,204,21,.75) 34%,
+    rgba(0,0,0,.55) 50%,
+    rgba(0,0,0,0) 72%) !important;
+  filter: drop-shadow(0 0 10px rgba(0,0,0,.12)) !important;
+  opacity: .35 !important;
+}
+html.theme-light .yxlDday::before{
+  mix-blend-mode: normal !important;
+  opacity: .20 !important;
+}
+
+/* ✅ theme toggle 버튼도 라이트에 맞게 */
+html.theme-light .theme-toggle{
   border-color: rgba(0,0,0,.12);
-  background: rgba(255,255,255,.72);
+  background: rgba(255,255,255,.78);
   color: var(--text);
   box-shadow: 0 8px 18px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.04) inset;
 }
-
 /* =========================
    🎧 BGM Dash (2-row fixed, right aligned, no spill)
    Row1: seek + volume

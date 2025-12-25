@@ -907,6 +907,7 @@ if (q) {
     function applyTheme(mode){
       const isLight = mode === "light";
       document.body.classList.toggle("theme-light", isLight);
+      document.documentElement.classList.toggle("theme-light", isLight);
       if (themeBtn){
         const icon = themeBtn.querySelector(".theme-icon");
         if (icon) icon.textContent = isLight ? "☀️" : "🌙";

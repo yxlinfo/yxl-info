@@ -270,10 +270,17 @@ document.addEventListener("DOMContentLoaded", () => {
       t.addEventListener("click", () => setActiveTab(t.dataset.target));
     });
 
-    const saved = localStorage.getItem("yxl_active_tab");
-    // 시너지표를 기본으로(요청사항)
-    setActiveTab(saved || "dash-synergy");
-  }
+    /* ✅ 접속 시 항상 '시너지표'가 기본 페이지 */
+    ["yxl_active_tab", "yxl_active_dash", "activeDash", "yxl_last_tab"].forEach((k) => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+    // URL 해시(#...)로 특정 탭이 지정돼도 무조건 시너지표로 덮어씀
+    if (location.hash) {
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { location.hash = ""; }
+    }
+
+    setActiveTab("dash-synergy");
+}
 
   /* =========================
      Render: Total (Sheet 1)
@@ -368,8 +375,9 @@ if (q) {
     tbody.innerHTML = rows
       .map((r) => {
         const rankNum = Number(r._calcRank ?? r["순위"] ?? 0);
-        const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
-        const trClass = top ? ` class="top${top}"` : "";
+        const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+        const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
+        const trClass = topRow ? ` class="top${topRow}"` : "";
         return `<tr${trClass}>${headers
           .map((h) => {
             const keyNorm = normalize(h);
@@ -530,6 +538,9 @@ if (q) {
     const nameKeyForOrder = "스트리머";
     let displayHeaders = SEASON_KEEP;
 
+    // 헤더 가운데 정렬(요청: 직급전, 1~4회차, 합산기여도)
+    const SEASON_CENTER_HEADERS = new Set(["직급전","1회차","2회차","3회차","4회차","합산기여도"]);
+
     // filter: streamer
     if (q) {
       rows = rows.filter((r) => normalize(r["스트리머"]).includes(q));
@@ -548,7 +559,8 @@ if (q) {
           .map((h) => {
             const isActive = state.seasonSort.key === h;
             const ind = isActive ? (state.seasonSort.dir === "asc" ? " ▲" : " ▼") : "";
-            return `<th data-key="${h}">${h}${ind}</th>`;
+            const cls = SEASON_CENTER_HEADERS.has(h) ? ' class="th-center"' : '';
+            return `<th data-key="${h}"${cls}>${h}${ind}</th>`;
           })
           .join("")}
       </tr>
@@ -557,8 +569,9 @@ if (q) {
     tbody.innerHTML = rows
       .map((r) => {
         const rankNum = Number(r._calcRank ?? (rankKey ? r[rankKey] : 0) ?? 0);
-        const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
-        const trClass = top ? ` class="top${top}"` : "";
+        const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+        const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
+        const trClass = topRow ? ` class="top${topRow}"` : "";
 
         return `<tr${trClass}>${displayHeaders
           .map((h) => {
@@ -682,8 +695,9 @@ if (q) {
         const balloonsNum = Number(r["월별 누적별풍선"] ?? 0);
         const pct = maxBalloon ? (balloonsNum / maxBalloon) * 100 : 0;
         const rankNum = Number(rank ?? 0);
-        const top = rankNum === 1 ? 1 : (rankNum === 2 ? 2 : (rankNum === 3 ? 3 : 0));
-        const trClass = top ? ` class="top${top}"` : "";
+        const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+        const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
+        const trClass = topRow ? ` class="top${topRow}"` : "";
         const rankHtml = top
           ? `<span class="rank-badge rank-${top}"><span class="medal">${top===1?"🥇":top===2?"🥈":"🥉"}</span><span class="rank-num">${rankNum}</span></span>`
           : `${rank ?? ""}`;
@@ -892,6 +906,35 @@ if (q) {
 
     // ✅ 드롭다운 UI 통일(커스텀 셀렉트)
     setupCustomSelect("bgmSelect");
+    /* =========================
+       🌗 Theme Toggle (Light/Dark)
+    ========================= */
+    const themeBtn = document.getElementById("themeToggle");
+    const THEME_KEY = "yxl_theme";
+    function applyTheme(mode){
+      const isLight = mode === "light";
+      document.body.classList.toggle("theme-light", isLight);
+      document.documentElement.classList.toggle("theme-light", isLight);
+      if (themeBtn){
+        const icon = themeBtn.querySelector(".theme-icon");
+        if (icon) icon.textContent = isLight ? "☀️" : "🌙";
+        themeBtn.setAttribute("aria-label", isLight ? "어둡게 전환" : "밝게 전환");
+        themeBtn.setAttribute("title", isLight ? "어둡게" : "밝게");
+      }
+    }
+    // 초기 적용
+    // 서버 접속 시 기본은 항상 라이트모드
+    localStorage.setItem(THEME_KEY, "light");
+    applyTheme("light");
+    // 클릭 토글
+    if (themeBtn){
+      themeBtn.addEventListener("click", () => {
+        const next = document.body.classList.contains("theme-light") ? "dark" : "light";
+        localStorage.setItem(THEME_KEY, next);
+        applyTheme(next);
+      });
+    }
+
 
     // ✅ gauges
     const seek = document.getElementById("bgmSeek");
@@ -945,7 +988,9 @@ if (q) {
     function setPlayUI(on) {
       if (!btnPlay) return;
       btnPlay.setAttribute("aria-pressed", on ? "true" : "false");
-      btnPlay.textContent = on ? "⏸︎ Pause" : "▶︎ Play";
+      btnPlay.textContent = on ? "⏸︎" : "▶︎";
+      btnPlay.setAttribute("aria-label", on ? "일시정지" : "재생");
+      btnPlay.setAttribute("title", on ? "일시정지" : "재생");
     }
 
     function getActiveAudio() {
@@ -1059,6 +1104,22 @@ if (q) {
     // 선택/표시 초기화
     setSelectedKey(getSelectedKey());
 
+    // ✅ BGM 선택 변경 시 저장 + (재생 중이면) 즉시 트랙 전환
+    if (sel && !sel.dataset.bound){
+      sel.addEventListener("change", async () => {
+        const k = sel.value;
+        setSelectedKey(k);
+        const isOn = localStorage.getItem(KEY_ON) === "1";
+        const entered = gate ? gate.classList.contains("is-hidden") : true;
+        if (isOn && entered){
+          await playSelected({ reset: true });
+          setPlayUI(true);
+        }
+      });
+      sel.dataset.bound = "1";
+    }
+
+
     // 볼륨 초기화(전체 트랙 동일)
     applyVolume(getSavedVolume());
 
@@ -1107,9 +1168,9 @@ if (q) {
     });
 
     sel?.addEventListener("change", async () => {
-      if (gateVisible()) return;
       setSelectedKey(sel.value);
-      const on = localStorage.getItem(KEY_ON) === "1";
+      if (gateVisible()) return; // 게이트 중엔 저장/표시만, 재생은 X
+const on = localStorage.getItem(KEY_ON) === "1";
       if (on) await playSelected({ reset: true });
       else syncGaugesToAudio();
     });
@@ -1164,16 +1225,6 @@ if (q) {
     if (!line) return;
 
     const HOF = [
-      { gen: "1대부장",  name: "류시아", cnt: "4,698,914개" },
-      { gen: "2대부장",  name: "류시아", cnt: "3,070,017개" },
-      { gen: "3대부장",  name: "류시아", cnt: "3,687,480개" },
-      { gen: "4대부장",  name: "유누",   cnt: "2,750,614개" },
-      { gen: "5대부장",  name: "유누",   cnt: "2,800,254개" },
-      { gen: "6대부장",  name: "유누",   cnt: "2,358,342개" },
-      { gen: "7대부장",  name: "루루",   cnt: "2,898,789개" },
-      { gen: "8대부장",  name: "은우",   cnt: "3,102,272개" },
-      { gen: "9대부장",  name: "은우",   cnt: "3,611,788개" },
-      { gen: "10대부장", name: "지유",   cnt: "4,001,954개" },
       { gen: "회장님", name: "지유의냥강조" },
       { gen: "부회장님", name: "까스댄스댄스" },
       { gen: "3등", name: "바구." },
@@ -1194,6 +1245,16 @@ if (q) {
       { gen: "18등", name: "lead-off" },
       { gen: "19등", name: "JS2" },
       { gen: "20등", name: "낭로우로우로" },
+      { gen: "1대부장", name: "류시아", cnt: "4,698,914개" },
+      { gen: "2대부장", name: "류시아", cnt: "3,070,017개" },
+      { gen: "3대부장", name: "류시아", cnt: "3,687,480개" },
+      { gen: "4대부장", name: "유누", cnt: "2,750,614개" },
+      { gen: "5대부장", name: "유누", cnt: "2,800,254개" },
+      { gen: "6대부장", name: "유누", cnt: "2,358,342개" },
+      { gen: "7대부장", name: "루루", cnt: "2,898,789개" },
+      { gen: "8대부장", name: "은우", cnt: "3,102,272개" },
+      { gen: "9대부장", name: "은우", cnt: "3,611,788개" },
+      { gen: "10대부장", name: "지유", cnt: "4,001,954개" }
     ];
 
     // 모션 최소화 환경에서는 1대만 고정 표시
@@ -1220,13 +1281,24 @@ if (q) {
     let timer = null;
 
     function setLine(item) {
-      const cntHtml = item.cnt ? `<span class="hofCnt">(${item.cnt})</span>` : "";
-      line.innerHTML = `
-        <span class="hofGen">${item.gen}</span>
-        <span class="hofName">${item.name}</span>
-        ${cntHtml}
-      `;
-    }
+  const cntHtml = item.cnt ? `<span class="hofCnt">(${item.cnt})</span>` : "";
+  line.innerHTML = `
+    <span class="hofGen">${item.gen}</span>
+    <span class="hofName">${item.name}</span>
+    ${cntHtml}
+  `;
+
+  // ✅ 특별 랭크(회장/부회장/Top5) 강조 클래스
+  const isPresident = item.gen === "회장님";
+  const isVice = item.gen === "부회장님";
+  const isTop5 = item.gen === "3등" || item.gen === "4등" || item.gen === "5등";
+  const isSpecial = isPresident || isVice || isTop5;
+
+  line.classList.toggle("is-president", isPresident);
+  line.classList.toggle("is-vice", isVice);
+  line.classList.toggle("is-top5", isTop5);
+  line.classList.toggle("is-special", isSpecial);
+}
 
     function resetToBlank() {
       line.classList.remove("is-anim");
@@ -1293,8 +1365,10 @@ if (q) {
       const diff = Math.floor((today.getTime() - start.getTime()) / 86400000);
       const dplus = Math.max(0, diff + 1);
 
-      el.textContent = `YXL · ${START_DISPLAY} ~ ing · D+${dplus}`;
-    }
+      const txt = `YXL · ${START_DISPLAY} ~ ing · D+${dplus}`;
+      el.textContent = txt;
+      el.dataset.text = txt;
+}
 
     calcDays();
     // 자정 넘김 대비(가볍게 10분마다 갱신)
@@ -1743,6 +1817,16 @@ function renderNextBar(){
   initTabs();
   initSearchInputs();
   initIntegratedToggle();
+  // ✅ 로고(헤더) 클릭 시 새로고침
+  const logoRefresh = document.getElementById("logoRefresh");
+  logoRefresh?.addEventListener("click", (e) => {
+    e.preventDefault();
+    // 캐시 문제 있으면 아래 2줄로 바꿔도 됨:
+    // const url = location.pathname + location.search;
+    // location.replace(url);
+    location.reload();
+  });
+
   loadAll();
   startAutoRefresh();
 });

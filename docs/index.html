@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YXL.info</title>
-  <link rel="stylesheet" href="styles.css?v=36">
+  <link rel="stylesheet" href="styles.css?v=33">
 </head>
 <body>
 
@@ -122,10 +122,10 @@
           <h2>🗓️ YXL 일정</h2>
         </div>
 
-        <div class="card scheduleCard" aria-label="YXL 월간 일정">
+        <div class="card scheduleCard" aria-label="YXL 주간 일정">
           <div class="scheduleHead">
             <div class="schRangeWrap">
-              <span class="schRangeLabel">월간</span>
+              <span class="schRangeLabel">주간</span>
               <div class="schRange" id="schRange">—</div>
               <div class="schLegend" aria-label="블록 색상 안내">
                 <span class="schLegendItem" title="엑셀">
@@ -149,13 +149,12 @@
             </div>
 
             <div class="schControls">
-              <button class="schIconBtn" id="schPrev" type="button" aria-label="이전 달">‹</button>
-              <button class="schIconBtn" id="schNext" type="button" aria-label="다음 달">›</button>
-              <button class="schBtn schBtn--today" id="schToday" type="button">이번달</button>
+              <button class="schIconBtn" id="schPrev" type="button" aria-label="이전 주">‹</button>
+              <button class="schIconBtn" id="schNext" type="button" aria-label="다음 주">›</button>
+              <button class="schBtn schBtn--today" id="schToday" type="button">이번주</button>
             </div>
           </div>
           <div class="schHighlight" id="schHighlight" aria-label="다음 일정"></div>
-          <div class="schDowRow" id="schDowRow" aria-label="요일"></div>
           <div class="schGrid" id="schGrid"></div>
           <div class="schDetail" id="schDetail"></div>
         </div>
@@ -179,7 +178,8 @@
           <div class="card">
             <div class="card-head">
               <div>
-                <h3 class="titleRow" style="margin:0 0 6px;">누적 기여도표 <span class="cmTag">현재 멤버</span></h3>
+                <h3 style="margin:0 0 6px;">누적 기여도표</h3>
+                <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
               </div>
               <div class="toolbar">
                 <div class="input-wrap">
@@ -194,18 +194,14 @@
                   <tr>
                     <th>순위</th>
                     <th>스트리머</th>
-                    <th class="th-center">누적기여도</th>
-                    <th class="th-center">변동</th>
-                    <th class="th-center">근속일수</th>
-                  </tr>
+                    <th style="text-align:right;">누적기여도</th>
+</tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
 
-            
-            <div class="card-credit">제공자 : 지케이님</div>
-
+            <div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
           </div>
         </div>
 
@@ -242,7 +238,7 @@
               </table>
             </div>
 
-            <div class="hint">* 플레이어/비플레이어 선택 + 헤더 클릭 정렬(▲/▼). </div>
+            <div class="hint">* 플레이어/비플레이어 선택 + 헤더 클릭 정렬(▲/▼). 1~3등은 특별 표시가 적용됩니다.</div>
           </div>
         </div>
 
@@ -277,7 +273,7 @@
               </table>
             </div>
 
-            <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다. </div>
+            <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다. 1~3등은 특별 표시가 적용됩니다.</div>
           </div>
         </div>
 
@@ -320,20 +316,6 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-  <!-- ✅ 월간 일정 상세 모달 -->
-  <div id="schModal" class="schModal" hidden aria-hidden="true">
-    <div class="schModal__backdrop" data-close="1" aria-hidden="true"></div>
-    <div class="schModal__panel" role="dialog" aria-modal="true" aria-labelledby="schModalTitle">
-      <div class="schModal__head">
-        <div id="schModalTitle" class="schModal__title">—</div>
-        <button id="schModalClose" class="schModal__close" type="button" aria-label="닫기">✕</button>
-      </div>
-      <div id="schModalBody" class="schModal__body"></div>
-    </div>
-  </div>
-
-
-  <script src="app.js?v=36"></script>
+  <script src="app.js?v=33"></script>
 </body>
 </html>

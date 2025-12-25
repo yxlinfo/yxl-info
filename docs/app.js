@@ -9,6 +9,9 @@ function normalizeHeader(s){
     .toLowerCase();
 }
 
+function normalizeHeaderSafe(s){ try { return normalizeHeader(s);} catch(_){ return (s??'').toString().trim().toLowerCase(); } }
+
+
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Config
@@ -368,24 +371,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ 파일 경로가 바뀌어도 자동으로 찾도록(./, ./data/, ./assets/)
   function buildCandidateUrls(fileOrUrl) {
-    // 이미 절대 URL이면 그대로 시도
+    // absolute URL -> as-is
     try {
       const u = new URL(fileOrUrl);
       return [u.toString()];
     } catch (_) {}
 
-    const base = new URL("./", location.href); // 현재 페이지의 디렉터리
+    const base = new URL("./", location.href); // current directory
     const file = String(fileOrUrl || "").replace(/^\.\//, "");
 
     const uniq = new Set();
     const push = (p) => { try { uniq.add(new URL(p, base).toString()); } catch (_) {} };
 
+    // 1) Relative candidates (same published folder)
     push(file);
-    // 흔한 배치 위치들
     if (!file.startsWith("data/"))   push("data/" + file);
     if (!file.startsWith("assets/")) push("assets/" + file);
-    // GitHub Pages에서 docs/ 경로가 꼬일 때 대비(한 단계 위)
-    push("../" + file);
+
+    // 2) GitHub Pages project-site raw fallback (in case xlsx is committed but not placed in published folder)
+    //    Example: https://<owner>.github.io/<repo>/  -> raw.githubusercontent.com/<owner>/<repo>/<branch>/...
+    try {
+      const host = location.hostname || "";
+      const pathSeg = (location.pathname || "").split("/").filter(Boolean);
+      const isGhPages = host.endsWith(".github.io");
+      const owner = isGhPages ? host.split(".")[0] : "";
+      const repo = isGhPages ? (pathSeg[0] || "") : "";
+      if (owner && repo) {
+        const branches = ["main", "master"];
+        for (const br of branches) {
+          const rawBase = `https://raw.githubusercontent.com/${owner}/${repo}/${br}/`;
+          // file at repo root / docs / data / assets
+          uniq.add(rawBase + file);
+          uniq.add(rawBase + "docs/" + file);
+          uniq.add(rawBase + "data/" + file);
+          uniq.add(rawBase + "assets/" + file);
+        }
+      }
+    } catch (_) {}
 
     return Array.from(uniq);
   }
@@ -426,55 +448,51 @@ document.addEventListener("DOMContentLoaded", () => {
     return { headers, rows };
   }
 
-  function setUpdatedAt(dt) {
-    const el = $("#updatedAt");
+  // Helper: pick value from row by trying multiple header names (supports small header variations)
+  function pickAny(row, keys) {
+    for (const k of keys) {
+      if (row && Object.prototype.hasOwnProperty.call(row, k)) return row[k];
+      // try normalized matching (e.g., "월별 누적별풍선" vs "월별누적별풍선")
+      const nk = normalizeHeaderSafe(k);
+      if (!nk) continue;
+      if (row) {
+        for (const rk of Object.keys(row)) {
+          if (normalizeHeaderSafe(rk) === nk) return row[rk];
+        }
+      }
+    }
+    return "";
+  }
+
+
+  function setUpdatedAt(dt, kind = "main") {
+    const el = document.getElementById("dataUpdatedAt");
     if (!el) return;
-    if (!dt) {
-      el.textContent = new Date().toLocaleString("ko-KR");
-      return;
-    }
-    const d = dt instanceof Date ? dt : new Date(dt);
-    el.textContent = d.toLocaleString("ko-KR");
+
+    const fmt = (d) => {
+      try {
+        if (!d) return "--";
+        const dd = (d instanceof Date) ? d : new Date(d);
+        if (isNaN(dd.getTime())) return "--";
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${dd.getFullYear()}.${pad(dd.getMonth()+1)}.${pad(dd.getDate())} ${pad(dd.getHours())}:${pad(dd.getMinutes())}`;
+      } catch (_) { return "--"; }
+    };
+
+    // 표시: 날짜 + (로드된 파일 해시/출처)
+    let extra = "";
+    try {
+      if (kind === "main" && state.main.fileInfo) {
+        const h = state.main.fileInfo.hash8 ? `#${state.main.fileInfo.hash8}` : "";
+        extra = h ? `  ${h}` : "";
+      }
+      if (kind === "synergy" && state.synergy.fileInfo) {
+        extra = state.synergy.fileInfo.url ? "  (시너지 로드됨)" : "";
+      }
+    } catch (_) {}
+
+    el.textContent = fmt(dt) + extra;
   }
-
-  /* =========================
-     Tabs
-  ========================= */
-  function setActiveTab(targetId) {
-    const tabs = $$(".dash-tab");
-    const panels = $$(".dash-panel");
-
-    tabs.forEach((t) => {
-      const isOn = t.dataset.target === targetId;
-      t.classList.toggle("is-active", isOn);
-      t.setAttribute("aria-selected", isOn ? "true" : "false");
-    });
-    panels.forEach((p) => {
-      const isOn = p.id === targetId;
-      p.hidden = !isOn;
-      p.classList.toggle("is-active", isOn);
-    });
-
-    localStorage.setItem("yxl_active_tab", targetId);
-  }
-
-  function initTabs() {
-    const tabs = $$(".dash-tab");
-    tabs.forEach((t) => {
-      t.addEventListener("click", () => setActiveTab(t.dataset.target));
-    });
-
-    /* ✅ 접속 시 항상 '시너지표'가 기본 페이지 */
-    ["yxl_active_tab", "yxl_active_dash", "activeDash", "yxl_last_tab"].forEach((k) => {
-      try { localStorage.removeItem(k); } catch (e) {}
-    });
-    // URL 해시(#...)로 특정 탭이 지정돼도 무조건 시너지표로 덮어씀
-    if (location.hash) {
-      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { location.hash = ""; }
-    }
-
-    setActiveTab("dash-synergy");
-}
 
   /* =========================
      Render: Total (Sheet 1)
@@ -1058,13 +1076,16 @@ if (q) {
 
 
   async function loadSynergyExcel() {
-    const { ab } = await fetchArrayBufferAny(buildCandidateUrls(FILE_SYNERGY));
+    const { ab, url } = await fetchArrayBufferAny(buildCandidateUrls(FILE_SYNERGY));
+
+    // 어떤 시너지 파일을 불러왔는지 표시용
+    state.synergy.fileInfo = { url: url || "", hash8: "" };
     const wb = XLSX.read(ab, { type: "array" });
     const sn = wb.SheetNames[0]; // 쿼리2
     const t = sheetToTable(wb, sn);
 
     // updatedAt: take first non-empty '새로고침시간'
-    const upd = t.rows.find((r) => r["새로고침시간"])?.["새로고침시간"];
+    const upd = pickAny(t.rows.find((r) => pickAny(r, ["새로고침시간","업데이트시간","갱신시간"])), ["새로고침시간","업데이트시간","갱신시간"]);
     // XLSX may parse dates as numbers; use XLSX.SSF.parse_date_code
     let dt = null;
     if (upd) {
@@ -1080,13 +1101,13 @@ if (q) {
     state.synergy.rows = computeSynergyDelta(
       t.rows.map((r) => ({
         "순위": r["순위"],
-        "비제이명": r["비제이명"],
-        "월별 누적별풍선": r["월별 누적별풍선"],
-        "새로고침시간": r["새로고침시간"],
+        "비제이명": pickAny(r, ["비제이명","스트리머","BJ명","비제이","이름","멤버"]),
+        "월별 누적별풍선": pickAny(r, ["월별 누적별풍선","누적별풍선","월누적별풍선","별풍선","월별누적별풍선"]),
+        "새로고침시간": pickAny(r, ["새로고침시간","업데이트시간","갱신시간"]),
       }))
     );
 
-    setUpdatedAt(state.synergy.updatedAt);
+    setUpdatedAt(state.synergy.updatedAt, "synergy");
   }
 
   async function loadAll() {

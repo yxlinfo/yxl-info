@@ -1146,6 +1146,46 @@ select.select option{
 }
 #integratedTable .rank-badge .medal,
 #seasonTable .rank-badge .medal{ font-size:13px; }
+/* Total(누적 기여도표): apply same Top 1~3 effects */
+#totalTable tr.top1 td{ background: rgba(255,215,0,.04); }
+#totalTable tr.top2 td{ background: rgba(192,192,192,.035); }
+#totalTable tr.top3 td{ background: rgba(205,127,50,.035); }
+
+#totalTable tr.top1 .soop-name,
+#totalTable tr.top2 .soop-name,
+#totalTable tr.top3 .soop-name{
+  font-weight: 900;
+}
+
+#totalTable td.rankcell{ white-space:nowrap; text-align:left; }
+#totalTable .rank-badge{ padding:4px 8px; font-size:12px; }
+#totalTable .rank-badge .medal{ font-size:13px; }
+
+/* 누적기여도: 현재 멤버(파란색) */
+#totalTable .soop-name.is-current{
+  color: rgba(96,165,250,.95);
+  font-weight: 900;
+}
+
+/* 누적기여도: 가운데 정렬용 */
+#totalTable th.center,
+#totalTable td.center{ text-align:center !important; }
+
+/* 누적기여도: 툴바(검색 + 크레딧) */
+.toolbar.total-toolbar{
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.total-credit{
+  font-size: 12px;
+  opacity: .85;
+  white-space: nowrap;
+}
+.legend-current{
+  color: rgba(96,165,250,.95);
+  font-weight: 900;
+}
 
 
 /* Sortable */

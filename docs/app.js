@@ -44,7 +44,15 @@ document.addEventListener("DOMContentLoaded", () => {
       .trim()
       .toLowerCase();
 
-  /* =========================
+  
+// 누적기여도: '현재 멤버' 표시(파란색)
+const CURRENT_MEMBERS = new Set([
+  "리윤","후잉","하랑짱","쩔밍","김유정","서니","율무","소다","강소지","나래","유나연"
+].map(normalize));
+
+const isCurrentMember = (name) => CURRENT_MEMBERS.has(normalize(name));
+
+/* =========================
      Custom Select (드롭다운 UI 통일)
   ========================= */
   const _cselect = new Map();
@@ -286,33 +294,48 @@ document.addEventListener("DOMContentLoaded", () => {
      Render: Total (Sheet 1)
   ========================= */
   function renderTotal() {
-    const table = $("#totalTable");
-    if (!table) return;
-    const tbody = table.querySelector("tbody");
-    const q = normalize($("#totalSearch")?.value);
+  const table = $("#totalTable");
+  if (!table) return;
+  const tbody = table.querySelector("tbody");
+  const q = normalize($("#totalSearch")?.value);
 
-    let rows = [...state.main.total];
-    if (q) rows = rows.filter((r) => normalize(String(r["스트리머"] ?? "")).includes(q));
+  let rows = [...state.main.total];
+  if (q) rows = rows.filter((r) => normalize(String(r["스트리머"] ?? "")).includes(q));
 
-    tbody.innerHTML = rows
-      .map((r) => {
-        const rank = r["순위"];
-        const name = r["스트리머"];
-        const total = r["누적기여도"];
-        const delta = r["변동사항"];
-        const tenure = r["근속일수"];
-        return `
-          <tr>
-            <td>${rank ?? ""}</td>
-            <td>${name ?? ""}</td>
-            <td class="num">${numFmt(total)}</td>
-            <td class="num">${delta ?? ""}</td>
-            <td>${tenure ?? ""}</td>
-          </tr>
-        `;
-      })
-      .join("");
-  }
+  tbody.innerHTML = rows
+    .map((r, idx) => {
+      const rankRaw = (r["순위"] ?? (idx + 1));
+      const rankNum = Number(toNumber(rankRaw) || rankRaw || 0);
+      const name = r["스트리머"];
+      const total = r["누적기여도"];
+      const delta = r["변동사항"];
+      const tenure = r["근속일수"];
+
+      const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+      const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
+      const trClass = topRow ? ` class="top${topRow}"` : "";
+
+      const rankHtml = top
+        ? `<span class="rank-badge rank-${top}"><span class="medal">${top===1?"🥇":top===2?"🥈":"🥉"}</span><span class="rank-num">${rankNum}</span></span>`
+        : `${rankRaw ?? ""}`;
+
+      const cur = isCurrentMember(name) ? " is-current" : "";
+
+      return `
+        <tr${trClass}>
+          <td class="rankcell">${rankHtml}</td>
+          <td>
+            <span class="soop-name${cur}" data-streamer="${String(name ?? "")}">${name ?? ""}</span>
+          </td>
+          <td class="center">${numFmt(total)}</td>
+          <td class="center">${delta ?? ""}</td>
+          <td class="center">${tenure ?? ""}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
 
 
   /* =========================

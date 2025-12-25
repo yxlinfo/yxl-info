@@ -1689,6 +1689,60 @@ const on = localStorage.getItem(KEY_ON) === "1";
     const btnNext = document.getElementById("schNext");
     const btnToday = document.getElementById("schToday");
 
+    // ✅ 모달(일정 2개 초과 시 확대 상세 보기)
+    const schModal = document.getElementById("schModal");
+    const schModalTitle = document.getElementById("schModalTitle");
+    const schModalBody = document.getElementById("schModalBody");
+    const schModalClose = document.getElementById("schModalClose");
+
+    const closeSchModal = () => {
+      if (!schModal) return;
+      schModal.hidden = true;
+      schModal.setAttribute("aria-hidden", "true");
+      if (schModalTitle) schModalTitle.textContent = "—";
+      if (schModalBody) schModalBody.innerHTML = "";
+    };
+
+    const openSchModal = (ymd) => {
+      if (!schModal || !schModalTitle || !schModalBody) return;
+      const ev = eventsFor(ymd);
+      const d = new Date(`${ymd}T00:00:00+09:00`);
+      const title = `${ymd.replaceAll("-", ".")} (${DOW[d.getDay()]}) · ${ev.length}개`;
+
+      schModalTitle.textContent = title;
+      schModalBody.innerHTML = ev
+        .map((e) => {
+          const kind = eventKind(e);
+          const t = getTypeText(e);
+          const showTag = kind === "other" && !!t;
+          return `
+            <div class="schDetailItem schBlock ${blockClass(kind)}">
+              <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
+              <span class="schBlockTitle" title="${escapeHtml(e.title || "")}">${escapeHtml(e.title || "")}</span>
+              ${showTag ? `<span class="schBlockTag">${escapeHtml(t)}</span>` : ""}
+            </div>
+          `;
+        })
+        .join("");
+
+      // 아래 상세 영역은 모달로 대체(깔끔하게)
+      detailEl.classList.remove("is-show");
+      detailEl.innerHTML = "";
+
+      schModal.hidden = false;
+      schModal.setAttribute("aria-hidden", "false");
+    };
+
+    // 모달 닫기 이벤트
+    schModalClose?.addEventListener("click", closeSchModal);
+    schModal?.addEventListener("click", (e) => {
+      const t = e.target;
+      if (t && t.getAttribute && t.getAttribute("data-close") === "1") closeSchModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeSchModal();
+    });
+
     // ✅ 달력형(월간) : 일 ~ 토
     const DOW = ["일", "월", "화", "수", "목", "금", "토"];
     const today = kstDate00();
@@ -1949,10 +2003,26 @@ const on = localStorage.getItem(KEY_ON) === "1";
           }
         `;
 
+        // '+N개 더' 클릭 시 모달로 전체 일정 보기
+        const moreEl = card.querySelector('.schPvMore');
+        if (moreEl && evCount > 2) {
+          moreEl.style.cursor = 'pointer';
+          moreEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeYMD = ymd;
+            renderMonth();
+            openSchModal(ymd);
+          });
+        }
+
         col.addEventListener("click", () => {
           activeYMD = ymd;
           renderMonth();
-          renderDetail(activeYMD);
+          if (evCount > 2) {
+            openSchModal(ymd);
+          } else {
+            renderDetail(activeYMD);
+          }
         });
 
         col.appendChild(card);

@@ -147,7 +147,7 @@ body::after{
 
 /* Header */
 .header{
-  position:sticky; top:0; z-index:2000;
+  position:sticky; top:0; z-index:10;
   background: rgba(8, 16, 30, .62);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255,255,255,.14);
@@ -621,29 +621,6 @@ body::after{
   gap:10px;
 }
 
-/* ✅ 월간 달력 요일 헤더(일~토) */
-.schDowRow{
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 10px;
-}
-.schDowCell{
-  text-align: center;
-  font-weight: 1000;
-  font-size: 12px;
-  opacity: .9;
-  padding: 8px 6px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(0,0,0,.14);
-  user-select: none;
-}
-.schDowCell.is-weekend{
-  border-color: rgba(255,255,255,.20);
-  background: rgba(255,255,255,.06);
-}
-
 /* ✅ 요일/월일을 블록 위로(가시성 개선) */
 .schCol{
   display:flex;
@@ -1001,8 +978,6 @@ select.select option{
   display:none;
 }
 .cselect.is-open .cselect-menu{ display:block; }
-.cselect.is-open{ z-index: 100000; }
-.cselect.is-open .cselect-menu{ z-index: 100001; }
 .cselect-option{
   width:100%;
   display:flex;
@@ -1063,7 +1038,7 @@ select.select option{
 .table{
   width:100%;
   border-collapse:collapse;
-  min-width:760px;
+  min-width:560px;
 }
 .table th, .table td{
   padding:8px 10px;
@@ -2715,3 +2690,90 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
   100%{ box-shadow: 0 0 0 0 rgba(125,211,252,0); }
 }
 
+/* =========================
+   Clean TODAY marker (remove label/dots)
+   - 요청: month 일정에서 TODAY 문구 + 파란점 제거
+========================= */
+.schDay.is-today::before,
+.schDay.is-today::after,
+.schCol.is-today .schHead::before,
+.schCol.is-today .schHead::after{
+  content: none !important;
+  display: none !important;
+}
+
+/* =========================
+   Schedule Modal (2개 초과 시 확대 상세)
+========================= */
+.schModal[hidden]{ display:none; }
+.schModal{
+  position:fixed;
+  inset:0;
+  z-index: 99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.schModal__backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+}
+.schModal__panel{
+  position:relative;
+  width: min(620px, 92vw);
+  max-height: 80vh;
+  overflow:hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.32);
+  box-shadow: 0 22px 60px rgba(0,0,0,.45);
+}
+.schModal__head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+.schModal__title{
+  font-size: 13px;
+  font-weight: 900;
+  opacity: .92;
+}
+.schModal__close{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.22);
+  color: var(--text);
+  cursor:pointer;
+  font-weight: 900;
+}
+.schModal__close:hover{ filter: brightness(1.08); }
+.schModal__body{
+  padding: 12px 14px;
+  overflow:auto;
+  max-height: calc(80vh - 58px);
+}
+
+html.theme-light .schModal__panel{
+  background: rgba(255,255,255,.96);
+  border-color: rgba(0,0,0,.26);
+  box-shadow: 0 22px 60px rgba(0,0,0,.18);
+}
+html.theme-light .schModal__head{ border-bottom-color: rgba(0,0,0,.12); }
+html.theme-light .schModal__close{
+  background: rgba(255,255,255,.95);
+  border-color: rgba(0,0,0,.22);
+}
+
+/* =========================
+   Light mode: dashboard border darker (more visible)
+========================= */
+html.theme-light :is(.card, .bgm-dash){
+  border-color: rgba(0,0,0,.38) !important;
+}

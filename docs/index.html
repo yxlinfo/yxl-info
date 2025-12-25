@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YXL.info</title>
-  <link rel="stylesheet" href="styles.css?v=33">
+  <link rel="stylesheet" href="styles.css?v=34">
 </head>
 <body>
 
@@ -180,14 +180,12 @@
             <div class="card-head">
               <div>
                 <h3 style="margin:0 0 6px;">누적 기여도표</h3>
-                <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
+                <p class="muted" style="margin:0;">제공자 : 지케이님</p>
               </div>
-              <div class="toolbar total-toolbar">
+              <div class="toolbar">
                 <div class="input-wrap">
                   <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
                 </div>
-                <div class="total-credit">자료 제공 : 지케이님</div>
-                <div class="legend-current">현재 멤버</div>
               </div>
             </div>
 
@@ -197,16 +195,16 @@
                   <tr>
                     <th>순위</th>
                     <th>스트리머</th>
-                    <th class="center">누적기여도</th>
-                    <th class="center">변동</th>
-                    <th class="center">근속일수</th>
-</tr>
+                    <th class="th-center">누적기여도</th>
+                    <th class="th-center">변동</th>
+                    <th class="th-center">근속일수</th>
+                  </tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
 
-            <div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
+            <div class="hint">제공자 : 지케이님</div>
           </div>
         </div>
 
@@ -243,7 +241,7 @@
               </table>
             </div>
 
-            <div class="hint">* 플레이어/비플레이어 선택 + 헤더 클릭 정렬(▲/▼). 1~3등은 특별 표시가 적용됩니다.</div>
+            <div class="hint">* 플레이어/비플레이어 선택 + 헤더 클릭 정렬(▲/▼). </div>
           </div>
         </div>
 
@@ -278,7 +276,7 @@
               </table>
             </div>
 
-            <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다. 1~3등은 특별 표시가 적용됩니다.</div>
+            <div class="hint">* 시즌/검색 조건은 브라우저에 저장됩니다. </div>
           </div>
         </div>
 
@@ -321,6 +319,20 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=33"></script>
+
+  <!-- ✅ 월간 일정 상세 모달 -->
+  <div id="schModal" class="schModal" hidden aria-hidden="true">
+    <div class="schModal__backdrop" data-close="1" aria-hidden="true"></div>
+    <div class="schModal__panel" role="dialog" aria-modal="true" aria-labelledby="schModalTitle">
+      <div class="schModal__head">
+        <div id="schModalTitle" class="schModal__title">—</div>
+        <button id="schModalClose" class="schModal__close" type="button" aria-label="닫기">✕</button>
+      </div>
+      <div id="schModalBody" class="schModal__body"></div>
+    </div>
+  </div>
+
+
+  <script src="app.js?v=34"></script>
 </body>
 </html>

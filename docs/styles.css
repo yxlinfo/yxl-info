@@ -2596,3 +2596,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
   border-color: rgba(239,68,68,.38);
   background: rgba(239,68,68,.10);
 }
+
+
+/* 시즌별 기여도표 헤더 가운데 정렬 */
+#seasonTable th.th-center{ text-align:center; }

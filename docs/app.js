@@ -538,6 +538,9 @@ if (q) {
     const nameKeyForOrder = "스트리머";
     let displayHeaders = SEASON_KEEP;
 
+    // 헤더 가운데 정렬(요청: 직급전, 1~4회차, 합산기여도)
+    const SEASON_CENTER_HEADERS = new Set(["직급전","1회차","2회차","3회차","4회차","합산기여도"]);
+
     // filter: streamer
     if (q) {
       rows = rows.filter((r) => normalize(r["스트리머"]).includes(q));
@@ -556,7 +559,8 @@ if (q) {
           .map((h) => {
             const isActive = state.seasonSort.key === h;
             const ind = isActive ? (state.seasonSort.dir === "asc" ? " ▲" : " ▼") : "";
-            return `<th data-key="${h}">${h}${ind}</th>`;
+            const cls = SEASON_CENTER_HEADERS.has(h) ? ' class="th-center"' : '';
+            return `<th data-key="${h}"${cls}>${h}${ind}</th>`;
           })
           .join("")}
       </tr>

@@ -147,7 +147,7 @@ body::after{
 
 /* Header */
 .header{
-  position:sticky; top:0; z-index:10;
+  position:sticky; top:0; z-index:2000;
   background: rgba(8, 16, 30, .62);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255,255,255,.14);
@@ -621,6 +621,29 @@ body::after{
   gap:10px;
 }
 
+/* ✅ 월간 달력 요일 헤더(일~토) */
+.schDowRow{
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+.schDowCell{
+  text-align: center;
+  font-weight: 1000;
+  font-size: 12px;
+  opacity: .9;
+  padding: 8px 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.14);
+  user-select: none;
+}
+.schDowCell.is-weekend{
+  border-color: rgba(255,255,255,.20);
+  background: rgba(255,255,255,.06);
+}
+
 /* ✅ 요일/월일을 블록 위로(가시성 개선) */
 .schCol{
   display:flex;
@@ -978,6 +1001,8 @@ select.select option{
   display:none;
 }
 .cselect.is-open .cselect-menu{ display:block; }
+.cselect.is-open{ z-index: 100000; }
+.cselect.is-open .cselect-menu{ z-index: 100001; }
 .cselect-option{
   width:100%;
   display:flex;
@@ -1038,7 +1063,7 @@ select.select option{
 .table{
   width:100%;
   border-collapse:collapse;
-  min-width:560px;
+  min-width:760px;
 }
 .table th, .table td{
   padding:8px 10px;

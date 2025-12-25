@@ -1994,13 +1994,13 @@ html.theme-light .table-wrap::-webkit-scrollbar-track, body.theme-light .table-w
   background: transparent; /* 코너 자체를 투명 처리해 '하얀 네모' 제거 */
 }
 
-/* 시즌통합랭킹: '합산기여도' 헤더 텍스트만 우측 정렬 */
+/* 시즌통합랭킹: '합산기여도' 헤더 텍스트만 가운데 정렬 */
 #dash-integrated th[data-key="합산기여도"]{
-  text-align:right !important;
+  text-align:center;
 }
 /* data-key가 없거나, 마지막 컬럼이 합산기여도인 경우를 대비한 보조 규칙(헤더만) */
 #dash-integrated thead th:last-child{
-  text-align:right !important;
+  text-align:center;
 }
 
 
@@ -2009,11 +2009,10 @@ html.theme-light .table-wrap::-webkit-scrollbar-track, body.theme-light .table-w
    - 요청: '1회차','2회차','3회차','4회차','5회차','합산기여도' 텍스트만 right
 ========================================================= */
 #seasonTable thead th[data-key="1회차"],
-#seasonTable thead th[data-key="직급전"],
 #seasonTable thead th[data-key="2회차"],
 #seasonTable thead th[data-key="3회차"],
 #seasonTable thead th[data-key="4회차"],
 #seasonTable thead th[data-key="5회차"],
 #seasonTable thead th[data-key="합산기여도"]{
-  text-align: right !important;
+  text-align: right;
 }

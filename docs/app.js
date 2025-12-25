@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .toLowerCase();
 
   /* =========================
-     Custom Select (드롭다운 UI 통일)
+     Custom Select (드롭다운 UI 통일) - Portal/FIXED (가려짐/잘림 방지)
   ========================= */
   const _cselect = new Map();
   let _cselectGlobalWired = false;
@@ -66,221 +66,166 @@ document.addEventListener("DOMContentLoaded", () => {
     const menu = wrap.querySelector(".cselect-menu");
     if (!btn || !label || !menu) return;
 
-    const close = () => {
-      wrap.classList.remove("is-open");
-      wrap.classList.remove("dropup");
-      btn.setAttribute("aria-expanded", "false");
-      // 메뉴 높이 inline 스타일 초기화
+    // portal 상태(메뉴를 body로 옮겨 fixed로 띄움)
+    const homeParent = menu.parentNode;
+    const homeNext = menu.nextSibling; // null 가능
+    let isPortaled = false;
+
+    const restoreMenuHome = () => {
+      if (!isPortaled) return;
+      try {
+        if (homeNext && homeNext.parentNode === homeParent) homeParent.insertBefore(menu, homeNext);
+        else homeParent.appendChild(menu);
+      } catch (e) {
+        // fallback
+        wrap.appendChild(menu);
+      }
+      menu.classList.remove("cselect-menu--portal");
+      menu.style.left = "";
+      menu.style.top = "";
+      menu.style.width = "";
       menu.style.maxHeight = "";
+      menu.style.visibility = "";
+      isPortaled = false;
     };
 
-    const placeMenu = () => {
-      // 열린 상태가 아니어도 방향 계산은 가능
-      wrap.classList.remove("dropup");
-      const r = wrap.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - r.bottom;
-      const spaceAbove = r.top;
+    const ensurePortal = () => {
+      if (isPortaled) return;
+      document.body.appendChild(menu);
+      menu.classList.add("cselect-menu--portal");
+      isPortaled = true;
+    };
 
-      // 아래 공간이 부족하면 위로 펼치기
-      const useUp = spaceBelow < 260 && spaceAbove > spaceBelow;
-      if (useUp) wrap.classList.add("dropup");
+    const close = () => {
+      wrap.classList.remove("is-open");
+      btn.setAttribute("aria-expanded", "false");
+      restoreMenuHome();
+    };
 
-      // 남은 공간에 맞춰 maxHeight 동적 조정(너무 작아지지 않게)
-      const avail = (useUp ? spaceAbove : spaceBelow) - 14;
-      const cap = Math.max(180, Math.min(420, Math.floor(avail)));
-      menu.style.maxHeight = cap + "px";
+    const positionPortalMenu = () => {
+      if (!wrap.classList.contains("is-open")) return;
+      ensurePortal();
+
+      const rect = btn.getBoundingClientRect();
+      const pad = 8;
+      const maxH = 320;
+
+      // 먼저 보이게(측정용) -> 위치 계산
+      menu.style.visibility = "hidden";
+      menu.style.display = "block";
+      menu.style.left = `${Math.round(rect.left)}px`;
+      menu.style.width = `${Math.round(rect.width)}px`;
+      menu.style.maxHeight = `${maxH}px`;
+
+      const naturalH = Math.min(menu.scrollHeight, maxH);
+      const belowSpace = window.innerHeight - rect.bottom - pad - 8;
+      const aboveSpace = rect.top - pad - 8;
+
+      const dropUp = belowSpace < naturalH && aboveSpace > belowSpace;
+
+      const top = dropUp
+        ? Math.max(8, Math.round(rect.top - pad - naturalH))
+        : Math.round(rect.bottom + pad);
+
+      const usableH = dropUp
+        ? Math.max(120, Math.min(maxH, aboveSpace))
+        : Math.max(120, Math.min(maxH, belowSpace));
+
+      menu.style.top = `${top}px`;
+      menu.style.maxHeight = `${Math.floor(usableH)}px`;
+      menu.style.visibility = "visible";
     };
 
     const open = () => {
-      placeMenu();
       wrap.classList.add("is-open");
       btn.setAttribute("aria-expanded", "true");
-      // 레이아웃 계산이 끝난 뒤 한 번 더(폰/리사이즈 대응)
-      requestAnimationFrame(placeMenu);
+      positionPortalMenu();
     };
 
-    const toggle = () => (wrap.classList.contains("is-open") ? close() : open());
+    const toggle = () => {
+      wrap.classList.contains("is-open") ? close() : open();
+    };
 
     const rebuild = () => {
-      const opts = Array.from(select.options);
-      const cur = select.value;
+      // 라벨 텍스트 갱신
+      const opt = select.options[select.selectedIndex];
+      label.textContent = opt ? opt.textContent : "선택";
 
-      const curOpt = opts.find((o) => o.value === cur) || opts[0];
-      label.textContent = curOpt ? curOpt.textContent : "선택";
-
+      // 메뉴 옵션 재구성
       menu.innerHTML = "";
-      opts.forEach((o) => {
-        const item = document.createElement("div");
+      Array.from(select.options).forEach((o) => {
+        const item = document.createElement("button");
+        item.type = "button";
         item.className = "cselect-option";
-        item.setAttribute("role", "option");
-        item.setAttribute("aria-selected", o.value === cur ? "true" : "false");
-        item.textContent = o.textContent;
-        item.addEventListener("click", (ev) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          if (select.value !== o.value) {
-            select.value = o.value;
-            select.dispatchEvent(new Event("change", { bubbles: true }));
-          }
-          rebuild();
+        item.dataset.value = o.value;
+        item.innerHTML = `<span class="cselect-option__txt">${escapeHtml(o.textContent ?? "")}</span>
+                          <span class="cselect-check">✓</span>`;
+        if (o.value === select.value) item.classList.add("is-active");
+        item.addEventListener("click", () => {
+          select.value = o.value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
           close();
         });
         menu.appendChild(item);
       });
+
+      // portal 열린 상태라면 위치 재계산
+      if (wrap.classList.contains("is-open")) positionPortalMenu();
     };
 
-    // 버튼 동작
     btn.addEventListener("click", (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
-      // 다른 셀렉트가 열려있으면 닫기
-      _cselect.forEach((inst, k) => {
-        if (k !== nativeId) inst.close();
-      });
       toggle();
     });
 
     // native select 값이 바뀌면 라벨/메뉴 동기화
     select.addEventListener("change", () => {
-      if (wrap.classList.contains("is-open")) close();
       rebuild();
     });
 
-    // 전역: 바깥 클릭/ESC 닫기
+    // 전역: 바깥 클릭/ESC 닫기 + 스크롤/리사이즈 시 재배치
     if (!_cselectGlobalWired) {
       _cselectGlobalWired = true;
+
       document.addEventListener("click", (ev) => {
         _cselect.forEach((inst) => {
-          if (inst.wrap && !inst.wrap.contains(ev.target)) inst.close();
+          // 메뉴가 body로 빠져있을 수 있으니 wrap + menu 둘 다 체크
+          const t = ev.target;
+          if (inst.wrap && inst.menu) {
+            if (!inst.wrap.contains(t) && !inst.menu.contains(t)) inst.close();
+          } else if (inst.wrap && !inst.wrap.contains(t)) {
+            inst.close();
+          }
         });
-      });
-      document.addEventListener("keydown", (ev) => {
-        if (ev.key === "Escape") {
-          _cselect.forEach((inst) => inst.close());
-        }
       });
 
-      // ✅ 화면 크기/스크롤 변동 시 열려있는 드롭다운이 잘리지 않게 재배치
-      window.addEventListener("resize", () => {
-        _cselect.forEach((inst) => {
-          if (inst.wrap && inst.wrap.classList.contains("is-open") && inst.placeMenu) inst.placeMenu();
-        });
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") _cselect.forEach((inst) => inst.close());
       });
+
       window.addEventListener("scroll", () => {
-        _cselect.forEach((inst) => {
-          if (inst.wrap && inst.wrap.classList.contains("is-open") && inst.placeMenu) inst.placeMenu();
-        });
+        _cselect.forEach((inst) => inst.position && inst.position());
       }, true);
+
+      window.addEventListener("resize", () => {
+        _cselect.forEach((inst) => inst.position && inst.position());
+      });
     }
 
-    const inst = { wrap, select, btn, menu, label, rebuild, open, close, placeMenu };
+    const inst = { wrap, select, btn, menu, label, rebuild, open, close, position: positionPortalMenu };
     _cselect.set(nativeId, inst);
     rebuild();
   }
 
   function rebuildCustomSelect(nativeId) {
     const inst = _cselect.get(nativeId);
-    if (inst && inst.rebuild) inst.rebuild();
+    if (!inst) return;
+    inst.rebuild();
   }
 
 
-  const toNumber = (v) => {
-    if (typeof v === "number") return v;
-    const s = (v ?? "").toString().replace(/,/g, "").trim();
-    if (!s) return NaN;
-    const n = Number(s);
-    return Number.isFinite(n) ? n : NaN;
-  };
-
-  const scoreNumber = (v) => {
-    const n = toNumber(v);
-    return Number.isFinite(n) ? n : 0;
-  };
-
-  const normalizeRoleLabel = (role) => {
-    const raw = (role ?? "").toString().trim();
-    // 흔한 오타 교정: '웨아터' -> '웨이터'
-    if (normalize(raw) === "웨아터") return "웨이터";
-    return raw;
-  };
-
-
-  // 시즌통합랭킹: 플레이어/비플레이어 구분
-  const INTEGRATED_KEEP = ["순위", "시즌", "직급", "스트리머", "합산기여도"];
-  const INTEGRATED_BAN_RANKS = new Set(["대표", "이사", "웨이터", "웨아터", "참가자", "총장대행", "신분"].map(normalize));
-  const INTEGRATED_VIEW_KEY = "yxl_integrated_view"; // 'player' | 'bplayer'
-
-  function getIntegratedView() {
-    const v = localStorage.getItem(INTEGRATED_VIEW_KEY);
-    return v === "bplayer" ? "bplayer" : "player";
-  }
-
-
-  const INTEGRATED_TEAMLEAD_BPLAYER_EXCEPT = new Set(["섭이", "차돈"].map(normalize));
-
-  function integratedIsBPlayer(row) {
-    const role = normalize(normalizeRoleLabel(row?.["직급"]));
-    const name = normalize(row?.["스트리머"]);
-    const teamLeadException = role === "팀장" && INTEGRATED_TEAMLEAD_BPLAYER_EXCEPT.has(name);
-    return INTEGRATED_BAN_RANKS.has(role) || teamLeadException;
-  }
-
-
-  function compareBy(key, dir = "asc") {
-    return (a, b) => {
-      const av = key === "순위" && a?._calcRank != null ? a._calcRank : (a?.[key] ?? "");
-      const bv = key === "순위" && b?._calcRank != null ? b._calcRank : (b?.[key] ?? "");
-      const aNum = toNumber(av);
-      const bNum = toNumber(bv);
-      let r = 0;
-
-      if (Number.isFinite(aNum) && Number.isFinite(bNum)) r = aNum - bNum;
-      else r = normalize(av).localeCompare(normalize(bv), "ko");
-
-      return dir === "asc" ? r : -r;
-    };
-  }
-
-  async function fetchArrayBuffer(url) {
-    // 캐시 회피(엑셀 갱신 반영)
-    const bust = url.includes("?") ? "&" : "?";
-    const res = await fetch(url + bust + "v=" + Date.now(), { cache: "no-store" });
-    if (!res.ok) throw new Error(`파일 불러오기 실패: ${url} (${res.status})`);
-    return await res.arrayBuffer();
-  }
-
-  function sheetToTable(wb, sheetName) {
-    const ws = wb.Sheets[sheetName];
-    if (!ws) return { headers: [], rows: [] };
-
-    const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-    if (!grid.length) return { headers: [], rows: [] };
-
-    const headers = grid[0].map((h) => (h ?? "").toString().trim());
-    const rows = grid
-      .slice(1)
-      .filter((r) => r.some((v) => (v ?? "").toString().trim() !== ""))
-      .map((r) => {
-        const obj = {};
-        headers.forEach((h, i) => (obj[h] = r[i] ?? ""));
-        return obj;
-      });
-
-    return { headers, rows };
-  }
-
-  function setUpdatedAt(dt) {
-    const el = $("#updatedAt");
-    if (!el) return;
-    if (!dt) {
-      el.textContent = new Date().toLocaleString("ko-KR");
-      return;
-    }
-    const d = dt instanceof Date ? dt : new Date(dt);
-    el.textContent = d.toLocaleString("ko-KR");
-  }
-
-  /* =========================
+/* =========================
      Tabs
   ========================= */
   function setActiveTab(targetId) {

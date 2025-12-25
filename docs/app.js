@@ -1094,6 +1094,22 @@ if (q) {
     // 선택/표시 초기화
     setSelectedKey(getSelectedKey());
 
+    // ✅ BGM 선택 변경 시 저장 + (재생 중이면) 즉시 트랙 전환
+    if (sel && !sel.dataset.bound){
+      sel.addEventListener("change", async () => {
+        const k = sel.value;
+        setSelectedKey(k);
+        const isOn = localStorage.getItem(KEY_ON) === "1";
+        const entered = gate ? gate.classList.contains("is-hidden") : true;
+        if (isOn && entered){
+          await playSelected({ reset: true });
+          setPlayUI(true);
+        }
+      });
+      sel.dataset.bound = "1";
+    }
+
+
     // 볼륨 초기화(전체 트랙 동일)
     applyVolume(getSavedVolume());
 
@@ -1199,16 +1215,6 @@ const on = localStorage.getItem(KEY_ON) === "1";
     if (!line) return;
 
     const HOF = [
-      { gen: "1대부장",  name: "류시아", cnt: "4,698,914개" },
-      { gen: "2대부장",  name: "류시아", cnt: "3,070,017개" },
-      { gen: "3대부장",  name: "류시아", cnt: "3,687,480개" },
-      { gen: "4대부장",  name: "유누",   cnt: "2,750,614개" },
-      { gen: "5대부장",  name: "유누",   cnt: "2,800,254개" },
-      { gen: "6대부장",  name: "유누",   cnt: "2,358,342개" },
-      { gen: "7대부장",  name: "루루",   cnt: "2,898,789개" },
-      { gen: "8대부장",  name: "은우",   cnt: "3,102,272개" },
-      { gen: "9대부장",  name: "은우",   cnt: "3,611,788개" },
-      { gen: "10대부장", name: "지유",   cnt: "4,001,954개" },
       { gen: "회장님", name: "지유의냥강조" },
       { gen: "부회장님", name: "까스댄스댄스" },
       { gen: "3등", name: "바구." },
@@ -1229,6 +1235,16 @@ const on = localStorage.getItem(KEY_ON) === "1";
       { gen: "18등", name: "lead-off" },
       { gen: "19등", name: "JS2" },
       { gen: "20등", name: "낭로우로우로" },
+      { gen: "1대부장", name: "류시아", cnt: "4,698,914개" },
+      { gen: "2대부장", name: "류시아", cnt: "3,070,017개" },
+      { gen: "3대부장", name: "류시아", cnt: "3,687,480개" },
+      { gen: "4대부장", name: "유누", cnt: "2,750,614개" },
+      { gen: "5대부장", name: "유누", cnt: "2,800,254개" },
+      { gen: "6대부장", name: "유누", cnt: "2,358,342개" },
+      { gen: "7대부장", name: "루루", cnt: "2,898,789개" },
+      { gen: "8대부장", name: "은우", cnt: "3,102,272개" },
+      { gen: "9대부장", name: "은우", cnt: "3,611,788개" },
+      { gen: "10대부장", name: "지유", cnt: "4,001,954개" }
     ];
 
     // 모션 최소화 환경에서는 1대만 고정 표시

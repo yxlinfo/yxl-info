@@ -11,6 +11,7 @@ html, body{ height:100%; }
 body{
   margin:0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
+  color-scheme: dark;
   color: var(--text);
 }
 
@@ -167,10 +168,10 @@ body::after{
   pointer-events:none;
 }
 .header-inner{
-  display:flex; align-items:flex-start; justify-content:space-between;
+  display:flex; align-items: stretch; justify-content:space-between;
   gap:16px; padding:14px 0;
 }
-.brand{ display:flex; gap:12px; align-items:center; }
+.brand{ display:flex; gap:12px; align-items: stretch; }
 
 /* --- YXL 시작일 D+ 표시 (로고 옆) --- */
 .yxlDday{
@@ -215,6 +216,7 @@ body::after{
     0 0 0 1px rgba(255,255,255,.06) inset,
     0 10px 22px rgba(0,0,0,.35);
   min-height: 60px;
+  height: 100%;
   overflow:hidden;
   min-width:0;
   color: inherit;
@@ -324,7 +326,7 @@ body::after{
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.20);
-  color: rgba(255,255,255,.90);
+  color: var(--text);
   text-decoration:none;
   font-weight:900;
   font-size:12px;
@@ -378,7 +380,7 @@ body::after{
   border-radius:12px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.20);
-  color: rgba(255,255,255,.85);
+  color: var(--text);
   cursor:pointer;
   font-weight:900;
   font-size:18px;
@@ -391,7 +393,7 @@ body::after{
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.20);
-  color: rgba(255,255,255,.85);
+  color: var(--text);
   cursor:pointer;
   font-weight:900;
   font-size:12px;
@@ -403,7 +405,7 @@ body::after{
   padding:0 12px;
   border-radius:12px;
 }
-.schBtn:hover{ border-color: rgba(255,255,255,.22); color: rgba(255,255,255,.95); }
+.schBtn:hover{ border-color: rgba(255,255,255,.22); color: var(--text); }
 .schRange{
   min-width: 170px;
   text-align:left;
@@ -576,12 +578,12 @@ body::after{
 .schBlock--event{
   background: rgba(245, 203, 65, .72);
   border-color: rgba(245, 203, 65, .80);
-  color: rgba(20,20,20,.92);
+  color: var(--text);
 }
 .schBlock--event .schBlockTime,
 .schBlock--event .schBlockTitle{ opacity:.98; }
 .schBlock--event .schBlockTag{
-  color: rgba(20,20,20,.92);
+  color: var(--text);
   border-color: rgba(20,20,20,.18);
   background: rgba(255,255,255,.35);
 }
@@ -730,7 +732,7 @@ body::after{
   border-radius:999px;
   border:1px solid rgba(125,211,252,.24);
   background: rgba(0,0,0,.18);
-  color: rgba(255,255,255,.92);
+  color: var(--text);
   opacity:.9;
 }
 .schDay.is-today::after{
@@ -863,9 +865,9 @@ body::after{
   cursor:pointer;
   font-weight:900;
 }
-.dash-tab:hover{ color:rgba(255,255,255,.92); border-color:rgba(255,255,255,.22); }
+.dash-tab:hover{ color: var(--text); border-color:rgba(255,255,255,.22); }
 .dash-tab.is-active{
-  color:rgba(255,255,255,.95);
+  color: var(--text);
   border-color:rgba(255,255,255,.18);
   background: linear-gradient(90deg,
     rgba(239, 68, 68, .12),
@@ -882,11 +884,11 @@ body::after{
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.20);
-  color:rgba(255,255,255,.85);
+  color: var(--text);
   cursor:pointer;
   font-weight:900;
 }
-.btn:hover{ border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.95); }
+.btn:hover{ border-color:rgba(255,255,255,.22); color: var(--text); }
 .btn.is-on{ border-color: var(--accent); background: rgba(125,211,252,.10); }
 .btn.ghost{ background: transparent; }
 
@@ -907,7 +909,7 @@ body::after{
   border-radius:12px;
   border:1px solid rgba(255,255,255,.14);
   background: rgba(0,0,0,.20);
-  color: rgba(255,255,255,.92);
+  color: var(--text);
   outline: none;
 }
 
@@ -928,10 +930,10 @@ select.select:focus{
 }
 select.select option{
   background: #0b0f14;
-  color: rgba(255,255,255,.92);
+  color: var(--text);
 }
 .select{ width:auto; min-width:180px; }
-.input::placeholder{ color: rgba(255,255,255,.45); }
+.input::placeholder{ color: var(--muted); }
 
 /* =========================
    Custom Select (드롭다운 UI 통일)
@@ -948,7 +950,7 @@ select.select option{
   border-radius:12px;
   border:1px solid rgba(255,255,255,.14);
   background: rgba(0,0,0,.20);
-  color: rgba(255,255,255,.92);
+  color: var(--text);
   cursor:pointer;
   font-weight:900;
 }
@@ -985,7 +987,7 @@ select.select option{
   padding:9px 10px;
   border-radius:12px;
   border:1px solid transparent;
-  color: rgba(255,255,255,.86);
+  color: var(--text);
   cursor:pointer;
   user-select:none;
 }
@@ -993,7 +995,7 @@ select.select option{
 .cselect-option[aria-selected="true"]{
   background: rgba(125,211,252,.14);
   border-color: rgba(125,211,252,.18);
-  color: rgba(255,255,255,.95);
+  color: var(--text);
 }
 .cselect-native{
   position:absolute;
@@ -1015,16 +1017,16 @@ select.select option{
 .seg-btn{
   border:0;
   background: transparent;
-  color: rgba(255,255,255,.78);
+  color: var(--text);
   padding:10px 12px;
   font-weight:900;
   cursor:pointer;
   line-height:1;
 }
-.seg-btn:hover{ color: rgba(255,255,255,.95); background: rgba(255,255,255,.06); }
+.seg-btn:hover{ color: var(--text); background: rgba(255,255,255,.06); }
 .seg-btn.is-active{
   background: rgba(125,211,252,.14);
-  color: rgba(255,255,255,.95);
+  color: var(--text);
 }
 
 /* Table */
@@ -1045,11 +1047,11 @@ select.select option{
   white-space:nowrap;
 }
 .table th{
-  color: rgba(255,255,255,.75);
+  color: var(--text);
   font-weight:900;
   background: rgba(255,255,255,.04);
 }
-.table td{ color: rgba(255,255,255,.92); }
+.table td{ color: var(--text); }
 .table .num{ text-align:right; font-variant-numeric: tabular-nums; }
 /* Synergy: value bar inside numeric cell (fills space when '변동사항' removed) */
 .table td.barcell{
@@ -1080,7 +1082,7 @@ select.select option{
   display:block;
   text-align:right;
 }
-.hint{ margin-top:10px; color: rgba(255,255,255,.55); font-size:12px; }
+.hint{ margin-top:10px; color: var(--muted); font-size:12px; }
 
 /* Top 1~3 badge */
 .rank-badge{
@@ -1200,7 +1202,7 @@ select.select option{
   padding: 28px 18px 24px;
   cursor: pointer;
   text-align: center;
-  color: rgba(255,255,255,.95);
+  color: var(--text);
   box-shadow: 0 22px 80px rgba(0,0,0,.58), 0 0 0 1px rgba(255,255,255,.06) inset;
   overflow:hidden;
 }
@@ -1235,13 +1237,13 @@ select.select option{
   margin-top: 6px;
   font-weight: 900;
   font-size: 22px;
-  color: rgba(255,255,255,.85);
+  color: var(--text);
   text-shadow: 0 10px 30px rgba(0,0,0,.45);
 }
 .gate-hint{
   margin-top: 14px;
   font-size: 13px;
-  color: rgba(255,255,255,.70);
+  color: var(--muted);
 }
 .gate-btn:active{ transform: scale(.995); }
 
@@ -1250,7 +1252,7 @@ select.select option{
   z-index: 2;
   margin-top: 12px;
   font-size: 12px;
-  color: rgba(255,255,255,.80);
+  color: var(--text);
   text-align:center;
 }
 
@@ -1448,7 +1450,7 @@ display:flex;
   border-radius:999px;
   font-weight:1000;
   font-size:12px;
-  color: rgba(255,255,255,.92);
+  color: var(--text);
   border:1px solid rgba(255,255,255,.14);
   background: linear-gradient(90deg,
     rgba(239,68,68,.14),
@@ -1470,7 +1472,7 @@ display:flex;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.90);
+  color: var(--text);
   font-weight:1000;
   line-height:1;
 }
@@ -1488,7 +1490,7 @@ display:flex;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.14);
   background: rgba(0,0,0,.20);
-  color: rgba(255,255,255,.92);
+  color: var(--text);
   min-width: 260px;
   max-width: 360px;
 }
@@ -1505,7 +1507,7 @@ display:flex;
 
 #bgmTime{
   font-size:12px;
-  color: rgba(255,255,255,.70);
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
   min-width: 96px;
   text-align:center;
@@ -1675,7 +1677,7 @@ display:flex;
   justify-content: center;
   border: 1px solid rgba(255,255,255,.14);
   background: rgba(0,0,0,.18);
-  color: rgba(255,255,255,.92);
+  color: var(--text);
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06) inset;
   backdrop-filter: blur(10px);
@@ -1686,19 +1688,48 @@ display:flex;
 
 /* ✅ 라이트 테마(기본은 다크) */
 body.theme-light{
-  --card: rgba(0,0,0,.04);
-  --line: rgba(0,0,0,.10);
-  --text: rgba(0,0,0,.88);
-  --muted: rgba(0,0,0,.55);
+  color-scheme: light;
+  --card: rgba(255,255,255,.78);
+  --line: rgba(0,0,0,.12);
+  --text: rgba(0,0,0,.92);
+  --muted: rgba(0,0,0,.70);
   --accent: rgba(2,132,199,.22);
   background: radial-gradient(1200px 700px at 10% 10%, rgba(2,132,199,.10), transparent 55%),
               radial-gradient(900px 600px at 90% 20%, rgba(34,197,94,.08), transparent 55%),
               linear-gradient(180deg, rgba(255,255,255,1), rgba(245,247,250,1));
 }
+
+/* ✅ Light mode: flip dark glass panels & text to light */
+body.theme-light .card,
+body.theme-light .bgm-dash,
+body.theme-light .logoBox,
+body.theme-light .sectionNav__btn,
+body.theme-light .btn,
+body.theme-light .btn-ghost,
+body.theme-light .input,
+body.theme-light .select,
+body.theme-light .cselect-btn,
+body.theme-light .cselect-menu,
+body.theme-light .tabs,
+body.theme-light .tab{
+  background: var(--card) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.10), 0 0 0 1px rgba(255,255,255,.40) inset !important;
+}
+body.theme-light .btn-ghost:hover,
+body.theme-light .sectionNav__btn:hover,
+body.theme-light .tab:hover{
+  background: rgba(0,0,0,.06) !important;
+}
+body.theme-light .cselect-menu{
+  background: rgba(255,255,255,.92) !important;
+}
+
 body.theme-light .theme-toggle{
   border-color: rgba(0,0,0,.12);
   background: rgba(255,255,255,.72);
-  color: rgba(0,0,0,.86);
+  color: var(--text);
   box-shadow: 0 8px 18px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.04) inset;
 }
 
@@ -1740,7 +1771,7 @@ body.theme-light .theme-toggle{
 
 .bgm-time{
   font-size: 12px;
-  color: rgba(255,255,255,.82);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1748,7 +1779,7 @@ body.theme-light .theme-toggle{
 
 .bgm-vol-label{
   font-size: 12px;
-  color: rgba(255,255,255,.75);
+  color: var(--text);
   text-align: right;
   letter-spacing: .2px;
 }

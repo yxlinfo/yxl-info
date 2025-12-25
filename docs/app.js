@@ -270,10 +270,9 @@ document.addEventListener("DOMContentLoaded", () => {
       t.addEventListener("click", () => setActiveTab(t.dataset.target));
     });
 
-    const saved = localStorage.getItem("yxl_active_tab");
-    // 시너지표를 기본으로(요청사항)
-    setActiveTab(saved || "dash-synergy");
-  }
+    /* 시너지표를 기본으로(요청사항): 저장된 탭 무시하고 항상 시너지표로 시작 */
+    setActiveTab("dash-synergy");
+}
 
   /* =========================
      Render: Total (Sheet 1)
@@ -892,6 +891,32 @@ if (q) {
 
     // ✅ 드롭다운 UI 통일(커스텀 셀렉트)
     setupCustomSelect("bgmSelect");
+    /* =========================
+       🌗 Theme Toggle (Light/Dark)
+    ========================= */
+    const themeBtn = document.getElementById("themeToggle");
+    const THEME_KEY = "yxl_theme";
+    function applyTheme(mode){
+      const isLight = mode === "light";
+      document.body.classList.toggle("theme-light", isLight);
+      if (themeBtn){
+        const icon = themeBtn.querySelector(".theme-icon");
+        if (icon) icon.textContent = isLight ? "☀️" : "🌙";
+        themeBtn.setAttribute("aria-label", isLight ? "어둡게 전환" : "밝게 전환");
+        themeBtn.setAttribute("title", isLight ? "어둡게" : "밝게");
+      }
+    }
+    // 초기 적용
+    applyTheme(localStorage.getItem(THEME_KEY) || "dark");
+    // 클릭 토글
+    if (themeBtn){
+      themeBtn.addEventListener("click", () => {
+        const next = document.body.classList.contains("theme-light") ? "dark" : "light";
+        localStorage.setItem(THEME_KEY, next);
+        applyTheme(next);
+      });
+    }
+
 
     // ✅ gauges
     const seek = document.getElementById("bgmSeek");
@@ -945,7 +970,9 @@ if (q) {
     function setPlayUI(on) {
       if (!btnPlay) return;
       btnPlay.setAttribute("aria-pressed", on ? "true" : "false");
-      btnPlay.textContent = on ? "⏸︎ Pause" : "▶︎ Play";
+      btnPlay.textContent = on ? "⏸︎" : "▶︎";
+      btnPlay.setAttribute("aria-label", on ? "일시정지" : "재생");
+      btnPlay.setAttribute("title", on ? "일시정지" : "재생");
     }
 
     function getActiveAudio() {

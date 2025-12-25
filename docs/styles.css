@@ -975,56 +975,6 @@ select.select option{
   z-index: 80;
   display:none;
 }
-/* ✅ Custom Select Scrollbar (드롭다운 스크롤바 톤 맞추기) */
-.cselect-menu{
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: rgba(125,211,252,.55) rgba(255,255,255,.08);
-}
-.cselect-menu::-webkit-scrollbar{
-  width: 10px;
-}
-.cselect-menu::-webkit-scrollbar-track{
-  background: rgba(255,255,255,.08);
-  border-radius: 999px;
-  margin: 8px 0;
-}
-.cselect-menu::-webkit-scrollbar-thumb{
-  background: rgba(125,211,252,.55);
-  border-radius: 999px;
-  border: 2px solid rgba(12, 14, 18, .94);
-  background-clip: padding-box;
-}
-.cselect-menu::-webkit-scrollbar-thumb:hover{
-  background: rgba(125,211,252,.72);
-}
-.cselect-menu::-webkit-scrollbar-thumb:active{
-  background: rgba(125,211,252,.88);
-}
-/* 스크롤바 위/아래 화살표(버튼) 숨김 */
-.cselect-menu::-webkit-scrollbar-button{
-  width: 0;
-  height: 0;
-  display: none;
-}
-
-/* (있다면) 라이트 모드용 */
-body.theme-light .cselect-menu{
-  scrollbar-color: rgba(2,132,199,.55) rgba(0,0,0,.08);
-}
-body.theme-light .cselect-menu::-webkit-scrollbar-track{
-  background: rgba(0,0,0,.08);
-}
-body.theme-light .cselect-menu::-webkit-scrollbar-thumb{
-  background: rgba(2,132,199,.55);
-  border-color: rgba(255,255,255,.92);
-}
-body.theme-light .cselect-menu::-webkit-scrollbar-thumb:hover{
-  background: rgba(2,132,199,.72);
-}
-body.theme-light .cselect-menu::-webkit-scrollbar-thumb:active{
-  background: rgba(2,132,199,.88);
-}
-
 .cselect.is-open .cselect-menu{ display:block; }
 .cselect-option{
   width:100%;
@@ -1710,6 +1660,48 @@ display:flex;
 }
 
 
+
+/* ✅ BGM Dash 내부 정렬(공백 제거): seek는 항상 남는 공간 채우기 */
+.bgm-dash .bgm-row-top #bgmSeek{ width:100%; max-width:100%; min-width:0; }
+.bgm-dash .bgm-row-top #bgmVol{ width:100%; max-width:100%; min-width:0; }
+
+/* 🌗 Theme toggle (원형 아이콘 버튼) */
+.theme-toggle{
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  color: rgba(255,255,255,.92);
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06) inset;
+  backdrop-filter: blur(10px);
+}
+.theme-toggle:hover{ filter: brightness(1.08); }
+.theme-toggle:active{ transform: translateY(1px); }
+.theme-toggle .theme-icon{ font-size: 16px; line-height: 1; }
+
+/* ✅ 라이트 테마(기본은 다크) */
+body.theme-light{
+  --card: rgba(0,0,0,.04);
+  --line: rgba(0,0,0,.10);
+  --text: rgba(0,0,0,.88);
+  --muted: rgba(0,0,0,.55);
+  --accent: rgba(2,132,199,.22);
+  background: radial-gradient(1200px 700px at 10% 10%, rgba(2,132,199,.10), transparent 55%),
+              radial-gradient(900px 600px at 90% 20%, rgba(34,197,94,.08), transparent 55%),
+              linear-gradient(180deg, rgba(255,255,255,1), rgba(245,247,250,1));
+}
+body.theme-light .theme-toggle{
+  border-color: rgba(0,0,0,.12);
+  background: rgba(255,255,255,.72);
+  color: rgba(0,0,0,.86);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.04) inset;
+}
+
 /* =========================
    🎧 BGM Dash (2-row fixed, right aligned, no spill)
    Row1: seek + volume
@@ -1743,7 +1735,7 @@ display:flex;
 
 /* Row 1: time | seek | VOL | volume */
 .bgm-dash .bgm-row-top{
-  grid-template-columns: 96px 1fr 34px 160px;
+  grid-template-columns: auto auto auto 1fr 160px;
 }
 
 .bgm-time{
@@ -1765,7 +1757,7 @@ display:flex;
 
 /* Row 2: mark | prev | play | next | select */
 .bgm-dash .bgm-row-bottom{
-  grid-template-columns: auto auto auto auto 1fr;
+  grid-template-columns: 1fr auto;
 }
 
 .bgm-dash .bgm-row-bottom .btn{
@@ -1790,12 +1782,16 @@ display:flex;
 /* Responsive: keep 2 rows, shrink select/volume */
 @media (max-width: 860px){
   .bgm-dash{ width: 100%; max-width: 100%; }
-  .bgm-dash .bgm-row-top{ grid-template-columns: 96px 1fr 34px 150px; }
+  .bgm-dash .bgm-row-top{
+  grid-template-columns: auto auto auto 1fr 160px;
+}
   .bgm-select{ min-width: 210px; }
 }
 @media (max-width: 620px){
   .bgm-dash{ width: min(640px, 96vw); }
-  .bgm-dash .bgm-row-top{ grid-template-columns: 92px 1fr 34px 130px; }
+  .bgm-dash .bgm-row-top{
+  grid-template-columns: auto auto auto 1fr 160px;
+}
   .bgm-select{ min-width: 180px; }
 }
 
@@ -1995,3 +1991,37 @@ display:flex;
 @media (max-width: 560px){
   .schHighlight__items{ flex-wrap:wrap; }
 }
+
+
+/* ✅ Custom Select Scrollbar (드롭다운 스크롤바 톤 맞추기) */
+.cselect-menu{
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(125,211,252,.55) rgba(255,255,255,.08);
+}
+.cselect-menu::-webkit-scrollbar{ width: 10px; }
+.cselect-menu::-webkit-scrollbar-track{
+  background: rgba(255,255,255,.08);
+  border-radius: 999px;
+  margin: 8px 0;
+}
+.cselect-menu::-webkit-scrollbar-thumb{
+  background: rgba(125,211,252,.55);
+  border-radius: 999px;
+  border: 2px solid rgba(12, 14, 18, .94);
+  background-clip: padding-box;
+}
+.cselect-menu::-webkit-scrollbar-thumb:hover{ background: rgba(125,211,252,.72); }
+.cselect-menu::-webkit-scrollbar-thumb:active{ background: rgba(125,211,252,.88); }
+.cselect-menu::-webkit-scrollbar-button{ width:0; height:0; display:none; }
+
+/* 라이트 모드 */
+body.theme-light .cselect-menu{
+  scrollbar-color: rgba(2,132,199,.55) rgba(0,0,0,.08);
+}
+body.theme-light .cselect-menu::-webkit-scrollbar-track{ background: rgba(0,0,0,.08); }
+body.theme-light .cselect-menu::-webkit-scrollbar-thumb{
+  background: rgba(2,132,199,.55);
+  border-color: rgba(255,255,255,.92);
+}
+body.theme-light .cselect-menu::-webkit-scrollbar-thumb:hover{ background: rgba(2,132,199,.72); }
+body.theme-light .cselect-menu::-webkit-scrollbar-thumb:active{ background: rgba(2,132,199,.88); }

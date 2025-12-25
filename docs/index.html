@@ -63,19 +63,16 @@
         <div class="header-actions">
     <div class="bgm-dash" role="group" aria-label="BGM 컨트롤">
       <!-- Row 1: 재생게이지 + 볼륨게이지 (고정 1줄) -->
-      <div class="bgm-row bgm-row-top">
-        <span id="bgmTime" class="bgm-time">00:00 / 00:00</span>
+            <div class="bgm-row bgm-row-top">
+        <button id="bgmPrev" class="btn btn-ghost" type="button" aria-label="이전 곡" title="이전">⏮︎</button>
+        <button id="bgmPlay" class="btn btn-ghost" type="button" aria-label="재생" title="재생" aria-pressed="false">▶︎</button>
+        <button id="bgmNext" class="btn btn-ghost" type="button" aria-label="다음 곡" title="다음">⏭︎</button>
         <input id="bgmSeek" class="bgm-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="재생 위치" />
-        <span class="bgm-vol-label">VOL</span>
         <input id="bgmVol" class="bgm-vol" type="range" min="0" max="100" value="30" step="1" aria-label="볼륨" />
       </div>
 
-      <!-- Row 2: BGM, Prev, Play, Next, Select (고정 1줄) -->
-      <div class="bgm-row bgm-row-bottom">
-        <span class="bgm-mark">♫ BGM</span>
-        <button id="bgmPrev" class="btn btn-ghost" type="button">⏮︎ Prev</button>
-        <button id="bgmPlay" class="btn btn-ghost" type="button" aria-pressed="false">▶︎ Play</button>
-        <button id="bgmNext" class="btn btn-ghost" type="button">⏭︎ Next</button>
+<!-- Row 2: BGM, Prev, Play, Next, Select (고정 1줄) -->
+            <div class="bgm-row bgm-row-bottom">
         <!-- ✅ 커스텀 드롭다운(UI 통일) -->
         <div class="cselect cselect--sm" data-native="bgmSelect">
           <button class="cselect-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -84,6 +81,18 @@
           </button>
           <div class="cselect-menu" role="listbox" aria-label="BGM 선택"></div>
           <select id="bgmSelect" class="select bgm-select cselect-native" aria-label="BGM 선택" aria-hidden="true" tabindex="-1">
+            <option value="bgm">Justin Bieber - Mistletoe</option>
+            <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
+            <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
+          </select>
+        </div>
+
+        <!-- 🌗 Theme toggle -->
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="밝게/어둡게 전환" title="밝게/어둡게">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+      </div>
+<select id="bgmSelect" class="select bgm-select cselect-native" aria-label="BGM 선택" aria-hidden="true" tabindex="-1">
             <option value="bgm">Justin Bieber - Mistletoe</option>
             <option value="bgm2">Kelly Clarkson - Underneath the Tree</option>
             <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>

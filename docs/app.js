@@ -5,23 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const FILE_MAIN = "YXL_통합.xlsx";
   const FILE_SYNERGY = "시너지표.xlsx";
   const AUTO_REFRESH_MS = 3 * 60 * 60 * 1000; // 3시간
-  const MAIN_CANDIDATES = [
-    "YXL_통합.xlsx",
-    "data/YXL_통합.xlsx",
-    "assets/YXL_통합.xlsx",
-    "docs/YXL_통합.xlsx",
-    "docs/data/YXL_통합.xlsx",
-    "docs/assets/YXL_통합.xlsx"
-  ];
-  const SYNERGY_CANDIDATES = [
-    "시너지표.xlsx",
-    "data/시너지표.xlsx",
-    "assets/시너지표.xlsx",
-    "docs/시너지표.xlsx",
-    "docs/data/시너지표.xlsx",
-    "docs/assets/시너지표.xlsx"
-  ];
-
 
   const state = {
     main: {
@@ -53,8 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return x.toLocaleString("ko-KR");
   };
 
-  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
-
   const normalize = (s) =>
     (s ?? "")
       .toString()
@@ -62,18 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/\s+/g, " ")
       .trim()
       .toLowerCase();
-
-
-  // 헤더/키 비교용 정규화 (공백/괄호/특수문자 차이 흡수)
-  const keyNorm = (s) =>
-    (s ?? "")
-      .toString()
-      .replace(/[\s\u00a0]+/g, "")   // 모든 공백(일반/nbsp) 제거
-      .replace(/[()]/g, "")           // 괄호 제거 (내용은 남김)
-      .replace(/[·ㆍ]/g, "")          // 중점류 제거
-      .trim()
-      .toLowerCase();
-
 
   /* =========================
      Custom Select (드롭다운 UI 통일)
@@ -97,93 +66,117 @@ document.addEventListener("DOMContentLoaded", () => {
     const menu = wrap.querySelector(".cselect-menu");
     if (!btn || !label || !menu) return;
 
-// ✅ BGM 드롭다운은 포탈(fixed)로 띄워서 어떤 대시보드/overflow에도 안 잘리게
-if (nativeId === "bgmSelect") {
-  let fly = null;
-  const closeFly = () => {
-    if (fly) { fly.remove(); fly = null; }
-    btn.setAttribute("aria-expanded", "false");
-    document.removeEventListener("mousedown", onDocDown, true);
-    window.removeEventListener("resize", placeFly);
-    window.removeEventListener("scroll", placeFly, true);
-  };
-  const onDocDown = (e) => {
-    if (!fly) return;
-    if (wrap.contains(e.target) || fly.contains(e.target)) return;
-    closeFly();
-  };
-  const placeFly = () => {
-    if (!fly) return;
-    const r = btn.getBoundingClientRect();
-    const margin = 6;
-    const maxH = Math.max(160, window.innerHeight - 24);
-    fly.style.maxHeight = (maxH) + "px";
-    const flyH = fly.getBoundingClientRect().height;
-    const spaceBelow = window.innerHeight - r.bottom;
-    const spaceAbove = r.top;
-    const openUp = spaceBelow < Math.min(flyH + margin, 220) && spaceAbove > spaceBelow;
-    const top = openUp ? Math.max(12, r.top - flyH - margin) : Math.min(window.innerHeight - 12, r.bottom + margin);
-    const desiredW = Math.min(window.innerWidth - 24, Math.max(280, r.width));
-    fly.style.width = desiredW + "px";
-    const left = Math.min(window.innerWidth - desiredW - 12, Math.max(12, r.left));
-    fly.style.left = left + "px";
-    fly.style.top = top + "px";
-  };
+    
+    const isPortal = nativeId === "bgmSelect";
 
-  const openFly = () => {
-    if (fly) { closeFly(); return; }
-    fly = document.createElement("div");
-    fly.className = "cselect-flymenu";
-    fly.setAttribute("role", "listbox");
-    document.body.appendChild(fly);
+    // 포탈(가려짐 방지) 메뉴: BGM 셀렉트만 body에 띄움
+    let portalEl = null;
+    const ensurePortal = () => {
+      if (!isPortal) return;
+      portalEl = document.getElementById("cselectPortal");
+      if (!portalEl) {
+        portalEl = document.createElement("div");
+        portalEl.id = "cselectPortal";
+        portalEl.className = "cselect-portal";
+        portalEl.style.display = "none";
+        document.body.appendChild(portalEl);
+      }
+    };
 
-    const opts = Array.from(select.options || []);
-    fly.innerHTML = opts.map(o=>{
-      const sel = o.value === select.value;
-      return `<button type="button" class="cselect-flyitem" data-val="${esc(o.value)}" aria-selected="${sel ? "true":"false"}"><span class="t">${esc(o.textContent||"")}</span></button>`;
-    }).join("");
-
-    fly.querySelectorAll(".cselect-flyitem").forEach((it)=>{
-      it.addEventListener("click", (ev)=>{
-        ev.preventDefault();
-        ev.stopPropagation();
-        const v = it.getAttribute("data-val");
-        if (v != null && select.value !== v) {
-          select.value = v;
-          select.dispatchEvent(new Event("change", { bubbles: true }));
-        }
-        closeFly();
-      });
-    });
-
-    btn.setAttribute("aria-expanded", "true");
-    placeFly();
-    document.addEventListener("mousedown", onDocDown, true);
-    window.addEventListener("resize", placeFly);
-    window.addEventListener("scroll", placeFly, true);
-  };
-
-  btn.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); openFly(); });
-  const sync = () => {
-    const opt = select.options[select.selectedIndex];
-    label.textContent = opt ? opt.textContent : "BGM 선택";
-  };
-  sync();
-  select.addEventListener("change", sync);
-  menu.style.display = "none";
-  return;
-}
-
-
-    const close = () => {
+    const closeLocal = () => {
       wrap.classList.remove("is-open");
       btn.setAttribute("aria-expanded", "false");
     };
-    const open = () => {
+    const openLocal = () => {
       wrap.classList.add("is-open");
       btn.setAttribute("aria-expanded", "true");
     };
-    const toggle = () => (wrap.classList.contains("is-open") ? close() : open());
+
+    const onDocDown = (e) => {
+      if (!portalEl) return;
+      if (portalEl.contains(e.target) || wrap.contains(e.target)) return;
+      closePortal();
+    };
+
+    const closePortal = () => {
+      if (!portalEl) return;
+      portalEl.style.display = "none";
+      portalEl.innerHTML = "";
+      btn.setAttribute("aria-expanded", "false");
+      document.removeEventListener("mousedown", onDocDown, true);
+      window.removeEventListener("resize", closePortal);
+      window.removeEventListener("scroll", closePortal, true);
+    };
+
+    const openPortal = () => {
+      ensurePortal();
+      if (!portalEl) return;
+
+      // 옵션 렌더
+      const opts = Array.from(select.options || []);
+      portalEl.innerHTML =
+        '<div class="cselect-portal-menu">' +
+        opts
+          .map((o) => {
+            const v = escapeHtml(o.value);
+            const t = escapeHtml(o.textContent || o.label || o.value || "");
+            const sel = select.value === o.value ? " is-selected" : "";
+            return `<button type="button" class="cselect-portal-item${sel}" data-value="${v}">${t}</button>`;
+          })
+          .join("") +
+        "</div>";
+
+      // 위치 계산(아래 공간 부족하면 위로)
+      const rect = btn.getBoundingClientRect();
+      const maxW = Math.min(420, window.innerWidth - 16);
+      const width = Math.min(maxW, Math.max(rect.width, 260));
+      let left = rect.left;
+      left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
+
+      // 임시 표시 후 높이 계산
+      portalEl.style.display = "block";
+      portalEl.style.position = "fixed";
+      portalEl.style.left = left + "px";
+      portalEl.style.width = width + "px";
+      portalEl.style.zIndex = 99999;
+
+      const menuEl = portalEl.querySelector(".cselect-portal-menu");
+      const availBelow = window.innerHeight - rect.bottom - 12;
+      const availAbove = rect.top - 12;
+      const maxH = Math.min(320, Math.max(140, Math.max(availBelow, availAbove) - 8));
+      if (menuEl) menuEl.style.maxHeight = maxH + "px";
+
+      // 아래/위 결정
+      const shouldDropUp = availBelow < 180 && availAbove > availBelow;
+      const top = shouldDropUp ? (rect.top - (portalEl.offsetHeight || 0) - 6) : (rect.bottom + 6);
+      portalEl.style.top = Math.max(8, Math.min(top, window.innerHeight - (portalEl.offsetHeight || 0) - 8)) + "px";
+
+      // 클릭 핸들
+      portalEl.querySelectorAll(".cselect-portal-item").forEach((b) => {
+        b.addEventListener("click", () => {
+          const v = b.getAttribute("data-value") ?? "";
+          select.value = v;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          closePortal();
+        });
+      });
+
+      btn.setAttribute("aria-expanded", "true");
+      setTimeout(() => document.addEventListener("mousedown", onDocDown, true), 0);
+      window.addEventListener("resize", closePortal);
+      window.addEventListener("scroll", closePortal, true);
+    };
+
+    const close = () => (isPortal ? closePortal() : closeLocal());
+    const open = () => (isPortal ? openPortal() : openLocal());
+    const toggle = () => {
+      if (isPortal) {
+        ensurePortal();
+        const isOpen = portalEl && portalEl.style.display === "block";
+        return isOpen ? closePortal() : openPortal();
+      }
+      return wrap.classList.contains("is-open") ? closeLocal() : openLocal();
+    };
 
     const rebuild = () => {
       const opts = Array.from(select.options);
@@ -259,6 +252,34 @@ if (nativeId === "bgmSelect") {
   const toNumber = (v) => {
     if (typeof v === "number") return v;
     const s = (v ?? "").toString().replace(/,/g, "").trim();
+  // 헤더/라벨 비교용 정규화: 공백/괄호(날짜)/특수문자 제거 후 소문자
+  const normalizeHeader = (s) =>
+    (s ?? "")
+      .toString()
+      .replace(/\(.*?\)/g, "")
+      .replace(/[^0-9a-zA-Z가-힣]/g, "")
+      .toLowerCase();
+
+  // row 객체에서 별칭(표기 흔들림 포함)으로 값 찾기
+  const getAny = (row, aliases) => {
+    if (!row) return "";
+    // 1) 원본 키 직접 조회
+    for (const k of aliases) {
+      if (k in row) return row[k];
+    }
+    // 2) 정규화 키로 조회(캐시)
+    if (!row.__nmap) {
+      const m = {};
+      Object.keys(row).forEach((k) => (m[normalizeHeader(k)] = row[k]));
+      row.__nmap = m;
+    }
+    for (const k of aliases) {
+      const nk = normalizeHeader(k);
+      if (nk && nk in row.__nmap) return row.__nmap[nk];
+    }
+    return "";
+  };
+
     if (!s) return NaN;
     const n = Number(s);
     return Number.isFinite(n) ? n : NaN;
@@ -321,20 +342,45 @@ if (nativeId === "bgmSelect") {
     return await res.arrayBuffer();
   }
 
-  async function fetchArrayBufferWithFallback(candidates) {
+  // ✅ 파일 경로가 바뀌어도 자동으로 찾도록(./, ./data/, ./assets/)
+  function buildCandidateUrls(fileOrUrl) {
+    // 이미 절대 URL이면 그대로 시도
+    try {
+      const u = new URL(fileOrUrl);
+      return [u.toString()];
+    } catch (_) {}
+
+    const base = new URL("./", location.href); // 현재 페이지의 디렉터리
+    const file = String(fileOrUrl || "").replace(/^\.\//, "");
+
+    const uniq = new Set();
+    const push = (p) => { try { uniq.add(new URL(p, base).toString()); } catch (_) {} };
+
+    push(file);
+    // 흔한 배치 위치들
+    if (!file.startsWith("data/"))   push("data/" + file);
+    if (!file.startsWith("assets/")) push("assets/" + file);
+    // GitHub Pages에서 docs/ 경로가 꼬일 때 대비(한 단계 위)
+    push("../" + file);
+
+    return Array.from(uniq);
+  }
+
+  async function fetchArrayBufferAny(candidates) {
+    const urls = Array.isArray(candidates) ? candidates : buildCandidateUrls(candidates);
     let lastErr = null;
-    for (const url of candidates) {
+    for (const u of urls) {
       try {
-        const bust = url.includes("?") ? "&" : "?";
-        const res = await fetch(url + bust + "v=" + Date.now(), { cache: "no-store" });
-        if (res.ok) return await res.arrayBuffer();
-        lastErr = new Error(`파일 불러오기 실패: ${url} (${res.status})`);
+        const ab = await fetchArrayBuffer(u);
+        return { ab, url: u };
       } catch (e) {
         lastErr = e;
+        console.warn("[fetch fail]", u, e);
       }
     }
-    throw lastErr || new Error("파일 불러오기 실패: 후보 경로 모두 실패");
+    throw lastErr || new Error("파일을 불러오지 못했습니다.");
   }
+
 
   function sheetToTable(wb, sheetName) {
     const ws = wb.Sheets[sheetName];
@@ -410,70 +456,83 @@ if (nativeId === "bgmSelect") {
      Render: Total (Sheet 1)
   ========================= */
   function renderTotal() {
-  const table = $("#totalTable");
-  if (!table) return;
-  const tbody = table.querySelector("tbody");
-  const q = normalize($("#totalSearch")?.value);
+    const table = $("#totalTable");
+    if (!table) return;
+    const tbody = table.querySelector("tbody");
+    if (!tbody) return;
 
-  const CURRENT_MEMBERS = new Set(["리윤","후잉","하랑짱","쩔밍","김유정","서니","율무","소다","강소지","나래","유나연"]);
+    const CURRENT_MEMBERS = new Set([
+      "리윤","후잉","하랑짱","쩔밍","김유정","서니","율무","소다","강소지","나래","유나연"
+    ].map(normalize));
 
-  const pick = (row, keys) => {
-    const obj = row || {};
-    const headers = Object.keys(obj);
+    const q = normalize($("#totalSearch")?.value);
 
-    const getBy = (k) => {
-      // 1) 완전일치
-      if (obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
-
-      // 2) 정규화 완전일치
-      const nk = keyNorm(k);
-      const exact = headers.find((h) => keyNorm(h) === nk);
-      if (exact && obj[exact] !== undefined && obj[exact] !== null && obj[exact] !== "") return obj[exact];
-
-      // 3) prefix 매칭(예: '1회차(11.11)' / '누적 기여도 점수' 등)
-      const pref = headers.find((h) => keyNorm(h).startsWith(nk));
-      if (pref && obj[pref] !== undefined && obj[pref] !== null && obj[pref] !== "") return obj[pref];
-
-      return "";
+    const toNum = (v) => {
+      const n = Number(String(v ?? "").replaceAll(",", "").trim());
+      return Number.isFinite(n) ? n : 0;
     };
 
-    for (const k of keys) {
-      const v = getBy(k);
-      if (v !== "") return v;
-    }
-    return "";
-  };
+    let rows = Array.isArray(state.main.total) ? state.main.total.slice() : [];
 
-  let rows = [...state.main.total];
-  if (q) rows = rows.filter((r) => normalize(pick(r, ["스트리머","이름","닉","닉네임"])).includes(q));
+    // 이름/값 키 유연 처리(시트 헤더가 조금 달라도 대응)
+    const getName = (r) => r["스트리머"] ?? r["비제이명"] ?? r["멤버"] ?? r["이름"] ?? "";
+    const getRank = (r, idx) => {
+      const v = r["순위"] ?? r["랭킹"] ?? r["Rank"];
+      const n = toNum(v);
+      return n > 0 ? n : (idx + 1);
+    };
+    const getTotal = (r) => getAny(r, ["누적기여도","누적 기여도","누적기여도점수","누적 기여도 점수","누적점수","합산기여도","누적"]);
+    const getDelta = (r) => getAny(r, ["변동","변동사항","등락","등락폭"]);
+    const getTenure = (r) => getAny(r, ["근속일수","근속","D+일수","근속일","근속일자"]);
 
-  tbody.innerHTML = rows.map((r, idx) => {
-    const rank = pick(r, ["순위","랭킹"]) || (idx + 1);
-    const name = pick(r, ["스트리머","이름","닉","닉네임"]);
-    const total = pick(r, ["누적 기여도 점수","누적기여도점수","누적기여도","누적 기여도","합산기여도"]);
-    const delta = pick(r, ["변동","변동사항"]);
-    const tenure = pick(r, ["근속일수","근속","근속일"]);
+    // 검색
+    if (q) rows = rows.filter((r) => normalize(getName(r)).includes(q));
 
-    const rankNum = Number(rank) || (idx+1);
-    const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
-    const trClass = topRow ? ` class="top${topRow}"` : "";
-    const isMember = CURRENT_MEMBERS.has(String(name).trim());
-    const nameHtml = isMember ? `<span class="memberName">${esc(name)}</span>` : esc(name);
+    // 정렬: 순위 우선(숫자), 없으면 누적기여도 내림차순
+    rows.sort((a, b) => {
+      const ra = getRank(a, 0);
+      const rb = getRank(b, 0);
+      if (ra !== rb) return ra - rb;
+      return toNum(getTotal(b)) - toNum(getTotal(a));
+    });
 
-    const medal = (rankNum===1?"🥇":rankNum===2?"🥈":rankNum===3?"🥉":"");
-    const rankCell = medal ? `<span class="rankMedal">${medal}</span> <span class="rankNum">${rankNum}</span>` : `${rankNum}`;
+    const medal = (rank) => (rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "");
+    const badge = (rank) =>
+      rank <= 3
+        ? `<span class="rank-badge rank-${rank}"><span class="medal">${medal(rank)}</span>${rank}</span>`
+        : escapeHtml(String(rank));
 
-    return `
-      <tr${trClass}>
-        <td class="td-center">${rankCell}</td>
-        <td>${nameHtml}</td>
-        <td class="td-center">${numFmt(total)}</td>
-        <td class="td-center">${esc(delta)}</td>
-        <td class="td-center">${esc(tenure)}</td>
-      </tr>
-    `;
-  }).join("");
-}
+    const fmtNum = (v) => {
+      const n = toNum(v);
+      return n ? n.toLocaleString("en-US") : (String(v ?? "").trim() || "-");
+    };
+
+    tbody.innerHTML = rows
+      .map((r, idx) => {
+        const rank = getRank(r, idx);
+        const name = String(getName(r) ?? "").trim();
+        const total = getTotal(r);
+        const delta = String(getDelta(r) ?? "").trim() || "-";
+        const tenure = String(getTenure(r) ?? "").trim() || "-";
+
+        const isTop = rank <= 3;
+        const isCurrent = CURRENT_MEMBERS.has(normalize(name));
+
+        const trClass =
+          (rank === 1 ? "top1" : rank === 2 ? "top2" : rank === 3 ? "top3" : "");
+
+        return `
+          <tr class="${trClass}">
+            <td class="td-rank">${isTop ? badge(rank) : escapeHtml(String(rank))}</td>
+            <td class="${isCurrent ? "is-current-member" : ""}">${escapeHtml(name)}</td>
+            <td class="td-center">${escapeHtml(fmtNum(total))}</td>
+            <td class="td-center">${escapeHtml(delta)}</td>
+            <td class="td-center">${escapeHtml(tenure)}</td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
 
   /* =========================
      Render: Integrated (Sheet 2)
@@ -512,7 +571,7 @@ if (nativeId === "bgmSelect") {
 
     let rows = ranked;
 if (q) {
-      const streamerKey = headers.find((h) => normalize(h) === "스트리머");
+      const streamerKey = headers.find((h) => normalizeHeader(h) === "스트리머");
       if (streamerKey) rows = rows.filter((r) => normalize(r[streamerKey]).includes(q));
     }
 
@@ -529,7 +588,7 @@ if (q) {
           .map((h) => {
             const isActive = state.integratedSort.key === h;
             const ind = isActive ? (state.integratedSort.dir === "asc" ? " ▲" : " ▼") : "";
-            return `<th data-key="${h}"${h==="합산기여도" ? ' class="th-center"' : ""}>${h}${ind}</th>`;
+            return `<th data-key="${h}">${h}${ind}</th>`;
           })
           .join("")}
       </tr>
@@ -632,18 +691,17 @@ if (q) {
     // - 팀장 기본은 플레이어, 단 스트리머가 '섭이','차돈'이면 비플레이어
     // - 직급 오타 '웨아터' -> '웨이터' 정정
     const _srcRoleKey =
-      headers.find((h) => normalize(h) === "직급" || normalize(h) === "직위") || "직급";
+      headers.find((h) => normalizeHeader(h) === "직급" || normalizeHeader(h) === "직위") || "직급";
     const _srcNameKey =
-      headers.find((h) =>
-        normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버"
+      headers.find((h) => normalizeHeader(h) === "스트리머" || normalizeHeader(h) === "비제이명" || normalizeHeader(h) === "멤버"
       ) || "스트리머";
-    const _srcBeforeKey = headers.find((h) => normalize(h) === "직급전") || "직급전";
+    const _srcBeforeKey = headers.find((h) => normalizeHeader(h) === "직급전") || "직급전";
     const _srcRounds = [1, 2, 3, 4, 5].map((n) => {
-      return headers.find((h) => normalize(h) === `${n}회차`) || `${n}회차`;
+      return headers.find((h) => normalizeHeader(h) === `${n}회차`) || `${n}회차`;
     });
     const _srcSumKey =
-      headers.find((h) => normalize(h) === "합산기여도") ||
-      headers.find((h) => normalize(h) === "누적기여도") ||
+      headers.find((h) => normalizeHeader(h) === "합산기여도") ||
+      headers.find((h) => normalizeHeader(h) === "누적기여도") ||
       "합산기여도";
 
     // 표 컬럼(고정)
@@ -818,6 +876,12 @@ if (q) {
 
     dt = dt instanceof Date ? dt : new Date(dt);
     meta.textContent = `데이터 기준: ${dt.toLocaleString("ko-KR")}`;
+
+    // (디버그) 현재 로드된 통합 엑셀 파일 정보
+    if (state.main.fileInfo?.hash8) {
+      meta.textContent += ` / 통합파일 해시: ${state.main.fileInfo.hash8}`;
+    }
+
   }
 
   function renderSynergy() {
@@ -899,94 +963,107 @@ if (q) {
   /* =========================
      Load Excel & Init
   ========================= */
+  
   async function loadMainExcel() {
-  const ab = await fetchArrayBufferWithFallback(MAIN_CANDIDATES);
-  const wb = XLSX.read(ab, { type: "array" });
-  const names = wb.SheetNames;
+    const { ab, url } = await fetchArrayBufferAny(buildCandidateUrls(FILE_MAIN));
 
-  const has = (n, t) => String(n).replace(/\s+/g,"").includes(t.replace(/\s+/g,""));
-
-  const findSheet = (preds) => {
-    for (const n of names) if (preds.some(fn => fn(n))) return n;
-    return null;
-  };
-
-  const totalSn =
-    findSheet([
-      (n)=> n==="누적기여도",
-      (n)=> has(n,"누적기여도"),
-      (n)=> has(n,"누적") && has(n,"기여")
-    ]) || names[0];
-
-  const integratedSn =
-    findSheet([
-      (n)=> has(n,"시즌통합랭킹"),
-      (n)=> has(n,"시즌통합"),
-      (n)=> has(n,"통합랭킹")
-    ]) || names.find(n=>n!==totalSn) || names[1];
-
-  const seasonNames = names.filter(n=>{
-    if (n===totalSn || n===integratedSn) return false;
-    const s=String(n).replace(/\s+/g,"");
-    return /yxl.*시즌\d+/i.test(s) || /시즌\d+/.test(s);
-  });
-
-  const t1 = sheetToTable(wb, totalSn);
-  state.main.total = t1.rows;
-
-  const t2 = sheetToTable(wb, integratedSn);
-  const calcSum = (row) => {
-    const keys = Object.keys(row||{});
-    const pickKey = (prefix) => keys.find(k => String(k).startsWith(prefix));
-    const nums = ["직급전","1회차","2회차","3회차","4회차","5회차"]
-      .map(p=>pickKey(p))
-      .filter(Boolean)
-      .map(k=>toNum(row[k]));
-    return nums.reduce((a,b)=>a+b,0);
-  };
-
-  state.main.integratedHeaders = INTEGRATED_KEEP;
-  state.main.integratedAll = t2.rows.map((r) => {
-    const o = {};
-    INTEGRATED_KEEP.forEach((k) => (o[k] = r[k] ?? ""));
-    o["직급"] = normalizeRoleLabel(o["직급"]);
-    if (!o["합산기여도"] && o["합산기여도"] !== 0) {
-      const s = calcSum(r);
-      if (s) o["합산기여도"] = s;
+    // 🔎 어떤 파일을 실제로 불러왔는지 확인용(해시 8자리)
+    try {
+      const digest = await crypto.subtle.digest("SHA-256", ab);
+      const hex = Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      state.main.fileInfo = { url, hash8: hex.slice(0, 8) };
+    } catch (_) {
+      state.main.fileInfo = { url, hash8: "" };
     }
-    return o;
-  });
 
-  state.main.seasonSheetNames = seasonNames.length ? seasonNames : names.filter(n=>n!==totalSn && n!==integratedSn).slice(0, 12);
-  state.main.seasons.clear();
-  state.main.seasonSheetNames.forEach((sn) => {
-    state.main.seasons.set(sn, sheetToTable(wb, sn));
-  });
-}
+    const wb = XLSX.read(ab, { type: "array" });
+    const names = wb.SheetNames || [];
+
+    // ✅ 시트 이름으로 찾기(순서 의존 제거)
+    const pickSheet = (cands) => {
+      const normNames = names.map((n) => normalizeHeader(n));
+      for (const c of cands) {
+        const nc = normalizeHeader(c);
+        const idx = normNames.findIndex((x) => x === nc);
+        if (idx >= 0) return names[idx];
+      }
+      // 부분일치도 허용
+      for (const c of cands) {
+        const nc = normalizeHeader(c);
+        const idx = normNames.findIndex((x) => x.includes(nc));
+        if (idx >= 0) return names[idx];
+      }
+      return "";
+    };
+
+    const totalSheet = pickSheet(["누적기여도", "누적 기여도"]);
+    const integratedSheet = pickSheet([
+      "시즌통합랭킹",
+      "시즌 통합 랭킹",
+      "통합랭킹",
+      "S1~S10 YXL_기여도",
+      "S1S10YXL기여도",
+      "S1~S10기여도",
+      "S1S10기여도",
+    ]);
+
+    // 누적기여도
+    state.main.total = totalSheet ? sheetToTable(wb, totalSheet).rows : [];
+    // 시즌통합랭킹
+    const integrated = integratedSheet ? sheetToTable(wb, integratedSheet) : { headers: [], rows: [] };
+    state.main.integratedHeaders = integrated.headers || [];
+    state.main.integratedRows = integrated.rows || [];
+
+    // 시즌별 시트: "시즌숫자"가 들어간 시트들 자동 탐색(누적/통합 제외)
+    const seasonNames = names.filter((n) => {
+      const nn = normalizeHeader(n);
+      if (!nn) return false;
+      if (totalSheet && n === totalSheet) return false;
+      if (integratedSheet && n === integratedSheet) return false;
+      return /시즌\d+/.test(nn); // 예: yxl시즌1, 시즌2 등
+    });
+
+    state.main.seasonSheetNames = seasonNames;
+    state.main.seasons.clear();
+    seasonNames.forEach((sn) => {
+      state.main.seasons.set(sn, sheetToTable(wb, sn));
+    });
+  }
+
 
   async function loadSynergyExcel() {
-  const ab = await fetchArrayBufferWithFallback(SYNERGY_CANDIDATES);
-  const wb = XLSX.read(ab, { type: "array" });
-  const sn = wb.SheetNames[0]; // 쿼리2
-  const t = sheetToTable(wb, sn);
+    const { ab } = await fetchArrayBufferAny(buildCandidateUrls(FILE_SYNERGY));
+    const wb = XLSX.read(ab, { type: "array" });
+    const sn = wb.SheetNames[0]; // 쿼리2
+    const t = sheetToTable(wb, sn);
 
-  const upd = t.rows.find((r) => r["새로고침시간"])?.["새로고침시간"];
-  let dt = null;
-  if (upd) {
-    try {
-      if (typeof upd === "number" && XLSX.SSF?.parse_date_code) {
-        const pc = XLSX.SSF.parse_date_code(upd);
-        if (pc) dt = new Date(Date.UTC(pc.y, pc.m - 1, pc.d, pc.H, pc.M, pc.S));
+    // updatedAt: take first non-empty '새로고침시간'
+    const upd = t.rows.find((r) => r["새로고침시간"])?.["새로고침시간"];
+    // XLSX may parse dates as numbers; use XLSX.SSF.parse_date_code
+    let dt = null;
+    if (upd) {
+      if (typeof upd === "number" && XLSX.SSF) {
+        const p = XLSX.SSF.parse_date_code(upd);
+        if (p) dt = new Date(p.y, p.m - 1, p.d, p.H, p.M, p.S);
       } else {
         dt = new Date(upd);
       }
-    } catch (e) {}
-  }
+    }
 
-  state.synergy.updatedAt = dt;
-  state.synergy.data = t.rows;
-  state.synergy.headers = t.headers;
-}
+    state.synergy.updatedAt = dt || new Date();
+    state.synergy.rows = computeSynergyDelta(
+      t.rows.map((r) => ({
+        "순위": r["순위"],
+        "비제이명": r["비제이명"],
+        "월별 누적별풍선": r["월별 누적별풍선"],
+        "새로고침시간": r["새로고침시간"],
+      }))
+    );
+
+    setUpdatedAt(state.synergy.updatedAt);
+  }
 
   async function loadAll() {
     try {
@@ -1682,211 +1759,276 @@ const on = localStorage.getItem(KEY_ON) === "1";
   }
 
   function initYxlSchedule() {
-  const grid = document.getElementById("schGrid");
-  const dowRow = document.getElementById("schDowRow");
-  const rangeEl = document.getElementById("schRange");
-  const detailEl = document.getElementById("schDetail");
-  const card = document.querySelector(".scheduleCard");
-  if (!grid || !rangeEl || !detailEl) return;
-  card?.classList.add("is-month");
+    const grid = document.getElementById("schGrid");
+    const rangeEl = document.getElementById("schRange");
+    const highlightEl = document.getElementById("schHighlight");
+    if (!grid || !rangeEl) return;
 
-  const btnPrev = document.getElementById("schPrev");
-  const btnNext = document.getElementById("schNext");
-  const btnToday = document.getElementById("schToday");
+    const btnPrev = document.getElementById("schPrev");
+    const btnNext = document.getElementById("schNext");
+    const btnToday = document.getElementById("schToday");
 
-  document.querySelectorAll(".schRangeLabel").forEach(el=>el.textContent="월간");
-  if (btnToday) btnToday.textContent = "이번달";
+    const modal = document.getElementById("schModal");
+    const modalTitle = document.getElementById("schModalTitle");
+    const modalBody = document.getElementById("schModalBody");
 
-  const today = kstDate00();
-  let view = new Date(today.getFullYear(), today.getMonth(), 1);
+    const today = kstDate00();
+    let cursor = new Date(today.getFullYear(), today.getMonth(), 1);
 
-  let modalBack = document.querySelector(".schModalBack");
-  let modal = document.querySelector(".schModal");
-  if (!modalBack){
-    modalBack = document.createElement("div");
-    modalBack.className = "schModalBack";
-    document.body.appendChild(modalBack);
-  }
-  if (!modal){
-    modal = document.createElement("div");
-    modal.className = "schModal";
-    modal.innerHTML = `
-      <div class="schModalHead">
-        <div class="schModalTitle" id="schModalTitle"></div>
-        <button class="schModalClose" type="button" id="schModalClose">닫기</button>
-      </div>
-      <div class="schModalBody">
-        <div class="schModalList" id="schModalList"></div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  }
-  const closeModal = ()=>{
-    modalBack.classList.remove("is-open");
-    modal.classList.remove("is-open");
-  };
-  modalBack.addEventListener("click", closeModal);
-  modal.querySelector("#schModalClose")?.addEventListener("click", closeModal);
-  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeModal(); });
+    const eventsFor = (ymd) =>
+      YXL_SCHEDULE
+        .filter((e) => e?.date === ymd)
+        .slice()
+        .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
 
-  const openModal = (ymd, dayEvents) => {
-    const d = new Date(`${ymd}T00:00:00+09:00`);
-    const title = `${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} (${["일","월","화","수","목","금","토"][d.getDay()]})`;
-    modal.querySelector("#schModalTitle").textContent = title;
-    const list = modal.querySelector("#schModalList");
-    list.innerHTML = dayEvents.map(ev=>{
-      const time = ev.time ? esc(ev.time) : "";
-      const type = esc(ev.type || "");
-      const t = esc(ev.title || "");
-      return `<div class="schModalItem">
-        <div class="schModalTime">${time || "—"}</div>
-        <div class="schModalText">${t}</div>
-        <div class="schModalType">${type}</div>
-      </div>`;
-    }).join("");
-    modalBack.classList.add("is-open");
-    modal.classList.add("is-open");
-  };
+    const getTypeText = (e) => (e?.type ?? "").toString().trim();
 
-  const renderDow = ()=>{
-    if (!dowRow) return;
-    const dows = ["일","월","화","수","목","금","토"];
-    dowRow.innerHTML = dows.map((d,i)=>{
-      const cls = i===0 ? "schDowCell is-sun" : (i===6 ? "schDowCell is-sat" : "schDowCell");
-      return `<div class="${cls}">${d}</div>`;
-    }).join("");
-  };
+    const eventKind = (e) => {
+      const t = getTypeText(e);
+      if (!t) return "other";
+      if (t.includes("생일")) return "birthday";
+      if (t === "엑셀일정" || t === "엑셀" || t.includes("엑셀")) return "excel";
+      if (t.includes("합방")) return "joint";
+      if (t.includes("이벤트")) return "event";
+      return "other";
+    };
 
-  const renderDayDetail = (ymd, dayEvents)=>{
-    if (!dayEvents || !dayEvents.length){
-      detailEl.innerHTML = "";
-      return;
+    const blockClass = (kind) => {
+      switch (kind) {
+        case "birthday": return "schBlock--birthday";
+        case "excel":    return "schBlock--excel";
+        case "joint":    return "schBlock--joint";
+        case "event":    return "schBlock--event";
+        default:         return "schBlock--etc";
+      }
+    };
+
+    function fmtYM(d) {
+      return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
     }
-    const d = new Date(`${ymd}T00:00:00+09:00`);
-    const title = `${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} (${["일","월","화","수","목","금","토"][d.getDay()]})`;
-    detailEl.innerHTML = `
-      <div class="schDetailCard">
-        <div class="schDetailTitle">${title}</div>
-        <div class="schDetailList">
-          ${dayEvents.map(ev=>{
-            const time = ev.time ? esc(ev.time) : "";
-            const type = esc(ev.type||"");
-            const t = esc(ev.title||"");
-            return `<div class="schDetailItem"><span class="schDetailTime">${time||"—"}</span><span class="schDetailText">${t}</span><span class="schDetailType">${type}</span></div>`;
-          }).join("")}
-        </div>
-      </div>
-    `;
-  };
 
-  const render = ()=>{
-    const y = view.getFullYear();
-    const m = view.getMonth();
-    rangeEl.textContent = `${y}.${String(m+1).padStart(2,"0")}`;
+    function startGridOfMonth(d) {
+      const first = new Date(d.getFullYear(), d.getMonth(), 1);
+      const start = new Date(first);
+      // Sunday(0) 시작
+      start.setDate(first.getDate() - first.getDay());
+      start.setHours(0, 0, 0, 0);
+      return start;
+    }
 
-    renderDow();
+    function openModal(ymd) {
+      if (!modal || !modalTitle || !modalBody) return;
 
-    const first = new Date(y, m, 1);
-    const start = new Date(first);
-    start.setDate(first.getDate() - first.getDay());
+      const d = new Date(`${ymd}T00:00:00+09:00`);
+      const DOW = ["일","월","화","수","목","금","토"];
+      modalTitle.textContent = `${ymd.replaceAll("-", ".")} (${DOW[d.getDay()]})`;
 
-    const cells = [];
-    for (let i=0;i<42;i++){
-      const d = addDays(start, i);
-      const ymd = toYMD(d);
-      const inMonth = d.getMonth() === m;
-      const dayEvents = eventsFor(ymd);
+      const ev = eventsFor(ymd);
+      if (!ev.length) {
+        modalBody.innerHTML = `<div class="schModalEmpty">일정이 없습니다.</div>`;
+      } else {
+        modalBody.innerHTML = ev
+          .map((e) => {
+            const kind = eventKind(e);
+            const t = getTypeText(e);
+            const time = (e.time ?? "").toString().trim() || "—";
+            const title = (e.title ?? "").toString().trim();
+            const tag = t ? `<span class="schBlockTag">${escapeHtml(t)}</span>` : "";
+            return `
+              <div class="schDetailItem schBlock ${blockClass(kind)}">
+                <span class="schBlockTime">${escapeHtml(time)}</span>
+                <span class="schBlockTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</span>
+                ${tag}
+              </div>
+            `;
+          })
+          .join("");
+      }
 
-      const shown = dayEvents.filter(isPinnedForCalendar).slice(0, 2);
-      const moreCount = Math.max(0, dayEvents.length - shown.length);
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    }
 
-      const day = d.getDay();
-      const isWeekend = day === 0 || day === 6;
-      const isHoliday = isKoreanHoliday(ymd);
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    }
 
-      const cls = [
-        "schDay",
-        !inMonth ? "is-out" : "",
-        (ymd === toYMD(today)) ? "is-today" : "",
-        (isWeekend || isHoliday) ? "is-weekend" : ""
-      ].filter(Boolean).join(" ");
+    // modal close handlers
+    if (modal && !modal.dataset.bound) {
+      modal.dataset.bound = "1";
+      modal.addEventListener("click", (e) => {
+        const t = e.target;
+        if (t?.dataset?.close === "1") closeModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+      });
+    }
 
-      const mmdd = `${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
-      const badge = dayEvents.length ? `<span class="schCount">${dayEvents.length}</span>` : "";
-      const moreBtn = moreCount ? `<button class="schMore" type="button" data-ymd="${ymd}">+${moreCount}개 더</button>` : "";
+    function renderNextBar() {
+      if (!highlightEl) return;
+      // 가장 가까운 일정 1건 + 7일 이내 추가 일정은 +N개로 요약
+      const now = new Date(`${toYMD(kstDate00())}T00:00:00+09:00`);
+      const list = YXL_SCHEDULE
+        .slice()
+        .filter((e) => (e?.date ?? "").toString().trim().length === 10)
+        .map((e) => {
+          const t = (e.time ?? "").toString().trim();
+          const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "23:59";
+          const dt = new Date(`${e.date}T${hhmm}:00+09:00`);
+          return { ...e, __dt: dt };
+        })
+        .filter((e) => !Number.isNaN(e.__dt?.getTime?.()) && e.__dt.getTime() >= now.getTime())
+        .sort((a, b) => a.__dt.getTime() - b.__dt.getTime());
 
-      const blocks = shown.map(ev=>{
-        const t = esc(ev.title||"");
-        const time = ev.time ? `<span class="schPvTime">${esc(ev.time)}</span>` : "";
-        const tag = ev.type ? `<span class="schBlockTag">${esc(ev.type)}</span>` : "";
-        const cls2 = `schBlock schBlock--${typeClass(ev.type)}`;
-        return `<div class="${cls2}">${time}<span class="schPvTitle">${t}</span>${tag}</div>`;
-      }).join("");
+      if (!list.length) {
+        highlightEl.classList.add("is-empty");
+        highlightEl.innerHTML = "";
+        return;
+      }
 
-      cells.push(`
-        <div class="${cls}" data-ymd="${ymd}">
-          <div class="schTop">
-            <div class="schHead">
-              <div class="schDate">${mmdd} <span class="schDow">${["일","월","화","수","목","금","토"][day]}</span></div>
-            </div>
-            ${badge}
+      highlightEl.classList.remove("is-empty");
+
+      const first = list[0];
+      const today00 = kstDate00();
+      const d0 = new Date(`${first.date}T00:00:00+09:00`);
+      const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
+      const dtag = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
+
+      const until = new Date(today00.getTime() + 7 * 86400000);
+      const moreN = Math.max(0, list.filter((e) => e.__dt.getTime() < until.getTime()).length - 1);
+
+      const mm = String(d0.getMonth() + 1).padStart(2, "0");
+      const dd = String(d0.getDate()).padStart(2, "0");
+      const dowMap = ["일","월","화","수","목","금","토"];
+      const dow = dowMap[d0.getDay()];
+
+      const t = (first.time ?? "").toString().trim();
+      const timeText = t ? `${t} · ` : "";
+      const kind = eventKind(first);
+      const titleText = (first.title ?? "").toString();
+      const typeText = getTypeText(first);
+      const typeBadge = typeText ? ` · ${typeText}` : "";
+
+      highlightEl.innerHTML = `
+        <div class="schHighlight__label">다음 일정</div>
+        <div class="schHighlight__items">
+          <div class="schHlItem schBlock ${blockClass(kind)}" title="${escapeHtml(titleText)}">
+            <span class="schHlD">${dtag}</span>
+            <span class="schHlText">${escapeHtml(`${mm}.${dd} (${dow}) · ${timeText}${titleText}${typeBadge}`)}</span>
           </div>
-          <div class="schDayList">${blocks}${moreBtn}</div>
+          ${moreN ? `<span class="schHlMore">+${moreN}개</span>` : ""}
         </div>
-      `);
+      `;
     }
 
-    grid.innerHTML = cells.join("");
+    function renderMonth() {
+      rangeEl.textContent = fmtYM(cursor);
+      grid.innerHTML = "";
 
-    grid.querySelectorAll(".schDay").forEach((el)=>{
-      el.addEventListener("click", (e)=>{
-        const ymd = el.dataset.ymd;
-        if (!ymd) return;
-        if (e.target && e.target.closest(".schMore")) return;
-        const dayEvents = eventsFor(ymd);
-        renderDayDetail(ymd, dayEvents);
-      });
+      const start = startGridOfMonth(cursor);
+
+      for (let i = 0; i < 42; i++) {
+        const d = addDays(start, i);
+        const ymd = toYMD(d);
+
+        const inMonth = d.getMonth() === cursor.getMonth();
+        const ev = eventsFor(ymd);
+        const count = ev.length;
+
+        const day = d.getDay(); // 0=일 ... 6=토
+        const isWeekend = day === 0 || day === 6;
+        const isHoliday = isKoreanHoliday(ymd);
+        const isToday = ymd === toYMD(today);
+
+        const cell = document.createElement("div");
+        cell.className =
+          "schMCell schDay" +
+          (isToday ? " is-today" : "") +
+          (!inMonth ? " is-out" : "") +
+          (isWeekend ? " is-weekend" : "") +
+          (isHoliday ? " is-holiday" : "");
+
+        const label = inMonth ? String(d.getDate()) : `${String(d.getMonth() + 1)}.${String(d.getDate())}`;
+
+        const preview = count
+          ? `<div class="schPreview">
+              ${ev
+                .slice(0, 2)
+                .map((e) => {
+                  const kind = eventKind(e);
+                  return `<div class="schBlock ${blockClass(kind)}">
+                            <span class="schBlockTime">${escapeHtml((e.time || "—").toString())}</span>
+                            <span class="schBlockTitle" title="${escapeHtml(e.title || "")}">${escapeHtml(e.title || "")}</span>
+                          </div>`;
+                })
+                .join("")}
+              ${count > 2 ? `<button class="schPvMoreBtn" type="button" data-ymd="${ymd}">+${count - 2}개 더</button>` : ""}
+            </div>`
+          : `<div class="schEmpty"></div>`;
+
+        cell.innerHTML = `
+          <div class="schMTop">
+            <div class="schMDate">${escapeHtml(label)}</div>
+            ${count ? `<div class="schCount" aria-label="일정 ${count}개">${count}</div>` : `<div class="schCount schCount--ghost" aria-hidden="true"></div>`}
+          </div>
+          ${preview}
+        `;
+
+        // 클릭: 일정이 있을 때만 모달
+        if (count > 0) {
+          cell.addEventListener("click", (e) => {
+            const btn = e.target?.closest?.(".schPvMoreBtn");
+            if (btn) {
+              e.preventDefault();
+              e.stopPropagation();
+              openModal(btn.dataset.ymd);
+              return;
+            }
+            openModal(ymd);
+          });
+        }
+
+        grid.appendChild(cell);
+      }
+
+      renderNextBar();
+    }
+
+    btnPrev?.addEventListener("click", () => {
+      cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
+      renderMonth();
     });
-    grid.querySelectorAll(".schMore").forEach((btn)=>{
-      btn.addEventListener("click", (e)=>{
-        e.preventDefault();
-        e.stopPropagation();
-        const ymd = btn.dataset.ymd;
-        if (!ymd) return;
-        const dayEvents = eventsFor(ymd);
-        openModal(ymd, dayEvents);
-      });
+    btnNext?.addEventListener("click", () => {
+      cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+      renderMonth();
+    });
+    btnToday?.addEventListener("click", () => {
+      cursor = new Date(today.getFullYear(), today.getMonth(), 1);
+      renderMonth();
     });
 
-    renderNextBar();
-  };
-
-  btnPrev?.addEventListener("click", ()=>{
-    view = new Date(view.getFullYear(), view.getMonth()-1, 1);
-    render();
-  });
-  btnNext?.addEventListener("click", ()=>{
-    view = new Date(view.getFullYear(), view.getMonth()+1, 1);
-    render();
-  });
-  btnToday?.addEventListener("click", ()=>{
-    view = new Date(today.getFullYear(), today.getMonth(), 1);
-    render();
-  });
-
-  render();
-}
+    renderMonth();
+  }
 
 
   /* =========================
      Init
   ========================= */
-  initYxlDday();
-  initHallOfFame();
-  initYxlSchedule();
-  initTabs();
-  initSearchInputs();
-  initIntegratedToggle();
+  const __safe = (fn) => {
+    try { return fn && fn(); } catch (e) { console.error(e); }
+  };
+
+  __safe(initYxlDday);
+  __safe(initHallOfFame);
+  __safe(initYxlSchedule);
+  __safe(initTabs);
+  __safe(initSearchInputs);
+  __safe(initIntegratedToggle);
   // ✅ 로고(헤더) 클릭 시 새로고침
   const logoRefresh = document.getElementById("logoRefresh");
   logoRefresh?.addEventListener("click", (e) => {

@@ -168,6 +168,15 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
 
+// ✅ 헤더 이름이 "직급전(11.5)" 처럼 괄호/부가정보가 붙어도 prefix로 찾기
+const findHeaderByPrefix = (headers, prefix) => {
+  if (!headers || !headers.length) return null;
+  const p = normalize(prefix);
+  return headers.find((h) => normalize(h).startsWith(p)) || null;
+};
+
+
+
   // 시즌통합랭킹: 플레이어/비플레이어 구분
   const INTEGRATED_KEEP = ["순위", "시즌", "직급", "스트리머", "합산기여도"];
   const INTEGRATED_BAN_RANKS = new Set(["대표", "이사", "웨이터", "웨아터", "참가자", "총장대행", "신분"].map(normalize));
@@ -468,20 +477,26 @@ if (q) {
     // ✅ 시즌별 기여도표: "플레이어"만 노출 (비플레이어는 제외)
     // - 팀장 기본은 플레이어, 단 스트리머가 '섭이','차돈'이면 비플레이어
     // - 직급 오타 '웨아터' -> '웨이터' 정정
-    const _srcRoleKey =
-      headers.find((h) => normalize(h) === "직급" || normalize(h) === "직위") || "직급";
-    const _srcNameKey =
-      headers.find((h) =>
-        normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버"
-      ) || "스트리머";
-    const _srcBeforeKey = headers.find((h) => normalize(h) === "직급전") || "직급전";
-    const _srcRounds = [1, 2, 3, 4, 5].map((n) => {
-      return headers.find((h) => normalize(h) === `${n}회차`) || `${n}회차`;
-    });
-    const _srcSumKey =
-      headers.find((h) => normalize(h) === "합산기여도") ||
-      headers.find((h) => normalize(h) === "누적기여도") ||
-      "합산기여도";
+    
+const _srcRoleKey =
+  findHeaderByPrefix(headers, "직급") ||
+  findHeaderByPrefix(headers, "직위") ||
+  headers.find((h) => normalize(h) === "직급") ||
+  "직급";
+const _srcNameKey =
+  findHeaderByPrefix(headers, "스트리머") ||
+  findHeaderByPrefix(headers, "비제이명") ||
+  findHeaderByPrefix(headers, "멤버") ||
+  headers.find((h) => ["스트리머", "비제이명", "멤버"].includes((h ?? "").toString().trim())) ||
+  "스트리머";
+const _srcBeforeKey = findHeaderByPrefix(headers, "직급전") || "직급전";
+const _srcRounds = [1, 2, 3, 4, 5].map((n) => {
+  return findHeaderByPrefix(headers, `${n}회차`) || `${n}회차`;
+});
+const _srcSumKey =
+  findHeaderByPrefix(headers, "합산기여도") ||
+  findHeaderByPrefix(headers, "누적기여도") ||
+  "합산기여도";
 
     // 표 컬럼(고정)
     const SEASON_KEEP = [
@@ -736,32 +751,88 @@ if (q) {
   /* =========================
      Load Excel & Init
   ========================= */
-  async function loadMainExcel() {
-    const ab = await fetchArrayBuffer(FILE_MAIN);
-    const wb = XLSX.read(ab, { type: "array" });
-    const names = wb.SheetNames;
+  
+async function loadMainExcel() {
+  const ab = await fetchArrayBuffer(FILE_MAIN);
+  const wb = XLSX.read(ab, { type: "array" });
+  const names = wb.SheetNames || [];
 
-    // Sheet 1: 누적기여도
-    const t1 = sheetToTable(wb, names[0]);
-    state.main.total = t1.rows;
+  // ✅ 시트 순서가 바뀌어도 안전하게 동작하도록 "이름/헤더" 기반으로 선택
+  const pickByName = (pred, fallbackIndex = 0) =>
+    names.find(pred) || names[fallbackIndex] || null;
 
-    // Sheet 2: 시즌통합랭킹
-    const t2 = sheetToTable(wb, names[1]);
-    state.main.integratedHeaders = INTEGRATED_KEEP;
-    state.main.integratedAll = t2.rows.map((r) => {
-      const o = {};
-      INTEGRATED_KEEP.forEach((k) => (o[k] = r[k] ?? ""));
-      o["직급"] = normalizeRoleLabel(o["직급"]);
+  const totalSheet = pickByName(
+    (n) => normalize(n) === "누적기여도" || normalize(n).includes("누적기여도"),
+    0
+  );
+  const integratedSheet = pickByName(
+    (n) =>
+      normalize(n).includes("s1~s10") ||
+      (normalize(n).includes("통합") && normalize(n).includes("기여도")),
+    1
+  );
+
+  // Sheet: 누적기여도
+  const t1 = sheetToTable(wb, totalSheet);
+  state.main.total = t1.rows;
+
+  // Sheet: 시즌통합랭킹 (합산기여도 컬럼이 없으면 직급전+1~5회차 합으로 계산)
+  const t2 = sheetToTable(wb, integratedSheet);
+  const t2h = t2.headers || [];
+  const kRank = findHeaderByPrefix(t2h, "순위") || "순위";
+  const kSeason = findHeaderByPrefix(t2h, "시즌") || "시즌";
+  const kRole = findHeaderByPrefix(t2h, "직급") || "직급";
+  const kName = findHeaderByPrefix(t2h, "스트리머") || findHeaderByPrefix(t2h, "비제이명") || "스트리머";
+  const kSum = findHeaderByPrefix(t2h, "합산기여도");
+  const kBefore = findHeaderByPrefix(t2h, "직급전");
+  const kRounds = [1, 2, 3, 4, 5]
+    .map((n) => findHeaderByPrefix(t2h, `${n}회차`))
+    .filter(Boolean);
+
+  state.main.integratedHeaders = INTEGRATED_KEEP;
+  state.main.integratedAll = (t2.rows || [])
+    .map((r) => {
+      const o = {
+        순위: r?.[kRank] ?? r?.["순위"] ?? "",
+        시즌: r?.[kSeason] ?? r?.["시즌"] ?? "",
+        직급: normalizeRoleLabel(r?.[kRole] ?? r?.["직급"] ?? ""),
+        스트리머: r?.[kName] ?? r?.["스트리머"] ?? r?.["비제이명"] ?? "",
+        합산기여도: "",
+      };
+
+      // ✅ 합산기여도 계산(없으면 직급전 + 1~5회차 합)
+      let sum = 0;
+      if (kSum && r?.[kSum] !== "" && r?.[kSum] != null) {
+        sum = scoreNumber(r[kSum]);
+      } else {
+        if (kBefore) sum += scoreNumber(r?.[kBefore]);
+        kRounds.forEach((k) => (sum += scoreNumber(r?.[k])));
+      }
+      o["합산기여도"] = sum;
+
       return o;
-    });
+    })
+    // 완전 빈 행 제거
+    .filter((r) => normalize(r["스트리머"]) || normalize(r["시즌"]) || normalize(r["직급"]));
 
-    // Sheets 3~12: 시즌별
-    state.main.seasonSheetNames = names.slice(2, 12);
-    state.main.seasons.clear();
-    state.main.seasonSheetNames.forEach((sn) => {
-      state.main.seasons.set(sn, sheetToTable(wb, sn));
-    });
-  }
+  // ✅ 시즌별 시트: 이름에 '시즌'이 포함된 시트 전부 (개수/순서 무관)
+  const seasonSheets = names
+    .filter((n) => normalize(n).includes("시즌"))
+    .filter((n) => n !== totalSheet && n !== integratedSheet);
+
+  // '시즌숫자'로 정렬 (없으면 기존 순서 유지)
+  const seasonNo = (name) => {
+    const s = (name || "").toString();
+    const m = s.match(/시즌\s*(\d+)/) || s.match(/_시즌(\d+)/i);
+    return m ? Number(m[1]) : Number.POSITIVE_INFINITY;
+  };
+
+  state.main.seasonSheetNames = [...seasonSheets].sort((a, b) => seasonNo(a) - seasonNo(b));
+  state.main.seasons.clear();
+  state.main.seasonSheetNames.forEach((sn) => {
+    state.main.seasons.set(sn, sheetToTable(wb, sn));
+  });
+}
 
   async function loadSynergyExcel() {
     const ab = await fetchArrayBuffer(FILE_SYNERGY);

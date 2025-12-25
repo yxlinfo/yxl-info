@@ -278,85 +278,32 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Render: Total (Sheet 1)
   ========================= */
-    function renderTotal() {
+  function renderTotal() {
     const table = $("#totalTable");
     if (!table) return;
     const tbody = table.querySelector("tbody");
     const q = normalize($("#totalSearch")?.value);
 
-    const rowsRaw = Array.isArray(state.main.total) ? [...state.main.total] : [];
-    if (!rowsRaw.length) {
-      tbody.innerHTML = "";
-      return;
-    }
-
-    // ✅ YXL_통합 누적기여도(누적기여도 시트) 헤더 대응
-    const first = rowsRaw[0] || {};
-    const keys = Object.keys(first);
-    const normMap = new Map(keys.map((k) => [normalize(k), k]));
-    const resolve = (cands) => {
-      for (const c of cands) {
-        const k = normMap.get(normalize(c));
-        if (k) return k;
-      }
-      return null;
-    };
-
-    const keyRank = resolve(["순위", "랭킹", "rank"]) || "순위";
-    const keyName = resolve(["스트리머", "이름", "비제이명", "멤버"]) || "스트리머";
-    const keyScore = resolve(["누적 기여도 점수", "누적기여도", "누적 기여도", "합산기여도"]) || "누적기여도";
-    const keyDelta = resolve(["변동사항", "변동"]) || "변동";
-    const keyTenure = resolve(["근속일수", "근속 일수", "근속"]) || "근속일수";
-
-    let rows = rowsRaw.map((r) => {
-      const name = r?.[keyName] ?? "";
-      const score = scoreNumber(r?.[keyScore]);
-      const delta = r?.[keyDelta] ?? "";
-      const tenure = r?.[keyTenure] ?? "";
-      return { ...r, _name: name, _score: score, _delta: delta, _tenure: tenure };
-    });
-
-    // ✅ 점수 기준 순위 재구성(내림차순)
-    rows = rows
-      .sort((a, b) => {
-        const d = b._score - a._score;
-        if (d !== 0) return d;
-        return normalize(a._name).localeCompare(normalize(b._name), "ko");
-      })
-      .map((r, i) => ({ ...r, _calcRank: i + 1 }));
-
-    // filter: name
-    if (q) rows = rows.filter((r) => normalize(r._name).includes(q));
+    let rows = [...state.main.total];
+    if (q) rows = rows.filter((r) => normalize(r["스트리머"]).includes(q));
 
     tbody.innerHTML = rows
       .map((r) => {
-        const rankNum = Number(r._calcRank ?? r?.[keyRank] ?? 0);
-        const top = rankNum === 1 ? 1 : rankNum === 2 ? 2 : rankNum === 3 ? 3 : 0;
-        const trClass = top ? ` class="top${top}"` : "";
-
-        const rankHtml = top
-          ? `<span class="rank-badge rank-${top}"><span class="medal">${
-              top === 1 ? "🥇" : top === 2 ? "🥈" : "🥉"
-            }</span><span class="rank-num">${rankNum}</span></span>`
-          : `${r?.[keyRank] ?? rankNum ?? ""}`;
-
-        const deltaNum = toNumber(r._delta);
-        const deltaCell =
-          r._delta !== "" && Number.isFinite(deltaNum) ? numFmt(deltaNum) : (r._delta ?? "");
-
+        const rank = r["순위"];
+        const name = r["스트리머"];
+        const total = r["누적기여도"];
+        const delta = r["변동사항"];
         return `
-          <tr${trClass}>
-            <td class="rankcell">${rankHtml}</td>
-            <td><span class="soop-name">${r._name ?? ""}</span></td>
-            <td class="num">${numFmt(r._score)}</td>
-            <td class="num">${deltaCell}</td>
-            <td class="num">${r._tenure ?? ""}</td>
+          <tr>
+            <td>${rank ?? ""}</td>
+            <td>${name ?? ""}</td>
+            <td class="num">${numFmt(total)}</td>
+            <td class="num">${delta ?? ""}</td>
           </tr>
         `;
       })
       .join("");
   }
-
 
   /* =========================
      Render: Integrated (Sheet 2)

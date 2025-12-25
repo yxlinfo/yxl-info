@@ -621,6 +621,25 @@ body::after{
   gap:10px;
 }
 
+/* ✅ 요일 헤더(일~토) : 7칸 그리드로 고정 */
+.schDowRow{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap:10px;
+}
+.schDowCell{
+  padding-left:8px;
+  font-size:12px;
+  font-weight:900;
+  opacity:.78;
+  user-select:none;
+}
+.schDowCell.is-weekend{
+  opacity:.92;
+  color: rgba(255, 120, 120, .95);
+}
+
 /* ✅ 요일/월일을 블록 위로(가시성 개선) */
 .schCol{
   display:flex;
@@ -2777,3 +2796,8 @@ html.theme-light .schModal__close{
 html.theme-light :is(.card, .bgm-dash){
   border-color: rgba(0,0,0,.38) !important;
 }
+
+
+/* 누적 기여도표 제목 옆 현재 멤버 표시 */
+.titleRow{ display:flex; align-items:baseline; gap:10px; }
+.cmTag{ font-size:12px; font-weight:900; color:#2f7cff; }

@@ -1923,6 +1923,35 @@ html.theme-light .hofName{
   text-shadow: 0 8px 18px rgba(0,0,0,.12) !important;
 }
 
+/* ✅ 라이트모드에서도 회장/부회장/3~5등(Top5) 어워드 강조 유지 */
+.theme-light .hofMarquee__line.is-special .hofName,
+html.theme-light .hofMarquee__line.is-special .hofName{
+  background: linear-gradient(180deg, rgba(255,236,236,.98), rgba(239,68,68,.70)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-stroke: 0.7px rgba(185,28,28,.55) !important;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,.25),
+    0 10px 26px rgba(239,68,68,.20),
+    0 0 18px rgba(239,68,68,.12) !important;
+}
+
+.theme-light .hofMarquee__line.is-president .hofGen,
+.theme-light .hofMarquee__line.is-vice .hofGen,
+html.theme-light .hofMarquee__line.is-president .hofGen,
+html.theme-light .hofMarquee__line.is-vice .hofGen{
+  background: rgba(239,68,68,.18) !important;
+  border-color: rgba(239,68,68,.38) !important;
+  box-shadow: 0 12px 26px rgba(239,68,68,.16), 0 0 0 1px rgba(255,255,255,.55) inset !important;
+}
+
+.theme-light .hofMarquee__line.is-top5 .hofGen,
+html.theme-light .hofMarquee__line.is-top5 .hofGen{
+  background: rgba(239,68,68,.12) !important;
+  border-color: rgba(239,68,68,.28) !important;
+}
+
 /* ✅ D+ 반짝임: 라이트에서는 '흰색' 스윕을 '검정' 스윕으로(골드는 유지) */
 html.theme-light .yxlDday::after{
   background: linear-gradient(90deg,
@@ -2519,6 +2548,15 @@ html.theme-light .table-wrap::-webkit-scrollbar-thumb{
   scrollbar-color: rgba(0,0,0,.28) rgba(0,0,0,.06);
 }
 
+
+/* 스크롤 교차 코너(우측 상단 하얀 네모) 톤 맞추기 */
+.table-wrap::-webkit-scrollbar-corner{
+  background: rgba(255,255,255,.07);
+}
+.theme-light .table-wrap::-webkit-scrollbar-corner,
+html.theme-light .table-wrap::-webkit-scrollbar-corner{
+  background: rgba(0,0,0,.06);
+}
 /* 2) 데이터(#secData) 안의 탭/표 텍스트(숫자 포함) 외곽선 느낌 */
 :root{
   --dataStroke: rgba(0,0,0,.62);
@@ -2550,33 +2588,6 @@ html.theme-light .table-wrap::-webkit-scrollbar-thumb{
 }
 #secData .table .num{ font-variant-numeric: tabular-nums; }
 
-/* 3) 라이트모드: 1~5위(회장/부회장/3~5등) 붉은 강조 */
-.theme-light #secData .table tbody tr.top1,
-.theme-light #secData .table tbody tr.top2,
-.theme-light #secData .table tbody tr.top3,
-.theme-light #secData .table tbody tr.top4,
-.theme-light #secData .table tbody tr.top5{
-  background: linear-gradient(90deg, rgba(239,68,68,.10), rgba(239,68,68,0) 55%);
-}
-.theme-light #secData .table tbody tr.top1 .soop-name,
-.theme-light #secData .table tbody tr.top2 .soop-name,
-.theme-light #secData .table tbody tr.top3 .soop-name,
-.theme-light #secData .table tbody tr.top4 .soop-name,
-.theme-light #secData .table tbody tr.top5 .soop-name,
-.theme-light #secData .table tbody tr.top1 .num,
-.theme-light #secData .table tbody tr.top2 .num,
-.theme-light #secData .table tbody tr.top3 .num,
-.theme-light #secData .table tbody tr.top4 .num,
-.theme-light #secData .table tbody tr.top5 .num{
-  color: #b91c1c; /* red-700 */
-}
-.theme-light #secData .table tbody tr.top1 .rankcell,
-.theme-light #secData .table tbody tr.top2 .rankcell,
-.theme-light #secData .table tbody tr.top3 .rankcell,
-.theme-light #secData .table tbody tr.top4 .rankcell,
-.theme-light #secData .table tbody tr.top5 .rankcell{
-  color: #991b1b;
-}
 
 /* (옵션) 라이트모드에서 top1~3 배지도 레드 엣지 */
 .theme-light #secData .rank-badge.rank-1,

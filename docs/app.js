@@ -919,7 +919,9 @@ if (q) {
       }
     }
     // 초기 적용
-    applyTheme(localStorage.getItem(THEME_KEY) || "light");
+    // 서버 접속 시 기본은 항상 라이트모드
+    localStorage.setItem(THEME_KEY, "light");
+    applyTheme("light");
     // 클릭 토글
     if (themeBtn){
       themeBtn.addEventListener("click", () => {

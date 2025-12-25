@@ -713,59 +713,38 @@ body::after{
   box-shadow: 0 0 0 1px rgba(125,211,252,.10) inset;
 }
 .schDay.is-today{
-  border:2px solid rgba(56,189,248,.92);
-  background: linear-gradient(180deg, rgba(56,189,248,.18), rgba(56,189,248,.06));
+  border-color: rgba(125,211,252,.40);
+  background: rgba(125,211,252,.06);
   box-shadow:
-    0 0 0 1px rgba(56,189,248,.20) inset,
-    0 0 0 5px rgba(56,189,248,.16),
-    0 18px 44px rgba(0,0,0,.36);
+    0 0 0 1px rgba(125,211,252,.14) inset,
+    0 0 0 3px rgba(125,211,252,.08),
+    0 12px 30px rgba(0,0,0,.30);
 }
 .schDay.is-today::before{
-  content:"오늘";
+  content:"TODAY";
   position:absolute;
   top:10px;
   right:10px;
-  font-size:11px;
-  font-weight:1000;
-  letter-spacing:.4px;
-  padding:3px 9px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.3px;
+  padding:2px 7px;
   border-radius:999px;
-  border:1px solid rgba(56,189,248,1);
-  background: rgba(56,189,248,.95);
-  color: rgba(2,6,23,.98);
-  opacity:1;
-  box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.14) inset;
+  border:1px solid rgba(125,211,252,.24);
+  background: rgba(0,0,0,.18);
+  color: var(--text);
+  opacity:.9;
 }
 .schDay.is-today::after{
   content:"";
   position:absolute;
   top:10px;
   left:10px;
-  width:10px;
-  height:10px;
+  width:8px;
+  height:8px;
   border-radius:50%;
-  background: rgba(56,189,248,1);
-  box-shadow:
-    0 0 0 2px rgba(0,0,0,.28),
-    0 0 0 0 rgba(56,189,248,.55);
-  animation: yxlTodayPulse 1.35s ease-out infinite;
-}
-@keyframes yxlTodayPulse{
-  0%{
-    box-shadow:
-      0 0 0 2px rgba(0,0,0,.28),
-      0 0 0 0 rgba(56,189,248,.55);
-  }
-  70%{
-    box-shadow:
-      0 0 0 2px rgba(0,0,0,.28),
-      0 0 0 10px rgba(56,189,248,0);
-  }
-  100%{
-    box-shadow:
-      0 0 0 2px rgba(0,0,0,.28),
-      0 0 0 0 rgba(56,189,248,0);
-  }
+  background: rgba(125,211,252,.95);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.22), 0 0 18px rgba(125,211,252,.35);
 }
 .schDay.is-active{
   border-color: rgba(255,255,255,.30);
@@ -1167,6 +1146,46 @@ select.select option{
 }
 #integratedTable .rank-badge .medal,
 #seasonTable .rank-badge .medal{ font-size:13px; }
+/* Total(누적 기여도표): apply same Top 1~3 effects */
+#totalTable tr.top1 td{ background: rgba(255,215,0,.04); }
+#totalTable tr.top2 td{ background: rgba(192,192,192,.035); }
+#totalTable tr.top3 td{ background: rgba(205,127,50,.035); }
+
+#totalTable tr.top1 .soop-name,
+#totalTable tr.top2 .soop-name,
+#totalTable tr.top3 .soop-name{
+  font-weight: 900;
+}
+
+#totalTable td.rankcell{ white-space:nowrap; text-align:left; }
+#totalTable .rank-badge{ padding:4px 8px; font-size:12px; }
+#totalTable .rank-badge .medal{ font-size:13px; }
+
+/* 누적기여도: 현재 멤버(파란색) */
+#totalTable .soop-name.is-current{
+  color: rgba(96,165,250,.95);
+  font-weight: 900;
+}
+
+/* 누적기여도: 가운데 정렬용 */
+#totalTable th.center,
+#totalTable td.center{ text-align:center !important; }
+
+/* 누적기여도: 툴바(검색 + 크레딧) */
+.toolbar.total-toolbar{
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.total-credit{
+  font-size: 12px;
+  opacity: .85;
+  white-space: nowrap;
+}
+.legend-current{
+  color: rgba(96,165,250,.95);
+  font-weight: 900;
+}
 
 
 /* Sortable */
@@ -1791,10 +1810,10 @@ html.theme-light :is(.schBdayBadge, .schCount){
 
 /* 'TODAY' 라벨(가독성) */
 html.theme-light .schDay.is-today::before{
-  background: rgba(2,132,199,.95) !important;
-  border-color: rgba(2,132,199,1) !important;
-  color: rgba(255,255,255,.98) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,.10), 0 0 0 1px rgba(255,255,255,.35) inset !important;
+  background: rgba(255,255,255,.85) !important;
+  border-color: rgba(2,132,199,.22) !important;
+  color: var(--text) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04) inset !important;
 }
 
 /* 오늘/선택/다음 일정 강조는 라이트에서도 선명하게 */
@@ -1804,13 +1823,12 @@ html.theme-light .schCol.is-today .schHead{
   box-shadow: 0 0 0 1px rgba(2,132,199,.10) inset, 0 10px 22px rgba(0,0,0,.08) !important;
 }
 html.theme-light .schDay.is-today{
-  border-color: rgba(2,132,199,.85) !important;
-  border-width: 2px !important;
-  background: linear-gradient(180deg, rgba(2,132,199,.16), rgba(2,132,199,.06)) !important;
+  border-color: rgba(2,132,199,.34) !important;
+  background: rgba(2,132,199,.05) !important;
   box-shadow:
-    0 0 0 1px rgba(2,132,199,.14) inset,
-    0 0 0 5px rgba(2,132,199,.14),
-    0 16px 34px rgba(0,0,0,.12) !important;
+    0 0 0 1px rgba(2,132,199,.10) inset,
+    0 0 0 3px rgba(2,132,199,.06),
+    0 14px 28px rgba(0,0,0,.10) !important;
 }
 html.theme-light .schDay.is-active{
   border-color: rgba(0,0,0,.26) !important;
@@ -1820,13 +1838,6 @@ html.theme-light .schDay.is-next{
   border-color: rgba(0,0,0,.26) !important;
   background: rgba(255,255,255,.92) !important;
   box-shadow: 0 0 0 1px rgba(0,0,0,.06) inset, 0 16px 34px rgba(0,0,0,.12) !important;
-}
-
-/* ✅ 라이트 모드 TODAY 점(펄스) 대비 강화 */
-html.theme-light .schDay.is-today::after{
-  box-shadow:
-    0 0 0 2px rgba(0,0,0,.18),
-    0 0 0 0 rgba(2,132,199,.45) !important;
 }
 
 /* hover도 라이트에서 확실히 */
@@ -2629,3 +2640,53 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 
 /* 시즌별 기여도표 헤더 가운데 정렬 */
 #seasonTable th.th-center{ text-align:center; }
+
+.schCol.is-out{ opacity:.62; }
+
+/* =========================
+   TODAY 강조(달력에서 오늘이 확 티나게) - override
+========================= */
+.schCol.is-today .schHead{
+  border-color: rgba(125,211,252,.85) !important;
+  background: linear-gradient(180deg, rgba(125,211,252,.30), rgba(125,211,252,.08)) !important;
+  box-shadow: 0 0 0 2px rgba(125,211,252,.35) inset, 0 10px 28px rgba(0,0,0,.18);
+}
+.schDay.is-today{
+  border-color: rgba(125,211,252,.70) !important;
+  background: rgba(125,211,252,.10) !important;
+  box-shadow: 0 0 0 2px rgba(125,211,252,.28) inset;
+}
+.schCol.is-today .schHead::after{
+  content:"오늘";
+  margin-left:8px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.2px;
+  color:#0b1220;
+  background: rgba(125,211,252,.95);
+  box-shadow: 0 6px 16px rgba(0,0,0,.22);
+}
+.schCol.is-today .schHead{
+  position:relative;
+}
+.schCol.is-today .schHead::before{
+  content:"";
+  position:absolute;
+  left:8px;
+  top:50%;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  transform: translateY(-50%);
+  background: rgba(125,211,252,.95);
+  box-shadow: 0 0 0 6px rgba(125,211,252,.20);
+  animation: yxlTodayPulse 1.4s infinite;
+}
+@keyframes yxlTodayPulse{
+  0%{ box-shadow: 0 0 0 0 rgba(125,211,252,.35); }
+  70%{ box-shadow: 0 0 0 10px rgba(125,211,252,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(125,211,252,0); }
+}
+

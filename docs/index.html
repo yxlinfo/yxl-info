@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YXL.info</title>
-  <link rel="stylesheet" href="styles.css?v=32">
+  <link rel="stylesheet" href="styles.css?v=33">
 </head>
 <body>
 
@@ -122,10 +122,10 @@
           <h2>🗓️ YXL 일정</h2>
         </div>
 
-        <div class="card scheduleCard" aria-label="YXL 주간 일정">
+        <div class="card scheduleCard" aria-label="YXL 월간 일정">
           <div class="scheduleHead">
             <div class="schRangeWrap">
-              <span class="schRangeLabel">주간</span>
+              <span class="schRangeLabel">월간</span>
               <div class="schRange" id="schRange">—</div>
               <div class="schLegend" aria-label="블록 색상 안내">
                 <span class="schLegendItem" title="엑셀">
@@ -149,12 +149,13 @@
             </div>
 
             <div class="schControls">
-              <button class="schIconBtn" id="schPrev" type="button" aria-label="이전 주">‹</button>
-              <button class="schIconBtn" id="schNext" type="button" aria-label="다음 주">›</button>
-              <button class="schBtn schBtn--today" id="schToday" type="button">이번주</button>
+              <button class="schIconBtn" id="schPrev" type="button" aria-label="이전 달">‹</button>
+              <button class="schIconBtn" id="schNext" type="button" aria-label="다음 달">›</button>
+              <button class="schBtn schBtn--today" id="schToday" type="button">이번달</button>
             </div>
           </div>
           <div class="schHighlight" id="schHighlight" aria-label="다음 일정"></div>
+          <div class="schDowRow" id="schDowRow" aria-label="요일"></div>
           <div class="schGrid" id="schGrid"></div>
           <div class="schDetail" id="schDetail"></div>
         </div>
@@ -316,6 +317,6 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=32"></script>
+  <script src="app.js?v=33"></script>
 </body>
 </html>

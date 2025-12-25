@@ -977,23 +977,6 @@ select.select option{
   z-index: 80;
   display:none;
 }
-
-/* Custom select menu portal (body에 fixed로 띄워 가려짐/잘림 방지) */
-.cselect-menu--portal{
-  position: fixed !important;
-  z-index: 99999 !important;
-}
-.cselect-menu{
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.cselect-option__txt{
-  flex:1;
-  min-width:0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 .cselect.is-open .cselect-menu{ display:block; }
 .cselect-option{
   width:100%;
@@ -2617,3 +2600,58 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 
 /* 시즌별 기여도표 헤더 가운데 정렬 */
 #seasonTable th.th-center{ text-align:center; }
+
+
+/* ===== Patch v40: Month schedule + data restore + bgm portal ===== */
+.scheduleCard.is-month .schDay{height:150px; min-height:150px;}
+.schDowRow{margin-top:10px; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px;}
+.schDowCell{text-align:center; font-size:12px; font-weight:900; opacity:.86; padding:4px 0;}
+.schDowCell.is-sun{color:#ff6b6b;}
+.schDowCell.is-sat{color:#7dd3fc;}
+
+/* remove TODAY badge & dots (keep subtle highlight only) */
+.schDay.is-today::after{display:none !important; content:none !important;}
+.schDot{display:none !important;}
+
+/* month outside cells */
+.schDay.is-out{opacity:.45;}
+.schMore{margin-top:6px; border:0; background:transparent; color:var(--muted); font-size:12px; cursor:pointer; padding:0;}
+.schMore:hover{text-decoration:underline;}
+
+/* modal */
+.schModalBack{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:99990; display:none;}
+.schModalBack.is-open{display:block;}
+.schModal{position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:min(720px, calc(100vw - 24px)); max-height:calc(100vh - 24px); background:rgba(20,20,20,.92); border:1px solid rgba(255,255,255,.14); border-radius:18px; box-shadow:0 14px 50px rgba(0,0,0,.45); z-index:99999; display:none; overflow:hidden;}
+.theme-light .schModal{background:#fff; border-color:rgba(20,20,20,.18);}
+.schModal.is-open{display:block;}
+.schModalHead{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.10);}
+.theme-light .schModalHead{border-bottom-color:rgba(20,20,20,.10);}
+.schModalTitle{font-weight:900;}
+.schModalClose{border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:var(--text); padding:6px 10px; border-radius:12px; cursor:pointer;}
+.theme-light .schModalClose{border-color:rgba(20,20,20,.18); background:rgba(0,0,0,.03);}
+.schModalBody{padding:12px 16px; overflow:auto; max-height:calc(100vh - 120px);}
+.schModalList{display:flex; flex-direction:column; gap:8px;}
+.schModalItem{display:flex; gap:10px; align-items:flex-start; border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:10px 12px; background:rgba(255,255,255,.04);}
+.theme-light .schModalItem{border-color:rgba(20,20,20,.12); background:#fff;}
+.schModalTime{min-width:52px; font-weight:900; opacity:.9;}
+.schModalText{flex:1; min-width:0;}
+.schModalType{font-size:11px; font-weight:900; opacity:.85; margin-left:auto;}
+
+/* align helpers */
+.th-center{text-align:center !important;}
+.td-center{text-align:center !important;}
+
+/* member badge + credit */
+.h3-row{display:flex; align-items:baseline; gap:10px;}
+.memberBadge{font-size:12px; font-weight:900; color:#2563eb; opacity:.95;}
+.card{position:relative;}
+.card-credit{position:absolute; right:14px; bottom:10px; font-size:12px; color:var(--muted);}
+.theme-light .card-credit{color:rgba(20,20,20,.55);}
+
+/* BGM portal fly menu */
+.cselect-flymenu{position:fixed; z-index:99999; min-width:240px; max-width:min(420px, calc(100vw - 24px)); max-height:calc(100vh - 24px); overflow:auto; padding:6px; border-radius:14px; border:1px solid rgba(255,255,255,.14); background:rgba(20,20,20,.92); box-shadow:0 14px 50px rgba(0,0,0,.45);}
+.theme-light .cselect-flymenu{background:#fff; border-color:rgba(20,20,20,.18);}
+.cselect-flyitem{width:100%; text-align:left; border:0; background:transparent; padding:10px 10px; border-radius:10px; cursor:pointer; color:var(--text);}
+.cselect-flyitem:hover{background:rgba(255,255,255,.08);}
+.theme-light .cselect-flyitem:hover{background:rgba(0,0,0,.04);}
+.cselect-flyitem .t{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}

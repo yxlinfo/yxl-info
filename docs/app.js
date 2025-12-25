@@ -5,6 +5,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const FILE_MAIN = "YXL_통합.xlsx";
   const FILE_SYNERGY = "시너지표.xlsx";
   const AUTO_REFRESH_MS = 3 * 60 * 60 * 1000; // 3시간
+  const MAIN_CANDIDATES = [
+    "YXL_통합.xlsx",
+    "data/YXL_통합.xlsx",
+    "assets/YXL_통합.xlsx",
+    "docs/YXL_통합.xlsx",
+    "docs/data/YXL_통합.xlsx",
+    "docs/assets/YXL_통합.xlsx"
+  ];
+  const SYNERGY_CANDIDATES = [
+    "시너지표.xlsx",
+    "data/시너지표.xlsx",
+    "assets/시너지표.xlsx",
+    "docs/시너지표.xlsx",
+    "docs/data/시너지표.xlsx",
+    "docs/assets/시너지표.xlsx"
+  ];
+
 
   const state = {
     main: {
@@ -36,6 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return x.toLocaleString("ko-KR");
   };
 
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+
   const normalize = (s) =>
     (s ?? "")
       .toString()
@@ -45,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .toLowerCase();
 
   /* =========================
-     Custom Select (드롭다운 UI 통일) - Portal/FIXED (가려짐/잘림 방지)
+     Custom Select (드롭다운 UI 통일)
   ========================= */
   const _cselect = new Map();
   let _cselectGlobalWired = false;
@@ -66,166 +85,275 @@ document.addEventListener("DOMContentLoaded", () => {
     const menu = wrap.querySelector(".cselect-menu");
     if (!btn || !label || !menu) return;
 
-    // portal 상태(메뉴를 body로 옮겨 fixed로 띄움)
-    const homeParent = menu.parentNode;
-    const homeNext = menu.nextSibling; // null 가능
-    let isPortaled = false;
+// ✅ BGM 드롭다운은 포탈(fixed)로 띄워서 어떤 대시보드/overflow에도 안 잘리게
+if (nativeId === "bgmSelect") {
+  let fly = null;
+  const closeFly = () => {
+    if (fly) { fly.remove(); fly = null; }
+    btn.setAttribute("aria-expanded", "false");
+    document.removeEventListener("mousedown", onDocDown, true);
+    window.removeEventListener("resize", placeFly);
+    window.removeEventListener("scroll", placeFly, true);
+  };
+  const onDocDown = (e) => {
+    if (!fly) return;
+    if (wrap.contains(e.target) || fly.contains(e.target)) return;
+    closeFly();
+  };
+  const placeFly = () => {
+    if (!fly) return;
+    const r = btn.getBoundingClientRect();
+    const margin = 6;
+    const maxH = Math.max(160, window.innerHeight - 24);
+    fly.style.maxHeight = (maxH) + "px";
+    const flyH = fly.getBoundingClientRect().height;
+    const spaceBelow = window.innerHeight - r.bottom;
+    const spaceAbove = r.top;
+    const openUp = spaceBelow < Math.min(flyH + margin, 220) && spaceAbove > spaceBelow;
+    const top = openUp ? Math.max(12, r.top - flyH - margin) : Math.min(window.innerHeight - 12, r.bottom + margin);
+    fly.style.left = Math.min(window.innerWidth - 12, Math.max(12, r.left)) + "px";
+    fly.style.top = top + "px";
+    fly.style.minWidth = Math.max(240, r.width) + "px";
+  };
 
-    const restoreMenuHome = () => {
-      if (!isPortaled) return;
-      try {
-        if (homeNext && homeNext.parentNode === homeParent) homeParent.insertBefore(menu, homeNext);
-        else homeParent.appendChild(menu);
-      } catch (e) {
-        // fallback
-        wrap.appendChild(menu);
-      }
-      menu.classList.remove("cselect-menu--portal");
-      menu.style.left = "";
-      menu.style.top = "";
-      menu.style.width = "";
-      menu.style.maxHeight = "";
-      menu.style.visibility = "";
-      isPortaled = false;
-    };
+  const openFly = () => {
+    if (fly) { closeFly(); return; }
+    fly = document.createElement("div");
+    fly.className = "cselect-flymenu";
+    fly.setAttribute("role", "listbox");
+    document.body.appendChild(fly);
 
-    const ensurePortal = () => {
-      if (isPortaled) return;
-      document.body.appendChild(menu);
-      menu.classList.add("cselect-menu--portal");
-      isPortaled = true;
-    };
+    const opts = Array.from(select.options || []);
+    fly.innerHTML = opts.map(o=>{
+      const sel = o.value === select.value;
+      return `<button type="button" class="cselect-flyitem" data-val="${esc(o.value)}" aria-selected="${sel ? "true":"false"}"><span class="t">${esc(o.textContent||"")}</span></button>`;
+    }).join("");
+
+    fly.querySelectorAll(".cselect-flyitem").forEach((it)=>{
+      it.addEventListener("click", (ev)=>{
+        ev.preventDefault();
+        ev.stopPropagation();
+        const v = it.getAttribute("data-val");
+        if (v != null && select.value !== v) {
+          select.value = v;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        closeFly();
+      });
+    });
+
+    btn.setAttribute("aria-expanded", "true");
+    placeFly();
+    document.addEventListener("mousedown", onDocDown, true);
+    window.addEventListener("resize", placeFly);
+    window.addEventListener("scroll", placeFly, true);
+  };
+
+  btn.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); openFly(); });
+  const sync = () => {
+    const opt = select.options[select.selectedIndex];
+    label.textContent = opt ? opt.textContent : "BGM 선택";
+  };
+  sync();
+  select.addEventListener("change", sync);
+  menu.style.display = "none";
+  return;
+}
+
 
     const close = () => {
       wrap.classList.remove("is-open");
       btn.setAttribute("aria-expanded", "false");
-      restoreMenuHome();
     };
-
-    const positionPortalMenu = () => {
-      if (!wrap.classList.contains("is-open")) return;
-      ensurePortal();
-
-      const rect = btn.getBoundingClientRect();
-      const pad = 8;
-      const maxH = 320;
-
-      // 먼저 보이게(측정용) -> 위치 계산
-      menu.style.visibility = "hidden";
-      menu.style.display = "block";
-      menu.style.left = `${Math.round(rect.left)}px`;
-      menu.style.width = `${Math.round(rect.width)}px`;
-      menu.style.maxHeight = `${maxH}px`;
-
-      const naturalH = Math.min(menu.scrollHeight, maxH);
-      const belowSpace = window.innerHeight - rect.bottom - pad - 8;
-      const aboveSpace = rect.top - pad - 8;
-
-      const dropUp = belowSpace < naturalH && aboveSpace > belowSpace;
-
-      const top = dropUp
-        ? Math.max(8, Math.round(rect.top - pad - naturalH))
-        : Math.round(rect.bottom + pad);
-
-      const usableH = dropUp
-        ? Math.max(120, Math.min(maxH, aboveSpace))
-        : Math.max(120, Math.min(maxH, belowSpace));
-
-      menu.style.top = `${top}px`;
-      menu.style.maxHeight = `${Math.floor(usableH)}px`;
-      menu.style.visibility = "visible";
-    };
-
     const open = () => {
       wrap.classList.add("is-open");
       btn.setAttribute("aria-expanded", "true");
-      positionPortalMenu();
     };
-
-    const toggle = () => {
-      wrap.classList.contains("is-open") ? close() : open();
-    };
+    const toggle = () => (wrap.classList.contains("is-open") ? close() : open());
 
     const rebuild = () => {
-      // 라벨 텍스트 갱신
-      const opt = select.options[select.selectedIndex];
-      label.textContent = opt ? opt.textContent : "선택";
+      const opts = Array.from(select.options);
+      const cur = select.value;
 
-      // 메뉴 옵션 재구성
+      const curOpt = opts.find((o) => o.value === cur) || opts[0];
+      label.textContent = curOpt ? curOpt.textContent : "선택";
+
       menu.innerHTML = "";
-      Array.from(select.options).forEach((o) => {
-        const item = document.createElement("button");
-        item.type = "button";
+      opts.forEach((o) => {
+        const item = document.createElement("div");
         item.className = "cselect-option";
-        item.dataset.value = o.value;
-        item.innerHTML = `<span class="cselect-option__txt">${escapeHtml(o.textContent ?? "")}</span>
-                          <span class="cselect-check">✓</span>`;
-        if (o.value === select.value) item.classList.add("is-active");
-        item.addEventListener("click", () => {
-          select.value = o.value;
-          select.dispatchEvent(new Event("change", { bubbles: true }));
+        item.setAttribute("role", "option");
+        item.setAttribute("aria-selected", o.value === cur ? "true" : "false");
+        item.textContent = o.textContent;
+        item.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          if (select.value !== o.value) {
+            select.value = o.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          rebuild();
           close();
         });
         menu.appendChild(item);
       });
-
-      // portal 열린 상태라면 위치 재계산
-      if (wrap.classList.contains("is-open")) positionPortalMenu();
     };
 
+    // 버튼 동작
     btn.addEventListener("click", (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
+      // 다른 셀렉트가 열려있으면 닫기
+      _cselect.forEach((inst, k) => {
+        if (k !== nativeId) inst.close();
+      });
       toggle();
     });
 
     // native select 값이 바뀌면 라벨/메뉴 동기화
     select.addEventListener("change", () => {
+      if (wrap.classList.contains("is-open")) close();
       rebuild();
     });
 
-    // 전역: 바깥 클릭/ESC 닫기 + 스크롤/리사이즈 시 재배치
+    // 전역: 바깥 클릭/ESC 닫기
     if (!_cselectGlobalWired) {
       _cselectGlobalWired = true;
-
       document.addEventListener("click", (ev) => {
         _cselect.forEach((inst) => {
-          // 메뉴가 body로 빠져있을 수 있으니 wrap + menu 둘 다 체크
-          const t = ev.target;
-          if (inst.wrap && inst.menu) {
-            if (!inst.wrap.contains(t) && !inst.menu.contains(t)) inst.close();
-          } else if (inst.wrap && !inst.wrap.contains(t)) {
-            inst.close();
-          }
+          if (inst.wrap && !inst.wrap.contains(ev.target)) inst.close();
         });
       });
-
       document.addEventListener("keydown", (ev) => {
-        if (ev.key === "Escape") _cselect.forEach((inst) => inst.close());
-      });
-
-      window.addEventListener("scroll", () => {
-        _cselect.forEach((inst) => inst.position && inst.position());
-      }, true);
-
-      window.addEventListener("resize", () => {
-        _cselect.forEach((inst) => inst.position && inst.position());
+        if (ev.key === "Escape") {
+          _cselect.forEach((inst) => inst.close());
+        }
       });
     }
 
-    const inst = { wrap, select, btn, menu, label, rebuild, open, close, position: positionPortalMenu };
+    const inst = { wrap, select, btn, menu, label, rebuild, open, close };
     _cselect.set(nativeId, inst);
     rebuild();
   }
 
   function rebuildCustomSelect(nativeId) {
     const inst = _cselect.get(nativeId);
-    if (!inst) return;
-    inst.rebuild();
+    if (inst && inst.rebuild) inst.rebuild();
   }
 
 
-/* =========================
+  const toNumber = (v) => {
+    if (typeof v === "number") return v;
+    const s = (v ?? "").toString().replace(/,/g, "").trim();
+    if (!s) return NaN;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : NaN;
+  };
+
+  const scoreNumber = (v) => {
+    const n = toNumber(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const normalizeRoleLabel = (role) => {
+    const raw = (role ?? "").toString().trim();
+    // 흔한 오타 교정: '웨아터' -> '웨이터'
+    if (normalize(raw) === "웨아터") return "웨이터";
+    return raw;
+  };
+
+
+  // 시즌통합랭킹: 플레이어/비플레이어 구분
+  const INTEGRATED_KEEP = ["순위", "시즌", "직급", "스트리머", "합산기여도"];
+  const INTEGRATED_BAN_RANKS = new Set(["대표", "이사", "웨이터", "웨아터", "참가자", "총장대행", "신분"].map(normalize));
+  const INTEGRATED_VIEW_KEY = "yxl_integrated_view"; // 'player' | 'bplayer'
+
+  function getIntegratedView() {
+    const v = localStorage.getItem(INTEGRATED_VIEW_KEY);
+    return v === "bplayer" ? "bplayer" : "player";
+  }
+
+
+  const INTEGRATED_TEAMLEAD_BPLAYER_EXCEPT = new Set(["섭이", "차돈"].map(normalize));
+
+  function integratedIsBPlayer(row) {
+    const role = normalize(normalizeRoleLabel(row?.["직급"]));
+    const name = normalize(row?.["스트리머"]);
+    const teamLeadException = role === "팀장" && INTEGRATED_TEAMLEAD_BPLAYER_EXCEPT.has(name);
+    return INTEGRATED_BAN_RANKS.has(role) || teamLeadException;
+  }
+
+
+  function compareBy(key, dir = "asc") {
+    return (a, b) => {
+      const av = key === "순위" && a?._calcRank != null ? a._calcRank : (a?.[key] ?? "");
+      const bv = key === "순위" && b?._calcRank != null ? b._calcRank : (b?.[key] ?? "");
+      const aNum = toNumber(av);
+      const bNum = toNumber(bv);
+      let r = 0;
+
+      if (Number.isFinite(aNum) && Number.isFinite(bNum)) r = aNum - bNum;
+      else r = normalize(av).localeCompare(normalize(bv), "ko");
+
+      return dir === "asc" ? r : -r;
+    };
+  }
+
+  async function fetchArrayBuffer(url) {
+    // 캐시 회피(엑셀 갱신 반영)
+    const bust = url.includes("?") ? "&" : "?";
+    const res = await fetch(url + bust + "v=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error(`파일 불러오기 실패: ${url} (${res.status})`);
+    return await res.arrayBuffer();
+  }
+
+  async function fetchArrayBufferWithFallback(candidates) {
+    let lastErr = null;
+    for (const url of candidates) {
+      try {
+        const bust = url.includes("?") ? "&" : "?";
+        const res = await fetch(url + bust + "v=" + Date.now(), { cache: "no-store" });
+        if (res.ok) return await res.arrayBuffer();
+        lastErr = new Error(`파일 불러오기 실패: ${url} (${res.status})`);
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr || new Error("파일 불러오기 실패: 후보 경로 모두 실패");
+  }
+
+  function sheetToTable(wb, sheetName) {
+    const ws = wb.Sheets[sheetName];
+    if (!ws) return { headers: [], rows: [] };
+
+    const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+    if (!grid.length) return { headers: [], rows: [] };
+
+    const headers = grid[0].map((h) => (h ?? "").toString().trim());
+    const rows = grid
+      .slice(1)
+      .filter((r) => r.some((v) => (v ?? "").toString().trim() !== ""))
+      .map((r) => {
+        const obj = {};
+        headers.forEach((h, i) => (obj[h] = r[i] ?? ""));
+        return obj;
+      });
+
+    return { headers, rows };
+  }
+
+  function setUpdatedAt(dt) {
+    const el = $("#updatedAt");
+    if (!el) return;
+    if (!dt) {
+      el.textContent = new Date().toLocaleString("ko-KR");
+      return;
+    }
+    const d = dt instanceof Date ? dt : new Date(dt);
+    el.textContent = d.toLocaleString("ko-KR");
+  }
+
+  /* =========================
      Tabs
   ========================= */
   function setActiveTab(targetId) {
@@ -268,31 +396,52 @@ document.addEventListener("DOMContentLoaded", () => {
      Render: Total (Sheet 1)
   ========================= */
   function renderTotal() {
-    const table = $("#totalTable");
-    if (!table) return;
-    const tbody = table.querySelector("tbody");
-    const q = normalize($("#totalSearch")?.value);
+  const table = $("#totalTable");
+  if (!table) return;
+  const tbody = table.querySelector("tbody");
+  const q = normalize($("#totalSearch")?.value);
 
-    let rows = [...state.main.total];
-    if (q) rows = rows.filter((r) => normalize(r["스트리머"]).includes(q));
+  const CURRENT_MEMBERS = new Set(["리윤","후잉","하랑짱","쩔밍","김유정","서니","율무","소다","강소지","나래","유나연"]);
 
-    tbody.innerHTML = rows
-      .map((r) => {
-        const rank = r["순위"];
-        const name = r["스트리머"];
-        const total = r["누적기여도"];
-        const delta = r["변동사항"];
-        return `
-          <tr>
-            <td>${rank ?? ""}</td>
-            <td>${name ?? ""}</td>
-            <td class="num">${numFmt(total)}</td>
-            <td class="num">${delta ?? ""}</td>
-          </tr>
-        `;
-      })
-      .join("");
-  }
+  const pick = (row, keys) => {
+    for (const k of keys) {
+      if (row && row[k] !== undefined && row[k] !== null && row[k] !== "") return row[k];
+      const kk = Object.keys(row||{}).find(h => String(h).startsWith(k));
+      if (kk && row[kk] !== undefined && row[kk] !== null && row[kk] !== "") return row[kk];
+    }
+    return "";
+  };
+
+  let rows = [...state.main.total];
+  if (q) rows = rows.filter((r) => normalize(pick(r, ["스트리머","이름","닉","닉네임"])).includes(q));
+
+  tbody.innerHTML = rows.map((r, idx) => {
+    const rank = pick(r, ["순위","랭킹"]) || (idx + 1);
+    const name = pick(r, ["스트리머","이름","닉","닉네임"]);
+    const total = pick(r, ["누적기여도","누적 기여도","합산기여도"]);
+    const delta = pick(r, ["변동","변동사항"]);
+    const tenure = pick(r, ["근속일수","근속","근속일"]);
+
+    const rankNum = Number(rank) || (idx+1);
+    const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+    const trClass = topRow ? ` class="top${topRow}"` : "";
+    const isMember = CURRENT_MEMBERS.has(String(name).trim());
+    const nameHtml = isMember ? `<span class="memberName">${esc(name)}</span>` : esc(name);
+
+    const medal = (rankNum===1?"🥇":rankNum===2?"🥈":rankNum===3?"🥉":"");
+    const rankCell = medal ? `<span class="rankMedal">${medal}</span> <span class="rankNum">${rankNum}</span>` : `${rankNum}`;
+
+    return `
+      <tr${trClass}>
+        <td class="td-center">${rankCell}</td>
+        <td>${nameHtml}</td>
+        <td class="td-center">${numFmt(total)}</td>
+        <td class="td-center">${esc(delta)}</td>
+        <td class="td-center">${esc(tenure)}</td>
+      </tr>
+    `;
+  }).join("");
+}
 
   /* =========================
      Render: Integrated (Sheet 2)
@@ -348,7 +497,7 @@ if (q) {
           .map((h) => {
             const isActive = state.integratedSort.key === h;
             const ind = isActive ? (state.integratedSort.dir === "asc" ? " ▲" : " ▼") : "";
-            return `<th data-key="${h}">${h}${ind}</th>`;
+            return `<th data-key="${h}"${h==="합산기여도" ? ' class="th-center"' : ""}>${h}${ind}</th>`;
           })
           .join("")}
       </tr>
@@ -719,63 +868,93 @@ if (q) {
      Load Excel & Init
   ========================= */
   async function loadMainExcel() {
-    const ab = await fetchArrayBuffer(FILE_MAIN);
-    const wb = XLSX.read(ab, { type: "array" });
-    const names = wb.SheetNames;
+  const ab = await fetchArrayBufferWithFallback(MAIN_CANDIDATES);
+  const wb = XLSX.read(ab, { type: "array" });
+  const names = wb.SheetNames;
 
-    // Sheet 1: 누적기여도
-    const t1 = sheetToTable(wb, names[0]);
-    state.main.total = t1.rows;
+  const has = (n, t) => String(n).replace(/\s+/g,"").includes(t.replace(/\s+/g,""));
 
-    // Sheet 2: 시즌통합랭킹
-    const t2 = sheetToTable(wb, names[1]);
-    state.main.integratedHeaders = INTEGRATED_KEEP;
-    state.main.integratedAll = t2.rows.map((r) => {
-      const o = {};
-      INTEGRATED_KEEP.forEach((k) => (o[k] = r[k] ?? ""));
-      o["직급"] = normalizeRoleLabel(o["직급"]);
-      return o;
-    });
+  const findSheet = (preds) => {
+    for (const n of names) if (preds.some(fn => fn(n))) return n;
+    return null;
+  };
 
-    // Sheets 3~12: 시즌별
-    state.main.seasonSheetNames = names.slice(2, 12);
-    state.main.seasons.clear();
-    state.main.seasonSheetNames.forEach((sn) => {
-      state.main.seasons.set(sn, sheetToTable(wb, sn));
-    });
-  }
+  const totalSn =
+    findSheet([
+      (n)=> n==="누적기여도",
+      (n)=> has(n,"누적기여도"),
+      (n)=> has(n,"누적") && has(n,"기여")
+    ]) || names[0];
+
+  const integratedSn =
+    findSheet([
+      (n)=> has(n,"시즌통합랭킹"),
+      (n)=> has(n,"시즌통합"),
+      (n)=> has(n,"통합랭킹")
+    ]) || names.find(n=>n!==totalSn) || names[1];
+
+  const seasonNames = names.filter(n=>{
+    if (n===totalSn || n===integratedSn) return false;
+    const s=String(n).replace(/\s+/g,"");
+    return /yxl.*시즌\d+/i.test(s) || /시즌\d+/.test(s);
+  });
+
+  const t1 = sheetToTable(wb, totalSn);
+  state.main.total = t1.rows;
+
+  const t2 = sheetToTable(wb, integratedSn);
+  const calcSum = (row) => {
+    const keys = Object.keys(row||{});
+    const pickKey = (prefix) => keys.find(k => String(k).startsWith(prefix));
+    const nums = ["직급전","1회차","2회차","3회차","4회차","5회차"]
+      .map(p=>pickKey(p))
+      .filter(Boolean)
+      .map(k=>toNum(row[k]));
+    return nums.reduce((a,b)=>a+b,0);
+  };
+
+  state.main.integratedHeaders = INTEGRATED_KEEP;
+  state.main.integratedAll = t2.rows.map((r) => {
+    const o = {};
+    INTEGRATED_KEEP.forEach((k) => (o[k] = r[k] ?? ""));
+    o["직급"] = normalizeRoleLabel(o["직급"]);
+    if (!o["합산기여도"] && o["합산기여도"] !== 0) {
+      const s = calcSum(r);
+      if (s) o["합산기여도"] = s;
+    }
+    return o;
+  });
+
+  state.main.seasonSheetNames = seasonNames.length ? seasonNames : names.filter(n=>n!==totalSn && n!==integratedSn).slice(0, 12);
+  state.main.seasons.clear();
+  state.main.seasonSheetNames.forEach((sn) => {
+    state.main.seasons.set(sn, sheetToTable(wb, sn));
+  });
+}
 
   async function loadSynergyExcel() {
-    const ab = await fetchArrayBuffer(FILE_SYNERGY);
-    const wb = XLSX.read(ab, { type: "array" });
-    const sn = wb.SheetNames[0]; // 쿼리2
-    const t = sheetToTable(wb, sn);
+  const ab = await fetchArrayBufferWithFallback(SYNERGY_CANDIDATES);
+  const wb = XLSX.read(ab, { type: "array" });
+  const sn = wb.SheetNames[0]; // 쿼리2
+  const t = sheetToTable(wb, sn);
 
-    // updatedAt: take first non-empty '새로고침시간'
-    const upd = t.rows.find((r) => r["새로고침시간"])?.["새로고침시간"];
-    // XLSX may parse dates as numbers; use XLSX.SSF.parse_date_code
-    let dt = null;
-    if (upd) {
-      if (typeof upd === "number" && XLSX.SSF) {
-        const p = XLSX.SSF.parse_date_code(upd);
-        if (p) dt = new Date(p.y, p.m - 1, p.d, p.H, p.M, p.S);
+  const upd = t.rows.find((r) => r["새로고침시간"])?.["새로고침시간"];
+  let dt = null;
+  if (upd) {
+    try {
+      if (typeof upd === "number" && XLSX.SSF?.parse_date_code) {
+        const pc = XLSX.SSF.parse_date_code(upd);
+        if (pc) dt = new Date(Date.UTC(pc.y, pc.m - 1, pc.d, pc.H, pc.M, pc.S));
       } else {
         dt = new Date(upd);
       }
-    }
-
-    state.synergy.updatedAt = dt || new Date();
-    state.synergy.rows = computeSynergyDelta(
-      t.rows.map((r) => ({
-        "순위": r["순위"],
-        "비제이명": r["비제이명"],
-        "월별 누적별풍선": r["월별 누적별풍선"],
-        "새로고침시간": r["새로고침시간"],
-      }))
-    );
-
-    setUpdatedAt(state.synergy.updatedAt);
+    } catch (e) {}
   }
+
+  state.synergy.updatedAt = dt;
+  state.synergy.data = t.rows;
+  state.synergy.headers = t.headers;
+}
 
   async function loadAll() {
     try {
@@ -1471,323 +1650,200 @@ const on = localStorage.getItem(KEY_ON) === "1";
   }
 
   function initYxlSchedule() {
-    const grid = document.getElementById("schGrid");
-    const rangeEl = document.getElementById("schRange");
-    const detailEl = document.getElementById("schDetail");
-    if (!grid || !rangeEl || !detailEl) return;
+  const grid = document.getElementById("schGrid");
+  const dowRow = document.getElementById("schDowRow");
+  const rangeEl = document.getElementById("schRange");
+  const detailEl = document.getElementById("schDetail");
+  const card = document.querySelector(".scheduleCard");
+  if (!grid || !rangeEl || !detailEl) return;
+  card?.classList.add("is-month");
 
-    const btnPrev = document.getElementById("schPrev");
-    const btnNext = document.getElementById("schNext");
-    const btnToday = document.getElementById("schToday");
+  const btnPrev = document.getElementById("schPrev");
+  const btnNext = document.getElementById("schNext");
+  const btnToday = document.getElementById("schToday");
 
-    const DOW = ["월", "화", "수", "목", "금", "토", "일"];
-    const today = kstDate00();
-    let weekMon = startOfWeekMon(today);
-    let activeYMD = toYMD(today);
+  document.querySelectorAll(".schRangeLabel").forEach(el=>el.textContent="월간");
+  if (btnToday) btnToday.textContent = "이번달";
 
-    const eventsFor = (ymd) =>
-      YXL_SCHEDULE
-        .filter((e) => e.date === ymd)
-        .slice()
-        .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
-    // 색상 블록 분류(타입 기반)
-    // - 생일: 빨간 블록
-    // - 엑셀일정: 파란 블록
-    // - 합방: 보라 블록
-    // - 이벤트: 노란 블록
-    const BDAY_EMOJI = "🍰"; // (필요시 배지에만 사용)
+  const today = kstDate00();
+  let view = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    const getTypeText = (e) => (e?.type ?? "").toString().trim();
-
-    const eventKind = (e) => {
-      const t = getTypeText(e);
-      if (!t) return "other";
-      if (t === "생일" || t.includes("생일")) return "birthday";
-      if (t === "엑셀일정" || t === "엑셀" || t.includes("엑셀")) return "excel";
-      if (t.includes("합방")) return "joint";
-      if (t.includes("이벤트")) return "event";
-      return "other";
-    };
-
-    const blockClass = (kind) => {
-      switch (kind) {
-        case "birthday": return "schBlock--birthday";
-        case "excel":    return "schBlock--excel";
-        case "joint":    return "schBlock--joint";
-        case "event":    return "schBlock--event";
-        default:         return "schBlock--etc";
-      }
-    };
-
-    const isBirthday = (e) => eventKind(e) === "birthday";
-
-    // 엑셀 일정(하이라이트/NEXT 강조용)
-    const isExcelEvent = (e) => eventKind(e) === "excel";
-
-    // 달력(주간 카드)에는 아래 4종만 블록으로 노출
-    const isPinnedForCalendar = (_e) => true;
-// ===== 다음 일정(전체 일정 기준) =====
-// - 빈 공간으로 보이던 하이라이트 영역을 "가장 가까운 일정 1건" 안내 바(Bar)로 사용합니다.
-// - 길게 늘어지는 리스트는 금지: 기본은 1건만 노출하고, 7일 이내 추가 일정은 +N개로 요약합니다.
-
-function kstNow(){
-  // Asia/Seoul 기준 현재 시각(Date)
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit",
-    hour12: false
-  }).formatToParts(new Date());
-
-  const get = (t) => parts.find(p => p.type === t)?.value || "00";
-  const y = get("year"), mo = get("month"), d = get("day");
-  const h = get("hour"), mi = get("minute"), s = get("second");
-  return new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`);
-}
-
-function parseEventDateKST(e){
-  const t = (e.time ?? "").toString().trim();
-  const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "23:59";
-  return new Date(`${e.date}T${hhmm}:00+09:00`);
-}
-
-function getUpcomingAll(){
-  const now = kstNow();
-  return YXL_SCHEDULE
-    .slice()
-    .filter(e => (e?.date ?? "").toString().trim().length === 10)
-    .map(e => ({ ...e, __dt: parseEventDateKST(e) }))
-    .filter(e => !Number.isNaN(e.__dt?.getTime?.()) && e.__dt.getTime() >= now.getTime())
-    .sort((a,b) => a.__dt.getTime() - b.__dt.getTime());
-}
-
-// 가장 가까운 일정 날짜(YYYY-MM-DD) — 주간 카드에서 NEXT 강조용
-const nextAny = getUpcomingAll()[0];
-const nextYMD = nextAny ? nextAny.date : null;
-
-function renderNextBar(){
-  const box = document.getElementById("schHighlight");
-  if (!box) return;
-
-  const list = getUpcomingAll();
-  if (!list.length){
-    box.classList.add("is-empty");
-    box.innerHTML = "";
-    return;
+  let modalBack = document.querySelector(".schModalBack");
+  let modal = document.querySelector(".schModal");
+  if (!modalBack){
+    modalBack = document.createElement("div");
+    modalBack.className = "schModalBack";
+    document.body.appendChild(modalBack);
   }
-  box.classList.remove("is-empty");
-
-  const first = list[0];
-
-  // 7일 이내 추가 일정 개수 요약(+N)
-  const now = kstNow();
-  const until = new Date(now.getTime() + 7 * 86400000);
-  const moreN = Math.max(
-    0,
-    list.filter(e => e.__dt.getTime() < until.getTime()).length - 1
-  );
-
-  const dowMap = ["일","월","화","수","목","금","토"];
-  const today00 = kstDate00();
-  const d0 = new Date(`${first.date}T00:00:00+09:00`);
-  const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
-  const dtag = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
-
-  const mm = String(d0.getMonth()+1).padStart(2,"0");
-  const dd = String(d0.getDate()).padStart(2,"0");
-  const dow = dowMap[d0.getDay()];
-
-  const t = (first.time ?? "").toString().trim();
-  const timeText = t ? `${t} · ` : "";
-
-  const kind = eventKind(first);
-  const titleText = (first.title ?? "").toString();
-  const typeText = getTypeText(first);
-  const typeBadge = typeText ? ` · ${typeText}` : "";
-
-  box.innerHTML = `
-    <div class="schHighlight__label">다음 일정</div>
-    <div class="schHighlight__items">
-      <div class="schHlItem schBlock ${blockClass(kind)}" title="${escapeHtml(titleText)}">
-        <span class="schHlD">${dtag}</span>
-        <span class="schHlText">${escapeHtml(`${mm}.${dd} (${dow}) · ${timeText}${titleText}${typeBadge}`)}</span>
+  if (!modal){
+    modal = document.createElement("div");
+    modal.className = "schModal";
+    modal.innerHTML = `
+      <div class="schModalHead">
+        <div class="schModalTitle" id="schModalTitle"></div>
+        <button class="schModalClose" type="button" id="schModalClose">닫기</button>
       </div>
-      ${moreN ? `<span class="schHlMore">+${moreN}개</span>` : ""}
-    </div>
-  `;
-}
-
-// 타입 칩(라벨) 매핑: 일정 데이터에 type을 적으면 자동 표시됩니다.
-    // 권장: "합방", "회의", "이벤트", "공지"
-    function typeClass(type) {
-      const t = (type ?? "").toString().trim();
-      if (!t) return "";
-      const k = t.toLowerCase();
-      if (k.includes("합") || k.includes("collab")) return "t-joint";
-      if (k.includes("회의") || k.includes("meeting")) return "t-meet";
-      if (k.includes("이벤트") || k.includes("event")) return "t-event";
-      if (k.includes("공지") || k.includes("notice")) return "t-notice";
-      return "t-etc";
-    }
-
-    function renderDetail(ymd) {
-      const ev = eventsFor(ymd);
-      const d = new Date(`${ymd}T00:00:00`);
-      const idx = d.getDay() === 0 ? 6 : d.getDay() - 1;
-      const title = `${ymd.replaceAll("-", ".")} (${DOW[idx]})`;
-      // 상세(아래 리스트)는 '달력에 표시되지 않은 일정'이 있거나, 일정이 2개 이상일 때만 노출합니다.
-      // - 달력 카드(엑셀일정/생일)와 중복되어 화면이 답답해지는 걸 방지
-      if (ev.length === 0 || (ev.length === 1 && isPinnedForCalendar(ev[0]))) {
-        detailEl.classList.remove("is-show");
-        detailEl.innerHTML = "";
-        return;
-      }
-
-      detailEl.classList.add("is-show");
-      detailEl.innerHTML =
-        `<div class="schDetailTitle">${title}</div>` +
-        ev
-          .map((e) => {
-            const kind = eventKind(e);
-            const t = getTypeText(e);
-            const showTag = kind === "other" && !!t;
-
-            return `
-              <div class="schDetailItem schBlock ${blockClass(kind)}">
-                <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
-                <span class="schBlockTitle" title="${escapeHtml(e.title || "")}">${escapeHtml(e.title || "")}</span>
-                ${showTag ? `<span class="schBlockTag">${escapeHtml(t)}</span>` : ""}
-              </div>
-            `;
-          })
-          .join("");
-    }
-
-    function renderWeek() {
-      rangeEl.textContent = fmtRange(weekMon);
-      grid.innerHTML = "";
-
-      for (let i = 0; i < 7; i++) {
-        const d = addDays(weekMon, i);
-        const ymd = toYMD(d);
-        const dayEvents = eventsFor(ymd);
-        const evCount = dayEvents.length;
-        const hasBirthday = dayEvents.some(isBirthday);
-        const shownEvents = dayEvents.filter(isPinnedForCalendar);
-        const shownCount = shownEvents.length;
-        const moreCount = Math.max(0, evCount - Math.min(shownCount, 2));
-
-        // 토/일(주말) + 한국 공휴일(대체 포함) 강조
-        const day = d.getDay(); // 0=일 ... 6=토
-        const isWeekend = day === 0 || day === 6;
-        const isHoliday = isKoreanHoliday(ymd);
-
-        const mm = String(d.getMonth() + 1).padStart(2, "0");
-        const dd = String(d.getDate()).padStart(2, "0");
-
-        // ✅ 그리드 1칸 = (상단 헤더) + (일정 블록 카드)
-        const col = document.createElement("div");
-        col.className =
-          "schCol" +
-          (ymd === toYMD(today) ? " is-today" : "") +
-          (ymd === activeYMD ? " is-active" : "") +
-          "" +
-          (isWeekend ? " is-weekend" : "") +
-          (isHoliday ? " is-holiday" : "");
-
-        // 일정 블록 카드(클릭 영역) — 안에는 일정만
-        const card = document.createElement("div");
-        card.className =
-          "schDay" +
-          (ymd === toYMD(today) ? " is-today" : "") +
-          (ymd === activeYMD ? " is-active" : "") +
-          "" +
-          (isWeekend ? " is-weekend" : "") +
-          (isHoliday ? " is-holiday" : "");
-
-        col.innerHTML = `
-          <div class="schHead">
-            <div class="schHeadLeft">
-              <span class="schDate">${mm}.${dd}</span>
-              <span class="schDow">${DOW[i]}</span>
-            </div>
-            <div class="schRight">
-              ${hasBirthday ? `<span class="schBdayBadge" aria-label="생일">${BDAY_EMOJI}</span>` : ""}
-              ${
-                evCount > 0
-                  ? `<span class="schCount" aria-label="일정 ${evCount}개">${evCount}</span>`
-                  : ""
-              }
-            </div>
-          </div>
-        `;
-
-        card.innerHTML = `
-          ${
-            evCount > 0
-              ? (Math.min(shownCount,2) > 0
-                  ? `<div class="schPreview">
-                  ${shownEvents
-                    .slice(0, 2)
-                    .map((e) => {
-                      const kind = eventKind(e);
-                      return `<div class="schBlock ${blockClass(kind)}">
-                                <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
-                                <span class="schBlockTitle" title="${escapeHtml(e.title || "")}">${escapeHtml(e.title || "")}</span>
-                              </div>`;
-                    })
-                    .join("")}
-                  ${moreCount > 0 ? `<div class="schPvMore">+${moreCount}개 더</div>` : ""}
-                </div>`
-                  : `<div class="schPreview"><div class="schPvMore">+${evCount}개</div></div>`
-                )
-              : `<div class="schDots" aria-hidden="true">
-                  ${Array.from({ length: Math.min(evCount, 3) })
-                    .map(() => `<span class="schDot"></span>`)
-                    .join("")}
-                </div>`
-          }
-        `;
-
-        col.addEventListener("click", () => {
-          activeYMD = ymd;
-          renderWeek();
-          renderDetail(activeYMD);
-        });
-
-        col.appendChild(card);
-        grid.appendChild(col);
-      }
-
-      // 상단 '다음 일정' 바 갱신
-      renderNextBar();
-
-    }
-
-    btnPrev?.addEventListener("click", () => {
-      weekMon = addDays(weekMon, -7);
-      activeYMD = toYMD(weekMon);
-      renderWeek();
-      renderDetail(activeYMD);
-    });
-
-    btnNext?.addEventListener("click", () => {
-      weekMon = addDays(weekMon, 7);
-      activeYMD = toYMD(weekMon);
-      renderWeek();
-      renderDetail(activeYMD);
-    });
-
-    btnToday?.addEventListener("click", () => {
-      weekMon = startOfWeekMon(kstDate00());
-      activeYMD = toYMD(kstDate00());
-      renderWeek();
-      renderDetail(activeYMD);
-    });
-
-    renderWeek();
-    renderDetail(activeYMD);
+      <div class="schModalBody">
+        <div class="schModalList" id="schModalList"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
   }
+  const closeModal = ()=>{
+    modalBack.classList.remove("is-open");
+    modal.classList.remove("is-open");
+  };
+  modalBack.addEventListener("click", closeModal);
+  modal.querySelector("#schModalClose")?.addEventListener("click", closeModal);
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeModal(); });
+
+  const openModal = (ymd, dayEvents) => {
+    const d = new Date(`${ymd}T00:00:00+09:00`);
+    const title = `${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} (${["일","월","화","수","목","금","토"][d.getDay()]})`;
+    modal.querySelector("#schModalTitle").textContent = title;
+    const list = modal.querySelector("#schModalList");
+    list.innerHTML = dayEvents.map(ev=>{
+      const time = ev.time ? esc(ev.time) : "";
+      const type = esc(ev.type || "");
+      const t = esc(ev.title || "");
+      return `<div class="schModalItem">
+        <div class="schModalTime">${time || "—"}</div>
+        <div class="schModalText">${t}</div>
+        <div class="schModalType">${type}</div>
+      </div>`;
+    }).join("");
+    modalBack.classList.add("is-open");
+    modal.classList.add("is-open");
+  };
+
+  const renderDow = ()=>{
+    if (!dowRow) return;
+    const dows = ["일","월","화","수","목","금","토"];
+    dowRow.innerHTML = dows.map((d,i)=>{
+      const cls = i===0 ? "schDowCell is-sun" : (i===6 ? "schDowCell is-sat" : "schDowCell");
+      return `<div class="${cls}">${d}</div>`;
+    }).join("");
+  };
+
+  const renderDayDetail = (ymd, dayEvents)=>{
+    if (!dayEvents || !dayEvents.length){
+      detailEl.innerHTML = "";
+      return;
+    }
+    const d = new Date(`${ymd}T00:00:00+09:00`);
+    const title = `${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} (${["일","월","화","수","목","금","토"][d.getDay()]})`;
+    detailEl.innerHTML = `
+      <div class="schDetailCard">
+        <div class="schDetailTitle">${title}</div>
+        <div class="schDetailList">
+          ${dayEvents.map(ev=>{
+            const time = ev.time ? esc(ev.time) : "";
+            const type = esc(ev.type||"");
+            const t = esc(ev.title||"");
+            return `<div class="schDetailItem"><span class="schDetailTime">${time||"—"}</span><span class="schDetailText">${t}</span><span class="schDetailType">${type}</span></div>`;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  };
+
+  const render = ()=>{
+    const y = view.getFullYear();
+    const m = view.getMonth();
+    rangeEl.textContent = `${y}.${String(m+1).padStart(2,"0")}`;
+
+    renderDow();
+
+    const first = new Date(y, m, 1);
+    const start = new Date(first);
+    start.setDate(first.getDate() - first.getDay());
+
+    const cells = [];
+    for (let i=0;i<42;i++){
+      const d = addDays(start, i);
+      const ymd = toYMD(d);
+      const inMonth = d.getMonth() === m;
+      const dayEvents = eventsFor(ymd);
+
+      const shown = dayEvents.filter(isPinnedForCalendar).slice(0, 2);
+      const moreCount = Math.max(0, dayEvents.length - shown.length);
+
+      const day = d.getDay();
+      const isWeekend = day === 0 || day === 6;
+      const isHoliday = isKoreanHoliday(ymd);
+
+      const cls = [
+        "schDay",
+        !inMonth ? "is-out" : "",
+        (ymd === toYMD(today)) ? "is-today" : "",
+        (isWeekend || isHoliday) ? "is-weekend" : ""
+      ].filter(Boolean).join(" ");
+
+      const mmdd = `${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
+      const badge = dayEvents.length ? `<span class="schCount">${dayEvents.length}</span>` : "";
+      const moreBtn = moreCount ? `<button class="schMore" type="button" data-ymd="${ymd}">+${moreCount}개 더</button>` : "";
+
+      const blocks = shown.map(ev=>{
+        const t = esc(ev.title||"");
+        const time = ev.time ? `<span class="schPvTime">${esc(ev.time)}</span>` : "";
+        const tag = ev.type ? `<span class="schBlockTag">${esc(ev.type)}</span>` : "";
+        const cls2 = `schBlock schBlock--${typeClass(ev.type)}`;
+        return `<div class="${cls2}">${time}<span class="schPvTitle">${t}</span>${tag}</div>`;
+      }).join("");
+
+      cells.push(`
+        <div class="${cls}" data-ymd="${ymd}">
+          <div class="schTop">
+            <div class="schHead">
+              <div class="schDate">${mmdd} <span class="schDow">${["일","월","화","수","목","금","토"][day]}</span></div>
+            </div>
+            ${badge}
+          </div>
+          <div class="schDayList">${blocks}${moreBtn}</div>
+        </div>
+      `);
+    }
+
+    grid.innerHTML = cells.join("");
+
+    grid.querySelectorAll(".schDay").forEach((el)=>{
+      el.addEventListener("click", (e)=>{
+        const ymd = el.dataset.ymd;
+        if (!ymd) return;
+        if (e.target && e.target.closest(".schMore")) return;
+        const dayEvents = eventsFor(ymd);
+        renderDayDetail(ymd, dayEvents);
+      });
+    });
+    grid.querySelectorAll(".schMore").forEach((btn)=>{
+      btn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        const ymd = btn.dataset.ymd;
+        if (!ymd) return;
+        const dayEvents = eventsFor(ymd);
+        openModal(ymd, dayEvents);
+      });
+    });
+
+    renderNextBar();
+  };
+
+  btnPrev?.addEventListener("click", ()=>{
+    view = new Date(view.getFullYear(), view.getMonth()-1, 1);
+    render();
+  });
+  btnNext?.addEventListener("click", ()=>{
+    view = new Date(view.getFullYear(), view.getMonth()+1, 1);
+    render();
+  });
+  btnToday?.addEventListener("click", ()=>{
+    view = new Date(today.getFullYear(), today.getMonth(), 1);
+    render();
+  });
+
+  render();
+}
 
 
   /* =========================

@@ -2690,116 +2690,92 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 /* =========================================================
-   MOBILE PATCH v5 (merged)
-   - Header/BGM: hide seek+vol, compact controls
-   - Hide D-day line (YXL 시작~ING)
-   - Hall of Fame: show names in one line (scrollable), no animation
-   - Schedule: 7 columns, hide legend, hide '이번달', compact header
-   - Schedule preview: show ONLY key label text (생일/공지/이벤트/엑셀/합방/기타)
+   MOBILE PATCH v6
+   - Re-add animation for Hall of Fame (scrolling items)
+   - Center align month, date, and weekday
+   - Schedule block click to show detailed info
    ========================================================= */
 @media (max-width: 520px){
-  /* ---------- BGM DASH ---------- */
-  #bgmSeek, #bgmVol, .bgm-seek, .bgm-vol{ display:none !important; }
-
-  .bgm-dash{ display:flex !important; flex-direction:row !important; align-items:center !important; gap:8px !important; padding:6px 8px !important; }
-  .bgm-row{ padding:0 !important; gap:6px !important; }
-  .bgm-row-top{ display:flex !important; align-items:center !important; gap:6px !important; flex:0 0 auto !important; }
-  .bgm-row-bottom{ display:flex !important; align-items:center !important; justify-content:flex-end !important; gap:6px !important; flex:1 1 auto !important; }
-
-  #bgmPrev, #bgmPlay, #bgmNext{
-    width:34px !important; height:34px !important;
-    min-width:34px !important; min-height:34px !important;
-    padding:0 !important; font-size:16px !important; line-height:1 !important;
-    border-radius:12px !important;
-  }
-  .bgm-dash .cselect-btn{
-    height:34px !important; padding:0 10px !important;
-    font-size:12px !important; border-radius:12px !important;
-    max-width:160px !important;
-  }
-  .bgm-dash .cselect-label{ display:block !important; max-width:120px !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; }
-  #themeToggle{ width:34px !important; height:34px !important; padding:0 !important; border-radius:12px !important; }
-
-  /* ---------- HOF STRIP ---------- */
-  #yxlDday{ display:none !important; } /* hide 'YXL 시작 ~ING' on mobile */
-
-  .hofMarquee__viewport{
-    overflow-x:auto !important; overflow-y:hidden !important;
-    -webkit-overflow-scrolling:touch !important;
-    mask-image:none !important;
-  }
-  .hofMarquee__line{
-    position:static !important;
-    height:auto !important;
-    opacity:1 !important;
-    transform:none !important;
-    white-space:nowrap !important;
-    flex-wrap:nowrap !important;
-    justify-content:flex-start !important;
-    gap:8px !important;
-    padding:2px 0 !important;
-  }
-  .hofMarquee__line.is-anim{ animation:none !important; }
-  .hofItem{
-    display:inline-flex !important; align-items:center !important; gap:6px !important;
-    padding:6px 10px !important; border-radius:999px !important;
-    border:1px solid rgba(255,255,255,.14) !important;
-    background:rgba(255,255,255,.05) !important;
-    box-shadow:0 10px 22px rgba(0,0,0,.18), 0 0 0 1px rgba(255,255,255,.06) inset !important;
-    white-space:nowrap !important;
-  }
-  .hofItem .hofGen{ font-size:11px !important; opacity:.9 !important; }
-  .hofItem .hofName{ font-size:13px !important; font-weight:1000 !important; background:none !important; -webkit-text-fill-color:currentColor !important; }
-  .hofItem .hofCnt{ font-size:11px !important; opacity:.85 !important; }
-
-  /* ---------- SCHEDULE HEADER ---------- */
-  .schLegend{ display:none !important; }     /* hide legend chips */
-  #schToday, .schBtn--today{ display:none !important; } /* keep only prev/next */
-  .schControls{ gap:6px !important; }
-  .schIconBtn{ width:30px !important; height:30px !important; border-radius:12px !important; }
-
-  /* ---------- SCHEDULE GRID: force 7 columns ---------- */
-  .schGrid{
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap:4px !important;
-  }
-  .schCol{ min-width:0 !important; }
-  .schHead{ padding:4px 4px !important; border-radius:10px !important; }
-  .schHeadLeft{ display:flex !important; flex-direction:column !important; align-items:center !important; gap:2px !important; }
-  .schDate{ font-size:10px !important; font-weight:900 !important; }
-  .schDow{ font-size:10px !important; opacity:.75 !important; }
-
-  .schDay{
-    height:84px !important; min-height:84px !important;
-    padding:5px !important; border-radius:12px !important;
+  /* ---------- HOF ANIMATION ---------- */
+  .hofMarquee__line {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: flex-start !important;
+    white-space: nowrap !important;
+    animation: marquee 15s linear infinite !important;
   }
 
-  /* ---------- SCHEDULE PREVIEW: show only label text ---------- */
-  .schPreview{ gap:6px !important; }
-  .schPreview .schBlock{
-    padding:6px 6px !important;
-    border-radius:12px !important;
-    display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
+  /* Animation for Hall of Fame (scrolling) */
+  @keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
   }
-  .schPreview .schBlockTime,
-  .schPreview .schBlockTitle,
-  .schPreview .schBlockTag{ display:none !important; }
 
-  .schPreview .schBlock::before{
-    font-size:12px !important;
-    font-weight:1000 !important;
-    white-space:nowrap !important;
-    content:"기타";
+  /* ---------- MONTHLY SCHEDULE: CENTER ALIGN ---------- */
+  .schHead {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px !important;
   }
-  .schPreview .schBlock--birthday::before{ content:"생일"; }
-  .schPreview .schBlock--notice::before{ content:"공지"; }
-  .schPreview .schBlock--event::before{ content:"이벤트"; }
-  .schPreview .schBlock--excel::before{ content:"엑셀"; }
-  .schPreview .schBlock--joint::before{ content:"합방"; }
+  .schDow, .schDate {
+    font-size: 12px !important;
+    text-align: center !important;
+    margin: 0 !important;
+  }
 
-  /* detail area should stay readable */
-  .schDetail .schBlockTime{ display:inline !important; }
-  .schDetail .schBlockTitle{ display:inline !important; white-space:normal !important; }
+  /* ---------- SCHEDULE: CLICK TO SHOW DETAILS ---------- */
+  .schBlock {
+    padding: 8px !important;
+    cursor: pointer !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .schBlockDetails {
+    display: none !important;
+    padding: 10px !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 10px !important;
+    margin-top: 10px !important;
+    font-size: 12px !important;
+    word-wrap: break-word;
+  }
+
+  .schBlock.active .schBlockDetails {
+    display: block !important;
+  }
+
+  /* Date and day labels in the grid (center alignment) */
+  .schGrid {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .schDay {
+    height: 70px !important;
+    min-height: 70px !important;
+    text-align: center !important;
+    padding: 5px !important;
+    font-size: 12px !important;
+  }
+
+  .schDay .schDate {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: #fff !important;
+  }
+  .schDay .schDow {
+    font-size: 10px !important;
+    opacity: 0.7 !important;
+  }
+
+  /* Remove long text overflow from schedule blocks */
+  .schBlockTitle {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-weight: 900 !important;
+  }
 }

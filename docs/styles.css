@@ -1053,6 +1053,35 @@ select.select option{
 }
 .table td{ color: var(--text); }
 .table .num{ text-align:right; font-variant-numeric: tabular-nums; }
+
+.th-center{ text-align:center !important; }
+.center{ text-align:center !important; }
+
+/* 누적기여도: 타이틀 옆 현재멤버 배지 */
+.title-inline{ display:flex; align-items:center; gap:10px; }
+.badge-current{
+  font-size: 12px;
+  color: #1266FF;
+  text-shadow: 0 0 10px rgba(18,102,255,.45);
+  font-weight: 900;
+}
+
+/* 누적기여도: 현재멤버 이름 파란색 */
+.member-current{
+  color: #1266FF !important;
+  text-shadow: 0 0 10px rgba(18,102,255,.35);
+}
+
+/* 누적기여도: 우측 하단 제공자 표기 */
+.card-total{ position: relative; }
+.provider-credit{
+  position:absolute;
+  right: 14px;
+  bottom: 12px;
+  font-size: 11px;
+  color: rgba(255,255,255,.6);
+  pointer-events: none;
+}
 /* Synergy: value bar inside numeric cell (fills space when '변동사항' removed) */
 .table td.barcell{
   position: relative;
@@ -1851,6 +1880,8 @@ html.theme-light .table tr:nth-child(even) td{
 html.theme-light .table tr:hover td{
   background: rgba(0,0,0,.04) !important;
 }
+
+html.theme-light .provider-credit{ color: rgba(0,0,0,.55); }
 
 /* ✅ 라이트 모드: 탭/버튼/라벨 텍스트에 은은한 테두리(입체감) */
 html.theme-light :is(

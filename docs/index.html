@@ -175,11 +175,11 @@
 
         <!-- Panel: Total -->
         <div class="dash-panel" id="dash-total" hidden>
-          <div class="card">
+          <div class="card card-total">
             <div class="card-head">
-              <div>
-                <h3 style="margin:0 0 6px;">누적 기여도표</h3>
-                <p class="muted" style="margin:0;">1~3등은 특별 표시가 적용됩니다.</p>
+              <div class="title-inline">
+                <h3 style="margin:0;">누적 기여도표</h3>
+                <span class="badge-current" aria-label="현재 멤버">현재 멤버</span>
               </div>
               <div class="toolbar">
                 <div class="input-wrap">
@@ -194,14 +194,16 @@
                   <tr>
                     <th>순위</th>
                     <th>스트리머</th>
-                    <th style="text-align:right;">누적기여도</th>
+                    <th class="th-center">누적기여도</th>
+                    <th class="th-center">변동</th>
+                    <th class="th-center">근속일수</th>
 </tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
 
-            <div class="hint">* 1~3등은 특별 표시가 적용됩니다.</div>
+            <div class="provider-credit" aria-label="제공자">제공자 : 지케이님</div>
           </div>
         </div>
 

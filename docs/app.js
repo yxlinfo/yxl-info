@@ -44,6 +44,31 @@ document.addEventListener("DOMContentLoaded", () => {
       .trim()
       .toLowerCase();
 
+  // 헤더 정규화(엑셀에서 날짜/괄호가 붙어도 동일 컬럼으로 인식)
+  // 예) "직급전(11.5)" -> "직급전", "1회차 (11.11)" -> "1회차"
+  function normalizeHeader(h) {
+    return (h ?? "")
+      .toString()
+      .replace(/[♥♡]/g, "")
+      .replace(/\([^\)]*\)/g, "") // 괄호/날짜 제거
+      .replace(/\s+/g, "")
+      .trim()
+      .toLowerCase();
+  }
+
+  function findHeader(headers, candidates) {
+    const hs = headers || [];
+    const normMap = new Map(hs.map((h) => [normalizeHeader(h), h]));
+    for (const c of candidates) {
+      const key = normalizeHeader(c);
+      if (normMap.has(key)) return normMap.get(key);
+      // startsWith 매칭(예: "직급전(11.5)")
+      const found = hs.find((h) => normalizeHeader(h).startsWith(key));
+      if (found) return found;
+    }
+    return null;
+  }
+
   /* =========================
      Custom Select (드롭다운 UI 통일)
   ========================= */
@@ -218,6 +243,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const INTEGRATED_TEAMLEAD_BPLAYER_EXCEPT = new Set(["섭이", "차돈"].map(normalize));
 
+  // ✅ 현재 멤버(누적 기여도표에서 파란색 표시)
+  const CURRENT_MEMBERS = new Set([
+    "리윤",
+    "후잉",
+    "하랑짱",
+    "쩔밍",
+    "김유정",
+    "서니",
+    "율무",
+    "소다",
+    "강소지",
+    "나래",
+    "유나연",
+  ].map(normalize));
+
   function integratedIsBPlayer(row) {
     const role = normalize(normalizeRoleLabel(row?.["직급"]));
     const name = normalize(row?.["스트리머"]);
@@ -333,16 +373,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tbody.innerHTML = rows
       .map((r) => {
-        const rank = r["순위"];
+        const rankNum = Number(r["순위"] ?? 0);
+        const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
+        const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
+        const trClass = topRow ? ` class="top${topRow}"` : "";
+
         const name = r["스트리머"];
         const total = r["누적기여도"];
-        const delta = r["변동사항"];
+        const delta = r["변동"];
+        const tenure = r["근속일수"];
+
+        const isCurrent = CURRENT_MEMBERS.has(normalize(name));
+        const nameHtml = `<span class="soop-name${isCurrent ? " member-current" : ""}" data-streamer="${String(name ?? "")}">${name ?? ""}</span>`;
+
+        const rankHtml = top
+          ? `<span class="rank-badge rank-${top}"><span class="medal">${top===1?"🥇":top===2?"🥈":"🥉"}</span><span class="rank-num">${rankNum}</span></span>`
+          : `${r["순위"] ?? ""}`;
         return `
-          <tr>
-            <td>${rank ?? ""}</td>
-            <td>${name ?? ""}</td>
-            <td class="num">${numFmt(total)}</td>
-            <td class="num">${delta ?? ""}</td>
+          <tr${trClass}>
+            <td class="rankcell">${rankHtml}</td>
+            <td>${nameHtml}</td>
+            <td class="num center">${(total==null || `${total}`.trim()==="") ? "-" : numFmt(total)}</td>
+            <td class="num center">${(delta==null || `${delta}`.trim()==="") ? "-" : delta}</td>
+            <td class="num center">${(tenure==null || `${tenure}`.trim()==="") ? "-" : tenure}</td>
           </tr>
         `;
       })
@@ -403,7 +456,8 @@ if (q) {
           .map((h) => {
             const isActive = state.integratedSort.key === h;
             const ind = isActive ? (state.integratedSort.dir === "asc" ? " ▲" : " ▼") : "";
-            return `<th data-key="${h}">${h}${ind}</th>`;
+            const cls = normalize(h) === "합산기여도" ? " class=\"th-center\"" : "";
+            return `<th data-key="${h}"${cls}>${h}${ind}</th>`;
           })
           .join("")}
       </tr>
@@ -505,20 +559,12 @@ if (q) {
     // ✅ 시즌별 기여도표: "플레이어"만 노출 (비플레이어는 제외)
     // - 팀장 기본은 플레이어, 단 스트리머가 '섭이','차돈'이면 비플레이어
     // - 직급 오타 '웨아터' -> '웨이터' 정정
-    const _srcRoleKey =
-      headers.find((h) => normalize(h) === "직급" || normalize(h) === "직위") || "직급";
-    const _srcNameKey =
-      headers.find((h) =>
-        normalize(h) === "스트리머" || normalize(h) === "비제이명" || normalize(h) === "멤버"
-      ) || "스트리머";
-    const _srcBeforeKey = headers.find((h) => normalize(h) === "직급전") || "직급전";
-    const _srcRounds = [1, 2, 3, 4, 5].map((n) => {
-      return headers.find((h) => normalize(h) === `${n}회차`) || `${n}회차`;
-    });
+    const _srcRoleKey = findHeader(headers, ["직급", "직위"]) || "직급";
+    const _srcNameKey = findHeader(headers, ["스트리머", "비제이명", "이름", "멤버"]) || "스트리머";
+    const _srcBeforeKey = findHeader(headers, ["직급전"]) || "직급전";
+    const _srcRounds = [1, 2, 3, 4, 5].map((n) => findHeader(headers, [`${n}회차`]) || `${n}회차`);
     const _srcSumKey =
-      headers.find((h) => normalize(h) === "합산기여도") ||
-      headers.find((h) => normalize(h) === "누적기여도") ||
-      "합산기여도";
+      findHeader(headers, ["합산기여도", "누적기여도", "합산 기여도", "누적 기여도"]) || "합산기여도";
 
     // 표 컬럼(고정)
     const SEASON_KEEP = [
@@ -576,7 +622,7 @@ if (q) {
     let displayHeaders = SEASON_KEEP;
 
     // 헤더 가운데 정렬(요청: 직급전, 1~4회차, 합산기여도)
-    const SEASON_CENTER_HEADERS = new Set(["직급전","1회차","2회차","3회차","4회차","합산기여도"]);
+    const SEASON_CENTER_HEADERS = new Set(["직급전","1회차","2회차","3회차","4회차","5회차","합산기여도"]);
 
     // filter: streamer
     if (q) {
@@ -778,22 +824,53 @@ if (q) {
     const wb = XLSX.read(ab, { type: "array" });
     const names = wb.SheetNames;
 
-    // Sheet 1: 누적기여도
-    const t1 = sheetToTable(wb, names[0]);
-    state.main.total = t1.rows;
+    // ✅ 시트 이름 기반으로 찾기(순서가 바뀌어도 안전)
+    const totalSheet = names.find((n) => normalize(n).includes("누적") && normalize(n).includes("기여")) || names[0];
+    const integratedSheet =
+      names.find((n) => normalize(n).includes("s1") && normalize(n).includes("기여")) ||
+      names.find((n) => normalize(n).includes("통합") && normalize(n).includes("랭")) ||
+      names[1];
+    const seasonSheets = names.filter((n) => normalize(n).includes("시즌") && normalize(n).includes("기여"));
 
-    // Sheet 2: 시즌통합랭킹
-    const t2 = sheetToTable(wb, names[1]);
+    // Sheet: 누적기여도 (사용자 엑셀 헤더 대응)
+    const t1 = sheetToTable(wb, totalSheet);
+    const h1 = t1.headers;
+    const kRank = findHeader(h1, ["순위"]);
+    const kName = findHeader(h1, ["스트리머", "이름", "비제이명", "멤버"]);
+    const kScore = findHeader(h1, ["누적기여도", "누적 기여도", "누적 기여도 점수", "누적기여도점수", "기여도", "점수"]);
+    const kDelta = findHeader(h1, ["변동", "변동사항", "변동 사항", "변동내역"]);
+    const kTenure = findHeader(h1, ["근속일수", "근속", "근속일"]);
+
+    state.main.total = t1.rows.map((r) => ({
+      "순위": r[kRank] ?? r["순위"] ?? "",
+      "스트리머": r[kName] ?? r["스트리머"] ?? r["이름"] ?? "",
+      "누적기여도": r[kScore] ?? r["누적기여도"] ?? r["누적 기여도 점수"] ?? "",
+      "변동": r[kDelta] ?? r["변동"] ?? r["변동사항"] ?? "",
+      "근속일수": r[kTenure] ?? r["근속일수"] ?? "",
+    }));
+
+    // Sheet: 시즌통합랭킹
+    const t2 = sheetToTable(wb, integratedSheet);
+    const h2 = t2.headers;
+    const kSsn = findHeader(h2, ["시즌"]);
+    const kIRank = findHeader(h2, ["순위"]);
+    const kIRole = findHeader(h2, ["직급", "직위"]);
+    const kIName = findHeader(h2, ["스트리머", "비제이명", "이름", "멤버"]);
+    const kISum = findHeader(h2, ["합산기여도", "누적기여도", "합산 기여도"]);
     state.main.integratedHeaders = INTEGRATED_KEEP;
     state.main.integratedAll = t2.rows.map((r) => {
-      const o = {};
-      INTEGRATED_KEEP.forEach((k) => (o[k] = r[k] ?? ""));
-      o["직급"] = normalizeRoleLabel(o["직급"]);
+      const o = {
+        "순위": r[kIRank] ?? r["순위"] ?? "",
+        "시즌": r[kSsn] ?? r["시즌"] ?? "",
+        "직급": normalizeRoleLabel(r[kIRole] ?? r["직급"] ?? ""),
+        "스트리머": r[kIName] ?? r["스트리머"] ?? "",
+        "합산기여도": r[kISum] ?? r["합산기여도"] ?? "",
+      };
       return o;
     });
 
-    // Sheets 3~12: 시즌별
-    state.main.seasonSheetNames = names.slice(2, 12);
+    // Sheets: 시즌별(3~)
+    state.main.seasonSheetNames = seasonSheets.length ? seasonSheets : names.slice(2, 12);
     state.main.seasons.clear();
     state.main.seasonSheetNames.forEach((sn) => {
       state.main.seasons.set(sn, sheetToTable(wb, sn));

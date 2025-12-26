@@ -631,13 +631,9 @@ body::after{
 }
 }
 .schCol.is-out .schHead,
-.schDay.is-out{
-  opacity:.45;
-}
-.schCol.is-out .schHead{
-  border-style:dashed;
-}
-
+.schCol.is-out{ opacity:.45; }
+.schCol.is-out.is-active{ opacity:1; }
+.schCol.is-out .schHead{ border-style:dashed; }
 .schHead{
   display:flex;
   align-items:center;
@@ -684,6 +680,15 @@ body::after{
   margin-bottom:6px;
 }
 .schDow{ font-size:12px; font-weight:900; opacity:.86; }
+/* ✅ 주말 색상(달력 위치 기반 fallback: 일요일 시작 그리드) */
+.schGrid > .schCol:nth-child(7n+1) .schDow,
+.schGrid > .schCol:nth-child(7n+1) .schDate{
+  color: rgba(255, 120, 120, .95);
+}
+.schGrid > .schCol:nth-child(7n) .schDow,
+.schGrid > .schCol:nth-child(7n) .schDate{
+  color: rgba(60, 140, 255, .95);
+}
 .schRight{ display:flex; align-items:center; gap:8px; }
 .schBdayBadge{
   min-width:18px;

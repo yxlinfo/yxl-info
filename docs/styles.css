@@ -1812,17 +1812,21 @@ html.theme-light .schDay.is-today::before{ content:none; display:none; }
 
 /* 오늘/선택/다음 일정 강조는 라이트에서도 선명하게 */
 html.theme-light .schCol.is-today .schHead{
-  border-color: rgba(2,132,199,.30) !important;
-  background: rgba(2,132,199,.06) !important;
-  box-shadow: 0 0 0 1px rgba(2,132,199,.10) inset, 0 10px 22px rgba(0,0,0,.08) !important;
+  /* 오늘(금일) 표시: 과하지 않게 '선명한 테두리 + 얕은 인셋'만 */
+  border-color: rgba(2,132,199,.45) !important;
+  background: rgba(255,255,255,.90) !important;
+  box-shadow:
+    0 0 0 1px rgba(2,132,199,.12) inset,
+    0 10px 22px rgba(0,0,0,.08),
+    0 0 0 1px rgba(0,0,0,.05) !important;
 }
 html.theme-light .schDay.is-today{
-  border-color: rgba(2,132,199,.34) !important;
-  background: rgba(2,132,199,.05) !important;
+  border-color: rgba(2,132,199,.40) !important;
+  background: rgba(255,255,255,.90) !important;
   box-shadow:
     0 0 0 1px rgba(2,132,199,.10) inset,
-    0 0 0 3px rgba(2,132,199,.06),
-    0 14px 28px rgba(0,0,0,.10) !important;
+    0 12px 26px rgba(0,0,0,.09),
+    0 0 0 1px rgba(0,0,0,.05) !important;
 }
 html.theme-light .schDay.is-active{
   border-color: rgba(0,0,0,.26) !important;
@@ -2666,6 +2670,13 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
   overflow: visible !important;
 }
 
+/* ✅ stacking order: dropdown should be above Hall of Fame strip
+   - .wrap has z-index:1 globally, so HOF (later in DOM) can cover dropdown
+   - raise header-inner above hof-strip to prevent covering */
+.header .header-inner{ position: relative; z-index: 3; }
+.header .hof-strip{ position: relative; z-index: 2; }
+
+
 .cselect{ z-index: 200000; }
 .cselect-menu{
   z-index: 200001 !important;
@@ -2676,4 +2687,39 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 .cselect.dropup .cselect-menu{
   top: auto !important;
   bottom: calc(100% + 8px);
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  .table-wrap {
+    font-size: 12px;
+  }
+  .card, .dashboard-grid {
+    padding: 8px;
+  }
+  .logoTitle {
+    font-size: 14px;
+  }
+  .scheduleCard {
+    padding: 12px;
+  }
+  .bgm-row {
+    font-size: 10px;
+  }
+  .dash-tabs {
+    font-size: 12px;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    table-layout: fixed;
+  }
+  th, td {
+    font-size: 14px;
+    padding: 8px 6px;
+  }
 }

@@ -2689,64 +2689,95 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
   bottom: calc(100% + 8px);
 }
 
-@media (max-width: 768px) {
-  /* BGM 플레이어 */
-  .bgm-row {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 8px;
-    gap: 10px; /* 아이콘 간격 */
+/* =========================================================
+   MOBILE PATCH v3 - Schedule (7 columns, compact, horizontal text)
+   - Hide legend chips (엑셀/합방/이벤트/기타 설명)
+   - Keep only month prev/next buttons (hide '이번달')
+   - Force 7 columns even on small screens
+   - Show schedule text horizontally (no wrap); allow inner horizontal scroll per block
+   ========================================================= */
+@media (max-width: 520px){
+  /* legend hide */
+  .schLegend{ display:none !important; }
+
+  /* keep only prev/next */
+  #schToday{ display:none !important; }
+  .schBtn--today{ display:none !important; }
+
+  /* force 7 columns */
+  .schGrid{
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 4px !important;
   }
 
-  /* 재생 게이지 및 음량 게이지 숨기기 */
-  .bgm-seek, .bgm-vol {
-    display: none;
+  /* compact headers */
+  .schHead{
+    padding: 4px 4px !important;
+    border-radius: 10px !important;
+  }
+  .schDow{ font-size: 10px !important; }
+  .schDate{ font-size: 10px !important; opacity: .72 !important; }
+
+  /* compact day cells */
+  .schDay{
+    height: 84px !important;
+    min-height: 84px !important;
+    padding: 5px !important;
+    border-radius: 12px !important;
+  }
+  .schTop{ margin-bottom: 4px !important; gap: 4px !important; }
+  .schCount, .schBdayBadge{
+    height: 16px !important;
+    min-width: 16px !important;
+    padding: 0 5px !important;
+    font-size: 10px !important;
   }
 
-  /* 아이콘 크기 및 배열 재정렬 */
-  .bgm-row button {
-    font-size: 20px; /* 아이콘 크기 축소 */
-    padding: 6px;
+  /* schedule blocks: horizontal text, scroll inside block if long */
+  .schBlock{
+    padding: 3px 5px !important;
+    border-radius: 10px !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .schBlock::-webkit-scrollbar{ display:none !important; }
+
+  .schBlockTime{
+    font-size: 9.5px !important;
+    margin-top: 0 !important;
+  }
+  .schBlockTitle{
+    font-size: 10.5px !important;
+    font-weight: 900 !important;
+
+    /* remove clamp and keep one-line */
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    max-height: none !important;
+
+    white-space: nowrap !important;
+    overflow: visible !important;
+  }
+  .schBlockTag{
+    font-size: 9px !important;
+    padding: 1px 6px !important;
   }
 
-  /* 이전, 재생, 다음 아이콘 배열 재정렬 */
-  .bgm-row-top button {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+  /* highlight bar compact */
+  .schHighlight{
+    padding: 6px 8px !important;
+    border-radius: 12px !important;
+    gap: 8px !important;
   }
-
-  /* BGM 버튼 텍스트 제거 */
-  .bgm-seek, .bgm-vol {
-    display: none;
-  }
-
-  /* YXL 시작 ~ING 일수 감추기 */
-  #yxlDday {
-    display: none;
-  }
-
-  /* 명예의 전당 명단이 깨지지 않도록 가로로 다 보이게 설정 */
-  .hofMarquee__line {
-    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
-    overflow-x: auto;
-    display: flex;
-    gap: 12px;
-  }
-
-  /* 명예의 전당 항목들이 한 줄에 보이게 */
-  .hofMarquee__line div {
-    display: inline-block;
-    padding: 5px 10px;
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 6px;
-    font-size: 12px;
-    margin-right: 12px;
-  }
-
-  /* 명예의 전당에서 텍스트 크기 및 여백 줄이기 */
-  .hofMarquee__label {
-    font-size: 14px;
+  .schHighlight__label{ font-size: 11px !important; }
+  .schHlD{ font-size: 10px !important; }
+  .schHlText{
+    font-size: 11px !important;
+    -webkit-line-clamp: 1 !important;
+    max-height: 1.2em !important;
+    white-space: nowrap !important;
   }
 }

@@ -1491,7 +1491,7 @@ const on = localStorage.getItem(KEY_ON) === "1";
 
 
   /* =========================
-     YXL 주간 일정 (섹션: 🗓️ YXL 일정)
+     YXL 월간 일정 (섹션: 🗓️ YXL 일정)
      - app.js 안에서 일정 데이터만 수정하면 전체 사용자에게 동일하게 반영됩니다.
   ========================= */
   const YXL_SCHEDULE = [
@@ -1562,7 +1562,7 @@ const on = localStorage.getItem(KEY_ON) === "1";
       .replaceAll("'", "&#039;");
   }
 
-  // KST 기준으로 날짜(00:00)를 잡아 주간이 어긋나지 않게
+  // KST 기준으로 날짜(00:00)를 잡아 월/주 경계가 어긋나지 않게
   function kstDate00() {
     const s = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Seoul",
@@ -1586,6 +1586,11 @@ const on = localStorage.getItem(KEY_ON) === "1";
     return x;
   }
 
+  function addMonths(d, n) {
+    // 항상 1일 앵커로 고정(월 말 일수 차이로 인한 튐 방지)
+    return new Date(d.getFullYear(), d.getMonth() + n, 1);
+  }
+
   function startOfWeekMon(d) {
     const x = new Date(d);
     const day = x.getDay(); // 0 Sun ... 6 Sat
@@ -1595,11 +1600,10 @@ const on = localStorage.getItem(KEY_ON) === "1";
     return x;
   }
 
-  function fmtRange(mon) {
-    const sun = addDays(mon, 6);
-    const a = `${mon.getFullYear()}.${String(mon.getMonth() + 1).padStart(2, "0")}.${String(mon.getDate()).padStart(2, "0")}`;
-    const b = `${sun.getFullYear()}.${String(sun.getMonth() + 1).padStart(2, "0")}.${String(sun.getDate()).padStart(2, "0")}`;
-    return `${a} ~ ${b}`;
+  function fmtMonth(anchor) {
+    const y = anchor.getFullYear();
+    const m = String(anchor.getMonth() + 1).padStart(2, "0");
+    return `${y}.${m}`;
   }
 
   function initYxlSchedule() {
@@ -1614,7 +1618,7 @@ const on = localStorage.getItem(KEY_ON) === "1";
 
     const DOW = ["월", "화", "수", "목", "금", "토", "일"];
     const today = kstDate00();
-    let weekMon = startOfWeekMon(today);
+    let monthAnchor = new Date(today.getFullYear(), today.getMonth(), 1);
     let activeYMD = toYMD(today);
 
     const eventsFor = (ymd) =>
@@ -1622,12 +1626,13 @@ const on = localStorage.getItem(KEY_ON) === "1";
         .filter((e) => e.date === ymd)
         .slice()
         .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+
     // 색상 블록 분류(타입 기반)
     // - 생일: 빨간 블록
-    // - 엑셀일정: 파란 블록
+    // - 엑셀: 파란 블록
     // - 합방: 보라 블록
     // - 이벤트: 노란 블록
-    const BDAY_EMOJI = "🍰"; // (필요시 배지에만 사용)
+    const BDAY_EMOJI = "🍰";
 
     const getTypeText = (e) => (e?.type ?? "").toString().trim();
 
@@ -1653,120 +1658,103 @@ const on = localStorage.getItem(KEY_ON) === "1";
 
     const isBirthday = (e) => eventKind(e) === "birthday";
 
-    // 엑셀 일정(하이라이트/NEXT 강조용)
-    const isExcelEvent = (e) => eventKind(e) === "excel";
-
-    // 달력(주간 카드)에는 아래 4종만 블록으로 노출
+    // 달력(월간 그리드)에는 기본적으로 모든 일정을 표시합니다.
+    // (차후 "생일만", "엑셀만" 같은 필터가 생기면 여기서 제한하면 됩니다.)
     const isPinnedForCalendar = (_e) => true;
-// ===== 다음 일정(전체 일정 기준) =====
-// - 빈 공간으로 보이던 하이라이트 영역을 "가장 가까운 일정 1건" 안내 바(Bar)로 사용합니다.
-// - 길게 늘어지는 리스트는 금지: 기본은 1건만 노출하고, 7일 이내 추가 일정은 +N개로 요약합니다.
 
-function kstNow(){
-  // Asia/Seoul 기준 현재 시각(Date)
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit",
-    hour12: false
-  }).formatToParts(new Date());
+    // ===== 다음 일정(전체 일정 기준) =====
+    // - 빈 공간으로 보이던 하이라이트 영역을 "가장 가까운 일정 1건" 안내 바(Bar)로 사용합니다.
+    // - 길게 늘어지는 리스트는 금지: 기본은 1건만 노출하고, 7일 이내 추가 일정은 +N개로 요약합니다.
 
-  const get = (t) => parts.find(p => p.type === t)?.value || "00";
-  const y = get("year"), mo = get("month"), d = get("day");
-  const h = get("hour"), mi = get("minute"), s = get("second");
-  return new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`);
-}
+    function kstNow() {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Seoul",
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+        hour12: false
+      }).formatToParts(new Date());
 
-function parseEventDateKST(e){
-  const t = (e.time ?? "").toString().trim();
-  const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "23:59";
-  return new Date(`${e.date}T${hhmm}:00+09:00`);
-}
+      const get = (t) => parts.find(p => p.type === t)?.value || "00";
+      const y = get("year"), mo = get("month"), d = get("day");
+      const h = get("hour"), mi = get("minute"), s = get("second");
+      return new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`);
+    }
 
-function getUpcomingAll(){
-  const now = kstNow();
-  return YXL_SCHEDULE
-    .slice()
-    .filter(e => (e?.date ?? "").toString().trim().length === 10)
-    .map(e => ({ ...e, __dt: parseEventDateKST(e) }))
-    .filter(e => !Number.isNaN(e.__dt?.getTime?.()) && e.__dt.getTime() >= now.getTime())
-    .sort((a,b) => a.__dt.getTime() - b.__dt.getTime());
-}
+    function parseEventDateKST(e) {
+      const t = (e.time ?? "").toString().trim();
+      const hhmm = t && /^\d{1,2}:\d{2}$/.test(t) ? t : "23:59";
+      return new Date(`${e.date}T${hhmm}:00+09:00`);
+    }
 
-// 가장 가까운 일정 날짜(YYYY-MM-DD) — 주간 카드에서 NEXT 강조용
-const nextAny = getUpcomingAll()[0];
-const nextYMD = nextAny ? nextAny.date : null;
+    function getUpcomingAll() {
+      const now = kstNow();
+      return YXL_SCHEDULE
+        .slice()
+        .filter(e => (e?.date ?? "").toString().trim().length === 10)
+        .map(e => ({ ...e, __dt: parseEventDateKST(e) }))
+        .filter(e => !Number.isNaN(e.__dt?.getTime?.()) && e.__dt.getTime() >= now.getTime())
+        .sort((a, b) => a.__dt.getTime() - b.__dt.getTime());
+    }
 
-function renderNextBar(){
-  const box = document.getElementById("schHighlight");
-  if (!box) return;
+    function renderNextBar() {
+      const box = document.getElementById("schHighlight");
+      if (!box) return;
 
-  const list = getUpcomingAll();
-  if (!list.length){
-    box.classList.add("is-empty");
-    box.innerHTML = "";
-    return;
-  }
-  box.classList.remove("is-empty");
+      const list = getUpcomingAll();
+      if (!list.length) {
+        box.classList.add("is-empty");
+        box.innerHTML = "";
+        return;
+      }
+      box.classList.remove("is-empty");
 
-  const first = list[0];
+      const first = list[0];
 
-  // 7일 이내 추가 일정 개수 요약(+N)
-  const now = kstNow();
-  const until = new Date(now.getTime() + 7 * 86400000);
-  const moreN = Math.max(
-    0,
-    list.filter(e => e.__dt.getTime() < until.getTime()).length - 1
-  );
+      // 7일 이내 추가 일정 개수 요약(+N)
+      const now = kstNow();
+      const until = new Date(now.getTime() + 7 * 86400000);
+      const moreN = Math.max(
+        0,
+        list.filter(e => e.__dt.getTime() < until.getTime()).length - 1
+      );
 
-  const dowMap = ["일","월","화","수","목","금","토"];
-  const today00 = kstDate00();
-  const d0 = new Date(`${first.date}T00:00:00+09:00`);
-  const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
-  const dtag = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
+      const dowMap = ["일", "월", "화", "수", "목", "금", "토"];
+      const today00 = kstDate00();
+      const d0 = new Date(`${first.date}T00:00:00+09:00`);
+      const diff = Math.floor((d0.getTime() - today00.getTime()) / 86400000);
+      const dtag = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
 
-  const mm = String(d0.getMonth()+1).padStart(2,"0");
-  const dd = String(d0.getDate()).padStart(2,"0");
-  const dow = dowMap[d0.getDay()];
+      const mm = String(d0.getMonth() + 1).padStart(2, "0");
+      const dd = String(d0.getDate()).padStart(2, "0");
+      const dow = dowMap[d0.getDay()];
 
-  const t = (first.time ?? "").toString().trim();
-  const timeText = t ? `${t} · ` : "";
+      const t = (first.time ?? "").toString().trim();
+      const timeText = t ? `${t} · ` : "";
 
-  const kind = eventKind(first);
-  const titleText = (first.title ?? "").toString();
-  const typeText = getTypeText(first);
-  const typeBadge = typeText ? ` · ${typeText}` : "";
+      const kind = eventKind(first);
+      const titleText = (first.title ?? "").toString();
+      const typeText = getTypeText(first);
+      const typeBadge = typeText ? ` · ${typeText}` : "";
 
-  box.innerHTML = `
-    <div class="schHighlight__label">다음 일정</div>
-    <div class="schHighlight__items">
-      <div class="schHlItem schBlock ${blockClass(kind)}" title="${escapeHtml(titleText)}">
-        <span class="schHlD">${dtag}</span>
-        <span class="schHlText">${escapeHtml(`${mm}.${dd} (${dow}) · ${timeText}${titleText}${typeBadge}`)}</span>
-      </div>
-      ${moreN ? `<span class="schHlMore">+${moreN}개</span>` : ""}
-    </div>
-  `;
-}
-
-// 타입 칩(라벨) 매핑: 일정 데이터에 type을 적으면 자동 표시됩니다.
-    // 권장: "합방", "회의", "이벤트", "공지"
-    function typeClass(type) {
-      const t = (type ?? "").toString().trim();
-      if (!t) return "";
-      const k = t.toLowerCase();
-      if (k.includes("합") || k.includes("collab")) return "t-joint";
-      if (k.includes("회의") || k.includes("meeting")) return "t-meet";
-      if (k.includes("이벤트") || k.includes("event")) return "t-event";
-      if (k.includes("공지") || k.includes("notice")) return "t-notice";
-      return "t-etc";
+      box.innerHTML = `
+        <div class="schHighlight__label">다음 일정</div>
+        <div class="schHighlight__items">
+          <div class="schHlItem schBlock ${blockClass(kind)}" title="${escapeHtml(titleText)}">
+            <span class="schHlD">${dtag}</span>
+            <span class="schHlText">${escapeHtml(`${mm}.${dd} (${dow}) · ${timeText}${titleText}${typeBadge}`)}</span>
+          </div>
+          ${moreN ? `<span class="schHlMore">+${moreN}개</span>` : ""}
+        </div>
+      `;
     }
 
     function renderDetail(ymd) {
       const ev = eventsFor(ymd);
       const d = new Date(`${ymd}T00:00:00`);
-      const idx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+      const day = d.getDay(); // 0=일..6=토
+      const idx = day === 0 ? 6 : day - 1;
       const title = `${ymd.replaceAll("-", ".")} (${DOW[idx]})`;
+
       // 상세(아래 리스트)는 '달력에 표시되지 않은 일정'이 있거나, 일정이 2개 이상일 때만 노출합니다.
       // - 달력 카드(엑셀일정/생일)와 중복되어 화면이 답답해지는 걸 방지
       if (ev.length === 0 || (ev.length === 1 && isPinnedForCalendar(ev[0]))) {
@@ -1795,12 +1783,17 @@ function renderNextBar(){
           .join("");
     }
 
-    function renderWeek() {
-      rangeEl.textContent = fmtRange(weekMon);
+    function renderMonth() {
+      rangeEl.textContent = fmtMonth(monthAnchor);
       grid.innerHTML = "";
 
-      for (let i = 0; i < 7; i++) {
-        const d = addDays(weekMon, i);
+      const monthFirst = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1);
+      const gridStart = startOfWeekMon(monthFirst); // 월요일 시작
+      const nextYMD = getUpcomingAll()[0]?.date || null;
+
+      // 6주(42칸) 고정: 월간 달력 레이아웃
+      for (let i = 0; i < 42; i++) {
+        const d = addDays(gridStart, i);
         const ymd = toYMD(d);
         const dayEvents = eventsFor(ymd);
         const evCount = dayEvents.length;
@@ -1809,39 +1802,39 @@ function renderNextBar(){
         const shownCount = shownEvents.length;
         const moreCount = Math.max(0, evCount - Math.min(shownCount, 2));
 
-        // 토/일(주말) + 한국 공휴일(대체 포함) 강조
         const day = d.getDay(); // 0=일 ... 6=토
         const isWeekend = day === 0 || day === 6;
         const isHoliday = isKoreanHoliday(ymd);
+        const isOut = d.getMonth() !== monthAnchor.getMonth();
 
+        const dowIdx = day === 0 ? 6 : day - 1;
         const mm = String(d.getMonth() + 1).padStart(2, "0");
         const dd = String(d.getDate()).padStart(2, "0");
 
-        // ✅ 그리드 1칸 = (상단 헤더) + (일정 블록 카드)
         const col = document.createElement("div");
         col.className =
           "schCol" +
           (ymd === toYMD(today) ? " is-today" : "") +
           (ymd === activeYMD ? " is-active" : "") +
-          "" +
           (isWeekend ? " is-weekend" : "") +
-          (isHoliday ? " is-holiday" : "");
+          (isHoliday ? " is-holiday" : "") +
+          (isOut ? " is-out" : "");
 
-        // 일정 블록 카드(클릭 영역) — 안에는 일정만
         const card = document.createElement("div");
         card.className =
           "schDay" +
           (ymd === toYMD(today) ? " is-today" : "") +
           (ymd === activeYMD ? " is-active" : "") +
-          "" +
           (isWeekend ? " is-weekend" : "") +
-          (isHoliday ? " is-holiday" : "");
+          (isHoliday ? " is-holiday" : "") +
+          (isOut ? " is-out" : "") +
+          (nextYMD && ymd === nextYMD ? " is-next" : "");
 
         col.innerHTML = `
           <div class="schHead">
             <div class="schHeadLeft">
               <span class="schDate">${mm}.${dd}</span>
-              <span class="schDow">${DOW[i]}</span>
+              <span class="schDow">${DOW[dowIdx]}</span>
             </div>
             <div class="schRight">
               ${hasBirthday ? `<span class="schBdayBadge" aria-label="생일">${BDAY_EMOJI}</span>` : ""}
@@ -1857,20 +1850,20 @@ function renderNextBar(){
         card.innerHTML = `
           ${
             evCount > 0
-              ? (Math.min(shownCount,2) > 0
+              ? (Math.min(shownCount, 2) > 0
                   ? `<div class="schPreview">
-                  ${shownEvents
-                    .slice(0, 2)
-                    .map((e) => {
-                      const kind = eventKind(e);
-                      return `<div class="schBlock ${blockClass(kind)}">
-                                <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
-                                <span class="schBlockTitle" title="${escapeHtml(e.title || "")}">${escapeHtml(e.title || "")}</span>
-                              </div>`;
-                    })
-                    .join("")}
-                  ${moreCount > 0 ? `<div class="schPvMore">+${moreCount}개 더</div>` : ""}
-                </div>`
+                      ${shownEvents
+                        .slice(0, 2)
+                        .map((e) => {
+                          const kind = eventKind(e);
+                          return `<div class="schBlock ${blockClass(kind)}">
+                                    <span class="schBlockTime">${escapeHtml(e.time || "—")}</span>
+                                    <span class="schBlockTitle" title="${escapeHtml(e.title || "")}">${escapeHtml(e.title || "")}</span>
+                                  </div>`;
+                        })
+                        .join("")}
+                      ${moreCount > 0 ? `<div class="schPvMore">+${moreCount}개 더</div>` : ""}
+                    </div>`
                   : `<div class="schPreview"><div class="schPvMore">+${evCount}개</div></div>`
                 )
               : `<div class="schDots" aria-hidden="true">
@@ -1882,8 +1875,10 @@ function renderNextBar(){
         `;
 
         col.addEventListener("click", () => {
+          // 다른 달 날짜를 클릭하면 해당 달로 자연스럽게 이동
+          if (isOut) monthAnchor = new Date(d.getFullYear(), d.getMonth(), 1);
           activeYMD = ymd;
-          renderWeek();
+          renderMonth();
           renderDetail(activeYMD);
         });
 
@@ -1891,36 +1886,34 @@ function renderNextBar(){
         grid.appendChild(col);
       }
 
-      // 상단 '다음 일정' 바 갱신
       renderNextBar();
-
     }
 
     btnPrev?.addEventListener("click", () => {
-      weekMon = addDays(weekMon, -7);
-      activeYMD = toYMD(weekMon);
-      renderWeek();
+      monthAnchor = addMonths(monthAnchor, -1);
+      activeYMD = toYMD(monthAnchor);
+      renderMonth();
       renderDetail(activeYMD);
     });
 
     btnNext?.addEventListener("click", () => {
-      weekMon = addDays(weekMon, 7);
-      activeYMD = toYMD(weekMon);
-      renderWeek();
+      monthAnchor = addMonths(monthAnchor, 1);
+      activeYMD = toYMD(monthAnchor);
+      renderMonth();
       renderDetail(activeYMD);
     });
 
     btnToday?.addEventListener("click", () => {
-      weekMon = startOfWeekMon(kstDate00());
-      activeYMD = toYMD(kstDate00());
-      renderWeek();
+      const t = kstDate00();
+      monthAnchor = new Date(t.getFullYear(), t.getMonth(), 1);
+      activeYMD = toYMD(t);
+      renderMonth();
       renderDetail(activeYMD);
     });
 
-    renderWeek();
+    renderMonth();
     renderDetail(activeYMD);
   }
-
 
   /* =========================
      Init

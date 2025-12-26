@@ -340,7 +340,7 @@ body::after{
 /* sticky 헤더에 가려지지 않게 */
 #secSchedule, #secData{ scroll-margin-top: 200px; }
 
-/* ✅ YXL 주간 일정 카드 */
+/* ✅ YXL 월간 일정 카드 */
 .scheduleCard{ padding:16px; }
 .scheduleHead{
   display:flex;
@@ -629,6 +629,15 @@ body::after{
   min-width:0;
   cursor:pointer;
 }
+}
+.schCol.is-out .schHead,
+.schDay.is-out{
+  opacity:.55;
+}
+.schCol.is-out .schHead{
+  border-style:dashed;
+}
+
 .schHead{
   display:flex;
   align-items:center;

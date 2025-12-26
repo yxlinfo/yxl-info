@@ -1371,6 +1371,25 @@ const on = localStorage.getItem(KEY_ON) === "1";
       { gen: "10대부장", name: "지유", cnt: "4,001,954개" }
     ];
 
+    // ✅ 모바일에서는 '1개씩 입장/정지/퇴장' 대신, 명단을 한 줄로 전부 표시(깨짐 방지)
+    const isMobileHofStatic = window.matchMedia && window.matchMedia("(max-width: 520px)").matches;
+    if (isMobileHofStatic) {
+      line.innerHTML = HOF.map((it) => {
+        const cntHtml = it.cnt ? `<span class="hofCnt">(${it.cnt})</span>` : "";
+        return `
+          <span class="hofItem">
+            <span class="hofGen">${it.gen}</span>
+            <span class="hofName">${it.name}</span>
+            ${cntHtml}
+          </span>
+        `;
+      }).join("");
+      line.style.opacity = "1";
+      line.style.transform = "translateY(0)";
+      return;
+    }
+
+
     // 모션 최소화 환경에서는 1대만 고정 표시
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       const it = HOF[0];

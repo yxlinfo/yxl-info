@@ -2690,94 +2690,179 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 /* =========================================================
-   MOBILE PATCH v3 - Schedule (7 columns, compact, horizontal text)
-   - Hide legend chips (엑셀/합방/이벤트/기타 설명)
-   - Keep only month prev/next buttons (hide '이번달')
-   - Force 7 columns even on small screens
-   - Show schedule text horizontally (no wrap); allow inner horizontal scroll per block
+   MOBILE PATCH (no horizontal dashboard drift)
+   - Hide BGM seek/vol on mobile + compact controls
+   - Hide YXL D-day on mobile
+   - Hall of Fame: show names in one line (scrollable) without breaking
+   - Schedule: compact week grid like PC (7 columns visible)
    ========================================================= */
 @media (max-width: 520px){
-  /* legend hide */
-  .schLegend{ display:none !important; }
-
-  /* keep only prev/next */
-  #schToday{ display:none !important; }
-  .schBtn--today{ display:none !important; }
-
-  /* force 7 columns */
-  .schGrid{
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap: 4px !important;
+  /* ---- Header / BGM dash: 1-line compact ---- */
+  .bgm-dash{
+    display:flex !important;
+    flex-direction: row !important;
+    align-items:center !important;
+    gap: 8px !important;
+    padding: 6px 8px !important;
+  }
+  .bgm-row{
+    padding: 0 !important;
+    gap: 6px !important;
+  }
+  .bgm-row-top{
+    display:flex !important;
+    align-items:center !important;
+    gap: 6px !important;
+    flex: 0 0 auto !important;
+  }
+  .bgm-row-bottom{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    gap: 6px !important;
+    flex: 1 1 auto !important;
   }
 
-  /* compact headers */
-  .schHead{
-    padding: 4px 4px !important;
-    border-radius: 10px !important;
+  /* hide seek/volume sliders (strong) */
+  #bgmSeek, #bgmVol,
+  .bgm-seek, .bgm-vol{
+    display:none !important;
   }
-  .schDow{ font-size: 10px !important; }
-  .schDate{ font-size: 10px !important; opacity: .72 !important; }
 
-  /* compact day cells */
-  .schDay{
-    height: 84px !important;
-    min-height: 84px !important;
-    padding: 5px !important;
+  /* compact buttons */
+  .bgm-row-top .btn,
+  #bgmPrev, #bgmPlay, #bgmNext{
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
     border-radius: 12px !important;
   }
-  .schTop{ margin-bottom: 4px !important; gap: 4px !important; }
-  .schCount, .schBdayBadge{
-    height: 16px !important;
-    min-width: 16px !important;
-    padding: 0 5px !important;
-    font-size: 10px !important;
+
+  /* compact select + theme */
+  .bgm-dash .cselect-btn{
+    height: 34px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    border-radius: 12px !important;
+    max-width: 160px !important;
+  }
+  .bgm-dash .cselect-label{
+    display:block !important;
+    max-width: 120px !important;
+    overflow:hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  #themeToggle{
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
   }
 
-  /* schedule blocks: horizontal text, scroll inside block if long */
-  .schBlock{
-    padding: 3px 5px !important;
-    border-radius: 10px !important;
-    gap: 6px !important;
+  /* ---- Hide YXL D-day on mobile ---- */
+  #yxlDday{ display:none !important; }
+
+  /* ---- Hall of Fame: prevent breaking, show horizontal list ---- */
+  .hofMarquee{
+    gap: 8px !important;
+    padding: 8px 10px !important;
+  }
+  .hofMarquee__viewport{
+    height: auto !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
+    mask-image: none !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
   }
-  .schBlock::-webkit-scrollbar{ display:none !important; }
-
-  .schBlockTime{
-    font-size: 9.5px !important;
-    margin-top: 0 !important;
-  }
-  .schBlockTitle{
-    font-size: 10.5px !important;
-    font-weight: 900 !important;
-
-    /* remove clamp and keep one-line */
-    display: block !important;
-    -webkit-line-clamp: unset !important;
-    max-height: none !important;
-
+  .hofMarquee__line{
+    position: static !important;
+    height: auto !important;
+    opacity: 1 !important;
+    transform: none !important;
+    justify-content: flex-start !important;
     white-space: nowrap !important;
-    overflow: visible !important;
-  }
-  .schBlockTag{
-    font-size: 9px !important;
-    padding: 1px 6px !important;
-  }
-
-  /* highlight bar compact */
-  .schHighlight{
-    padding: 6px 8px !important;
-    border-radius: 12px !important;
+    flex-wrap: nowrap !important;
     gap: 8px !important;
+    padding: 2px 0 !important;
   }
-  .schHighlight__label{ font-size: 11px !important; }
-  .schHlD{ font-size: 10px !important; }
-  .schHlText{
-    font-size: 11px !important;
-    -webkit-line-clamp: 1 !important;
-    max-height: 1.2em !important;
+  .hofMarquee__line.is-anim{ animation:none !important; }
+  .hofItem{
+    display:inline-flex !important;
+    align-items:center !important;
+    gap: 6px !important;
+    padding: 6px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,255,255,.14) !important;
+    background: rgba(255,255,255,.05) !important;
+    box-shadow: 0 10px 22px rgba(0,0,0,.18), 0 0 0 1px rgba(255,255,255,.06) inset !important;
     white-space: nowrap !important;
+  }
+  .hofItem .hofGen{
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 11px !important;
+    opacity: .9 !important;
+  }
+  .hofItem .hofName{
+    font-size: 13px !important;
+    font-weight: 1100 !important;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+  .hofItem .hofCnt{
+    font-size: 11px !important;
+    opacity: .85 !important;
+  }
+
+  /* ---- Schedule: keep 7 columns visible, but compact ---- */
+  .scheduleCard{ padding: 10px !important; }
+  .scheduleHead{
+    gap: 8px !important;
+    align-items: center !important;
+  }
+  .schRangeWrap{ gap: 8px !important; }
+  .schRangeLabel{ font-size: 12px !important; }
+  .schRange{ font-size: 12px !important; }
+
+  /* legend: swatch-only to save width */
+  .schLegend{ gap: 6px !important; }
+  .schLegendLabel{ display:none !important; }
+  .schLegendSwatch{ width: 10px !important; height: 10px !important; border-radius: 3px !important; }
+
+  .schControls{ gap: 6px !important; }
+  .schIconBtn{
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 10px !important;
+  }
+  .schBtn{
+    height: 28px !important;
+    padding: 0 8px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+  }
+
+  /* grid density */
+  .schGrid{ gap: 6px !important; }
+  .schHead{
+    padding: 6px 6px !important;
+    font-size: 11px !important;
+  }
+  .schDay{
+    min-height: 62px !important;
+    padding: 6px !important;
+    border-radius: 12px !important;
+  }
+  .schBlock{
+    padding: 3px 6px !important;
+    font-size: 10px !important;
+    border-radius: 10px !important;
   }
 }

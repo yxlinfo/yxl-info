@@ -2690,36 +2690,90 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 @media (max-width: 768px) {
-  body {
-    font-size: 14px;
+  /* 월간 일정 그리드 수정 */
+  .schGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 일주일을 7개의 열로 나누기 */
+    gap: 10px;
   }
-  .table-wrap {
+
+  /* 일정 박스 크기 조정 */
+  .schDay {
+    padding: 12px;
+    font-size: 12px; /* 폰트 크기 축소 */
+    height: auto;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+
+  /* 각 요일 박스 */
+  .schDay .schTop {
+    font-size: 14px; /* 요일 표시 크기 */
+    margin-bottom: 8px;
+  }
+
+  .schDay .schDate {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  /* 일정 내용 표시 */
+  .schBlock {
+    padding: 6px;
+    font-size: 10px;
+    margin-top: 6px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    color: #fff;
+  }
+
+  /* 일정 카드 크기 최적화 */
+  .scheduleCard {
+    padding: 10px;
+  }
+
+  /* 일정 카드의 내용 */
+  .schHighlight, .schBlock {
+    padding: 8px 10px;
+    font-size: 10px; /* 작은 화면에 맞게 폰트 축소 */
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .schGrid .schDay {
+    height: 100px; /* 일정 박스 높이 조정 */
+    text-align: center;
     font-size: 12px;
-  }
-  .card, .dashboard-grid {
     padding: 8px;
   }
-  .logoTitle {
-    font-size: 14px;
-  }
-  .scheduleCard {
-    padding: 12px;
-  }
-  .bgm-row {
-    font-size: 10px;
-  }
-  .dash-tabs {
+
+  /* 더 보기 버튼 */
+  .showMore {
+    display: block;
+    text-align: center;
+    margin-top: 6px;
+    background-color: rgba(0, 0, 0, 0.15);
+    padding: 5px 10px;
+    border-radius: 6px;
     font-size: 12px;
+    color: #fff;
+    cursor: pointer;
   }
-  .table-wrap {
-    overflow-x: auto;
+
+  .showMore:hover {
+    background-color: rgba(0, 0, 0, 0.2);
   }
-  table {
-    width: 100%;
-    table-layout: fixed;
+
+  .schHead .schDow {
+    font-size: 10px;
+    color: #fff;
+    text-align: center;
   }
-  th, td {
-    font-size: 14px;
-    padding: 8px 6px;
+
+  .schHead .schDate {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
   }
 }

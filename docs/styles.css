@@ -670,7 +670,8 @@ body::after{
   border-radius:14px;
   background:rgba(255,255,255,.04);
   padding:10px;
-  min-height:66px;
+  height:150px;
+  min-height:150px;
   cursor:pointer;
   opacity:.92;
 }
@@ -730,30 +731,12 @@ body::after{
     0 12px 30px rgba(0,0,0,.30);
 }
 .schDay.is-today::before{
-  content:"TODAY";
-  position:absolute;
-  top:10px;
-  right:10px;
-  font-size:10px;
-  font-weight:900;
-  letter-spacing:.3px;
-  padding:2px 7px;
-  border-radius:999px;
-  border:1px solid rgba(125,211,252,.24);
-  background: rgba(0,0,0,.18);
-  color: var(--text);
-  opacity:.9;
+  content:none;
+  display:none;
 }
 .schDay.is-today::after{
-  content:"";
-  position:absolute;
-  top:10px;
-  left:10px;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background: rgba(125,211,252,.95);
-  box-shadow: 0 0 0 2px rgba(0,0,0,.22), 0 0 18px rgba(125,211,252,.35);
+  content:none;
+  display:none;
 }
 .schDay.is-active{
   border-color: rgba(255,255,255,.30);
@@ -1733,8 +1716,8 @@ html.theme-light, html.theme-light body{
 
   /* text palette */
   --card: rgba(255,255,255,.86);
-  --line: rgba(0,0,0,.18);
-  --line-soft: rgba(0,0,0,.12);
+  --line: rgba(0,0,0,.30);
+  --line-soft: rgba(0,0,0,.20);
   --lift: 0 12px 28px rgba(0,0,0,.10);
   --lift-outline: 0 0 0 1px rgba(0,0,0,.08);
   --lift-inset: 0 0 0 1px rgba(255,255,255,.55) inset;
@@ -1791,7 +1774,7 @@ html.theme-light :is(
 */
 html.theme-light :is(.schHighlight, .schHead, .schDay){
   background: rgba(255,255,255,.90) !important;
-  border-color: rgba(0,0,0,.18) !important;
+  border-color: rgba(0,0,0,.30) !important;
   box-shadow:
     0 10px 22px rgba(0,0,0,.08),
     0 0 0 1px rgba(0,0,0,.05),
@@ -1807,12 +1790,7 @@ html.theme-light :is(.schBdayBadge, .schCount){
 }
 
 /* 'TODAY' 라벨(가독성) */
-html.theme-light .schDay.is-today::before{
-  background: rgba(255,255,255,.85) !important;
-  border-color: rgba(2,132,199,.22) !important;
-  color: var(--text) !important;
-  box-shadow: 0 8px 18px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04) inset !important;
-}
+html.theme-light .schDay.is-today::before{ content:none; display:none; }
 
 /* 오늘/선택/다음 일정 강조는 라이트에서도 선명하게 */
 html.theme-light .schCol.is-today .schHead{

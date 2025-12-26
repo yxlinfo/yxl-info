@@ -1591,11 +1591,11 @@ const on = localStorage.getItem(KEY_ON) === "1";
     return new Date(d.getFullYear(), d.getMonth() + n, 1);
   }
 
-  function startOfWeekMon(d) {
+  function startOfWeekSun(d) {
     const x = new Date(d);
     const day = x.getDay(); // 0 Sun ... 6 Sat
-    const diff = day === 0 ? -6 : 1 - day; // Monday 기준
-    x.setDate(x.getDate() + diff);
+    // Sunday 기준: 해당 주의 일요일(00:00)로 이동
+    x.setDate(x.getDate() - day);
     x.setHours(0, 0, 0, 0);
     return x;
   }
@@ -1616,7 +1616,7 @@ const on = localStorage.getItem(KEY_ON) === "1";
     const btnNext = document.getElementById("schNext");
     const btnToday = document.getElementById("schToday");
 
-    const DOW = ["월", "화", "수", "목", "금", "토", "일"];
+    const DOW = ["일", "월", "화", "수", "목", "금", "토"];
     const today = kstDate00();
     let monthAnchor = new Date(today.getFullYear(), today.getMonth(), 1);
     let activeYMD = toYMD(today);
@@ -1752,7 +1752,7 @@ const on = localStorage.getItem(KEY_ON) === "1";
       const ev = eventsFor(ymd);
       const d = new Date(`${ymd}T00:00:00`);
       const day = d.getDay(); // 0=일..6=토
-      const idx = day === 0 ? 6 : day - 1;
+      const idx = day;
       const title = `${ymd.replaceAll("-", ".")} (${DOW[idx]})`;
 
       // 상세(아래 리스트)는 '달력에 표시되지 않은 일정'이 있거나, 일정이 2개 이상일 때만 노출합니다.
@@ -1788,7 +1788,7 @@ const on = localStorage.getItem(KEY_ON) === "1";
       grid.innerHTML = "";
 
       const monthFirst = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1);
-      const gridStart = startOfWeekMon(monthFirst); // 월요일 시작
+      const gridStart = startOfWeekSun(monthFirst); // 월요일 시작
       const nextYMD = getUpcomingAll()[0]?.date || null;
 
       // 6주(42칸) 고정: 월간 달력 레이아웃
@@ -1807,7 +1807,7 @@ const on = localStorage.getItem(KEY_ON) === "1";
         const isHoliday = isKoreanHoliday(ymd);
         const isOut = d.getMonth() !== monthAnchor.getMonth();
 
-        const dowIdx = day === 0 ? 6 : day - 1;
+        const dowIdx = day;
         const mm = String(d.getMonth() + 1).padStart(2, "0");
         const dd = String(d.getDate()).padStart(2, "0");
 

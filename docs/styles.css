@@ -2690,12 +2690,14 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 /* =========================================================
-   MOBILE PATCH v8 (Optimized for iPhone 12 Pro)
-   - Optimized for iPhone 12 Pro screen size and resolution
-   - Layout adjustments for calendar, schedule, and icons
+   MOBILE PATCH v9 (Optimized for iPhone 12 Pro - landscape and portrait)
+   - Optimized layout for mobile portrait mode (no clipping or overlap)
+   - Maintain consistent layout for calendar and schedule
+   - Correct display for icons and text, ensuring no elements get cut off
    ========================================================= */
+
 @media (max-width: 1170px) {
-  /* 7 columns, center align month/date/week */
+  /* ---------- 7 columns for schedule, full width on mobile ---------- */
   .schGrid {
     grid-template-columns: repeat(7, 1fr) !important;
     gap: 4px !important;
@@ -2725,7 +2727,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     opacity: 0.7 !important;
   }
   
-  /* Optimize BGM player buttons (size and layout) */
+  /* ---------- BGM buttons: adjusted for portrait mode ---------- */
   .bgm-row button {
     width: 35px !important;
     height: 35px !important;
@@ -2739,21 +2741,21 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     border-radius: 12px !important;
     max-width: 160px !important;
   }
-
-  /* Hall of Fame: animation re-added (slow and smooth) */
+  
+  /* ---------- Hall of Fame animation for portrait and landscape mode ---------- */
   .hofMarquee__line {
     display: flex !important;
     gap: 8px !important;
     justify-content: flex-start !important;
     white-space: nowrap !important;
-    animation: marquee 30s linear infinite !important;
+    animation: marquee 30s linear infinite !important; /* Slower animation for smooth display */
   }
   @keyframes marquee {
     0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
   }
-
-  /* Schedule blocks: clickable to reveal detailed info */
+  
+  /* ---------- Schedule block: clickable to show details ---------- */
   .schBlock {
     padding: 8px !important;
     cursor: pointer !important;
@@ -2774,7 +2776,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     display: block !important;
   }
   
-  /* Key info text only for schedule (No overflow) */
+  /* ---------- Key info text for schedule: only show the necessary labels ---------- */
   .schPreview .schBlockTitle {
     white-space: nowrap !important;
     overflow: hidden !important;

@@ -2600,3 +2600,30 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 
 /* 시즌별 기여도표 헤더 가운데 정렬 */
 #seasonTable th.th-center{ text-align:center; }
+
+/* =========================
+   ✅ Fix: BGM Select 드롭다운이 가려지는 문제
+   - z-index 최상단
+   - 헤더/대시보드 overflow로 잘리는 현상 방지
+   - 화면 아래로 잘리면 dropup으로 위로 펼침 (JS와 함께)
+========================= */
+.header,
+.header .wrap,
+.header-inner,
+.header-actions,
+.bgm-dash,
+.bgm-row{
+  overflow: visible !important;
+}
+
+.cselect{ z-index: 200000; }
+.cselect-menu{
+  z-index: 200001 !important;
+  /* 화면 높이에 맞춰 너무 길면 내부 스크롤 */
+  max-height: min(420px, calc(100vh - 120px));
+}
+
+.cselect.dropup .cselect-menu{
+  top: auto !important;
+  bottom: calc(100% + 8px);
+}

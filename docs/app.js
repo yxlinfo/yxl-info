@@ -2,18 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Config
   ========================= */
-const FILE_MAIN_CANDIDATES = [
-  "YXL_통합.xlsx",
-  "data/YXL_통합.xlsx",
-  "assets/YXL_통합.xlsx",
-  "docs/YXL_통합.xlsx",
-];
-const FILE_SYNERGY_CANDIDATES = [
-  "시너지표.xlsx",
-  "data/시너지표.xlsx",
-  "assets/시너지표.xlsx",
-  "docs/시너지표.xlsx",
-];
+  const FILE_MAIN = "YXL_통합.xlsx";
+  const FILE_SYNERGY = "시너지표.xlsx";
   const AUTO_REFRESH_MS = 3 * 60 * 60 * 1000; // 3시간
 
   const state = {
@@ -78,12 +68,37 @@ const FILE_SYNERGY_CANDIDATES = [
 
     const close = () => {
       wrap.classList.remove("is-open");
+      wrap.classList.remove("dropup");
       btn.setAttribute("aria-expanded", "false");
+      // 메뉴 높이 inline 스타일 초기화
+      menu.style.maxHeight = "";
     };
+
+    const placeMenu = () => {
+      // 열린 상태가 아니어도 방향 계산은 가능
+      wrap.classList.remove("dropup");
+      const r = wrap.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - r.bottom;
+      const spaceAbove = r.top;
+
+      // 아래 공간이 부족하면 위로 펼치기
+      const useUp = spaceBelow < 260 && spaceAbove > spaceBelow;
+      if (useUp) wrap.classList.add("dropup");
+
+      // 남은 공간에 맞춰 maxHeight 동적 조정(너무 작아지지 않게)
+      const avail = (useUp ? spaceAbove : spaceBelow) - 14;
+      const cap = Math.max(180, Math.min(420, Math.floor(avail)));
+      menu.style.maxHeight = cap + "px";
+    };
+
     const open = () => {
+      placeMenu();
       wrap.classList.add("is-open");
       btn.setAttribute("aria-expanded", "true");
+      // 레이아웃 계산이 끝난 뒤 한 번 더(폰/리사이즈 대응)
+      requestAnimationFrame(placeMenu);
     };
+
     const toggle = () => (wrap.classList.contains("is-open") ? close() : open());
 
     const rebuild = () => {
@@ -144,9 +159,21 @@ const FILE_SYNERGY_CANDIDATES = [
           _cselect.forEach((inst) => inst.close());
         }
       });
+
+      // ✅ 화면 크기/스크롤 변동 시 열려있는 드롭다운이 잘리지 않게 재배치
+      window.addEventListener("resize", () => {
+        _cselect.forEach((inst) => {
+          if (inst.wrap && inst.wrap.classList.contains("is-open") && inst.placeMenu) inst.placeMenu();
+        });
+      });
+      window.addEventListener("scroll", () => {
+        _cselect.forEach((inst) => {
+          if (inst.wrap && inst.wrap.classList.contains("is-open") && inst.placeMenu) inst.placeMenu();
+        });
+      }, true);
     }
 
-    const inst = { wrap, select, btn, menu, label, rebuild, open, close };
+    const inst = { wrap, select, btn, menu, label, rebuild, open, close, placeMenu };
     _cselect.set(nativeId, inst);
     rebuild();
   }
@@ -221,53 +248,6 @@ const FILE_SYNERGY_CANDIDATES = [
     if (!res.ok) throw new Error(`파일 불러오기 실패: ${url} (${res.status})`);
     return await res.arrayBuffer();
   }
-
-// 여러 후보 경로에서 첫 성공을 선택
-async function fetchArrayBufferAny(candidates) {
-  let lastErr = null;
-  for (const url of candidates) {
-    try {
-      const ab = await fetchArrayBuffer(url);
-      return { ab, url };
-    } catch (e) {
-      lastErr = e;
-    }
-  }
-  throw lastErr || new Error("파일 불러오기 실패");
-}
-
-// 헤더 비교용 정규화(공백/기호/괄호 제거)
-function normalizeHeader(h) {
-  return String(h ?? "")
-    .toLowerCase()
-    .replace(/\s+/g, "")
-    .replace(/[()（）\[\]{}<>]/g, "")
-    .replace(/[·・]/g, "")
-    .replace(/[._\-~]/g, "");
-}
-
-function sheetHasHeaders(headers, required) {
-  const set = new Set(headers.map(normalizeHeader));
-  return required.every((r) => set.has(normalizeHeader(r)));
-}
-
-function pickSheetName(wb, { nameRegex, requiredHeaders }) {
-  const names = wb.SheetNames || [];
-  // 1) 이름 우선
-  if (nameRegex) {
-    const byName = names.find((n) => nameRegex.test(n));
-    if (byName) return byName;
-  }
-  // 2) 헤더 패턴으로 탐색
-  if (requiredHeaders && requiredHeaders.length) {
-    for (const n of names) {
-      const t = sheetToTable(wb, n);
-      if (t.headers?.length && sheetHasHeaders(t.headers, requiredHeaders)) return n;
-    }
-  }
-  // 3) fallback
-  return names[0] || null;
-}
 
   function sheetToTable(wb, sheetName) {
     const ws = wb.Sheets[sheetName];
@@ -794,28 +774,16 @@ if (q) {
      Load Excel & Init
   ========================= */
   async function loadMainExcel() {
-    const { ab, url } = await fetchArrayBufferAny(FILE_MAIN_CANDIDATES);
+    const ab = await fetchArrayBuffer(FILE_MAIN);
     const wb = XLSX.read(ab, { type: "array" });
-    const names = wb.SheetNames || [];
-    state.main.sourceUrl = url;
+    const names = wb.SheetNames;
 
-    // 누적기여도 시트 선택(이름 우선, 없으면 헤더 기반)
-    const totalSheet = pickSheetName(wb, {
-      nameRegex: /누적\s*기여도/i,
-      requiredHeaders: ["순위", "스트리머"],
-    }) || names[0];
-
-    const t1 = sheetToTable(wb, totalSheet);
+    // Sheet 1: 누적기여도
+    const t1 = sheetToTable(wb, names[0]);
     state.main.total = t1.rows;
 
-    // 시즌통합랭킹 시트 선택(이름 우선, 없으면 헤더 기반)
-    const integratedSheet = pickSheetName(wb, {
-      nameRegex: /시즌.*통합|통합.*랭킹/i,
-      requiredHeaders: ["순위", "시즌", "스트리머"],
-    }) || names[1] || names[0];
-
-    const t2 = sheetToTable(wb, integratedSheet);
-
+    // Sheet 2: 시즌통합랭킹
+    const t2 = sheetToTable(wb, names[1]);
     state.main.integratedHeaders = INTEGRATED_KEEP;
     state.main.integratedAll = t2.rows.map((r) => {
       const o = {};
@@ -824,30 +792,18 @@ if (q) {
       return o;
     });
 
-// 시즌별 시트 자동 탐색(시트 순서에 의존하지 않음)
-const seasonNames = (names || [])
-  .filter((n) => n !== totalSheet && n !== integratedSheet)
-  .filter((n) => /(YXL\s*시즌\s*\d+)|(S\d+[^\d].*YXL.*기여도)|(YXL.*기여도.*S\d+)/i.test(n));
-
-// fallback: 위 패턴이 없으면, 남은 시트 중 "기여도" 포함한 것들
-const seasonPick = seasonNames.length
-  ? seasonNames
-  : (names || []).filter((n) => n !== totalSheet && n !== integratedSheet && /기여도/i.test(n));
-
-state.main.seasonSheetNames = seasonPick;
-state.main.seasons.clear();
-state.main.seasonSheetNames.forEach((sn) => {
-  state.main.seasons.set(sn, sheetToTable(wb, sn));
-});
+    // Sheets 3~12: 시즌별
+    state.main.seasonSheetNames = names.slice(2, 12);
+    state.main.seasons.clear();
+    state.main.seasonSheetNames.forEach((sn) => {
+      state.main.seasons.set(sn, sheetToTable(wb, sn));
+    });
   }
 
   async function loadSynergyExcel() {
-    const { ab, url } = await fetchArrayBufferAny(FILE_SYNERGY_CANDIDATES);
+    const ab = await fetchArrayBuffer(FILE_SYNERGY);
     const wb = XLSX.read(ab, { type: "array" });
-    // 보통 "쿼리2"지만, 이름/헤더 기반으로도 탐색
-    const sn = pickSheetName(wb, { nameRegex: /쿼리|synergy|시너지/i, requiredHeaders: ["순위", "비제이명"] });
-    state.synergy.sourceUrl = url;
-    state.synergy.sheetName = sn;
+    const sn = wb.SheetNames[0]; // 쿼리2
     const t = sheetToTable(wb, sn);
 
     // updatedAt: take first non-empty '새로고침시간'

@@ -632,7 +632,7 @@ body::after{
 }
 .schCol.is-out .schHead,
 .schDay.is-out{
-  opacity:.55;
+  opacity:.45;
 }
 .schCol.is-out .schHead{
   border-style:dashed;
@@ -744,12 +744,26 @@ body::after{
 }
 
 /* 토/일 + 공휴일(대체 포함) 표기 */
-.schDay.is-weekend .schDow,
-.schDay.is-weekend .schDate,
+.schDay.is-sun .schDow,
+.schDay.is-sun .schDate,
+.schCol.is-sun .schDow,
+.schCol.is-sun .schDate{
+  color: rgba(255, 120, 120, .95);
+  opacity: 1;
+}
+
+/* 토요일은 파란색 (단, 공휴일이면 아래 is-holiday가 빨간색으로 덮어씀) */
+.schDay.is-sat .schDow,
+.schDay.is-sat .schDate,
+.schCol.is-sat .schDow,
+.schCol.is-sat .schDate{
+  color: rgba(60, 140, 255, .95);
+  opacity: 1;
+}
+
+/* 공휴일은 무조건 빨간색 */
 .schDay.is-holiday .schDow,
 .schDay.is-holiday .schDate,
-.schCol.is-weekend .schDow,
-.schCol.is-weekend .schDate,
 .schCol.is-holiday .schDow,
 .schCol.is-holiday .schDate{
   color: rgba(255, 120, 120, .95);
@@ -1208,7 +1222,7 @@ select.select option{
 }
 @keyframes sparkleMove{
   from{ transform: translate3d(0,0,0) scale(1); opacity:.35; }
-  to{ transform: translate3d(0,-8px,0) scale(1.05); opacity:.55; }
+  to{ transform: translate3d(0,-8px,0) scale(1.05); opacity:.45; }
 }
 
 .gate-particles{ position:absolute; inset:0; pointer-events:none; }
@@ -1483,7 +1497,7 @@ display:flex;
 
 /* dot 구분자 */
 .bgm-dash .dot{
-  opacity:.55;
+  opacity:.45;
   margin: 0 2px;
 }
 
@@ -2356,7 +2370,7 @@ body.theme-light .cselect-menu::-webkit-scrollbar-thumb:active{ background: rgba
   -webkit-background-clip:text;
   background-clip:text;
   color: transparent;
-  opacity:.55;
+  opacity:.45;
   filter: drop-shadow(0 0 12px rgba(255,255,255,.16));
   animation: yxlDdayShine 3.8s linear infinite;
   pointer-events:none;
@@ -2369,7 +2383,7 @@ body.theme-light .cselect-menu::-webkit-scrollbar-thumb:active{ background: rgba
     radial-gradient(circle at 18% 55%, rgba(255,255,255,.22), transparent 46%),
     radial-gradient(circle at 62% 35%, rgba(250,204,21,.18), transparent 52%),
     radial-gradient(circle at 88% 62%, rgba(255,255,255,.18), transparent 48%);
-  opacity:.55;
+  opacity:.45;
   mix-blend-mode: screen;
   animation: yxlDdaySparkle 2.9s ease-in-out infinite;
   pointer-events:none;

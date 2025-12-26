@@ -1803,8 +1803,9 @@ const on = localStorage.getItem(KEY_ON) === "1";
         const moreCount = Math.max(0, evCount - Math.min(shownCount, 2));
 
         const day = d.getDay(); // 0=일 ... 6=토
-        const isWeekend = day === 0 || day === 6;
-        const isHoliday = isKoreanHoliday(ymd);
+        const isSun = day === 0;
+        const isSat = day === 6;
+const isHoliday = isKoreanHoliday(ymd);
         const isOut = d.getMonth() !== monthAnchor.getMonth();
 
         const dowIdx = day;
@@ -1816,7 +1817,8 @@ const on = localStorage.getItem(KEY_ON) === "1";
           "schCol" +
           (ymd === toYMD(today) ? " is-today" : "") +
           (ymd === activeYMD ? " is-active" : "") +
-          (isWeekend ? " is-weekend" : "") +
+          (isSun ? " is-sun" : "") +
+          (isSat ? " is-sat" : "") +
           (isHoliday ? " is-holiday" : "") +
           (isOut ? " is-out" : "");
 
@@ -1825,7 +1827,8 @@ const on = localStorage.getItem(KEY_ON) === "1";
           "schDay" +
           (ymd === toYMD(today) ? " is-today" : "") +
           (ymd === activeYMD ? " is-active" : "") +
-          (isWeekend ? " is-weekend" : "") +
+          (isSun ? " is-sun" : "") +
+          (isSat ? " is-sat" : "") +
           (isHoliday ? " is-holiday" : "") +
           (isOut ? " is-out" : "") +
           (nextYMD && ymd === nextYMD ? " is-next" : "");

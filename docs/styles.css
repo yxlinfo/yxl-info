@@ -2690,14 +2690,26 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 /* =========================================================
-   MOBILE PATCH v10
-   - Optimized layout for all mobile devices in portrait mode
-   - Responsive font sizes and icon sizes based on viewport width (vw)
-   - Prevent horizontal scrolling, layout fits without clipping or shifting
+   MOBILE PATCH v11 (Animation moves from bottom to top)
+   - Optimized for mobile devices with correct animation
+   - All previous optimizations intact
    ========================================================= */
 
 @media (max-width: 1170px) {
-  /* Layout optimizations for mobile */
+  /* ---------- Hall of Fame Animation (from bottom to top) ---------- */
+  .hofMarquee__line {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: flex-start !important;
+    white-space: nowrap !important;
+    animation: marquee 30s linear infinite !important; /* Slower animation, bottom to top */
+  }
+  @keyframes marquee {
+    0% { transform: translateY(100%); }
+    100% { transform: translateY(-100%); }
+  }
+
+  /* ---------- Schedule layout for mobile: 7 columns, centered text ---------- */
   .schGrid {
     grid-template-columns: repeat(7, 1fr) !important;
     gap: 4px !important;
@@ -2727,7 +2739,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     opacity: 0.7 !important;
   }
 
-  /* BGM player buttons optimized */
+  /* ---------- BGM buttons optimized for mobile ---------- */
   .bgm-row button {
     width: 35px !important;
     height: 35px !important;
@@ -2742,20 +2754,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     max-width: 160px !important;
   }
 
-  /* Hall of Fame animation (slow) */
-  .hofMarquee__line {
-    display: flex !important;
-    gap: 8px !important;
-    justify-content: flex-start !important;
-    white-space: nowrap !important;
-    animation: marquee 30s linear infinite !important; 
-  }
-  @keyframes marquee {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
-  }
-  
-  /* Schedule block clickable to show details */
+  /* ---------- Schedule blocks: clickable to show details ---------- */
   .schBlock {
     padding: 8px !important;
     cursor: pointer !important;
@@ -2775,8 +2774,8 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
   .schBlock.active .schBlockDetails {
     display: block !important;
   }
-  
-  /* Key info text for schedule (No overflow) */
+
+  /* ---------- Key info text for schedule (No overflow) ---------- */
   .schPreview .schBlockTitle {
     white-space: nowrap !important;
     overflow: hidden !important;

@@ -1029,6 +1029,9 @@ if (q) {
       const isLight = mode === "light";
       document.body.classList.toggle("theme-light", isLight);
       document.documentElement.classList.toggle("theme-light", isLight);
+      // ✅ CSS에서 [data-theme] 기반으로도 분기 가능하게
+      document.documentElement.setAttribute("data-theme", isLight ? "light" : "dark");
+      document.body.setAttribute("data-theme", isLight ? "light" : "dark");
       if (themeBtn){
         const icon = themeBtn.querySelector(".theme-icon");
         if (icon) icon.textContent = isLight ? "☀️" : "🌙";

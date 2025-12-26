@@ -2690,90 +2690,63 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 @media (max-width: 768px) {
-  /* 월간 일정 그리드 수정 */
-  .schGrid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 일주일을 7개의 열로 나누기 */
-    gap: 10px;
-  }
-
-  /* 일정 박스 크기 조정 */
-  .schDay {
-    padding: 12px;
-    font-size: 12px; /* 폰트 크기 축소 */
-    height: auto;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-  }
-
-  /* 각 요일 박스 */
-  .schDay .schTop {
-    font-size: 14px; /* 요일 표시 크기 */
-    margin-bottom: 8px;
-  }
-
-  .schDay .schDate {
-    font-size: 16px;
-    font-weight: bold;
-  }
-
-  /* 일정 내용 표시 */
-  .schBlock {
-    padding: 6px;
-    font-size: 10px;
-    margin-top: 6px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    color: #fff;
-  }
-
-  /* 일정 카드 크기 최적화 */
-  .scheduleCard {
-    padding: 10px;
-  }
-
-  /* 일정 카드의 내용 */
-  .schHighlight, .schBlock {
-    padding: 8px 10px;
-    font-size: 10px; /* 작은 화면에 맞게 폰트 축소 */
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.15);
-  }
-
-  .schGrid .schDay {
-    height: 100px; /* 일정 박스 높이 조정 */
-    text-align: center;
-    font-size: 12px;
+  /* BGM 플레이어 */
+  .bgm-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
     padding: 8px;
+    gap: 10px; /* 아이콘 간격 */
   }
 
-  /* 더 보기 버튼 */
-  .showMore {
-    display: block;
-    text-align: center;
-    margin-top: 6px;
-    background-color: rgba(0, 0, 0, 0.15);
+  /* 재생 게이지 및 음량 게이지 숨기기 */
+  .bgm-seek, .bgm-vol {
+    display: none;
+  }
+
+  /* 아이콘 크기 및 배열 재정렬 */
+  .bgm-row button {
+    font-size: 20px; /* 아이콘 크기 축소 */
+    padding: 6px;
+  }
+
+  /* 이전, 재생, 다음 아이콘 배열 재정렬 */
+  .bgm-row-top button {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  /* BGM 버튼 텍스트 제거 */
+  .bgm-seek, .bgm-vol {
+    display: none;
+  }
+
+  /* YXL 시작 ~ING 일수 감추기 */
+  #yxlDday {
+    display: none;
+  }
+
+  /* 명예의 전당 명단이 깨지지 않도록 가로로 다 보이게 설정 */
+  .hofMarquee__line {
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+    overflow-x: auto;
+    display: flex;
+    gap: 12px;
+  }
+
+  /* 명예의 전당 항목들이 한 줄에 보이게 */
+  .hofMarquee__line div {
+    display: inline-block;
     padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 6px;
     font-size: 12px;
-    color: #fff;
-    cursor: pointer;
+    margin-right: 12px;
   }
 
-  .showMore:hover {
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-
-  .schHead .schDow {
-    font-size: 10px;
-    color: #fff;
-    text-align: center;
-  }
-
-  .schHead .schDate {
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 8px;
+  /* 명예의 전당에서 텍스트 크기 및 여백 줄이기 */
+  .hofMarquee__label {
+    font-size: 14px;
   }
 }

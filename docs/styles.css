@@ -2690,14 +2690,14 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 /* =========================================================
-   MOBILE PATCH v9 (Optimized for iPhone 12 Pro - landscape and portrait)
-   - Optimized layout for mobile portrait mode (no clipping or overlap)
-   - Maintain consistent layout for calendar and schedule
-   - Correct display for icons and text, ensuring no elements get cut off
+   MOBILE PATCH v10
+   - Optimized layout for all mobile devices in portrait mode
+   - Responsive font sizes and icon sizes based on viewport width (vw)
+   - Prevent horizontal scrolling, layout fits without clipping or shifting
    ========================================================= */
 
 @media (max-width: 1170px) {
-  /* ---------- 7 columns for schedule, full width on mobile ---------- */
+  /* Layout optimizations for mobile */
   .schGrid {
     grid-template-columns: repeat(7, 1fr) !important;
     gap: 4px !important;
@@ -2706,7 +2706,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     height: 70px !important;
     min-height: 70px !important;
     padding: 6px !important;
-    font-size: 12px !important;
+    font-size: 2vw !important;
     text-align: center !important;
     border-radius: 8px !important;
   }
@@ -2726,12 +2726,12 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     font-size: 10px !important;
     opacity: 0.7 !important;
   }
-  
-  /* ---------- BGM buttons: adjusted for portrait mode ---------- */
+
+  /* BGM player buttons optimized */
   .bgm-row button {
     width: 35px !important;
     height: 35px !important;
-    font-size: 18px !important;
+    font-size: 16px !important;
     padding: 8px !important;
   }
   .bgm-dash .cselect-btn {
@@ -2741,21 +2741,21 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     border-radius: 12px !important;
     max-width: 160px !important;
   }
-  
-  /* ---------- Hall of Fame animation for portrait and landscape mode ---------- */
+
+  /* Hall of Fame animation (slow) */
   .hofMarquee__line {
     display: flex !important;
     gap: 8px !important;
     justify-content: flex-start !important;
     white-space: nowrap !important;
-    animation: marquee 30s linear infinite !important; /* Slower animation for smooth display */
+    animation: marquee 30s linear infinite !important; 
   }
   @keyframes marquee {
     0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
   }
   
-  /* ---------- Schedule block: clickable to show details ---------- */
+  /* Schedule block clickable to show details */
   .schBlock {
     padding: 8px !important;
     cursor: pointer !important;
@@ -2776,7 +2776,7 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     display: block !important;
   }
   
-  /* ---------- Key info text for schedule: only show the necessary labels ---------- */
+  /* Key info text for schedule (No overflow) */
   .schPreview .schBlockTitle {
     white-space: nowrap !important;
     overflow: hidden !important;

@@ -1520,6 +1520,7 @@ const on = localStorage.getItem(KEY_ON) === "1";
   const YXL_SCHEDULE = [
     { date: "2025-12-22", time: "17:00", type: "엑셀", title: "YXL S11 1회차" },
     { date: "2025-12-25", time: "17:00", type: "엑셀", title: "YXL S11 2회차" },
+    { date: "2025-12-27", time: "17:00", type: "이벤트", title: "SOOP 스트리머 대상" },
     { date: "2026-01-01", time: "17:00", type: "엑셀", title: "YXL S11 3회차" },
     { date: "2026-01-05", time: "17:00", type: "엑셀", title: "YXL S11 4회차" },
     { date: "2025-12-29", time: "", type: "이벤트", title: "Y그룹 골든어워즈" },

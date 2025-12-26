@@ -629,11 +629,19 @@ body::after{
   min-width:0;
   cursor:pointer;
 }
+
+/* 이전달/다음달 날짜(현재 달이 아닌 칸) 톤다운 표시 */
+.schCol.is-out{
+  opacity:.42;
 }
-.schCol.is-out .schHead,
-.schCol.is-out{ opacity:.45; }
-.schCol.is-out.is-active{ opacity:1; }
-.schCol.is-out .schHead{ border-style:dashed; }
+.schCol.is-out .schHead{
+  border-style:dashed;
+}
+.schCol.is-out .schDay{
+  background: rgba(0,0,0,.02);
+}
+
+
 .schHead{
   display:flex;
   align-items:center;
@@ -680,15 +688,6 @@ body::after{
   margin-bottom:6px;
 }
 .schDow{ font-size:12px; font-weight:900; opacity:.86; }
-/* ✅ 주말 색상(달력 위치 기반 fallback: 일요일 시작 그리드) */
-.schGrid > .schCol:nth-child(7n+1) .schDow,
-.schGrid > .schCol:nth-child(7n+1) .schDate{
-  color: rgba(255, 120, 120, .95);
-}
-.schGrid > .schCol:nth-child(7n) .schDow,
-.schGrid > .schCol:nth-child(7n) .schDate{
-  color: rgba(60, 140, 255, .95);
-}
 .schRight{ display:flex; align-items:center; gap:8px; }
 .schBdayBadge{
   min-width:18px;
@@ -1833,6 +1832,20 @@ html.theme-light .schDay.is-next{
   border-color: rgba(0,0,0,.26) !important;
   background: rgba(255,255,255,.92) !important;
   box-shadow: 0 0 0 1px rgba(0,0,0,.06) inset, 0 16px 34px rgba(0,0,0,.12) !important;
+}
+
+
+/* ✅ 라이트 모드: 이전/다음 달(현재 달 아님) 칸을 확실히 톤다운 */
+html.theme-light .schCol.is-out{
+  opacity: .38;
+}
+html.theme-light .schCol.is-out :is(.schHead, .schDay){
+  background: rgba(0,0,0,.02) !important;
+  border-color: rgba(0,0,0,.14) !important;
+}
+html.theme-light .schCol.is-out .schDate,
+html.theme-light .schCol.is-out .schDow{
+  opacity: .58;
 }
 
 /* hover도 라이트에서 확실히 */

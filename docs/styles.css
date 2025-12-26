@@ -2690,83 +2690,94 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 /* =========================================================
-   MOBILE PATCH v7
-   - Re-apply Hall of Fame animation (with mobile optimizations)
-   - Optimize calendar layout: 7 columns, centered month/date/week
-   - Schedule blocks: Click to reveal detailed info, key info visible only
+   MOBILE PATCH v3 - Schedule (7 columns, compact, horizontal text)
+   - Hide legend chips (엑셀/합방/이벤트/기타 설명)
+   - Keep only month prev/next buttons (hide '이번달')
+   - Force 7 columns even on small screens
+   - Show schedule text horizontally (no wrap); allow inner horizontal scroll per block
    ========================================================= */
 @media (max-width: 520px){
-  /* ---------- HOF ANIMATION (Optimized) ---------- */
-  .hofMarquee__line {
-    display: flex !important;
-    gap: 8px !important;
-    justify-content: flex-start !important;
-    white-space: nowrap !important;
-    animation: marquee 30s linear infinite !important; /* Slower animation */
-  }
+  /* legend hide */
+  .schLegend{ display:none !important; }
 
-  @keyframes marquee {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
-  }
+  /* keep only prev/next */
+  #schToday{ display:none !important; }
+  .schBtn--today{ display:none !important; }
 
-  /* ---------- SCHEDULE: 7 columns, center align ----------- */
-  .schGrid {
-    grid-template-columns: repeat(7, 1fr) !important;
+  /* force 7 columns */
+  .schGrid{
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
     gap: 4px !important;
   }
-  .schDay {
-    height: 70px !important;
-    min-height: 70px !important;
-    padding: 6px !important;
-    font-size: 12px !important;
-    text-align: center !important;
-    border-radius: 8px !important;
+
+  /* compact headers */
+  .schHead{
+    padding: 4px 4px !important;
+    border-radius: 10px !important;
   }
-  .schHead {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+  .schDow{ font-size: 10px !important; }
+  .schDate{ font-size: 10px !important; opacity: .72 !important; }
+
+  /* compact day cells */
+  .schDay{
+    height: 84px !important;
+    min-height: 84px !important;
+    padding: 5px !important;
+    border-radius: 12px !important;
+  }
+  .schTop{ margin-bottom: 4px !important; gap: 4px !important; }
+  .schCount, .schBdayBadge{
+    height: 16px !important;
+    min-width: 16px !important;
+    padding: 0 5px !important;
+    font-size: 10px !important;
+  }
+
+  /* schedule blocks: horizontal text, scroll inside block if long */
+  .schBlock{
+    padding: 3px 5px !important;
+    border-radius: 10px !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .schBlock::-webkit-scrollbar{ display:none !important; }
+
+  .schBlockTime{
+    font-size: 9.5px !important;
+    margin-top: 0 !important;
+  }
+  .schBlockTitle{
+    font-size: 10.5px !important;
+    font-weight: 900 !important;
+
+    /* remove clamp and keep one-line */
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    max-height: none !important;
+
+    white-space: nowrap !important;
+    overflow: visible !important;
+  }
+  .schBlockTag{
+    font-size: 9px !important;
+    padding: 1px 6px !important;
+  }
+
+  /* highlight bar compact */
+  .schHighlight{
+    padding: 6px 8px !important;
+    border-radius: 12px !important;
     gap: 8px !important;
   }
-
-  .schDate {
-    font-size: 14px !important;
-    font-weight: bold !important;
-    color: #fff !important;
-  }
-  .schDow {
-    font-size: 10px !important;
-    opacity: 0.7 !important;
-  }
-
-  /* ---------- SCHEDULE BLOCKS: Click to Reveal Detailed Info ---------- */
-  .schBlock {
-    padding: 8px !important;
-    cursor: pointer !important;
-    border-radius: 8px !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    height: 80px !important;
-  }
-
-  .schBlockDetails {
-    display: none !important;
-    padding: 10px !important;
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 10px !important;
-    margin-top: 10px !important;
-    font-size: 12px !important;
-    word-wrap: break-word;
-  }
-
-  .schBlock.active .schBlockDetails {
-    display: block !important;
-  }
-
-  /* ---------- KEY INFO TEXT ONLY (No overflow) ---------- */
-  .schPreview .schBlockTitle {
+  .schHighlight__label{ font-size: 11px !important; }
+  .schHlD{ font-size: 10px !important; }
+  .schHlText{
+    font-size: 11px !important;
+    -webkit-line-clamp: 1 !important;
+    max-height: 1.2em !important;
     white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
   }
 }

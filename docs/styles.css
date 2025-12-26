@@ -2690,47 +2690,63 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
 }
 
 /* =========================================================
-   MOBILE PATCH v6
-   - Re-add animation for Hall of Fame (scrolling items)
-   - Center align month, date, and weekday
-   - Schedule block click to show detailed info
+   MOBILE PATCH v7
+   - Re-apply Hall of Fame animation (with mobile optimizations)
+   - Optimize calendar layout: 7 columns, centered month/date/week
+   - Schedule blocks: Click to reveal detailed info, key info visible only
    ========================================================= */
 @media (max-width: 520px){
-  /* ---------- HOF ANIMATION ---------- */
+  /* ---------- HOF ANIMATION (Optimized) ---------- */
   .hofMarquee__line {
     display: flex !important;
     gap: 8px !important;
     justify-content: flex-start !important;
     white-space: nowrap !important;
-    animation: marquee 15s linear infinite !important;
+    animation: marquee 30s linear infinite !important; /* Slower animation */
   }
 
-  /* Animation for Hall of Fame (scrolling) */
   @keyframes marquee {
     0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
   }
 
-  /* ---------- MONTHLY SCHEDULE: CENTER ALIGN ---------- */
+  /* ---------- SCHEDULE: 7 columns, center align ----------- */
+  .schGrid {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 4px !important;
+  }
+  .schDay {
+    height: 70px !important;
+    min-height: 70px !important;
+    padding: 6px !important;
+    font-size: 12px !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+  }
   .schHead {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 10px !important;
-    padding: 8px !important;
-  }
-  .schDow, .schDate {
-    font-size: 12px !important;
-    text-align: center !important;
-    margin: 0 !important;
+    gap: 8px !important;
   }
 
-  /* ---------- SCHEDULE: CLICK TO SHOW DETAILS ---------- */
+  .schDate {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: #fff !important;
+  }
+  .schDow {
+    font-size: 10px !important;
+    opacity: 0.7 !important;
+  }
+
+  /* ---------- SCHEDULE BLOCKS: Click to Reveal Detailed Info ---------- */
   .schBlock {
     padding: 8px !important;
     cursor: pointer !important;
     border-radius: 8px !important;
     background: rgba(255, 255, 255, 0.1) !important;
+    height: 80px !important;
   }
 
   .schBlockDetails {
@@ -2747,35 +2763,10 @@ html.theme-light .table-wrap::-webkit-scrollbar-corner{
     display: block !important;
   }
 
-  /* Date and day labels in the grid (center alignment) */
-  .schGrid {
-    grid-template-columns: repeat(7, 1fr) !important;
-    gap: 4px !important;
-  }
-
-  .schDay {
-    height: 70px !important;
-    min-height: 70px !important;
-    text-align: center !important;
-    padding: 5px !important;
-    font-size: 12px !important;
-  }
-
-  .schDay .schDate {
-    font-size: 14px !important;
-    font-weight: bold !important;
-    color: #fff !important;
-  }
-  .schDay .schDow {
-    font-size: 10px !important;
-    opacity: 0.7 !important;
-  }
-
-  /* Remove long text overflow from schedule blocks */
-  .schBlockTitle {
+  /* ---------- KEY INFO TEXT ONLY (No overflow) ---------- */
+  .schPreview .schBlockTitle {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    font-weight: 900 !important;
   }
 }

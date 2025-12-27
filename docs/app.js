@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("YXLInfo app.js loaded (v34)");
   /* =========================
      Config
   ========================= */

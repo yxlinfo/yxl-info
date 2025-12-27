@@ -977,7 +977,13 @@ select.select option{
   left:0;
   width:100%;
   max-height: 320px;
-  overflow:auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+
   padding:6px;
   border-radius:14px;
   border:1px solid rgba(255,255,255,.14);
@@ -995,6 +1001,11 @@ select.select option{
   justify-content:space-between;
   gap:10px;
   padding:9px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+
   border-radius:12px;
   border:1px solid transparent;
   color: var(--text);

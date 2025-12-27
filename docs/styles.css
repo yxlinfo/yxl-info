@@ -913,6 +913,22 @@ body::after{
 }
 .toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:nowrap; }
 .input-wrap{ min-width:220px; flex:1; }
+
+/* 제공자 크레딧(누적 기여도표 우측 상단) */
+.provider-credit{
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  white-space: nowrap;
+  letter-spacing: .2px;
+  opacity: .92;
+  text-shadow: 0 6px 14px rgba(0,0,0,.28);
+}
+
+/* 모바일에선 상단이 좁아서 숨김(표 가독성 유지) */
+@media (max-width: 520px){
+  .provider-credit{ display:none; }
+}
 .input, .select{
   width:100%;
   padding:10px 12px;
@@ -977,13 +993,7 @@ select.select option{
   left:0;
   width:100%;
   max-height: 320px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
-
+  overflow:auto;
   padding:6px;
   border-radius:14px;
   border:1px solid rgba(255,255,255,.14);
@@ -1001,11 +1011,6 @@ select.select option{
   justify-content:space-between;
   gap:10px;
   padding:9px 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-
   border-radius:12px;
   border:1px solid transparent;
   color: var(--text);

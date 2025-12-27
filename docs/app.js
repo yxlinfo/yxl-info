@@ -376,12 +376,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const rankNum = Number(r["순위"] ?? 0);
         const topRow = (rankNum >= 1 && rankNum <= 5) ? rankNum : 0;
         const top = (rankNum >= 1 && rankNum <= 3) ? rankNum : 0;
-        const trClass = topRow ? ` class="top${topRow}"` : "";
+        const classes = ["total-row"];
+        if (topRow) classes.push(`top${topRow}`);
+        const trClass = ` class="${classes.join(" ")}"`;
 
         const name = r["스트리머"];
         const total = r["누적기여도"];
         const delta = r["변동"];
         const tenure = r["근속일수"];
+        const totalTxt = (total==null || `${total}`.trim()==="") ? "-" : numFmt(total);
+        const deltaTxt = (delta==null || `${delta}`.trim()==="") ? "-" : String(delta);
+        const tenureTxt = (tenure==null || `${tenure}`.trim()==="") ? "-" : String(tenure);
 
         const isCurrent = CURRENT_MEMBERS.has(normalize(name));
         const nameHtml = `<span class="soop-name${isCurrent ? " member-current" : ""}" data-streamer="${String(name ?? "")}">${name ?? ""}</span>`;
@@ -390,12 +395,12 @@ document.addEventListener("DOMContentLoaded", () => {
           ? `<span class="rank-badge rank-${top}"><span class="medal">${top===1?"🥇":top===2?"🥈":"🥉"}</span><span class="rank-num">${rankNum}</span></span>`
           : `${r["순위"] ?? ""}`;
         return `
-          <tr${trClass}>
+          <tr${trClass} data-delta="${escapeHtml(deltaTxt)}" data-tenure="${escapeHtml(tenureTxt)}" data-name="${escapeHtml(name ?? \"\" )}">
             <td class="rankcell">${rankHtml}</td>
             <td>${nameHtml}</td>
-            <td class="num center">${(total==null || `${total}`.trim()==="") ? "-" : numFmt(total)}</td>
-            <td class="num center">${(delta==null || `${delta}`.trim()==="") ? "-" : delta}</td>
-            <td class="num center">${(tenure==null || `${tenure}`.trim()==="") ? "-" : tenure}</td>
+            <td class="num center">${totalTxt}</td>
+            <td class="num center">${deltaTxt}</td>
+            <td class="num center">${tenureTxt}</td>
           </tr>
         `;
       })
@@ -1962,6 +1967,120 @@ const isHoliday = isKoreanHoliday(ymd);
     // location.replace(url);
     location.reload();
   });
+
+
+
+  /* =========================
+     PATCH: BGM mini (fold) + Search clear + Mobile row detail (Total)
+     - 적용: 1,3,5,6 (2,4 제외)
+  ========================= */
+
+  // 1) BGM mini (접기/펼치기)
+  (function wireBgmMini(){
+    const dash = document.querySelector(".bgm-dash");
+    const btn = document.getElementById("bgmFold");
+    if (!dash || !btn) return;
+
+    const KEY = "yxl_bgm_mini";
+    const mq = window.matchMedia("(max-width: 520px)");
+    const stored = localStorage.getItem(KEY);
+    const initial = stored == null ? mq.matches : (stored === "1");
+
+    function apply(on){
+      dash.classList.toggle("is-mini", !!on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.textContent = on ? "▾" : "▴";
+      localStorage.setItem(KEY, on ? "1" : "0");
+    }
+
+    apply(initial);
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      apply(!dash.classList.contains("is-mini"));
+    });
+
+    // 화면 크기 변화(모바일->데스크탑) 시 저장값이 없으면 자동 반영
+
+    const onChange = (ev) => {
+      if (localStorage.getItem(KEY) == null) apply(ev.matches);
+    };
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  })();
+
+  // 6) 누적기여도 검색: Clear 버튼
+  (function wireTotalSearchClear(){
+    const input = document.getElementById("totalSearch");
+    const btn = document.getElementById("totalSearchClear");
+    if (!input || !btn) return;
+
+    const sync = () => {
+      const has = (input.value || "").trim().length > 0;
+      btn.hidden = !has;
+    };
+
+    input.addEventListener("input", () => {
+      sync();
+      // 기존 로직 유지: 입력하면 즉시 테이블 렌더
+      renderTotal();
+    });
+
+    btn.addEventListener("click", () => {
+      input.value = "";
+      sync();
+      renderTotal();
+      input.focus();
+    });
+
+    sync();
+  })();
+
+  // 5) 모바일: 누적기여도표 3컬럼 요약 + 상세 펼침(행 탭)
+  (function wireTotalRowDetail(){
+    const table = document.getElementById("totalTable");
+    if (!table) return;
+    const tbody = table.querySelector("tbody");
+    if (!tbody) return;
+
+    const isMobile = () => window.matchMedia("(max-width: 520px)").matches;
+
+    tbody.addEventListener("click", (e) => {
+      if (!isMobile()) return;
+
+      const tr = e.target.closest("tr.total-row");
+      if (!tr) return;
+
+      // 상세행 클릭은 무시
+      if (tr.classList.contains("total-detail")) return;
+
+      // 기존 상세행 모두 닫기
+      const existing = tbody.querySelectorAll("tr.total-detail");
+      let wasOpen = false;
+      existing.forEach((d) => {
+        if (d.dataset.forName === tr.dataset.name) wasOpen = true;
+        d.remove();
+      });
+      if (wasOpen) return;
+
+      const delta = tr.dataset.delta || "-";
+      const tenure = tr.dataset.tenure || "-";
+
+      const detail = document.createElement("tr");
+      detail.className = "total-detail";
+      detail.dataset.forName = tr.dataset.name || "";
+      detail.innerHTML = `
+        <td colspan="5">
+          <div class="row-detail-box">
+            <span><span class="k">변동</span>${escapeHtml(delta)}</span>
+            <span><span class="k">근속</span>${escapeHtml(tenure)}</span>
+          </div>
+        </td>
+      `;
+
+      tr.insertAdjacentElement("afterend", detail);
+    });
+  })();
 
   loadAll();
   startAutoRefresh();

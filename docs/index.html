@@ -86,12 +86,14 @@
             <option value="bgm3">Brenda Lee - Rockin Around The Christmas Tree</option>
           </select>
         </div>
-
-        <!-- 🌗 Theme toggle -->
-        <button id="themeToggle" class="theme-toggle" type="button" aria-label="밝게/어둡게 전환" title="밝게/어둡게">
-          <span class="theme-icon" aria-hidden="true">☀️</span>
-        </button>
-      </div>
+        <div class="bgm-tools" role="group" aria-label="BGM 도구">
+          <button id="bgmFold" class="btn btn-ghost bgm-fold" type="button" aria-label="BGM 선택 접기/펼치기" title="BGM 선택 접기/펼치기" aria-pressed="false">▴</button>
+          <!-- 🌗 Theme toggle -->
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="밝게/어둡게 전환" title="밝게/어둡게">
+            <span class="theme-icon" aria-hidden="true">☀️</span>
+          </button>
+        </div>
+</div>
 
         </div>
       </div>
@@ -186,6 +188,7 @@
                 <div class="provider-credit" aria-label="제공자">제공자 : 지케이님</div>
                 <div class="input-wrap">
                   <input id="totalSearch" class="input" placeholder="멤버 이름 검색" />
+                  <button id="totalSearchClear" class="input-clear" type="button" aria-label="검색 지우기" title="지우기" hidden>✕</button>
                 </div>
               </div>
             </div>

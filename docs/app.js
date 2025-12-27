@@ -395,7 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ? `<span class="rank-badge rank-${top}"><span class="medal">${top===1?"🥇":top===2?"🥈":"🥉"}</span><span class="rank-num">${rankNum}</span></span>`
           : `${r["순위"] ?? ""}`;
         return `
-          <tr${trClass} data-delta="${escapeHtml(deltaTxt)}" data-tenure="${escapeHtml(tenureTxt)}" data-name="${escapeHtml(name ?? \"\" )}">
+          <tr${trClass} data-delta="${escapeHtml(deltaTxt)}" data-tenure="${escapeHtml(tenureTxt)}" data-name="${escapeHtml(name ?? "" )}">
             <td class="rankcell">${rankHtml}</td>
             <td>${nameHtml}</td>
             <td class="num center">${totalTxt}</td>

@@ -58,7 +58,7 @@ table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 
 .crew-name span { font-weight: 400; font-size: 13px; color: var(--text-muted); margin-left: 8px; }
 
-/* 멤버 리스트: 가로줄 및 배경패턴 없음 */
+/* 멤버 리스트 */
 tbody td {
     border: none !important;
     height: 32px;
@@ -80,28 +80,35 @@ tbody td {
 .gauge-container { width: 100%; height: 3px; background: #212124; border-radius: 2px; overflow: hidden; }
 .gauge-fill { height: 100%; border-radius: 2px; }
 
-/* 게이지 색상 */
 .p-gray { background: #475569; } .p-yellow { background: #facc15; }
 .p-green { background: #4ade80; } .p-blue { background: #3b82f6; }
 .p-navy { background: #1e3a8a; } .p-purple { background: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.5); }
 
-/* 강조 */
+/* 순위 강조 */
 .rank-1 .name-cell { color: #fff !important; font-weight: 800; font-size: 14.5px; }
 .rank-2 .name-cell, .rank-3 .name-cell { color: #fff !important; font-weight: 700; }
 .badge { margin-left: 5px; font-size: 12px; }
 
-/* 하단 통계 영역: 55px 높이 고정으로 통일 */
+/* 하단 통계 영역 (평균값 강조 강화) */
 .stats-container {
     border-top: 1px solid #2d2d30;
     padding-top: 15px;
-    height: 55px;
+    height: 65px; /* 높이 약간 조절 */
     display: flex; flex-direction: column; justify-content: center;
 }
 
 .stats-table td { border: none !important; padding: 0 10px !important; height: auto !important; }
-.total-row td { color: var(--text-muted); font-size: 11px; font-weight: bold; letter-spacing: 1px; }
-.total-row .count-cell { color: var(--accent-blue); font-size: 15px; }
-.avg-row td { color: var(--text-muted); font-size: 10px; }
+
+.total-row td { color: var(--text-muted); font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+.total-row .count-cell { color: #64748b; font-size: 13px; }
+
+.avg-row td { padding-top: 4px !important; }
+.avg-row .label-cell { color: var(--text-dim); font-size: 11px; font-weight: 800; }
+.avg-row .count-cell { 
+    color: var(--crew-color, var(--accent-blue)); /* 크루별 포인트 컬러 적용 */
+    font-size: 18px; 
+    text-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
 
 /* 크루 컬러 클래스 */
 .c-red { --crew-color: var(--clr-red); } .c-white { --crew-color: var(--clr-white); }

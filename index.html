@@ -3,176 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10개 크루 통합 대시보드</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Crew Performance Dashboard</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS를 HTML 내부에 포함하여 한 번에 관리하기 편하게 구성했습니다 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0d0d0f;
+            color: #94a3b8;
+            font-family: 'Pretendard', sans-serif;
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .dashboard-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px 20px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .crew-wrapper {
+            flex: 0 0 calc((100% - 40px) / 3);
+            background-color: #161618;
+            border-radius: 16px;
+            padding: 24px;
+            transition: transform 0.3s ease;
+        }
+        .crew-wrapper:hover { transform: translateY(-5px); }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { border: none; height: 34px; font-size: 13.5px; }
+        th:nth-child(1), td:nth-child(1) { width: 65%; text-align: left; }
+        th:nth-child(2), td:nth-child(2) { width: 35%; text-align: right; }
+        .crew-name {
+            color: #f8fafc;
+            font-size: 18px;
+            font-weight: 700;
+            padding-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+        .crew-name span { font-weight: 400; font-size: 13px; color: #475569; margin-left: 8px; }
+        .sub-head { display: none; }
+        tbody td { color: #cbd5e1; border-bottom: 1px solid #212124; }
+        tbody tr:last-child td { border-bottom: none; }
+        .count { color: #f1f5f9; font-family: 'Inter', sans-serif; font-weight: 600; }
+        .empty td { color: transparent; border-bottom: 1px solid transparent; }
+        tfoot { border-top: 2px solid #2d2d30; }
+        .total td { padding-top: 15px; color: #64748b; font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+        .total .count { color: #38bdf8; font-size: 15px; }
+        .avg td { color: #475569; font-size: 11px; }
+        @media (max-width: 1200px) { .crew-wrapper { flex: 0 0 calc((100% - 20px) / 2); } }
+        @media (max-width: 850px) { .crew-wrapper { flex: 0 0 100%; } }
+    </style>
 </head>
 <body>
     <div class="dashboard-grid">
         <div class="crew-wrapper">
             <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">광우상사 (11명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
+                <thead><tr><th colspan="2" class="crew-name">광우상사 <span>11</span></th></tr></thead>
                 <tbody>
-                    <tr><td>파미</td><td class="count">0</td></tr><tr><td>아이빈</td><td class="count">0</td></tr><tr><td>이온♥</td><td class="count">0</td></tr><tr><td>임주연♥</td><td class="count">0</td></tr><tr><td>미디♡.</td><td class="count">0</td></tr><tr><td>가을이♡</td><td class="count">0</td></tr><tr><td>원영님♥</td><td class="count">0</td></tr><tr><td>서윤슬@</td><td class="count">0</td></tr><tr><td>맹이.zip</td><td class="count">0</td></tr><tr><td>안둥♥</td><td class="count">0</td></tr><tr><td>미숑.♥</td><td class="count">0</td></tr>
-                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
-                </tbody>
-                <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <div class="crew-wrapper">
-            <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">씨나인 (13명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>체온_♡</td><td class="count">0</td></tr><tr><td>혜루찡</td><td class="count">0</td></tr><tr><td>쁠리vvely</td><td class="count">0</td></tr><tr><td>초초</td><td class="count">0</td></tr><tr><td>[윤이솔]</td><td class="count">0</td></tr><tr><td>BJ채리</td><td class="count">0</td></tr><tr><td>애순이</td><td class="count">0</td></tr><tr><td>하이희야♡</td><td class="count">0</td></tr><tr><td>인지연JYEON</td><td class="count">0</td></tr><tr><td>아윤♡</td><td class="count">0</td></tr><tr><td>리하♥</td><td class="count">0</td></tr><tr><td>#초린</td><td class="count">0</td></tr><tr><td>히나_♥</td><td class="count">0</td></tr>
-                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
-                </tbody>
-                <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <div class="crew-wrapper">
-            <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">더케이 (15명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>! 채채</td><td class="count">0</td></tr><tr><td>앙체리♥</td><td class="count">0</td></tr><tr><td>퀸다미♧</td><td class="count">0</td></tr><tr><td>[BJ]에디양</td><td class="count">0</td></tr><tr><td>차시월</td><td class="count">0</td></tr><tr><td>유더♥</td><td class="count">0</td></tr><tr><td>소냥이에요</td><td class="count">0</td></tr><tr><td>엘♥</td><td class="count">0</td></tr><tr><td>한슬댕</td><td class="count">0</td></tr><tr><td>푸린♡</td><td class="count">0</td></tr><tr><td>채리나</td><td class="count">0</td></tr><tr><td>강한빛♡</td><td class="count">0</td></tr><tr><td>포카린</td><td class="count">0</td></tr><tr><td>지아콩</td><td class="count">0</td></tr><tr><td>우아한♡우와</td><td class="count">0</td></tr>
+                    <tr><td>파미</td><td class="count">0</td></tr><tr><td>아이빈</td><td class="count">0</td></tr>
+                    <tr><td>이온♥</td><td class="count">0</td></tr><tr><td>임주연♥</td><td class="count">0</td></tr>
+                    <tr><td>미디♡.</td><td class="count">0</td></tr><tr><td>가을이♡</td><td class="count">0</td></tr>
+                    <tr><td>원영님♥</td><td class="count">0</td></tr><tr><td>서윤슬@</td><td class="count">0</td></tr>
+                    <tr><td>맹이.zip</td><td class="count">0</td></tr><tr><td>안둥♥</td><td class="count">0</td></tr>
+                    <tr><td>미숑.♥</td><td class="count">0</td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
                     <tr class="empty"><td>&nbsp;</td><td></td></tr>
                 </tbody>
                 <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
                 </tfoot>
             </table>
         </div>
 
         <div class="crew-wrapper">
             <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">정선컴퍼니 (12명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
+                <thead><tr><th colspan="2" class="crew-name">씨나인 <span>13</span></th></tr></thead>
                 <tbody>
-                    <tr><td>♡김베리♡</td><td class="count">0</td></tr><tr><td>나의유주♥</td><td class="count">0</td></tr><tr><td>김규리♥</td><td class="count">0</td></tr><tr><td>바미♡</td><td class="count">0</td></tr><tr><td>윤수♥</td><td class="count">0</td></tr><tr><td>햇동이♥</td><td class="count">0</td></tr><tr><td>윤세빈♥</td><td class="count">0</td></tr><tr><td>율비♡</td><td class="count">0</td></tr><tr><td>채보미=3=</td><td class="count">0</td></tr><tr><td>♥백설♥</td><td class="count">0</td></tr><tr><td>유서림♥</td><td class="count">0</td></tr><tr><td>한아영♡</td><td class="count">0</td></tr>
-                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr><td>체온_♡</td><td class="count">0</td></tr><tr><td>혜루찡</td><td class="count">0</td></tr>
+                    <tr><td>쁠리vvely</td><td class="count">0</td></tr><tr><td>초초</td><td class="count">0</td></tr>
+                    <tr><td>[윤이솔]</td><td class="count">0</td></tr><tr><td>BJ채리</td><td class="count">0</td></tr>
+                    <tr><td>애순이</td><td class="count">0</td></tr><tr><td>하이희야♡</td><td class="count">0</td></tr>
+                    <tr><td>인지연JYEON</td><td class="count">0</td></tr><tr><td>아윤♡</td><td class="count">0</td></tr>
+                    <tr><td>리하♥</td><td class="count">0</td></tr><tr><td>#초린</td><td class="count">0</td></tr>
+                    <tr><td>히나_♥</td><td class="count">0</td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr>
                 </tbody>
                 <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
                 </tfoot>
             </table>
         </div>
 
         <div class="crew-wrapper">
             <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">YXL (14명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
+                <thead><tr><th colspan="2" class="crew-name">더케이 <span>15</span></th></tr></thead>
                 <tbody>
-                    <tr><td>리윤_♥</td><td class="count">0</td></tr><tr><td>후잉♥</td><td class="count">0</td></tr><tr><td>냥냥수주</td><td class="count">0</td></tr><tr><td>류서하♥</td><td class="count">0</td></tr><tr><td>#율무</td><td class="count">0</td></tr><tr><td>하랑짱♥</td><td class="count">0</td></tr><tr><td>미로。</td><td class="count">0</td></tr><tr><td>유나연º-º</td><td class="count">0</td></tr><tr><td>김유정S2</td><td class="count">0</td></tr><tr><td>소다♥</td><td class="count">0</td></tr><tr><td>백나현</td><td class="count">0</td></tr><tr><td>서니_♥</td><td class="count">0</td></tr><tr><td>ZO아름♡</td><td class="count">0</td></tr><tr><td>너의˚멜로디</td><td class="count">0</td></tr>
+                    <tr><td>! 채채</td><td class="count">0</td></tr><tr><td>앙체리♥</td><td class="count">0</td></tr>
+                    <tr><td>퀸다미♧</td><td class="count">0</td></tr><tr><td>[BJ]에디양</td><td class="count">0</td></tr>
+                    <tr><td>차시월</td><td class="count">0</td></tr><tr><td>유더♥</td><td class="count">0</td></tr>
+                    <tr><td>소냥이에요</td><td class="count">0</td></tr><tr><td>엘♥</td><td class="count">0</td></tr>
+                    <tr><td>한슬댕</td><td class="count">0</td></tr><tr><td>푸린♡</td><td class="count">0</td></tr>
+                    <tr><td>채리나</td><td class="count">0</td></tr><tr><td>강한빛♡</td><td class="count">0</td></tr>
+                    <tr><td>포카린</td><td class="count">0</td></tr><tr><td>지아콩</td><td class="count">0</td></tr>
+                    <tr><td>우아한♡우와</td><td class="count">0</td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="crew-wrapper">
+            <table>
+                <thead><tr><th colspan="2" class="crew-name">정선컴퍼니 <span>12</span></th></tr></thead>
+                <tbody>
+                    <tr><td>♡김베리♡</td><td class="count">0</td></tr><tr><td>나의유주♥</td><td class="count">0</td></tr>
+                    <tr><td>김규리♥</td><td class="count">0</td></tr><tr><td>바미♡</td><td class="count">0</td></tr>
+                    <tr><td>윤수♥</td><td class="count">0</td></tr><tr><td>햇동이♥</td><td class="count">0</td></tr>
+                    <tr><td>윤세빈♥</td><td class="count">0</td></tr><tr><td>율비♡</td><td class="count">0</td></tr>
+                    <tr><td>채보미=3=</td><td class="count">0</td></tr><tr><td>♥백설♥</td><td class="count">0</td></tr>
+                    <tr><td>유서림♥</td><td class="count">0</td></tr><tr><td>한아영♡</td><td class="count">0</td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
                     <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
                 </tbody>
                 <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
                 </tfoot>
             </table>
         </div>
 
         <div class="crew-wrapper">
             <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">이노레이블 (13명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
+                <thead><tr><th colspan="2" class="crew-name">YXL <span>14</span></th></tr></thead>
                 <tbody>
-                    <tr><td>꽃부기♥</td><td class="count">0</td></tr><tr><td>#누리-</td><td class="count">0</td></tr><tr><td>이월♥</td><td class="count">0</td></tr><tr><td>설탱♥</td><td class="count">0</td></tr><tr><td>애지니♡</td><td class="count">0</td></tr><tr><td>밤비♥</td><td class="count">0</td></tr><tr><td>리에♡</td><td class="count">0</td></tr><tr><td>이리원♥</td><td class="count">0</td></tr><tr><td>히냥이♥</td><td class="count">0</td></tr><tr><td>설인_♥</td><td class="count">0</td></tr><tr><td>연보민</td><td class="count">0</td></tr><tr><td>유복이!</td><td class="count">0</td></tr><tr><td>[SO]박소연</td><td class="count">0</td></tr>
-                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
-                </tbody>
-                <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <div class="crew-wrapper">
-            <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">GD컴퍼니 (7명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>설인아님♥</td><td class="count">0</td></tr><tr><td>♥유현♥</td><td class="count">0</td></tr><tr><td>E윤아♡</td><td class="count">0</td></tr><tr><td>쥬브리</td><td class="count">0</td></tr><tr><td>은아린!!</td><td class="count">0</td></tr><tr><td>아링</td><td class="count">0</td></tr><tr><td>해리님♥</td><td class="count">0</td></tr>
-                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
-                </tbody>
-                <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <div class="crew-wrapper">
-            <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">쇼케이 (14명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>송화양</td><td class="count">0</td></tr><tr><td>＠서단</td><td class="count">0</td></tr><tr><td>쏘피♥</td><td class="count">0</td></tr><tr><td>도하정♥</td><td class="count">0</td></tr><tr><td>♥제니♥</td><td class="count">0</td></tr><tr><td>송유이♥</td><td class="count">0</td></tr><tr><td>재온ly</td><td class="count">0</td></tr><tr><td>도예빈♥</td><td class="count">0</td></tr><tr><td>정인♥</td><td class="count">0</td></tr><tr><td>한유나♥</td><td class="count">0</td></tr><tr><td>이로♥</td><td class="count">0</td></tr><tr><td>@유톨</td><td class="count">0</td></tr><tr><td>유이나.♡</td><td class="count">0</td></tr><tr><td>새봄_♡</td><td class="count">0</td></tr>
+                    <tr><td>리윤_♥</td><td class="count">0</td></tr><tr><td>후잉♥</td><td class="count">0</td></tr>
+                    <tr><td>냥냥수주</td><td class="count">0</td></tr><tr><td>류서하♥</td><td class="count">0</td></tr>
+                    <tr><td>#율무</td><td class="count">0</td></tr><tr><td>하랑짱♥</td><td class="count">0</td></tr>
+                    <tr><td>미로。</td><td class="count">0</td></tr><tr><td>유나연º-º</td><td class="count">0</td></tr>
+                    <tr><td>김유정S2</td><td class="count">0</td></tr><tr><td>소다♥</td><td class="count">0</td></tr>
+                    <tr><td>백나현</td><td class="count">0</td></tr><tr><td>서니_♥</td><td class="count">0</td></tr>
+                    <tr><td>ZO아름♡</td><td class="count">0</td></tr><tr><td>너의˚멜로디</td><td class="count">0</td></tr>
                     <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
                 </tbody>
                 <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
                 </tfoot>
             </table>
         </div>
 
         <div class="crew-wrapper">
             <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">문에이 (16명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
+                <thead><tr><th colspan="2" class="crew-name">이노레이블 <span>13</span></th></tr></thead>
                 <tbody>
-                    <tr><td>표냥이♥</td><td class="count">0</td></tr><tr><td>서언수</td><td class="count">0</td></tr><tr><td>박재열</td><td class="count">0</td></tr><tr><td>하임*</td><td class="count">0</td></tr><tr><td>#다인</td><td class="count">0</td></tr><tr><td>뮤엘♥</td><td class="count">0</td></tr><tr><td>천시아S2</td><td class="count">0</td></tr><tr><td>미지수♥</td><td class="count">0</td></tr><tr><td>현강림2</td><td class="count">0</td></tr><tr><td>설현미</td><td class="count">0</td></tr><tr><td>슈나♥</td><td class="count">0</td></tr><tr><td>김하연님♥</td><td class="count">0</td></tr><tr><td>강형민이</td><td class="count">0</td></tr><tr><td>E-;이은♥</td><td class="count">0</td></tr><tr><td>.장지민</td><td class="count">0</td></tr><tr><td>예니__</td><td class="count">0</td></tr>
+                    <tr><td>꽃부기♥</td><td class="count">0</td></tr><tr><td>#누리-</td><td class="count">0</td></tr>
+                    <tr><td>이월♥</td><td class="count">0</td></tr><tr><td>설탱♥</td><td class="count">0</td></tr>
+                    <tr><td>애지니♡</td><td class="count">0</td></tr><tr><td>밤비♥</td><td class="count">0</td></tr>
+                    <tr><td>리에♡</td><td class="count">0</td></tr><tr><td>이리원♥</td><td class="count">0</td></tr>
+                    <tr><td>히냥이♥</td><td class="count">0</td></tr><tr><td>설인_♥</td><td class="count">0</td></tr>
+                    <tr><td>연보민</td><td class="count">0</td></tr><tr><td>유복이!</td><td class="count">0</td></tr>
+                    <tr><td>[SO]박소연</td><td class="count">0</td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr>
                 </tbody>
                 <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
                 </tfoot>
             </table>
         </div>
 
         <div class="crew-wrapper">
             <table>
-                <thead>
-                    <tr><th colspan="2" class="crew-name">771 (8명)</th></tr>
-                    <tr class="sub-head"><th>BJ명</th><th>별풍선</th></tr>
-                </thead>
+                <thead><tr><th colspan="2" class="crew-name">GD컴퍼니 <span>7</span></th></tr></thead>
                 <tbody>
-                    <tr><td>예란</td><td class="count">0</td></tr><tr><td>나래~~~</td><td class="count">0</td></tr><tr><td>박예솜:)</td><td class="count">0</td></tr><tr><td>이밍+♥</td><td class="count">0</td></tr><tr><td>지숙♥_.</td><td class="count">0</td></tr><tr><td>푸글리♡</td><td class="count">0</td></tr><tr><td>이나율♥</td><td class="count">0</td></tr><tr><td>한채아♥</td><td class="count">0</td></tr>
-                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr><td>설인아님♥</td><td class="count">0</td></tr><tr><td>♥유현♥</td><td class="count">0</td></tr>
+                    <tr><td>E윤아♡</td><td class="count">0</td></tr><tr><td>쥬브리</td><td class="count">0</td></tr>
+                    <tr><td>은아린!!</td><td class="count">0</td></tr><tr><td>아링</td><td class="count">0</td></tr>
+                    <tr><td>해리님♥</td><td class="count">0</td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr>
                 </tbody>
                 <tfoot>
-                    <tr class="total"><td>TOTAL</td><td class="count">0</td></tr>
-                    <tr class="avg"><td>AVG</td><td class="count">0</td></tr>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="crew-wrapper">
+            <table>
+                <thead><tr><th colspan="2" class="crew-name">쇼케이 <span>14</span></th></tr></thead>
+                <tbody>
+                    <tr><td>송화양</td><td class="count">0</td></tr><tr><td>＠서단</td><td class="count">0</td></tr>
+                    <tr><td>쏘피♥</td><td class="count">0</td></tr><tr><td>도하정♥</td><td class="count">0</td></tr>
+                    <tr><td>♥제니♥</td><td class="count">0</td></tr><tr><td>송유이♥</td><td class="count">0</td></tr>
+                    <tr><td>재온ly</td><td class="count">0</td></tr><tr><td>도예빈♥</td><td class="count">0</td></tr>
+                    <tr><td>정인♥</td><td class="count">0</td></tr><tr><td>한유나♥</td><td class="count">0</td></tr>
+                    <tr><td>이로♥</td><td class="count">0</td></tr><tr><td>@유톨</td><td class="count">0</td></tr>
+                    <tr><td>유이나.♡</td><td class="count">0</td></tr><tr><td>새봄_♡</td><td class="count">0</td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="crew-wrapper">
+            <table>
+                <thead><tr><th colspan="2" class="crew-name">문에이 <span>16</span></th></tr></thead>
+                <tbody>
+                    <tr><td>표냥이♥</td><td class="count">0</td></tr><tr><td>서언수</td><td class="count">0</td></tr>
+                    <tr><td>박재열</td><td class="count">0</td></tr><tr><td>하임*</td><td class="count">0</td></tr>
+                    <tr><td>#다인</td><td class="count">0</td></tr><tr><td>뮤엘♥</td><td class="count">0</td></tr>
+                    <tr><td>천시아S2</td><td class="count">0</td></tr><tr><td>미지수♥</td><td class="count">0</td></tr>
+                    <tr><td>현강림2</td><td class="count">0</td></tr><tr><td>설현미</td><td class="count">0</td></tr>
+                    <tr><td>슈나♥</td><td class="count">0</td></tr><tr><td>김하연님♥</td><td class="count">0</td></tr>
+                    <tr><td>강형민이</td><td class="count">0</td></tr><tr><td>E-;이은♥</td><td class="count">0</td></tr>
+                    <tr><td>.장지민</td><td class="count">0</td></tr><tr><td>예니__</td><td class="count">0</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="crew-wrapper">
+            <table>
+                <thead><tr><th colspan="2" class="crew-name">771 <span>8</span></th></tr></thead>
+                <tbody>
+                    <tr><td>예란</td><td class="count">0</td></tr><tr><td>나래~~~</td><td class="count">0</td></tr>
+                    <tr><td>박예솜:)</td><td class="count">0</td></tr><tr><td>이밍+♥</td><td class="count">0</td></tr>
+                    <tr><td>지숙♥_.</td><td class="count">0</td></tr><tr><td>푸글리♡</td><td class="count">0</td></tr>
+                    <tr><td>이나율♥</td><td class="count">0</td></tr><tr><td>한채아♥</td><td class="count">0</td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                    <tr class="empty"><td>&nbsp;</td><td></td></tr><tr class="empty"><td>&nbsp;</td><td></td></tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total"><td>PERFORMANCE</td><td class="count">0</td></tr>
+                    <tr class="avg"><td>AVG. PER MEMBER</td><td class="count">0.0</td></tr>
                 </tfoot>
             </table>
         </div>

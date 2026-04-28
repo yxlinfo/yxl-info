@@ -1,4 +1,4 @@
-/* --- CSS Variables: 크루별 고유 컬러 정의 --- */
+/* --- CSS Variables: 크루별 고유 컬러 및 로고 경로 정의 --- */
 :root {
     --bg-dark: #0d0d0f;
     --card-bg: #161618;
@@ -50,25 +50,50 @@ body {
 
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 
-/* --- 헤더 및 로고 --- */
-.logo-inline {
-    width: 28px; height: 28px;
-    vertical-align: middle;
-    margin-right: 12px;
-    object-fit: contain;
-    border-radius: 6px;
-}
-
+/* --- [2안 리뉴얼] 헤더 워터마크 스타일 --- */
 .crew-name {
     color: var(--text-main);
     font-size: 19px; font-weight: 700;
     padding-bottom: 25px;
     text-align: left;
     border-bottom: 2px solid var(--crew-color, var(--accent-blue));
-    display: flex; align-items: center;
+    
+    /* 워터마크 배치를 위한 설정 */
+    position: relative;
+    overflow: hidden; /* 로고가 카드 밖으로 나가지 않도록 */
 }
 
-.crew-name span { font-weight: 400; font-size: 13px; color: var(--text-muted); margin-left: auto; }
+/* 워터마크 로고 가공 (가상 요소 활용) */
+.crew-name::after {
+    content: "";
+    position: absolute;
+    right: -10px; /* 우측 끝에 살짝 걸치게 */
+    bottom: -15px; /* 하단 끝에 살짝 걸치게 */
+    width: 100px; /* 로고 크기 */
+    height: 100px;
+    background-image: var(--crew-logo); /* HTML에서 주입받은 로고 */
+    background-size: contain;
+    background-repeat: no-repeat;
+    
+    /* 미니멀 효과: 그레이스케일 + 극도로 낮은 투명도 */
+    filter: grayscale(100%);
+    opacity: 0.05; 
+    
+    z-index: 0; /* 텍스트 뒤로 */
+}
+
+/* 텍스트가 로고 위에 오도록 설정 */
+.crew-name-text {
+    position: relative;
+    z-index: 1;
+}
+
+.crew-name span { 
+    font-weight: 400; font-size: 13px; color: var(--text-muted); 
+    margin-left: 8px;
+    position: relative;
+    z-index: 1;
+}
 
 /* --- 멤버 리스트 (무선 디자인) --- */
 tbody td {
@@ -110,7 +135,7 @@ tbody td {
 .total-row .count-cell { color: var(--accent-blue); font-size: 15px; }
 .avg-row td { color: var(--text-muted); font-size: 10px; }
 
-/* --- 크루별 클래스 --- */
+/* --- 크루별 클래스 (고유 컬러) --- */
 .c-red { --crew-color: var(--clr-red); } .c-white { --crew-color: var(--clr-white); }
 .c-gold { --crew-color: var(--clr-gold); } .c-pink { --crew-color: var(--clr-pink); }
 .c-green { --crew-color: var(--clr-green); } .c-cyan { --crew-color: var(--clr-cyan); }

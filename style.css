@@ -3,18 +3,18 @@ body {
     color: #eee;
     margin: 0;
     padding: 20px;
-    font-family: sans-serif;
+    font-family: 'Malgun Gothic', sans-serif;
 }
 
 .dashboard-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 30px 15px; /* 세로 간격 30px, 가로 간격 15px */
+    gap: 30px 15px;
     justify-content: center;
 }
 
 .crew-wrapper {
-    flex: 0 0 calc(33.33% - 20px); /* 3분할 */
+    flex: 0 0 calc(33.33% - 20px);
     min-width: 320px;
     background-color: #1e1e1e;
     border-radius: 8px;
@@ -31,7 +31,7 @@ table {
 th, td {
     border: 1px solid #333;
     padding: 8px 10px;
-    height: 38px; /* 한 줄 높이 고정 (가장 중요) */
+    height: 38px;
     font-size: 13px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -43,12 +43,14 @@ th, td {
     color: #4dabf7;
     font-size: 15px;
     height: 50px;
+    text-align: center;
 }
 
 .sub-head th {
     background-color: #252525;
     color: #888;
     font-size: 11px;
+    text-align: center;
 }
 
 .count {
@@ -65,11 +67,11 @@ th, td {
 tfoot tr td {
     background-color: #2a2a2a;
     height: 40px;
+    text-align: center;
 }
 
 .total { color: #fff; font-weight: bold; border-top: 2px solid #444; }
 .avg { color: #aaa; font-size: 11px; }
 
-/* PC 3열 / 태블릿 2열 / 모바일 1열 대응 */
 @media (max-width: 1050px) { .crew-wrapper { flex: 0 0 calc(50% - 15px); } }
 @media (max-width: 700px) { .crew-wrapper { flex: 0 0 100%; } }

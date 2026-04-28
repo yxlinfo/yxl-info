@@ -1,3 +1,8 @@
+/* 전역 설정: 여백 계산 오류 방지 */
+* {
+    box-sizing: border-box;
+}
+
 body {
     background-color: #121212;
     color: #eee;
@@ -6,16 +11,18 @@ body {
     font-family: 'Malgun Gothic', sans-serif;
 }
 
+/* 그리드 컨테이너 */
 .dashboard-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 30px 15px;
-    justify-content: center;
+    gap: 20px; /* 표 사이 간격 */
+    width: 100%;
 }
 
+/* 표를 감싸는 박스: 한 줄에 정확히 3개 배치 */
 .crew-wrapper {
-    flex: 0 0 calc(33.33% - 20px);
-    min-width: 320px;
+    /* (100% - (간격 20px * 2)) / 3 */
+    width: calc((100% - 40px) / 3); 
     background-color: #1e1e1e;
     border-radius: 8px;
     overflow: hidden;
@@ -25,13 +32,17 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: fixed; /* 행 너비 강제 고정 */
 }
+
+/* 열 너비 통일 (BJ명 65% : 별풍선 35%) */
+th:nth-child(1), td:nth-child(1) { width: 65%; }
+th:nth-child(2), td:nth-child(2) { width: 35%; }
 
 th, td {
     border: 1px solid #333;
     padding: 8px 10px;
-    height: 38px;
+    height: 38px; /* 행 높이 통일 */
     font-size: 13px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -70,8 +81,13 @@ tfoot tr td {
     text-align: center;
 }
 
-.total { color: #fff; font-weight: bold; border-top: 2px solid #444; }
+.total { color: #fff; font-weight: bold; }
 .avg { color: #aaa; font-size: 11px; }
 
-@media (max-width: 1050px) { .crew-wrapper { flex: 0 0 calc(50% - 15px); } }
-@media (max-width: 700px) { .crew-wrapper { flex: 0 0 100%; } }
+/* PC 화면이 충분히 넓을 때만 3열 유지, 좁아지면 유연하게 대응 */
+@media (max-width: 1200px) {
+    .crew-wrapper { width: calc((100% - 20px) / 2); } /* 2열 */
+}
+@media (max-width: 800px) {
+    .crew-wrapper { width: 100%; } /* 1열 */
+}

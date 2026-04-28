@@ -8,7 +8,7 @@
     --text-muted: #475569;
     --accent-blue: #38bdf8;
     
-    /* 크루별 포인트 컬러 */
+    /* 크루 컬러 */
     --clr-red: #ef4444; --clr-white: #f8fafc; --clr-gold: #fbbf24;
     --clr-pink: #f472b6; --clr-green: #22c55e; --clr-cyan: #06b6d4;
     --clr-purple: #a855f7; --clr-orange: #f97316; --clr-teal: #14b8a6;
@@ -16,7 +16,6 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
     background-color: var(--bg-dark);
     color: var(--text-dim);
@@ -29,7 +28,6 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 30px 20px;
-    width: 100%;
     max-width: 1600px;
     margin: 0 auto;
 }
@@ -39,9 +37,9 @@ body {
     background-color: var(--card-bg);
     border-radius: 20px;
     padding: 24px 20px;
-    transition: transform 0.3s ease;
     display: flex;
     flex-direction: column;
+    transition: transform 0.3s ease;
 }
 
 .crew-wrapper:hover { transform: translateY(-5px); }
@@ -52,59 +50,47 @@ table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     color: var(--text-main);
     font-size: 19px; font-weight: 700;
     padding-bottom: 25px;
-    text-align: left;
     border-bottom: 2px solid var(--crew-color, var(--accent-blue));
 }
 
 .crew-name span { font-weight: 400; font-size: 13px; color: var(--text-muted); margin-left: 8px; }
 
-/* 멤버 리스트: 가로줄 및 순위별 차등 강조 없음 */
-tbody td {
-    border: none !important;
-    height: 32px;
-    font-size: 13.5px;
-    vertical-align: bottom;
-    padding: 0 10px;
-}
-
+/* 멤버 리스트: 가로줄 및 순위 강조 완전 제거 */
+tbody td { border: none !important; height: 32px; font-size: 13.5px; vertical-align: bottom; padding: 0 10px; }
 .name-cell { color: #cbd5e1; text-align: left; }
-.count-cell { 
-    color: var(--text-main); 
-    font-family: 'Inter', sans-serif; 
-    font-weight: 600; text-align: right; 
-    font-variant-numeric: tabular-nums; 
-}
+.count-cell { color: var(--text-main); font-family: 'Inter', sans-serif; font-weight: 600; text-align: right; }
 
-/* 게이지 바: 상대 비율 */
-.gauge-row td { height: 14px !important; padding: 2px 10px 10px 10px !important; border: none !important; }
+/* 게이지 바 */
+.gauge-row td { height: 14px !important; padding: 2px 10px 10px 10px !important; }
 .gauge-container { width: 100%; height: 3px; background: #212124; border-radius: 2px; overflow: hidden; }
 .gauge-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; background: var(--crew-color, #475569); }
 
-/* 하단 통계 영역 (AVG 강조형) */
+/* 하단 평균 수치 극대화 */
 .stats-container {
     border-top: 1px solid #2d2d30;
     padding-top: 18px;
+    margin-top: 10px;
     height: 85px;
     display: flex; flex-direction: column; justify-content: center;
 }
 
 .stats-table td { border: none !important; padding: 0 10px !important; height: auto !important; }
-.total-row td { color: var(--text-muted); font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+.total-row .label-cell { color: var(--text-muted); font-size: 10px; font-weight: bold; letter-spacing: 1px; }
 .total-row .count-cell { color: #475569; font-size: 12px; }
 
 .avg-row .label-cell { color: var(--text-dim); font-size: 11px; font-weight: 900; }
 .avg-row .count-cell { 
-    color: var(--crew-color, var(--accent-blue)); 
+    color: var(--crew-color, var(--accent-blue));
     font-size: 24px; font-weight: 800;
 }
 
-/* 크루 컬러 클래스 */
+/* 크루별 컬러 클래스 */
 .c-red { --crew-color: var(--clr-red); } .c-white { --crew-color: var(--clr-white); }
 .c-gold { --crew-color: var(--clr-gold); } .c-pink { --crew-color: var(--clr-pink); }
 .c-green { --crew-color: var(--clr-green); } .c-cyan { --crew-color: var(--clr-cyan); }
 .c-purple { --crew-color: var(--clr-purple); } .c-orange { --crew-color: var(--clr-orange); }
 .c-teal { --crew-color: var(--clr-teal); } .c-lime { --crew-color: var(--clr-lime); }
 
-/* 반응형: 화면 작아지면 가독성을 위해 1~2열로 전환 */
+/* 반응형 */
 @media (max-width: 1200px) { .crew-wrapper { flex: 0 0 calc((100% - 20px) / 2); } }
 @media (max-width: 850px) { .crew-wrapper { flex: 0 0 100%; } }

@@ -1,4 +1,4 @@
-/* --- CSS 변수 설정 --- */
+/* --- 변수 설정 --- */
 :root {
     --bg-dark: #0d0d0f;
     --card-bg: #161618;
@@ -7,7 +7,6 @@
     --text-dim: #94a3b8;
     --text-muted: #475569;
     --accent-blue: #38bdf8;
-    --zebra-bg: rgba(255, 255, 255, 0.02);
     
     /* 크루별 포인트 컬러 */
     --clr-red: #ef4444; --clr-white: #f8fafc; --clr-gold: #fbbf24;
@@ -16,7 +15,6 @@
     --clr-lime: #84cc16;
 }
 
-/* --- 기본 초기화 --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -27,7 +25,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* --- 그리드 레이아웃 --- */
 .dashboard-grid {
     display: flex;
     flex-wrap: wrap;
@@ -42,90 +39,63 @@ body {
     background-color: var(--card-bg);
     border-radius: 20px;
     padding: 24px 20px;
-    transition: transform 0.3s ease, background-color 0.3s ease;
+    transition: transform 0.3s ease;
     display: flex;
     flex-direction: column;
 }
 
-.crew-wrapper:hover {
-    transform: translateY(-5px);
-    background-color: var(--card-hover);
-}
+.crew-wrapper:hover { transform: translateY(-5px); }
 
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 
-/* --- 워터마크가 들어가는 헤더 --- */
 .crew-name {
     color: var(--text-main);
     font-size: 19px; font-weight: 700;
     padding-bottom: 25px;
     text-align: left;
     border-bottom: 2px solid var(--crew-color, var(--accent-blue));
-    position: relative;
-    overflow: hidden;
 }
 
-.crew-name::after {
-    content: "";
-    position: absolute;
-    right: -10px; bottom: -15px;
-    width: 100px; height: 100px;
-    background-image: var(--crew-logo);
-    background-size: contain;
-    background-repeat: no-repeat;
-    filter: grayscale(100%);
-    opacity: 0.05;
-    z-index: 0;
-}
-
-.crew-name-text, .crew-name span { position: relative; z-index: 1; }
 .crew-name span { font-weight: 400; font-size: 13px; color: var(--text-muted); margin-left: 8px; }
 
-/* --- 멤버 리스트 디자인 --- */
+/* 멤버 리스트: 가로줄 및 배경패턴 없음 */
 tbody td {
     border: none !important;
-    height: 34px;
+    height: 32px;
     font-size: 13.5px;
-    vertical-align: middle;
+    vertical-align: bottom;
     padding: 0 10px;
 }
 
 .name-cell { color: #cbd5e1; text-align: left; }
-.count-cell {
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
+.count-cell { 
+    color: var(--text-main); 
+    font-family: 'Inter', sans-serif; 
+    font-weight: 600; text-align: right; 
+    font-variant-numeric: tabular-nums; 
 }
 
-/* --- 게이지 바 시스템 --- */
-.gauge-row td {
-    height: 14px !important;
-    padding: 2px 10px 10px 10px !important;
-}
-
+/* 게이지 바 */
+.gauge-row td { height: 14px !important; padding: 2px 10px 10px 10px !important; border: none !important; }
 .gauge-container { width: 100%; height: 3px; background: #212124; border-radius: 2px; overflow: hidden; }
 .gauge-fill { height: 100%; border-radius: 2px; }
 
-/* 게이지 색상 구간 */
+/* 게이지 색상 */
 .p-gray { background: #475569; } .p-yellow { background: #facc15; }
 .p-green { background: #4ade80; } .p-blue { background: #3b82f6; }
 .p-navy { background: #1e3a8a; } .p-purple { background: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.5); }
 
-/* --- 상위 3인 강조 --- */
+/* 강조 */
 .rank-1 .name-cell { color: #fff !important; font-weight: 800; font-size: 14.5px; }
 .rank-2 .name-cell, .rank-3 .name-cell { color: #fff !important; font-weight: 700; }
 .badge { margin-left: 5px; font-size: 12px; }
 
-/* --- 하단 통계 영역 (높이 통일) --- */
+/* 하단 통계 영역: 55px 높이 고정으로 통일 */
 .stats-container {
     border-top: 1px solid #2d2d30;
     padding-top: 15px;
-    height: 55px; /* 모든 표의 하단 높이를 맞춤 */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    height: 55px;
+    display: flex; flex-direction: column; justify-content: center;
 }
 
 .stats-table td { border: none !important; padding: 0 10px !important; height: auto !important; }
@@ -133,13 +103,12 @@ tbody td {
 .total-row .count-cell { color: var(--accent-blue); font-size: 15px; }
 .avg-row td { color: var(--text-muted); font-size: 10px; }
 
-/* --- 크루별 클래스 주입 --- */
+/* 크루 컬러 클래스 */
 .c-red { --crew-color: var(--clr-red); } .c-white { --crew-color: var(--clr-white); }
 .c-gold { --crew-color: var(--clr-gold); } .c-pink { --crew-color: var(--clr-pink); }
 .c-green { --crew-color: var(--clr-green); } .c-cyan { --crew-color: var(--clr-cyan); }
 .c-purple { --crew-color: var(--clr-purple); } .c-orange { --crew-color: var(--clr-orange); }
 .c-teal { --crew-color: var(--clr-teal); } .c-lime { --crew-color: var(--clr-lime); }
 
-/* --- 반응형 설정 --- */
 @media (max-width: 1200px) { .crew-wrapper { flex: 0 0 calc((100% - 20px) / 2); } }
 @media (max-width: 850px) { .crew-wrapper { flex: 0 0 100%; } }

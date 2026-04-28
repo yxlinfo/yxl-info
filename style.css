@@ -1,56 +1,59 @@
-body {
-    background-color: #1a1a1b;
-    color: #ffffff;
-    font-family: 'Pretendard', sans-serif;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-}
+<style>
+    :root {
+        --bg: #0f172a;
+        --card-bg: #1e293b;
+        --header-bg: #334155;
+        --accent: #38bdf8;
+        --text: #f1f5f9;
+    }
+    body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 10px; }
+    
+    .crew-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    
+    /* 상단 헤드 */
+    .crew-header {
+        background: var(--header-bg);
+        padding: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid var(--accent);
+    }
+    .c-title { font-size: 1.1rem; font-weight: bold; color: var(--accent); }
+    .c-count { font-size: 0.85rem; color: #94a3b8; }
 
-.container {
-    width: 100%;
-    max-width: 1000px;
-}
+    /* 멤버 리스트 */
+    .member-list { padding: 5px 0; }
+    .member-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 15px;
+        border-bottom: 1px solid #2d3748;
+        font-size: 0.9rem;
+    }
+    .m-name { color: #cbd5e1; }
+    .m-value { font-family: monospace; color: #fbbf24; font-weight: bold; }
 
-h1 {
-    text-align: center;
-    color: #4dabf7;
-    margin-bottom: 30px;
-}
-
-.table-wrapper {
-    background: #262627;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    background-color: #343a40;
-    padding: 15px;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-}
-
-td {
-    padding: 15px;
-    text-align: center;
-    border-bottom: 1px solid #383838;
-}
-
-.crew-name {
-    font-weight: bold;
-    color: #ffd43b; /* 강조색 */
-}
-
-.status.up { color: #ff6b6b; }
-.status.down { color: #51cf66; }
-
-tr:hover {
-    background-color: #2f2f30;
-}
+    /* 하단 Total / Average */
+    .crew-footer {
+        background: #0f172a;
+        display: flex;
+        padding: 10px 0;
+    }
+    .f-item {
+        flex: 1;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #1e293b;
+    }
+    .f-item:last-child { border-right: none; }
+    .f-item span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
+    .f-item strong { font-size: 1rem; color: #f8fafc; }
+</style>

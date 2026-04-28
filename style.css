@@ -1,64 +1,75 @@
-:root {
-    --bg-dark: #121212;
-    --border-color: #333;
-    --accent-blue: #4dabf7;
-    --highlight: #ffd43b;
-}
-
 body {
-    background-color: var(--bg-dark);
+    background-color: #121212;
     color: #eee;
-    font-family: 'Malgun Gothic', sans-serif;
-    padding: 15px;
     margin: 0;
+    padding: 20px;
+    font-family: sans-serif;
 }
 
-.crew-table-container {
-    margin-bottom: 40px; /* 표 사이 간격 */
-    overflow-x: auto;
+.dashboard-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px 15px; /* 세로 간격 30px, 가로 간격 15px */
+    justify-content: center;
+}
+
+.crew-wrapper {
+    flex: 0 0 calc(33.33% - 20px); /* 3분할 */
+    min-width: 320px;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #1e1e1e;
-    border: 1px solid var(--border-color);
+    table-layout: fixed;
 }
 
 th, td {
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    text-align: left;
-    font-size: 0.9rem;
+    border: 1px solid #333;
+    padding: 8px 10px;
+    height: 38px; /* 한 줄 높이 고정 (가장 중요) */
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* 표 제목 헤더 */
-.table-title {
-    background-color: #2c2c2c;
-    color: var(--accent-blue);
-    text-align: center;
-    font-size: 1.1rem;
-    padding: 15px;
+.crew-name {
+    background-color: #2c3e50;
+    color: #4dabf7;
+    font-size: 15px;
+    height: 50px;
 }
 
-.sub-head {
+.sub-head th {
     background-color: #252525;
     color: #888;
-    font-size: 0.8rem;
+    font-size: 11px;
 }
 
-/* 숫자 열 */
-.num-cell {
+.count {
     text-align: right;
-    font-family: 'Consolas', monospace;
-    color: var(--highlight);
-}
-
-/* 합계 및 평균 열 */
-tfoot tr {
-    background-color: #2c2c2c;
+    color: #ffd43b;
+    font-family: 'Courier New', monospace;
     font-weight: bold;
 }
 
-.total-row td { color: #fff; border-top: 2px solid var(--border-color); }
-.avg-row td { color: #bbb; font-size: 0.85rem; }
+.empty td {
+    background-color: #181818;
+}
+
+tfoot tr td {
+    background-color: #2a2a2a;
+    height: 40px;
+}
+
+.total { color: #fff; font-weight: bold; border-top: 2px solid #444; }
+.avg { color: #aaa; font-size: 11px; }
+
+/* PC 3열 / 태블릿 2열 / 모바일 1열 대응 */
+@media (max-width: 1050px) { .crew-wrapper { flex: 0 0 calc(50% - 15px); } }
+@media (max-width: 700px) { .crew-wrapper { flex: 0 0 100%; } }

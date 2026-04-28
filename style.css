@@ -1,4 +1,29 @@
-/* Global Reset & Base */
+/* --- CSS Variables for Easy Color Customization --- */
+:root {
+    --bg-dark: #0d0d0f;
+    --card-bg: #161618;
+    --card-hover: #1c1c1f;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --text-muted: #475569;
+    --accent-blue: #38bdf8;
+    --border-dim: #212124;
+    --zebra-bg: rgba(255, 255, 255, 0.02);
+    
+    /* Crew Colors */
+    --clr-red: #ef4444;
+    --clr-white: #f8fafc;
+    --clr-gold: #fbbf24;
+    --clr-pink: #f472b6;
+    --clr-green: #22c55e;
+    --clr-cyan: #06b6d4;
+    --clr-purple: #a855f7;
+    --clr-orange: #f97316;
+    --clr-teal: #14b8a6;
+    --clr-lime: #84cc16;
+}
+
+/* --- Global Reset --- */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -6,14 +31,14 @@
 }
 
 body {
-    background-color: #0d0d0f;
-    color: #94a3b8;
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-dim);
+    font-family: 'Pretendard', sans-serif;
     padding: 40px 20px;
     -webkit-font-smoothing: antialiased;
 }
 
-/* Grid Layout */
+/* --- Layout --- */
 .dashboard-grid {
     display: flex;
     flex-wrap: wrap;
@@ -23,71 +48,80 @@ body {
     margin: 0 auto;
 }
 
-/* Crew Card Container */
 .crew-wrapper {
     flex: 0 0 calc((100% - 40px) / 3);
-    background-color: #161618;
-    border-radius: 16px;
-    padding: 24px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    padding: 24px 20px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .crew-wrapper:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    background-color: var(--card-hover);
 }
 
+/* --- Typography & Table --- */
 table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
 }
 
-/* Header */
 .crew-name {
-    color: #f8fafc;
-    font-size: 18px;
+    color: var(--text-main);
+    font-size: 19px;
     font-weight: 700;
-    padding-bottom: 20px;
+    padding-bottom: 25px;
     letter-spacing: -0.5px;
     text-align: left;
+    border-bottom: 2px solid var(--crew-color, var(--accent-blue));
 }
 
 .crew-name span {
     font-weight: 400;
     font-size: 13px;
-    color: #475569;
+    color: var(--text-muted);
     margin-left: 8px;
 }
 
-/* Member Rows */
+/* Remove all row lines, use Zebra Striping */
+tbody tr {
+    transition: background-color 0.2s;
+}
+
+tbody tr:nth-child(4n-3) {
+    background-color: var(--zebra-bg);
+}
+
 tbody td {
-    border: none;
-    height: 32px;
+    height: 34px;
     font-size: 13.5px;
-    vertical-align: bottom;
-    padding: 0 5px;
+    vertical-align: middle;
+    padding: 0 10px;
+    border: none !important; /* Force remove all lines */
 }
 
 .name-cell {
     color: #cbd5e1;
     text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .count-cell {
-    color: #f1f5f9;
+    color: var(--text-main);
     font-family: 'Inter', sans-serif;
     font-weight: 600;
     text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
-/* Gauge System */
+/* --- Gauge System --- */
 .gauge-row td {
-    height: 12px !important;
-    padding: 4px 5px 12px 5px !important;
+    height: 14px !important;
+    padding: 2px 10px 10px 10px !important;
+    background-color: transparent !important;
 }
 
 .gauge-container {
@@ -101,65 +135,80 @@ tbody td {
 .gauge-fill {
     height: 100%;
     border-radius: 2px;
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Color Ranges */
+/* Rank Highlights */
+.rank-1 .name-cell { color: #fff !important; font-weight: 800; font-size: 14.5px; }
+.rank-2 .name-cell { color: #fff !important; font-weight: 700; }
+.rank-3 .name-cell { color: #fff !important; font-weight: 700; }
+.badge { margin-left: 5px; font-size: 12px; }
+
+/* Gauge Range Colors */
 .p-gray   { background: #475569; }
 .p-yellow { background: #facc15; }
 .p-green  { background: #4ade80; }
 .p-blue   { background: #3b82f6; }
 .p-navy   { background: #1e3a8a; }
-.p-purple {
-    background: #a855f7;
-    box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+.p-purple { 
+    background: #a855f7; 
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.5); 
 }
 
-/* Top 3 Rank Highlight */
-.rank-1 .name-cell { color: #fff !important; font-weight: 800; font-size: 15px; }
-.rank-2 .name-cell { color: #fff !important; font-weight: 700; }
-.rank-3 .name-cell { color: #fff !important; font-weight: 700; }
-
-.badge {
-    margin-left: 5px;
-    font-size: 12px;
-}
-
-/* Footer Stats */
+/* --- Footer Stats (Fixed Height & Uniformity) --- */
 tfoot {
-    border-top: 2px solid #2d2d30;
+    margin-top: auto;
+}
+
+.stats-container {
+    border-top: 1px solid #2d2d30;
+    padding-top: 15px;
+    height: 55px; /* FIXED HEIGHT */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stats-table td {
+    border: none !important;
+    padding: 0 10px !important;
+    height: auto !important;
 }
 
 .total-row td {
-    padding-top: 15px;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
     font-weight: bold;
     letter-spacing: 1px;
 }
 
 .total-row .count-cell {
-    color: #38bdf8;
+    color: var(--accent-blue);
     font-size: 15px;
 }
 
 .avg-row td {
-    color: #475569;
-    font-size: 11px;
-    padding-bottom: 5px;
+    color: var(--text-muted);
+    font-size: 10px;
+    padding-top: 2px;
 }
 
-/* Layout Consistency (Empty Rows) */
-.empty-row td {
-    height: 44px !important;
-}
+/* --- Crew Color Classes --- */
+.c-red { --crew-color: var(--clr-red); }
+.c-white { --crew-color: var(--clr-white); }
+.c-gold { --crew-color: var(--clr-gold); }
+.c-pink { --crew-color: var(--clr-pink); }
+.c-green { --crew-color: var(--clr-green); }
+.c-cyan { --crew-color: var(--clr-cyan); }
+.c-purple { --crew-color: var(--clr-purple); }
+.c-orange { --crew-color: var(--clr-orange); }
+.c-teal { --crew-color: var(--clr-teal); }
+.c-lime { --crew-color: var(--clr-lime); }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: #2d2d30; border-radius: 10px; }
 
 /* Responsive */
-@media (max-width: 1200px) {
-    .crew-wrapper { flex: 0 0 calc((100% - 20px) / 2); }
-}
-
-@media (max-width: 850px) {
-    .crew-wrapper { flex: 0 0 100%; }
-    body { padding: 20px 15px; }
-}
+@media (max-width: 1200px) { .crew-wrapper { flex: 0 0 calc((100% - 20px) / 2); } }
+@media (max-width: 850px) { .crew-wrapper { flex: 0 0 100%; } }

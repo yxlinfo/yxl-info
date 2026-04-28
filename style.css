@@ -6,7 +6,7 @@
     --text-dim: #94a3b8;
     --text-muted: #475569;
     
-    /* 크루별 포인트 컬러 */
+    /* 크루별 컬러 */
     --clr-red: #ef4444; --clr-white: #f8fafc; --clr-gold: #fbbf24;
     --clr-pink: #f472b6; --clr-green: #22c55e; --clr-cyan: #06b6d4;
     --clr-purple: #a855f7; --clr-orange: #f97316; --clr-teal: #14b8a6;
@@ -19,24 +19,24 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-dim);
     font-family: 'Pretendard', sans-serif;
-    padding: 20px 10px; /* 여백 축소 */
+    padding: 20px;
     -webkit-font-smoothing: antialiased;
 }
 
 .dashboard-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px 10px; /* 간격 축소 */
+    gap: 20px 15px;
     max-width: 1600px;
     margin: 0 auto;
 }
 
+/* [PC 기본: 3열] */
 .crew-wrapper {
-    /* [핵심] 모든 화면 크기에서 무조건 3열 유지 */
-    flex: 0 0 calc((100% - 20px) / 3); 
+    flex: 0 0 calc((100% - 30px) / 3);
     background-color: var(--card-bg);
-    border-radius: 12px;
-    padding: 12px 8px; /* 내부 여백 축소 */
+    border-radius: 16px;
+    padding: 20px 15px;
     display: flex;
     flex-direction: column;
 }
@@ -45,56 +45,71 @@ table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 
 .crew-name {
     color: var(--text-main);
-    font-size: 13px; /* 모바일 대응 폰트 축소 */
+    font-size: 17px;
     font-weight: 700;
-    padding-bottom: 12px;
+    padding-bottom: 20px;
     border-bottom: 2px solid var(--crew-color, #38bdf8);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* 제목 길면 말줄임 */
 }
 
-.crew-name span { font-weight: 400; font-size: 10px; color: var(--text-muted); margin-left: 4px; }
+.crew-name span { font-weight: 400; font-size: 12px; color: var(--text-muted); margin-left: 6px; }
 
 /* 멤버 리스트 */
-tbody td { border: none !important; height: 28px; font-size: 10.5px; vertical-align: bottom; padding: 0 4px; }
-.name-cell { color: #cbd5e1; text-align: left; white-space: nowrap; overflow: hidden; }
+tbody td { border: none !important; height: 32px; font-size: 13px; vertical-align: bottom; padding: 0 8px; }
+.name-cell { color: #cbd5e1; text-align: left; }
 .count-cell { 
     color: var(--text-main); 
     font-family: 'Inter', sans-serif; 
     font-weight: 600; text-align: right;
-    font-size: 9px; /* 숫자 폰트 축소 */
+    font-size: 12px;
 }
 
 /* 게이지 바 */
-.gauge-row td { height: 10px !important; padding: 2px 4px 6px 4px !important; }
-.gauge-container { width: 100%; height: 2px; background: #212124; border-radius: 2px; overflow: hidden; }
+.gauge-row td { height: 14px !important; padding: 2px 8px 10px 8px !important; }
+.gauge-container { width: 100%; height: 3px; background: #212124; border-radius: 2px; overflow: hidden; }
 .gauge-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; background: var(--crew-color, #475569); }
 
-/* 하단 통계 영역 (강조) */
+/* 하단 평균 수치 강조 */
 .stats-container {
     border-top: 1px solid #2d2d30;
-    padding-top: 12px;
-    margin-top: 8px;
-    height: 60px;
+    padding-top: 15px;
+    margin-top: 10px;
+    height: 75px;
     display: flex; flex-direction: column; justify-content: center;
 }
 
-.stats-table td { border: none !important; padding: 0 4px !important; height: auto !important; }
-.total-row .label-cell { color: var(--text-muted); font-size: 8px; font-weight: bold; letter-spacing: 0.5px; }
-.total-row .count-cell { color: #475569; font-size: 9px; }
+.stats-table td { border: none !important; padding: 0 8px !important; }
+.total-row .label-cell { color: var(--text-muted); font-size: 10px; font-weight: bold; }
+.total-row .count-cell { color: #475569; font-size: 11px; }
 
-.avg-row .label-cell { color: var(--text-dim); font-size: 9px; font-weight: 900; }
+.avg-row .label-cell { color: var(--text-dim); font-size: 11px; font-weight: 900; }
 .avg-row .count-cell { 
     color: var(--crew-color, #38bdf8);
-    font-size: 14px; font-weight: 800; /* 평균값 강조 */
+    font-size: 20px; font-weight: 800;
 }
 
-/* 크루 컬러 클래스 */
+/* 크루별 컬러 */
 .c-red { --crew-color: var(--clr-red); } .c-white { --crew-color: var(--clr-white); }
 .c-gold { --crew-color: var(--clr-gold); } .c-pink { --crew-color: var(--clr-pink); }
 .c-green { --crew-color: var(--clr-green); } .c-cyan { --crew-color: var(--clr-cyan); }
 .c-purple { --crew-color: var(--clr-purple); } .c-orange { --crew-color: var(--clr-orange); }
 .c-teal { --crew-color: var(--clr-teal); } .c-lime { --crew-color: var(--clr-lime); }
 
-/* 모바일 3열 유지를 위해 기존 미디어 쿼리 완전 제거 */
+/* [모바일 대응: 한 줄에 2개] */
+@media (max-width: 768px) {
+    .dashboard-grid { gap: 10px 8px; }
+    .crew-wrapper {
+        flex: 0 0 calc((100% - 8px) / 2); /* 2열 배치 */
+        padding: 12px 10px;
+        border-radius: 12px;
+    }
+    .crew-name { font-size: 14px; padding-bottom: 12px; }
+    tbody td { font-size: 11px; height: 28px; padding: 0 4px; }
+    .avg-row .count-cell { font-size: 16px; }
+}
+
+/* [아주 좁은 화면: 1열로 전환 (선택 사항)] 
+   만약 2열도 좁다면 아래 주석을 해제하세요. 
+@media (max-width: 400px) {
+    .crew-wrapper { flex: 0 0 100%; }
+}
+*/

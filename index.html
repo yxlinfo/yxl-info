@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { margin: 0; padding: 5px; background-color: #1a1c23; font-family: 'Malgun Gothic', sans-serif; color: white; }
+        .container { width: 100%; max-width: 450px; margin: 0 auto; border: 1px solid #333; border-radius: 12px; overflow: hidden; background: #1a1c23; }
+        
+        /* 탭 라디오 버튼 숨김 */
+        .tab-input { display: none; }
+
+        /* 탭 상단 메뉴 - 모바일 대응 (Flex) */
+        .nav-tabs { display: flex; background: #252831; padding: 5px; gap: 5px; }
+        .nav-tabs label { 
+            flex: 1; text-align: center; padding: 12px 0; font-size: 13px; 
+            font-weight: bold; color: #999; cursor: pointer; border-radius: 8px; transition: 0.2s;
+        }
+
+        /* 탭 선택 시 스타일 */
+        #t1:checked ~ .nav-tabs label[for="t1"],
+        #t2:checked ~ .nav-tabs label[for="t2"],
+        #t3:checked ~ .nav-tabs label[for="t3"] {
+            background: #4a3f9a; color: #fff;
+        }
+
+        /* 본문 영역 */
+        .content { display: none; padding: 20px; min-height: 250px; animation: fadeIn 0.3s ease-in-out; }
+        #t1:checked ~ #c1, #t2:checked ~ #c2, #t3:checked ~ #c3 { display: block; }
+
+        /* 모바일 카드 스타일 */
+        .card { background: #2d303a; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #4a3f9a; }
+        .card-title { font-size: 0.9em; color: #a29bfe; margin-bottom: 5px; }
+        .card-value { font-size: 1.1em; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <input type="radio" name="tab" id="t1" class="tab-input" checked>
+        <input type="radio" name="tab" id="t2" class="tab-input">
+        <input type="radio" name="tab" id="t3" class="tab-input">
+
+        <div class="nav-tabs">
+            <label for="t1">⏰ 어셈블</label>
+            <label for="t2">📝 공약표</label>
+            <label for="t3">📅 일정표</label>
+        </div>
+
+        <div id="c1" class="content">
+            <div class="card">
+                <div class="card-title">방송 시작 시간</div>
+                <div class="card-value">오늘 오후 20:00</div>
+            </div>
+            <div style="font-size: 0.85em; color: #aaa; padding: 5px;">* 5분 전 대기 필수</div>
+        </div>
+
+        <div id="c2" class="content">
+            <div class="card">
+                <div class="card-title">오늘의 목표</div>
+                <div class="card-value">별풍선 5만개 달성</div>
+            </div>
+            <div class="card" style="border-left-color: #ff7675;">
+                <div class="card-title">실패 시 공약</div>
+                <div class="card-value">공포 게임 12시간</div>
+            </div>
+        </div>
+
+        <div id="c3" class="content">
+            <div style="border-bottom: 1px solid #333; padding: 10px 0;"><b>20:00</b> 오프닝</div>
+            <div style="border-bottom: 1px solid #333; padding: 10px 0;"><b>21:00</b> 스타 멸망전</div>
+            <div style="padding: 10px 0;"><b>23:00</b> 정산 및 방종</div>
+        </div>
+    </div>
+</body>
+</html>

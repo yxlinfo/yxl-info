@@ -3,144 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YXL 실시간 현황판</title>
     <style>
-        :root { 
-            --neon-purple: #bc66ff; 
-            --neon-glow: rgba(188, 102, 255, 0.6); 
-            --on-red: #ff4d4d; 
-            --glass-bg: rgba(30, 30, 30, 0.9);
-        }
-        
-        /* 스크롤바 제거 및 여백 최적화 */
-        body { 
-            background: #121212; margin: 0; padding: 10px; 
-            font-family: 'Pretendard', sans-serif; color: #fff; 
-            overflow-x: hidden;
-        }
-
-        .tab-header {
-            display: inline-block; padding: 8px 20px; background: #1e1e1e;
-            border: 1.5px solid var(--neon-purple); border-bottom: none;
-            border-radius: 10px 10px 0 0; font-size: 13px; font-weight: 800;
-            color: var(--neon-purple); text-shadow: 0 0 8px var(--neon-glow);
-            margin-left: 5px; letter-spacing: 1px;
-        }
-        .tab-line { border-top: 1.5px solid var(--neon-purple); margin-bottom: 15px; box-shadow: 0 0 10px var(--neon-glow); opacity: 0.6; }
-
-        /* 🔥 그리드 설정: 기본 모바일 2열, PC(600px 이상) 4열 */
+        /* 와이고수 다크모드/라이트모드 어디서나 잘 어울리는 스타일 */
+        body { background: #121212; color: #e0e0e0; font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 10px; }
         .grid { 
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
             gap: 8px; 
-            padding-bottom: 20px; /* 하단 잘림 방지 여백 */
         }
-        @media (min-width: 600px) { 
-            .grid { grid-template-columns: repeat(4, 1fr); gap: 15px; } 
-        }
-        
-        /* 카드 디자인 */
+
+        /* 카드 기본 디자인 */
         .card { 
-            background: var(--glass-bg); border-radius: 12px; padding: 15px 10px; border: 1px solid #333;
-            position: relative; text-align: center; display: flex; flex-direction: column; align-items: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
-            overflow: hidden;
+            background: #1e1e1e; border-radius: 8px; padding: 10px; 
+            border: 1px solid #2c2c2c; position: relative;
+            transition: all 0.3s ease;
         }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--neon-purple), transparent); opacity: 0.3;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--neon-purple); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .card.on { border: 1.5px solid var(--on-red); box-shadow: 0 0 10px rgba(255, 77, 77, 0.2); }
-        .card.on::before { background: linear-gradient(90deg, transparent, var(--on-red), transparent); opacity: 1; }
-
-        .dot { position: absolute; top: 8px; right: 8px; font-size: 9px; color: #666; font-weight: bold; }
-        .on .dot { color: var(--on-red); text-shadow: 0 0 5px var(--on-red); }
-        .p-img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #444; margin-bottom: 10px; transition: 0.3s; }
-        .card:hover .p-img { transform: scale(1.1); }
-        .on .p-img { border-color: var(--on-red); }
-
-        .rank { font-size: 10px; color: var(--neon-purple); font-weight: 700; margin-bottom: 2px; }
-        .name { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
         
-        .joined-box { 
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(188, 102, 255, 0.15);
-            padding: 3px 8px; border-radius: 15px; margin-bottom: 10px;
+        /* 방송 중일 때 하이라이트 (유저님의 최신 선호 반영: 보라색 글로우) */
+        .card.on { 
+            border-color: #8a2be2; 
+            box-shadow: 0 0 8px rgba(138, 43, 226, 0.4); 
         }
-        .joined { font-size: 9px; color: #888; }
 
-        .btn { 
-            width: 100%; background: #2a2a2a; color: #fff; text-decoration: none; font-size: 10px; 
-            padding: 7px 0; border-radius: 6px; transition: 0.2s; font-weight: 700; border: 1px solid #444;
-        }
-        .on .btn { background: var(--on-red); border-color: transparent; }
+        /* 닉네임 및 상태 */
+        .name { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .info { font-size: 11px; color: #999; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        
+        /* 라이브 점(Dot) 애니메이션 */
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #444; }
+        .on .dot { background: #ff4d4d; box-shadow: 0 0 5px #ff4d4d; animation: blink 1.5s infinite; }
+        
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* 툴팁 */
-        #tooltip { position: fixed; display: none; z-index: 9999; pointer-events: none; background: rgba(15, 15, 15, 0.98); 
-                   border: 1.5px solid var(--on-red); border-radius: 10px; padding: 10px; width: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
-        .tt-thumb { width: 100%; border-radius: 4px; margin-bottom: 8px; }
-        .tt-title { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-        .tt-info { font-size: 10px; color: var(--on-red); }
+        /* 자물쇠(비번방) 아이콘 */
+        .lock { color: #ffd700; font-size: 10px; }
+        
+        a { text-decoration: none; color: inherit; }
     </style>
 </head>
 <body>
-    <div class="tab-header">현황표</div>
-    <div class="tab-line"></div>
-    <div class="grid" id="grid"></div>
-    <div id="tooltip"></div>
+    <div class="grid" id="status-container">
+        <!-- 데이터 로딩 전 표시 -->
+    </div>
 
     <script>
-        const members = [
-            {id: "sladk51", name: "리윤", rank: "부장", date: "2025.06.29"}, {id: "jaeha010", name: "후잉", rank: "차장", date: "2024.10.12"},
-            {id: "star49", name: "냥냥수주", rank: "과장", date: "2026.01.25"}, {id: "smkim82372", name: "류서하", rank: "비서실장", date: "2026.01.25"},
-            {id: "offside629", name: "율무", rank: "대리", date: "2025.10.19"}, {id: "asy1218", name: "하랑짱", rank: "주임", date: "2025.10.12"},
-            {id: "fhwm0602", name: "미로", rank: "사원", date: "2026.01.13"}, {id: "jeewon1202", name: "유나연", rank: "인턴장", date: "2025.12.11"},
-            {id: "zbxlzzz", name: "소다", rank: "시급이", date: "2024.10.29"}, {id: "tkek55", name: "김유정", rank: "시급이", date: "2025.09.04"},
-            {id: "iluvpp", name: "서니", rank: "신입", date: "2026.04.14"}, {id: "wk3220", name: "백나현", rank: "신입", date: "2026.03.28"},
-            {id: "ahrum0912", name: "아름", rank: "신입", date: "2026.03.29"}, {id: "meldoy777", name: "너의멜로디", rank: "신입", date: "2026.03.31"},
-            {id: "callgg", name: "꺼니", rank: "웨이터", date: "2025.10.02"}, {id: "kimpooh0707", name: "김푸", rank: "웨이터", date: "2025.10.02"}
-        ];
+        async function fetchStatus() {
+            try {
+                // status.json은 yxl.py가 생성한 최신 데이터를 읽어옵니다.
+                const res = await fetch('status.json?v=' + Date.now());
+                const data = await res.json();
+                const container = document.getElementById('status-container');
+                container.innerHTML = '';
 
-        let currentData = {};
-        const tooltip = document.getElementById('tooltip');
-
-        function refresh() {
-            fetch("status.json?v=" + new Date().getTime())
-                .then(r => r.json())
-                .then(data => {
-                    currentData = data;
-                    const grid = document.getElementById('grid');
-                    grid.innerHTML = members.map(m => {
-                        const info = data[m.id] || {};
-                        const isOn = info.is_on;
-                        return `
-                            <div class="card ${isOn ? 'on' : ''}" onmousemove="showTooltip(event, '${m.id}')" onmouseleave="hideTooltip()">
-                                <div class="dot">${isOn ? '● LIVE' : '○ OFF'}</div>
-                                <img src="https://stimg.sooplive.com/LOGO/${m.id.substring(0,2)}/${m.id}/m/${m.id}.webp" class="p-img">
-                                <div class="rank">${m.rank}</div>
-                                <div class="name">${m.name}</div>
-                                <div class="joined-box"><div class="joined">JOINED ${m.date}</div></div>
-                                <a href="https://www.sooplive.com/station/${m.id}" class="btn" target="_blank">STATION</a>
+                Object.entries(data).forEach(([mid, info]) => {
+                    const card = document.createElement('div');
+                    card.className = `card ${info.is_on ? 'on' : ''}`;
+                    
+                    const lockIcon = info.is_password ? '<span class="lock">🔒</span>' : '';
+                    const viewerCount = info.is_on ? info.viewers.toLocaleString() + '명' : 'OFF';
+                    
+                    card.innerHTML = `
+                        <a href="https://play.sooplive.co.kr/${mid}" target="_blank">
+                            <div class="name">${info.name}</div>
+                            <div class="info">
+                                <div class="dot"></div>
+                                <span>${viewerCount}</span>
+                                ${lockIcon}
                             </div>
-                        `;
-                    }).join('');
+                        </a>
+                    `;
+                    container.appendChild(card);
                 });
+            } catch (err) {
+                console.error("현황판 업데이트 실패:", err);
+            }
         }
 
-        function showTooltip(e, id) {
-            const info = currentData[id];
-            if (!info?.is_on) return;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 10) + 'px';
-            tooltip.style.top = (e.clientY - 40) + 'px';
-            tooltip.innerHTML = `
-                <img src="https://liveimg.sooplive.com/ask_t/${id}.webp?v=${new Date().getTime()}" class="tt-thumb">
-                <div class="tt-title">${info.title || '방송 중'}</div>
-                <div class="tt-info">👥 ${info.viewers || 0}명</div>
-            `;
-        }
-        function hideTooltip() { tooltip.style.display = 'none'; }
-        refresh();
-        setInterval(refresh, 60000);
+        // 초기 실행 및 1분마다 자동 갱신
+        fetchStatus();
+        setInterval(fetchStatus, 60000);
     </script>
 </body>
 </html>

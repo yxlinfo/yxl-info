@@ -4,74 +4,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YXL Dashboard - 염보성</title>
+    <title>YXL STREAMER DASHBOARD</title>
     <style>
-        /* 기본 배경 및 폰트 설정 */
-        body { background: transparent; margin: 0; font-family: 'Pretendard', -apple-system, sans-serif; display: flex; justify-content: center; padding: 30px; overflow: hidden; }
+        body { background: #f0f2f5; margin: 0; font-family: 'Pretendard', sans-serif; padding: 40px 20px; }
         
-        /* [1] 카드 기본 디자인 & 애니메이션 */
+        /* 그리드 레이아웃: 화면 너비에 따라 카드 개수 자동 조절 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
         .streamer-card {
-            width: 280px; border-radius: 24px; background: #ffffff; position: relative;
+            background: #fff; border-radius: 24px; position: relative;
             text-align: center; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 8px 15px rgba(0,0,0,0.06); cursor: pointer; border: 2.5px solid transparent;
         }
-        
-        /* [2] 방송 중일 때 테두리 및 글로우 효과 */
-        .streamer-card.is-live { border-color: #ff4646; box-shadow: 0 0 20px rgba(255, 70, 70, 0.25); }
-        
-        /* [3] Hover: 볼록 튀어나오는 인터랙션 */
-        .streamer-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
-        .streamer-card.is-live:hover { box-shadow: 0 20px 40px rgba(255, 70, 70, 0.45); }
+        .streamer-card.is-live { border-color: #ff4646; box-shadow: 0 0 20px rgba(255, 70, 70, 0.15); }
+        .streamer-card:hover { transform: translateY(-12px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+        .streamer-card.is-live:hover { box-shadow: 0 20px 40px rgba(255, 70, 70, 0.4); }
 
-        /* LIVE 배지 애니메이션 */
-        .live-badge {
-            display: none; position: absolute; top: 18px; right: 18px;
-            background: #ff4646; color: white; padding: 5px 12px; border-radius: 8px;
-            font-size: 11px; font-weight: 800; z-index: 10; animation: pulse 2s infinite;
-        }
+        .live-badge { display: none; position: absolute; top: 18px; right: 18px; background: #ff4646; color: white; padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; z-index: 10; animation: pulse 2s infinite; }
         .is-live .live-badge { display: block; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
-        /* [4] 커서 추적 썸네일 미리보기 박스 */
-        #thumbnail-preview {
-            position: fixed; pointer-events: none; display: none; z-index: 1000;
-            width: 270px; background: #121212; border-radius: 14px; overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5); border: 1.5px solid #333;
-        }
+        #thumbnail-preview { position: fixed; pointer-events: none; display: none; z-index: 1000; width: 270px; background: #121212; border-radius: 14px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5); border: 1.5px solid #333; }
         .preview-screen img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
         .preview-info { padding: 12px; color: #fff; }
         .preview-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .preview-stats { font-size: 0.75rem; color: #aaa; display: flex; align-items: center; gap: 4px; }
+        .preview-stats { font-size: 0.75rem; color: #aaa; }
 
-        /* 카드 내부 스타일링 */
         .card-header { height: 85px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 21px 21px 0 0; }
         .profile-section { margin-top: -45px; padding: 0 20px 25px 20px; }
         .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; background: #f8fafc; }
-        .streamer-name { margin: 15px 0 5px 0; font-size: 1.45rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
-        .btn-station {
-            display: block; text-decoration: none; background: #0045ff; color: #fff;
-            padding: 13px; border-radius: 14px; font-weight: 700; margin-top: 18px; transition: 0.2s ease;
-        }
-        .btn-station:hover { background: #0037cc; transform: scale(1.02); }
+        .streamer-name { margin: 15px 0 5px 0; font-size: 1.4rem; font-weight: 800; color: #0f172a; }
+        .btn-station { display: block; text-decoration: none; background: #0045ff; color: #fff; padding: 12px; border-radius: 12px; font-weight: 700; margin-top: 15px; transition: 0.2s; }
+        .btn-station:hover { background: #0037cc; }
     </style>
 </head>
 <body>
 
-    <div class="streamer-card is-live" 
-         data-thumb="https://liveimg.sooplive.com/h/293635001.webp"
-         data-title="[YXL] 시즌 14 2화 직급프리데이!! 카운트 시작하겠습니다."
-         data-viewers="2,601">
+    <div class="dashboard-grid">
         
-        <div class="live-badge">● LIVE</div>
-        <div class="card-header"></div>
-        <div class="profile-section">
-            <img src="https://stimg.sooplive.com/LOGO/yu/yuambo/m/yuambo.webp" class="profile-img">
-            <h2 class="streamer-name">염보성</h2>
-            <a href="https://www.sooplive.com/station/yuambo" target="_blank" class="btn-station">방송국 가기</a>
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293635001.webp"
+             data-title="[YXL] 시즌 14 2화 직급프리데이!! 카운트 시작하겠습니다."
+             data-viewers="2,531">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/yu/yuambo/m/yuambo.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">염보성</h2>
+                <a href="https://www.sooplive.com/station/yuambo" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
         </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293650103.webp"
+             data-title="[YXL차장] 직프데이 잉짜장까지 한단계. . 카운트칩니다"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/ja/jaeha010/m/jaeha010.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">후잉</h2>
+                <a href="https://www.sooplive.com/station/jaeha010" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293650215.webp"
+             data-title="[yxl:과장] 진짜올라가고시퍼요..."
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/st/star49/m/star49.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">냥냥수수</h2>
+                <a href="https://www.sooplive.com/station/star49" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293651047.webp"
+             data-title="좌표-> 염보성 / 오늘직프.. 카운트 들오가요 2등 지켜됴요 ㅜㅜ..."
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/as/asy1218/m/asy1218.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">하랑짱</h2>
+                <a href="https://www.sooplive.com/station/asy1218" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293650825.webp"
+             data-title="[YXL:사원] 직급프리데이 시급만 탈출하게헤줘 진짜."
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/fh/fhwm0602/m/fhwm0602.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">미로</h2>
+                <a href="https://www.sooplive.com/station/fhwm0602" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293644901.webp"
+             data-title="[Yxl:인턴장] 나연이 따잇!!!개비상!!!!!"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/je/jeewon1202/m/jeewon1202.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">유나연</h2>
+                <a href="https://www.sooplive.com/station/jeewon1202" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293650645.webp"
+             data-title="[YXL]직프데이 카운트중 ㅠㅠㅠ소다살려"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/zb/zbxlzzz/m/zbxlzzz.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">소다</h2>
+                <a href="https://www.sooplive.com/station/zbxlzzz" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293635457.webp"
+             data-title="[YXL:신입]직프데이!!좌표>>염보성"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/wk/wk3220/m/wk3220.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">백나현</h2>
+                <a href="https://www.sooplive.com/station/wk3220" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293650037.webp"
+             data-title="[YXL 신입] 직프.. 서니 내려가기 시러염 ㅠ.ㅠ"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/il/iluvpp/m/iluvpp.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">서니</h2>
+                <a href="https://www.sooplive.com/station/iluvpp" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293650493.webp"
+             data-title="[yxl 신입] 직급프리데이 아선사..7천개면.."
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/ah/ahrum0912/m/ahrum0912.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">아름</h2>
+                <a href="https://www.sooplive.com/station/ahrum0912" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293649801.webp"
+             data-title="[YXL:신입] 직프 대리 유지 모여주세요 멜~플~단"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/me/meldoy777/m/meldoy777.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">너의멜로디</h2>
+                <a href="https://www.sooplive.com/station/meldoy777" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card is-live" 
+             data-thumb="https://liveimg.sooplive.com/h/293649917.webp"
+             data-title="[YXL]  김푸vs 꺼니   도와주세요  좌표 :염보성대표님"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/ki/kimpooh0707/m/kimpooh0707.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">김푸</h2>
+                <a href="https://www.sooplive.com/station/kimpooh0707" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card " 
+             data-thumb=""
+             data-title="방송 종료"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/sl/sladk51/m/sladk51.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">리윤</h2>
+                <a href="https://www.sooplive.com/station/sladk51" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card " 
+             data-thumb=""
+             data-title="방송 종료"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/sm/smkim82372/m/smkim82372.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">류서하</h2>
+                <a href="https://www.sooplive.com/station/smkim82372" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card " 
+             data-thumb=""
+             data-title="방송 종료"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/of/offside629/m/offside629.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">율무</h2>
+                <a href="https://www.sooplive.com/station/offside629" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card " 
+             data-thumb=""
+             data-title="방송 종료"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/tk/tkek55/m/tkek55.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">김유정</h2>
+                <a href="https://www.sooplive.com/station/tkek55" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
+        <div class="streamer-card " 
+             data-thumb=""
+             data-title="방송 종료"
+             data-viewers="0">
+            <div class="live-badge">● LIVE</div>
+            <div class="card-header"></div>
+            <div class="profile-section">
+                <img src="https://stimg.sooplive.com/LOGO/ca/callgg/m/callgg.webp" class="profile-img" onerror="this.src='https://res.afreecatv.com/images/afreecatv/common/img_no_profile.gif'">
+                <h2 class="streamer-name">꺼니</h2>
+                <a href="https://www.sooplive.com/station/callgg" target="_blank" class="btn-station">방송국 가기</a>
+            </div>
+        </div>
+        
     </div>
 
-    <!-- 썸네일 팝업 엘리먼트 -->
     <div id="thumbnail-preview">
         <div class="preview-screen"><img src="" id="p-img"></div>
         <div class="preview-info">
@@ -81,33 +280,25 @@
     </div>
 
     <script>
-        const card = document.querySelector('.streamer-card');
+        const cards = document.querySelectorAll('.streamer-card');
         const preview = document.getElementById('thumbnail-preview');
         const pImg = document.getElementById('p-img');
         const pTitle = document.getElementById('p-title');
         const pViewers = document.getElementById('p-viewers');
 
-        card.addEventListener('mousemove', (e) => {
-            // 버튼 위에 있을 때는 썸네일 숨김
-            if (e.target.closest('.btn-station')) {
-                preview.style.display = 'none';
-                return;
-            }
-
-            if (card.classList.contains('is-live')) {
-                pImg.src = card.getAttribute('data-thumb');
-                pTitle.textContent = card.getAttribute('data-title');
-                pViewers.textContent = card.getAttribute('data-viewers');
-                
-                preview.style.display = 'block';
-                // 마우스 오른쪽 중앙 정렬 계산
-                preview.style.left = (e.clientX + 20) + 'px';
-                preview.style.top = (e.clientY - (preview.offsetHeight / 2)) + 'px';
-            }
-        });
-
-        card.addEventListener('mouseleave', () => {
-            preview.style.display = 'none';
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                if (e.target.closest('.btn-station')) { preview.style.display = 'none'; return; }
+                if (card.classList.contains('is-live')) {
+                    pImg.src = card.getAttribute('data-thumb');
+                    pTitle.textContent = card.getAttribute('data-title');
+                    pViewers.textContent = card.getAttribute('data-viewers');
+                    preview.style.display = 'block';
+                    preview.style.left = (e.clientX + 20) + 'px';
+                    preview.style.top = (e.clientY - (preview.offsetHeight / 2)) + 'px';
+                }
+            });
+            card.addEventListener('mouseleave', () => { preview.style.display = 'none'; });
         });
     </script>
 </body>

@@ -1,66 +1,68 @@
 import requests
 import json
 
-# YXL 크루 멤버 리스트
-MEMBERS = [
-    "sladk51", "jaeha010", "star49", "smkim82372", 
-    "offside629", "asy1218", "fhwm0602", "jeewon1202", 
-    "zbxlzzz", "tkek55", "iluvpp", "wk3220", 
-    "ahrum0912", "meldoy777", "callgg", "kimpooh0707"
-]
+# 유저님이 제공해주신 닉네임, 아이디, 고유번호 매칭 데이터
+STREAMER_DATA = {
+    "리윤": {"id": "sladk51", "no": "293641745"},
+    "후잉": {"id": "jaeha010", "no": "293635513"},
+    "냥냥수주": {"id": "star49", "no": "194283087"},
+    "류서하": {"id": "smkim82372", "no": "293644155"},
+    "율무": {"id": "offside629", "no": "194282859"},
+    "하랑짱": {"id": "asy1218", "no": "293645237"},
+    "미로": {"id": "fhwm0602", "no": "293644931"},
+    "유나연": {"id": "jeewon1202", "no": "293644901"},
+    "소다": {"id": "zbxlzzz", "no": "293645329"},
+    "김유정": {"id": "tkek55", "no": "194284025"},
+    "서니": {"id": "iluvpp", "no": "293641957"},
+    "백나현": {"id": "wk3220", "no": "293635457"},
+    "아름": {"id": "ahrum0912", "no": "194283191"},
+    "너의멜로디": {"id": "meldoy777", "no": "194195841"},
+    "꺼니": {"id": "callgg", "no": "193689229"},
+    "김푸": {"id": "kimpooh0707", "no": "194161903"}
+}
 
-def get_stream_status():
-    status_data = {}
-    
-    # 브라우저 접근처럼 보이게 하기 위한 헤더 설정
+def check_live_status():
+    status_results = {}
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
-    
-    for mid in MEMBERS:
+
+    for name, info in STREAMER_DATA.items():
+        mid = info["id"]
+        target_no = info["no"]
+        
         try:
-            # 1차 확인: 공식 플레이어 API (공개 방송 위주)
+            # 아프리카TV 플레이어 API 호출
             api_url = f"https://live.sooplive.com/afreeca/player_live_api.php?bj_id={mid}"
-            response = requests.get(api_url, headers=headers, timeout=7)
-            data = response.json()
+            res = requests.get(api_url, headers=headers, timeout=5).json()
             
-            channel = data.get('CHANNEL', {})
-            broad_no = channel.get('broad_no', '0')
+            channel = res.get('CHANNEL', {})
+            current_no = str(channel.get('broad_no', '0'))
             
-            # 2차 확인: 방송국 API (비공개/비번방 교차 검증)
-            # 플레이어 API에서 broad_no가 "0"으로 올 경우를 대비해 방송국 API로 재확인합니다.
-            if broad_no == "0" or broad_no is None:
-                station_url = f"https://bjapi.sooplive.com/api/{mid}/station"
-                st_res = requests.get(station_url, headers=headers, timeout=5)
-                st_data = st_res.json()
-                
-                # 방송국 데이터 내의 broad_no 존재 여부 확인
-                station_broad = st_data.get('broad')
-                if station_broad and station_broad.get('broad_no'):
-                    is_on = True
-                    title = "비공개 방송 중"
-                    viewers = "0"
-                else:
-                    is_on = False
-            else:
+            # 감지 로직:
+            # 1. API에서 가져온 번호가 유저님이 준 고유번호와 일치하는가?
+            # 2. 혹은 API가 번호를 가리더라도 현재 '방송 중' 신호(broad_no != 0)가 잡히는가?
+            is_on = False
+            if current_no == target_no:
                 is_on = True
-                title = channel.get('TITLE', '방송 중')
-                viewers = channel.get('VIEW_CNT', '0')
+            elif current_no != "0" and current_no != "":
+                is_on = True
             
-            # 데이터 저장
-            status_data[mid] = {
+            # 결과 데이터 구성
+            status_results[mid] = {
+                "name": name,
                 "is_on": is_on,
-                "title": title,
-                "viewers": viewers
+                "title": channel.get('TITLE', '비공개 방송 중') if is_on else "",
+                "viewers": channel.get('VIEW_CNT', '0') if is_on else "0"
             }
             
         except Exception:
-            # 에러 발생 시 해당 멤버는 오프라인 처리
-            status_data[mid] = {"is_on": False}
-    
-    # status.json 파일로 저장 (UTF-8 인코딩)
+            # 에러 발생 시 오프라인 처리
+            status_results[mid] = {"name": name, "is_on": False}
+
+    # status.json 파일 생성 (UTF-8 인코딩)
     with open('status.json', 'w', encoding='utf-8') as f:
-        json.dump(status_data, f, ensure_ascii=False, indent=4)
+        json.dump(status_results, f, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
-    get_stream_status()
+    check_live_status()

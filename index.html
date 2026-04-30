@@ -4,60 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>염보성 대시보드</title>
+    <title>YXL Dashboard - 염보성</title>
     <style>
-        body { background: transparent; margin: 0; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; padding: 20px; overflow: hidden; }
+        /* 기본 배경 및 폰트 설정 */
+        body { background: transparent; margin: 0; font-family: 'Pretendard', -apple-system, sans-serif; display: flex; justify-content: center; padding: 30px; overflow: hidden; }
         
-        /* 카드 디자인 */
+        /* [1] 카드 기본 디자인 & 애니메이션 */
         .streamer-card {
-            width: 280px; border-radius: 20px; background: #fff; position: relative;
-            text-align: center; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; border: 2px solid transparent;
+            width: 280px; border-radius: 24px; background: #ffffff; position: relative;
+            text-align: center; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.06); cursor: pointer; border: 2.5px solid transparent;
         }
-        .streamer-card.is-live { border-color: #ff4646; box-shadow: 0 0 15px rgba(255, 70, 70, 0.2); }
         
-        /* Hover: 볼록 튀어나오는 느낌 */
-        .streamer-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
-        .streamer-card.is-live:hover { box-shadow: 0 15px 30px rgba(255, 70, 70, 0.4); }
+        /* [2] 방송 중일 때 테두리 및 글로우 효과 */
+        .streamer-card.is-live { border-color: #ff4646; box-shadow: 0 0 20px rgba(255, 70, 70, 0.25); }
+        
+        /* [3] Hover: 볼록 튀어나오는 인터랙션 */
+        .streamer-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+        .streamer-card.is-live:hover { box-shadow: 0 20px 40px rgba(255, 70, 70, 0.45); }
 
-        /* LIVE 배지 */
+        /* LIVE 배지 애니메이션 */
         .live-badge {
-            display: none; position: absolute; top: 15px; right: 15px;
-            background: #ff4646; color: white; padding: 4px 10px; border-radius: 6px;
-            font-size: 12px; font-weight: bold; z-index: 10; animation: blink 1.5s infinite;
+            display: none; position: absolute; top: 18px; right: 18px;
+            background: #ff4646; color: white; padding: 5px 12px; border-radius: 8px;
+            font-size: 11px; font-weight: 800; z-index: 10; animation: pulse 2s infinite;
         }
         .is-live .live-badge { display: block; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 
-        /* 썸네일 미리보기 (커서 추적) */
+        /* [4] 커서 추적 썸네일 미리보기 박스 */
         #thumbnail-preview {
             position: fixed; pointer-events: none; display: none; z-index: 1000;
-            width: 260px; background: #1a1a1a; border-radius: 12px; overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid #333;
+            width: 270px; background: #121212; border-radius: 14px; overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); border: 1.5px solid #333;
         }
         .preview-screen img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .preview-info { padding: 10px; color: white; }
-        .preview-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .preview-stats { font-size: 0.75rem; color: #bbb; }
+        .preview-info { padding: 12px; color: #fff; }
+        .preview-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .preview-stats { font-size: 0.75rem; color: #aaa; display: flex; align-items: center; gap: 4px; }
 
-        /* 카드 내부 */
-        .card-header { height: 80px; background: linear-gradient(135deg, #1e3a8a, #000000); border-radius: 18px 18px 0 0; }
+        /* 카드 내부 스타일링 */
+        .card-header { height: 85px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 21px 21px 0 0; }
         .profile-section { margin-top: -45px; padding: 0 20px 25px 20px; }
-        .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #ffffff; object-fit: cover; background: #fff; }
-        .streamer-name { margin: 12px 0 5px 0; font-size: 1.4rem; font-weight: 700; color: #1a1a1a; }
+        .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; background: #f8fafc; }
+        .streamer-name { margin: 15px 0 5px 0; font-size: 1.45rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
         .btn-station {
             display: block; text-decoration: none; background: #0045ff; color: #fff;
-            padding: 12px; border-radius: 12px; font-weight: bold; margin-top: 15px; transition: 0.2s;
+            padding: 13px; border-radius: 14px; font-weight: 700; margin-top: 18px; transition: 0.2s ease;
         }
-        .btn-station:hover { background: #0035cc; }
+        .btn-station:hover { background: #0037cc; transform: scale(1.02); }
     </style>
 </head>
 <body>
 
     <div class="streamer-card is-live" 
-         data-thumb="https://live-screenshot.sooplive.com/live-agent/sur_v/293635001.jpg"
+         data-thumb="https://liveimg.sooplive.com/h/293635001.webp"
          data-title="[YXL] 시즌 14 2화 직급프리데이!! 카운트 시작하겠습니다."
-         data-viewers="2,329">
+         data-viewers="2,601">
         
         <div class="live-badge">● LIVE</div>
         <div class="card-header"></div>
@@ -68,6 +71,7 @@
         </div>
     </div>
 
+    <!-- 썸네일 팝업 엘리먼트 -->
     <div id="thumbnail-preview">
         <div class="preview-screen"><img src="" id="p-img"></div>
         <div class="preview-info">
@@ -84,6 +88,7 @@
         const pViewers = document.getElementById('p-viewers');
 
         card.addEventListener('mousemove', (e) => {
+            // 버튼 위에 있을 때는 썸네일 숨김
             if (e.target.closest('.btn-station')) {
                 preview.style.display = 'none';
                 return;
@@ -93,7 +98,9 @@
                 pImg.src = card.getAttribute('data-thumb');
                 pTitle.textContent = card.getAttribute('data-title');
                 pViewers.textContent = card.getAttribute('data-viewers');
+                
                 preview.style.display = 'block';
+                // 마우스 오른쪽 중앙 정렬 계산
                 preview.style.left = (e.clientX + 20) + 'px';
                 preview.style.top = (e.clientY - (preview.offsetHeight / 2)) + 'px';
             }

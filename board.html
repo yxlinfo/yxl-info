@@ -3,86 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YXL 실시간 현황판</title>
+    <title>YXL LIVE STATUS</title>
     <style>
-        /* 와이고수 다크모드/라이트모드 어디서나 잘 어울리는 스타일 */
-        body { background: #121212; color: #e0e0e0; font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 10px; }
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-            gap: 8px; 
-        }
-
-        /* 카드 기본 디자인 */
+        /* 와이고수 모바일 환경 최적화 디자인 */
+        body { background: #121212; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+        
         .card { 
-            background: #1e1e1e; border-radius: 8px; padding: 10px; 
-            border: 1px solid #2c2c2c; position: relative;
-            transition: all 0.3s ease;
+            background: #1e1e1e; border-radius: 10px; padding: 12px; 
+            border: 1px solid #2c2c2c; text-align: center; transition: 0.3s;
         }
+        /* 방송 중일 때 보라색 테두리와 빛나는 효과 */
+        .card.on { border-color: #a855f7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
         
-        /* 방송 중일 때 하이라이트 (유저님의 최신 선호 반영: 보라색 글로우) */
-        .card.on { 
-            border-color: #8a2be2; 
-            box-shadow: 0 0 8px rgba(138, 43, 226, 0.4); 
-        }
-
-        /* 닉네임 및 상태 */
-        .name { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .info { font-size: 11px; color: #999; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .name { font-size: 14px; font-weight: bold; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .status-box { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; }
         
-        /* 라이브 점(Dot) 애니메이션 */
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: #444; }
-        .on .dot { background: #ff4d4d; box-shadow: 0 0 5px #ff4d4d; animation: blink 1.5s infinite; }
+        /* 라이브 표시 점 */
+        .dot { width: 7px; height: 7px; border-radius: 50%; background: #444; }
+        .on .dot { background: #ef4444; box-shadow: 0 0 5px #ef4444; animation: pulse 1.5s infinite; }
         
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-        /* 자물쇠(비번방) 아이콘 */
-        .lock { color: #ffd700; font-size: 10px; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         
-        a { text-decoration: none; color: inherit; }
+        .count { color: #aaa; }
+        .lock { color: #fbbf24; font-size: 11px; } /* 비번방 자물쇠 */
+        
+        a { text-decoration: none; color: inherit; display: block; }
     </style>
 </head>
 <body>
-    <div class="grid" id="status-container">
-        <!-- 데이터 로딩 전 표시 -->
-    </div>
+    <div class="grid" id="status-grid"></div>
 
     <script>
-        async function fetchStatus() {
+        async function loadStatus() {
             try {
-                // status.json은 yxl.py가 생성한 최신 데이터를 읽어옵니다.
-                const res = await fetch('status.json?v=' + Date.now());
-                const data = await res.json();
-                const container = document.getElementById('status-container');
-                container.innerHTML = '';
+                // yxl.py가 생성하는 status.json을 읽어옵니다.
+                const response = await fetch('status.json?v=' + Date.now());
+                const data = await response.json();
+                const grid = document.getElementById('status-grid');
+                grid.innerHTML = '';
 
                 Object.entries(data).forEach(([mid, info]) => {
                     const card = document.createElement('div');
                     card.className = `card ${info.is_on ? 'on' : ''}`;
                     
-                    const lockIcon = info.is_password ? '<span class="lock">🔒</span>' : '';
-                    const viewerCount = info.is_on ? info.viewers.toLocaleString() + '명' : 'OFF';
+                    // 비번방(is_password)일 때 자물쇠 아이콘 추가
+                    const lock = info.is_password ? '<span class="lock">🔒</span>' : '';
+                    const displayViewers = info.is_on ? info.viewers.toLocaleString() + '명' : 'OFFLINE';
                     
                     card.innerHTML = `
                         <a href="https://play.sooplive.co.kr/${mid}" target="_blank">
                             <div class="name">${info.name}</div>
-                            <div class="info">
+                            <div class="status-box">
                                 <div class="dot"></div>
-                                <span>${viewerCount}</span>
-                                ${lockIcon}
+                                <div class="count">${displayViewers} ${lock}</div>
                             </div>
                         </a>
                     `;
-                    container.appendChild(card);
+                    grid.appendChild(card);
                 });
-            } catch (err) {
-                console.error("현황판 업데이트 실패:", err);
-            }
+            } catch (e) { console.error("데이터 로드 오류", e); }
         }
-
-        // 초기 실행 및 1분마다 자동 갱신
-        fetchStatus();
-        setInterval(fetchStatus, 60000);
+        loadStatus();
+        setInterval(loadStatus, 60000); // 1분마다 자동 갱신
     </script>
 </body>
 </html>

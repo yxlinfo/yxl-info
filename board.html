@@ -5,71 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root { --neon-purple: #bc66ff; --neon-glow: rgba(188, 102, 255, 0.6); --on-red: #ff4d4d; }
-        body { background: #1a1a1a; margin: 0; padding: 10px; font-family: sans-serif; color: #fff; }
-        
-        /* 모바일 2열 / PC 4열 그리드 */
+        body { background: #1a1a1a; margin: 0; padding: 10px; font-family: sans-serif; color: #fff; overflow-x: hidden; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 600px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 15px; } }
-
-        /* 카드 및 네온 효과 */
+        
+        /* 카드 디자인 및 호버 효과 */
         .card { 
             background: #252525; border-radius: 12px; padding: 15px; border: 1px solid #333;
             position: relative; text-align: center; display: flex; flex-direction: column; align-items: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;
         }
-        .card.on { 
-            border: 2px solid var(--on-red); 
-            box-shadow: 0 0 15px rgba(255, 77, 77, 0.3);
-            transform: translateY(-2px);
-        }
-
-        /* 텍스트 및 UI 요소 */
+        .card:hover { transform: translateY(-8px); border-color: var(--neon-purple); box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px var(--neon-glow); }
+        
+        /* 라이브 상태 강조 */
+        .card.on { border: 2px solid var(--on-red); box-shadow: 0 0 15px rgba(255, 77, 77, 0.3); }
+        .card.on:hover { border-color: var(--on-red); box-shadow: 0 10px 25px rgba(255, 77, 77, 0.4); }
         .dot { position: absolute; top: 12px; right: 12px; font-size: 10px; color: #555; }
         .on .dot { color: var(--on-red); font-weight: bold; }
-        .p-img { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #444; margin-bottom: 10px; }
-        .on .p-img { border-color: var(--on-red); }
+
+        .p-img { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #444; margin-bottom: 10px; transition: 0.3s; }
+        .card:hover .p-img { transform: scale(1.1); }
         .rank { font-size: 11px; color: var(--neon-purple); font-weight: 600; text-shadow: 0 0 5px var(--neon-glow); }
         .name { font-size: 16px; font-weight: bold; margin: 4px 0; }
-        .btn { width: 100%; background: #333; color: #fff; text-decoration: none; font-size: 11px; padding: 8px 0; border-radius: 6px; margin-top: 10px; }
+        .joined { font-size: 10px; color: #666; margin-bottom: 10px; }
+        .btn { width: 100%; background: #333; color: #fff; text-decoration: none; font-size: 11px; padding: 8px 0; border-radius: 6px; }
         .on .btn { background: var(--on-red); }
+
+        /* 툴팁 */
+        #tooltip { position: fixed; display: none; z-index: 9999; pointer-events: none; background: rgba(20, 20, 20, 0.95); 
+                   border: 1px solid var(--on-red); border-radius: 8px; padding: 10px; width: 220px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        .tt-thumb { width: 100%; border-radius: 4px; margin-bottom: 8px; border: 1px solid #444; }
+        .tt-title { font-size: 12px; font-weight: bold; color: #fff; margin-bottom: 5px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .tt-info { font-size: 11px; color: var(--on-red); }
     </style>
 </head>
 <body>
     <div class="grid" id="grid"></div>
-
+    <div id="tooltip"></div>
     <script>
         const members = [
-            {id: "sladk51", name: "리윤", rank: "부장"}, {id: "jaeha010", name: "후잉", rank: "차장"},
-            {id: "star49", name: "냥냥수주", rank: "과장"}, {id: "smkim82372", name: "류서하", rank: "비서실장"},
-            {id: "offside629", name: "율무", rank: "대리"}, {id: "asy1218", name: "하랑짱", rank: "주임"},
-            {id: "fhwm0602", name: "미로", rank: "사원"}, {id: "jeewon1202", name: "유나연", rank: "인턴장"},
-            {id: "zbxlzzz", name: "소다", rank: "시급이"}, {id: "tkek55", name: "김유정", rank: "시급이"},
-            {id: "iluvpp", name: "서니", rank: "신입"}, {id: "wk3220", name: "백나현", rank: "신입"},
-            {id: "ahrum0912", name: "아름", rank: "신입"}, {id: "meldoy777", name: "너의멜로디", rank: "신입"},
-            {id: "callgg", name: "꺼니", rank: "웨이터"}, {id: "kimpooh0707", name: "김푸", rank: "웨이터"}
+            {id: "sladk51", name: "리윤", rank: "부장", date: "2025.06.29"}, {id: "jaeha010", name: "후잉", rank: "차장", date: "2024.10.12"},
+            {id: "star49", name: "냥냥수주", rank: "과장", date: "2026.01.25"}, {id: "smkim82372", name: "류서하", rank: "비서실장", date: "2026.01.25"},
+            {id: "offside629", name: "율무", rank: "대리", date: "2025.10.19"}, {id: "asy1218", name: "하랑짱", rank: "주임", date: "2025.10.12"},
+            {id: "fhwm0602", name: "미로", rank: "사원", date: "2026.01.13"}, {id: "jeewon1202", name: "유나연", rank: "인턴장", date: "2025.12.11"},
+            {id: "zbxlzzz", name: "소다", rank: "시급이", date: "2024.10.29"}, {id: "tkek55", name: "김유정", rank: "시급이", date: "2025.09.04"},
+            {id: "iluvpp", name: "서니", rank: "신입", date: "2026.04.14"}, {id: "wk3220", name: "백나현", rank: "신입", date: "2026.03.28"},
+            {id: "ahrum0912", name: "아름", rank: "신입", date: "2026.03.29"}, {id: "meldoy777", name: "너의멜로디", rank: "신입", date: "2026.03.31"},
+            {id: "callgg", name: "꺼니", rank: "웨이터", date: "2025.10.02"}, {id: "kimpooh0707", name: "김푸", rank: "웨이터", date: "2025.10.02"}
         ];
+
+        let currentData = {};
+        const tooltip = document.getElementById('tooltip');
 
         function refresh() {
             fetch("status.json?v=" + new Date().getTime())
                 .then(r => r.json())
                 .then(data => {
+                    currentData = data;
                     const grid = document.getElementById('grid');
                     grid.innerHTML = members.map(m => {
-                        const info = data[m.id] || {};
-                        const isOn = info.is_on;
+                        const isOn = data[m.id]?.is_on;
                         return `
-                            <div class="card ${isOn ? 'on' : ''}">
+                            <div class="card ${isOn ? 'on' : ''}" onmousemove="showTooltip(event, '${m.id}')" onmouseleave="hideTooltip()">
                                 <div class="dot">${isOn ? '● 근무' : '○ 퇴근'}</div>
                                 <img src="https://stimg.sooplive.com/LOGO/${m.id.substring(0,2)}/${m.id}/m/${m.id}.webp" class="p-img">
                                 <div class="rank">${m.rank}</div>
                                 <div class="name">${m.name}</div>
+                                <div class="joined">Joined ${m.date}</div>
                                 <a href="https://www.sooplive.com/station/${m.id}" class="btn" target="_top">방송국</a>
                             </div>
                         `;
                     }).join('');
                 });
         }
+
+        function showTooltip(e, id) {
+            const info = currentData[id];
+            if (!info?.is_on) return;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY - 50) + 'px';
+            tooltip.innerHTML = `
+                <img src="https://liveimg.sooplive.com/ask_t/${id}.webp?v=${new Date().getTime()}" class="tt-thumb">
+                <div class="tt-title">${info.title || '방송 중'}</div>
+                <div class="tt-info">👥 ${info.viewers || 0}명 시청 중</div>
+            `;
+        }
+        function hideTooltip() { tooltip.style.display = 'none'; }
         refresh();
-        setInterval(refresh, 60000); // 1분마다 자동 갱신
+        setInterval(refresh, 60000);
     </script>
 </body>
 </html>

@@ -11,83 +11,75 @@
             --glass-bg: rgba(30, 30, 30, 0.9);
         }
         
-        body { background: #121212; margin: 0; padding: 15px; font-family: 'Pretendard', sans-serif; color: #fff; overflow-x: hidden; }
-
-        /* 현황표 탭 상단 디자인 */
-        .tab-header {
-            display: inline-block;
-            padding: 10px 25px;
-            background: #1e1e1e;
-            border: 1.5px solid var(--neon-purple);
-            border-bottom: none;
-            border-radius: 12px 12px 0 0;
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--neon-purple);
-            text-shadow: 0 0 8px var(--neon-glow);
-            margin-bottom: -1px;
-            margin-left: 5px;
-            letter-spacing: 1px;
+        /* 스크롤바 제거 및 여백 최적화 */
+        body { 
+            background: #121212; margin: 0; padding: 10px; 
+            font-family: 'Pretendard', sans-serif; color: #fff; 
+            overflow-x: hidden;
         }
-        .tab-line { border-top: 1.5px solid var(--neon-purple); margin-bottom: 20px; box-shadow: 0 0 10px var(--neon-glow); opacity: 0.6; }
 
-        /* 그리드 및 카드 디자인 */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        @media (min-width: 600px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
+        .tab-header {
+            display: inline-block; padding: 8px 20px; background: #1e1e1e;
+            border: 1.5px solid var(--neon-purple); border-bottom: none;
+            border-radius: 10px 10px 0 0; font-size: 13px; font-weight: 800;
+            color: var(--neon-purple); text-shadow: 0 0 8px var(--neon-glow);
+            margin-left: 5px; letter-spacing: 1px;
+        }
+        .tab-line { border-top: 1.5px solid var(--neon-purple); margin-bottom: 15px; box-shadow: 0 0 10px var(--neon-glow); opacity: 0.6; }
+
+        /* 🔥 그리드 설정: 기본 모바일 2열, PC(600px 이상) 4열 */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 8px; 
+            padding-bottom: 20px; /* 하단 잘림 방지 여백 */
+        }
+        @media (min-width: 600px) { 
+            .grid { grid-template-columns: repeat(4, 1fr); gap: 15px; } 
+        }
         
+        /* 카드 디자인 */
         .card { 
-            background: var(--glass-bg); border-radius: 16px; padding: 20px 15px; border: 1px solid #333;
+            background: var(--glass-bg); border-radius: 12px; padding: 15px 10px; border: 1px solid #333;
             position: relative; text-align: center; display: flex; flex-direction: column; align-items: center;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
             overflow: hidden;
         }
-
-        /* 카드 상단 네온 라인 효과 */
         .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
             background: linear-gradient(90deg, transparent, var(--neon-purple), transparent); opacity: 0.3;
         }
-
-        /* 호버 및 라이브 상태 생동감 */
-        .card:hover { transform: translateY(-10px); border-color: var(--neon-purple); box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 15px var(--neon-glow); }
-        .card.on { border: 2px solid var(--on-red); box-shadow: 0 0 15px rgba(255, 77, 77, 0.2); }
+        .card:hover { transform: translateY(-5px); border-color: var(--neon-purple); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .card.on { border: 1.5px solid var(--on-red); box-shadow: 0 0 10px rgba(255, 77, 77, 0.2); }
         .card.on::before { background: linear-gradient(90deg, transparent, var(--on-red), transparent); opacity: 1; }
-        .card.on:hover { border-color: var(--on-red); box-shadow: 0 15px 35px rgba(255, 77, 77, 0.4); }
 
-        /* 상태 점 및 프로필 */
-        .dot { position: absolute; top: 12px; right: 12px; font-size: 10px; color: #666; font-weight: bold; }
+        .dot { position: absolute; top: 8px; right: 8px; font-size: 9px; color: #666; font-weight: bold; }
         .on .dot { color: var(--on-red); text-shadow: 0 0 5px var(--on-red); }
-        .p-img { width: 75px; height: 75px; border-radius: 50%; border: 2px solid #444; margin-bottom: 12px; transition: 0.3s; z-index: 2; }
-        .card:hover .p-img { transform: scale(1.1) rotate(3deg); }
+        .p-img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #444; margin-bottom: 10px; transition: 0.3s; }
+        .card:hover .p-img { transform: scale(1.1); }
         .on .p-img { border-color: var(--on-red); }
 
-        /* 텍스트 정보 */
-        .rank { font-size: 11px; color: var(--neon-purple); font-weight: 700; text-shadow: 0 0 5px var(--neon-glow); margin-bottom: 2px; }
-        .name { font-size: 17px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .rank { font-size: 10px; color: var(--neon-purple); font-weight: 700; margin-bottom: 2px; }
+        .name { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
         
-        /* 입사일 게이지 박스 */
         .joined-box { 
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(188, 102, 255, 0.15);
-            padding: 4px 10px; border-radius: 20px; margin-bottom: 15px;
+            padding: 3px 8px; border-radius: 15px; margin-bottom: 10px;
         }
-        .joined { font-size: 10px; color: #888; font-weight: 500; }
-        .on .joined-box { border-color: rgba(255, 77, 77, 0.3); background: rgba(255, 77, 77, 0.05); }
-        .on .joined { color: #aaa; }
+        .joined { font-size: 9px; color: #888; }
 
-        /* 버튼 */
         .btn { 
-            width: 100%; background: #2a2a2a; color: #fff; text-decoration: none; font-size: 11px; 
-            padding: 9px 0; border-radius: 8px; transition: 0.2s; font-weight: 700; border: 1px solid #444;
+            width: 100%; background: #2a2a2a; color: #fff; text-decoration: none; font-size: 10px; 
+            padding: 7px 0; border-radius: 6px; transition: 0.2s; font-weight: 700; border: 1px solid #444;
         }
         .on .btn { background: var(--on-red); border-color: transparent; }
-        .btn:hover { filter: brightness(1.3); transform: scale(1.03); }
 
         /* 툴팁 */
         #tooltip { position: fixed; display: none; z-index: 9999; pointer-events: none; background: rgba(15, 15, 15, 0.98); 
-                   border: 1.5px solid var(--on-red); border-radius: 12px; padding: 12px; width: 240px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
-        .tt-thumb { width: 100%; border-radius: 6px; margin-bottom: 10px; border: 1px solid #333; }
-        .tt-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; line-height: 1.4; }
-        .tt-info { font-size: 11px; color: var(--on-red); font-weight: 600; display: flex; align-items: center; gap: 5px; }
+                   border: 1.5px solid var(--on-red); border-radius: 10px; padding: 10px; width: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
+        .tt-thumb { width: 100%; border-radius: 4px; margin-bottom: 8px; }
+        .tt-title { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .tt-info { font-size: 10px; color: var(--on-red); }
     </style>
 </head>
 <body>
@@ -126,10 +118,8 @@
                                 <img src="https://stimg.sooplive.com/LOGO/${m.id.substring(0,2)}/${m.id}/m/${m.id}.webp" class="p-img">
                                 <div class="rank">${m.rank}</div>
                                 <div class="name">${m.name}</div>
-                                <div class="joined-box">
-                                    <div class="joined">JOINED ${m.date}</div>
-                                </div>
-                                <a href="https://www.sooplive.com/station/${m.id}" class="btn" target="_blank">GO STATION</a>
+                                <div class="joined-box"><div class="joined">JOINED ${m.date}</div></div>
+                                <a href="https://www.sooplive.com/station/${m.id}" class="btn" target="_blank">STATION</a>
                             </div>
                         `;
                     }).join('');
@@ -140,12 +130,12 @@
             const info = currentData[id];
             if (!info?.is_on) return;
             tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 15) + 'px';
-            tooltip.style.top = (e.clientY - 50) + 'px';
+            tooltip.style.left = (e.clientX + 10) + 'px';
+            tooltip.style.top = (e.clientY - 40) + 'px';
             tooltip.innerHTML = `
                 <img src="https://liveimg.sooplive.com/ask_t/${id}.webp?v=${new Date().getTime()}" class="tt-thumb">
                 <div class="tt-title">${info.title || '방송 중'}</div>
-                <div class="tt-info"><span>●</span> 시청자 ${info.viewers || 0}명</div>
+                <div class="tt-info">👥 ${info.viewers || 0}명</div>
             `;
         }
         function hideTooltip() { tooltip.style.display = 'none'; }

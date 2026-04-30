@@ -3,75 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
     <style>
-        body { margin: 0; padding: 5px; background-color: #1a1c23; font-family: 'Malgun Gothic', sans-serif; color: white; }
-        .container { width: 100%; max-width: 450px; margin: 0 auto; border: 1px solid #333; border-radius: 12px; overflow: hidden; background: #1a1c23; }
+        body { margin: 0; padding: 0; background-color: transparent; font-family: 'Malgun Gothic', sans-serif; }
+        .dashboard-container { max-width: 100%; border: 1px solid #ddd; border-radius: 12px; overflow: hidden; background: #fff; }
         
-        /* 탭 라디오 버튼 숨김 */
-        .tab-input { display: none; }
+        /* 탭 라디오 버튼 */
+        input[name="tab-control"] { display: none; }
+        
+        /* 탭 메뉴 */
+        .tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #eee; }
+        .tabs label { flex: 1; padding: 15px 0; text-align: center; cursor: pointer; font-weight: bold; color: #666; font-size: 14px; transition: 0.3s; }
+        
+        /* 활성화된 탭 스타일 */
+        #tab1:checked ~ .tabs label[for="tab1"],
+        #tab2:checked ~ .tabs label[for="tab2"],
+        #tab3:checked ~ .tabs label[for="tab3"] { background: #fff; color: #007bff; border-bottom: 3px solid #007bff; }
 
-        /* 탭 상단 메뉴 - 모바일 대응 (Flex) */
-        .nav-tabs { display: flex; background: #252831; padding: 5px; gap: 5px; }
-        .nav-tabs label { 
-            flex: 1; text-align: center; padding: 12px 0; font-size: 13px; 
-            font-weight: bold; color: #999; cursor: pointer; border-radius: 8px; transition: 0.2s;
-        }
+        /* 콘텐츠 영역 */
+        .tab-content { display: none; padding: 15px; min-height: 250px; }
+        #tab1:checked ~ .content1,
+        #tab2:checked ~ .content2,
+        #tab3:checked ~ .content3 { display: block; }
 
-        /* 탭 선택 시 스타일 */
-        #t1:checked ~ .nav-tabs label[for="t1"],
-        #t2:checked ~ .nav-tabs label[for="t2"],
-        #t3:checked ~ .nav-tabs label[for="t3"] {
-            background: #4a3f9a; color: #fff;
-        }
-
-        /* 본문 영역 */
-        .content { display: none; padding: 20px; min-height: 250px; animation: fadeIn 0.3s ease-in-out; }
-        #t1:checked ~ #c1, #t2:checked ~ #c2, #t3:checked ~ #c3 { display: block; }
-
-        /* 모바일 카드 스타일 */
-        .card { background: #2d303a; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #4a3f9a; }
-        .card-title { font-size: 0.9em; color: #a29bfe; margin-bottom: 5px; }
-        .card-value { font-size: 1.1em; font-weight: bold; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* 표 스타일 */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f4f4f4; border: 1px solid #ddd; padding: 10px; font-size: 13px; }
+        td { border: 1px solid #eee; padding: 10px; text-align: center; font-size: 13px; }
+        .plus-val { color: #ff4d4d; font-weight: bold; font-size: 11px; }
+        .assemble-box { text-align: center; padding: 40px 0; }
+        .assemble-time { font-size: 24px; font-weight: bold; color: #d9534f; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <input type="radio" name="tab" id="t1" class="tab-input" checked>
-        <input type="radio" name="tab" id="t2" class="tab-input">
-        <input type="radio" name="tab" id="t3" class="tab-input">
 
-        <div class="nav-tabs">
-            <label for="t1">⏰ 어셈블</label>
-            <label for="t2">📝 공약표</label>
-            <label for="t3">📅 일정표</label>
-        </div>
+<div class="dashboard-container">
+    <input type="radio" id="tab1" name="tab-control" checked>
+    <input type="radio" id="tab2" name="tab-control">
+    <input type="radio" id="tab3" name="tab-control">
 
-        <div id="c1" class="content">
-            <div class="card">
-                <div class="card-title">방송 시작 시간</div>
-                <div class="card-value">오늘 오후 20:00</div>
-            </div>
-            <div style="font-size: 0.85em; color: #aaa; padding: 5px;">* 5분 전 대기 필수</div>
-        </div>
+    <div class="tabs">
+        <label for="tab1">📅 일정표</label>
+        <label for="tab2">📜 공약표</label>
+        <label for="tab3">⏰ 어셈블</label>
+    </div>
 
-        <div id="c2" class="content">
-            <div class="card">
-                <div class="card-title">오늘의 목표</div>
-                <div class="card-value">별풍선 5만개 달성</div>
-            </div>
-            <div class="card" style="border-left-color: #ff7675;">
-                <div class="card-title">실패 시 공약</div>
-                <div class="card-value">공포 게임 12시간</div>
-            </div>
-        </div>
+    <div class="tab-content content1">
+        <table>
+            <thead>
+                <tr><th>시간</th><th>내용</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>18:00</td><td>방송 시작</td></tr>
+                <tr><td>20:00</td><td>메인 콘텐츠 시작</td></tr>
+            </tbody>
+        </table>
+    </div>
 
-        <div id="c3" class="content">
-            <div style="border-bottom: 1px solid #333; padding: 10px 0;"><b>20:00</b> 오프닝</div>
-            <div style="border-bottom: 1px solid #333; padding: 10px 0;"><b>21:00</b> 스타 멸망전</div>
-            <div style="padding: 10px 0;"><b>23:00</b> 정산 및 방종</div>
+    <div class="tab-content content2">
+        <table>
+            <thead>
+                <tr><th>항목</th><th>수치</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>오늘의 풍</td>
+                    <td>100,000 <span class="plus-val">(+5,200)</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tab-content content3">
+        <div class="assemble-box">
+            <div style="font-size: 14px; color: #888;">오늘의 어셈블 예정 시간</div>
+            <div class="assemble-time">21:30</div>
         </div>
     </div>
+</div>
+
 </body>
 </html>

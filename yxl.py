@@ -108,7 +108,6 @@ def generate_full_system(members):
         status_html += f'<div class="row">{cards}</div>'
 
     print("[2/3] 매출 데이터를 생성합니다...")
-    # 요청하신 디테일한 회차 정보 반영
     history_db = {
         "시즌1": {"직급전": 5374481, "contents": [["1회차 전후반전", 2426065], ["2회차 팀전", 2732426], ["3회차 직급프리데이", 3890922], ["4회차 전후반 지분전쟁", 3833288], ["5회차 3천만원 기여도 펌핑데이", 3054893]]},
         "시즌2": {"직급전": 6610938, "contents": [["1회차 상벌금데이", 6078903], ["2회차 명품데이", 3390108], ["3회차 직급프리데이", 4124926], ["4회차 팀전", 2313129], ["5회차 펌핑룰렛 및 퇴근전쟁", 1969188]]},
@@ -185,6 +184,8 @@ def generate_full_system(members):
         @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; }} }}
 
         /* 1. 현황판 */
+        /* 💡 현황판 카드가 아래로 내려오도록 padding-top 30px 추가 */
+        #status {{ padding-top: 30px; }} 
         .row {{ display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 35px; justify-content: center; }}
         .member-unit {{ position: relative; width: 130px; transition: transform 0.3s; }}
         .member-unit:hover {{ transform: scale(1.08); z-index: 50; }}
@@ -205,6 +206,13 @@ def generate_full_system(members):
         .on-air .live-indicator {{ display: block; animation: blink 1s infinite; }}
         .on-air .circle-frame {{ border: 2px solid #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.6); }}
         @keyframes blink {{ 50% {{ opacity: 0.5; }} }}
+
+        /* 💡 미리보기(Preview) 툴팁 CSS 복구 */
+        #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 300px; background: #0f0c1a; border: 2px solid #8a2be2; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); overflow: hidden; }}
+        .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #333; }}
+        .p-info {{ padding: 15px; text-align: center; }}
+        .p-title {{ font-size: 14px; color: #fff; margin-bottom: 8px; word-break: keep-all; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
+        .p-live-badge {{ font-size: 13px; color: #ff0000; text-shadow: 0 0 10px rgba(255,0,0,0.5); }}
 
         /* 2. 매출표 */
         .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 4px solid #8a2be2; padding-left: 10px; flex-wrap: wrap; gap: 10px; }}
@@ -393,6 +401,15 @@ def generate_full_system(members):
         </section>
     </div>
     
+    <!-- 💡 복구된 방송 썸네일 미리보기 UI -->
+    <div id="preview">
+        <img src="" id="p-img" class="p-thumb">
+        <div class="p-info">
+            <div id="p-title" class="p-title"></div>
+            <div class="p-live-badge">🔴 LIVE • <span id="p-viewers"></span>명 시청중</div>
+        </div>
+    </div>
+    
     <!-- 모달 -->
     <div id="sales-modal" onclick="closeSalesModal()">
         <div class="s-modal-card" onclick="event.stopPropagation()">
@@ -520,6 +537,29 @@ def generate_full_system(members):
             document.getElementById('list-title').innerText = query === "" ? "ALL VIDEOS" : `SEARCH RESULTS (${{filtered.length}})`;
             renderVODList(filtered);
         }}
+
+        // 💡 복구된 자바스크립트 미리보기 (Hover) 기능
+        const units = document.querySelectorAll('.member-unit'); 
+        const preview = document.getElementById('preview');
+        units.forEach(unit => {{
+            unit.addEventListener('mousemove', (e) => {{
+                const thumb = unit.getAttribute('data-thumb');
+                if (thumb && thumb !== "None" && thumb !== "") {{
+                    document.getElementById('p-img').src = thumb; 
+                    document.getElementById('p-title').textContent = unit.getAttribute('data-title'); 
+                    document.getElementById('p-viewers').textContent = unit.getAttribute('data-viewers');
+                    
+                    preview.style.display = 'block';
+                    // 화면 오른쪽 밖으로 잘리지 않게 위치 계산
+                    let x = e.clientX + 15; 
+                    let y = e.clientY + 15;
+                    if(x + 320 > window.innerWidth) x = window.innerWidth - 330;
+                    preview.style.left = x + 'px'; 
+                    preview.style.top = y + 'px';
+                }}
+            }});
+            unit.addEventListener('mouseleave', () => preview.style.display = 'none');
+        }});
 
         let time = 300;
         setInterval(() => {{ time--; const min = Math.floor(time/60); const sec = time%60; const el = document.getElementById('timer-text'); if(el) el.innerText = `NEXT: ${{min}}:${{sec<10?'0':''}}${{sec}}`; if(time<=0) location.reload(); }}, 1000);

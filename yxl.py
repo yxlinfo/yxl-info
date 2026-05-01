@@ -68,7 +68,6 @@ def generate_full_system(members):
     data_map = {m['name']: get_yxl_status(m['name'], m['id'], m['pos'], m['img']) for m in members}
     js_member_data = json.dumps({m['name']: m for m in members}, ensure_ascii=False)
     
-    # 6열 직급 구조 완벽 적용 (4열에 사원/인턴장 독립 배치)
     rows_structure = [
         ["염보성"], 
         ["리윤", "후잉", "냥냥수주"], 
@@ -154,13 +153,15 @@ def generate_full_system(members):
     main_vod = vod_list[0] if vod_list else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
     js_vod_data = json.dumps(vod_list, ensure_ascii=False)
 
-    print("\n✅ 모든 데이터 수집 완료! index.html 생성 중...")
+    print("\n✅ 모든 데이터 수집 완료! HTML 및 더미 JSON 파일 생성 중...")
 
     full_html = f"""
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
+    <!-- 💡 와이고수 이미지 차단(엑스박스)을 막아주는 마법의 한 줄 -->
+    <meta name="referrer" content="no-referrer">
     <title>YXL MANAGEMENT SYSTEM</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -263,7 +264,7 @@ def generate_full_system(members):
         .s-modal-card {{ background: #12121b; width: 500px; border-radius: 20px; border: 1px solid #444; padding: 35px; box-shadow: 0 0 50px rgba(138,43,226,0.3); }}
         .content-item {{ display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #222; font-size: 15px; }}
         
-        /* 프로필 모달 커스텀 디자인 */
+        /* 프로필 상세 모달 */
         .profile-modal-inner {{ background: #12121b; width: 650px; border-radius: 20px; border: 1px solid #444; display: flex; padding: 40px; position:relative; box-shadow: 0 20px 60px rgba(138,43,226,0.4); }}
         .profile-details-row {{ display: flex; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }}
         .profile-details-label {{ color: #8a2be2; font-size: 15px; width: 70px; display: inline-block; font-weight: 900; }}
@@ -426,7 +427,6 @@ def generate_full_system(members):
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
         
-        /* 프로필 상세 데이터 렌더링 로직 */
         function openProfile(n) {{ 
             const m = members[n];
             document.getElementById('m-img').src = m.img; 
@@ -488,11 +488,15 @@ def generate_full_system(members):
 </body>
 </html>
 """
+    # 1. 메인 웹페이지 파일 (index.html) 생성
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(full_html)
 
+    # 2. 봇 에러(128) 방지용 빈 파일 (status.json) 생성
+    with open("status.json", "w", encoding="utf-8") as f:
+        f.write("{}")
+
 if __name__ == "__main__":
-    # 요청해주신 17명의 최신 프로필 상세 정보가 전부 포함된 데이터베이스
     yxl_members = [
         {"name": "염보성", "id": "yuambo", "pos": "대표", "img": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692", "age": "1990.03.29", "join_date": "2024.10.01", "stats": "171.4cm / 76kg / B형", "mbti": "ENFJ", "skill": "스타크래프트"},
         {"name": "리윤", "id": "sladk51", "pos": "부장", "img": "https://storage2.ygosu.com/?code=S696b627eddf978.03910279", "age": "1996년생", "join_date": "2025.06.29", "stats": "164cm", "mbti": "ISTP", "skill": ""},

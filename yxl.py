@@ -108,20 +108,21 @@ def generate_full_system(members):
         status_html += f'<div class="row">{cards}</div>'
 
     print("[2/3] 매출 데이터를 생성합니다...")
+    # 요청하신 디테일한 회차 정보 반영
     history_db = {
-        "시즌1": {"직급전": 5374481, "contents": [["1회차", 2426065], ["2회차", 2732426], ["3회차", 3890922], ["4회차", 3833288], ["5회차", 3054893]]},
-        "시즌2": {"직급전": 6610938, "contents": [["1회차", 6078903], ["2회차", 3390108], ["3회차", 4124926], ["4회차", 2313129], ["5회차", 1969188]]},
-        "시즌3": {"직급전": 13445194, "contents": [["1회차", 2683770], ["2회차", 2011356], ["3회차", 1852181], ["4회차", 1703576], ["5회차", 1863867]]},
-        "시즌4": {"직급전": 2561153, "contents": [["1회차", 2035685], ["2회차", 1702385], ["3회차", 2676513], ["4회차", 1216858], ["5회차", 1939123]]},
-        "시즌5": {"직급전": 4252794, "contents": [["1회차", 3400157], ["2회차", 2996095], ["3회차", 2300171], ["4회차", 2122733], ["5회차", 370113]]},
-        "시즌6": {"직급전": 5953195, "contents": [["1회차", 2822840], ["2회차", 2076273], ["3회차", 2642197], ["4회차", 2948979], ["5회차", 2043429]]},
-        "시즌7": {"직급전": 5746700, "contents": [["1회차", 3076958], ["2회차", 2961402], ["3회차", 3738078], ["4회차", 3390310], ["5회차", 2023172]]},
-        "시즌8": {"직급전": 5769642, "contents": [["1회차", 4291255], ["2회차", 2356810], ["3회차", 3932965], ["4회차", 1766989], ["5회차", 1815026]]},
-        "시즌9": {"직급전": 4716222, "contents": [["1회차", 2823519], ["2회차", 2476563], ["3회차", 3035332], ["4회차", 2003513], ["5회차", 4514325]]},
-        "시즌10": {"직급전": 5035289, "contents": [["1회차", 2470625], ["2회차", 2008740], ["3회차", 2359007], ["4회차", 2114014], ["5회차", 2430578]]},
-        "시즌11": {"직급전": 4222022, "contents": [["1회차", 2397972], ["2회차", 1364489], ["3회차", 1507997], ["4회차", 4078678], ["5회차", 1580993]]},
-        "시즌12": {"직급전": 3026835, "contents": [["1회차", 3038172], ["2회차", 2960260], ["3회차", 1860656], ["4회차", 1356111], ["5회차", 1465653]]},
-        "시즌13": {"직급전": 3342545, "contents": [["1회차", 3046622], ["2회차", 1426315], ["3회차", 5941453], ["4회차", 1049820], ["5회차", 1762153]]}
+        "시즌1": {"직급전": 5374481, "contents": [["1회차 전후반전", 2426065], ["2회차 팀전", 2732426], ["3회차 직급프리데이", 3890922], ["4회차 전후반 지분전쟁", 3833288], ["5회차 3천만원 기여도 펌핑데이", 3054893]]},
+        "시즌2": {"직급전": 6610938, "contents": [["1회차 상벌금데이", 6078903], ["2회차 명품데이", 3390108], ["3회차 직급프리데이", 4124926], ["4회차 팀전", 2313129], ["5회차 펌핑룰렛 및 퇴근전쟁", 1969188]]},
+        "시즌3": {"직급전": 13445194, "contents": [["1회차 블라인드 상금데이", 2683770], ["2회차 데스매치 및 퇴근전쟁", 2011356], ["3회차 직급프리데이", 1852181], ["4회차 전후반 지분전쟁", 1703576], ["5회차 일급데이 및 벌칙", 1863867]]},
+        "시즌4": {"직급전": 2561153, "contents": [["1회차 그녀를 이겨라 및 퇴근전쟁", 2035685], ["2회차 퐁당퐁당데이", 1702385], ["3회차 장들의 전쟁", 2676513], ["4회차 직급프리데이", 1216858], ["5회차 기여도 펌핑데이 및 퇴근전쟁", 1939123]]},
+        "시즌5": {"직급전": 4252794, "contents": [["1회차 대표 VS 부장 팀전", 3400157], ["2회차 퐁당 & 가챠 상금데이", 2996095], ["3회차 조기퇴근데이", 2300171], ["4회차 직급프리데이", 2122733], ["5회차 기여도펌핑룰렛데이", 370113]]},
+        "시즌6": {"직급전": 5953195, "contents": [["1회차 퐁당 & 비키니 벌칙데이", 2822840], ["2회차 난사데이 및 퇴근전쟁", 2076273], ["3회차 직급 프리데이", 2642197], ["4회차 팀전", 2948979], ["5회차 한방룰렛골드데이", 2043429]]},
+        "시즌7": {"직급전": 5746700, "contents": [["1회차 퐁당퐁당 상벌금데이", 3076958], ["2회차 대표님을 이겨라 및 퇴근전쟁", 2961402], ["3회차 직급 프리데이", 3738078], ["4회차 기여도 펌핑데이", 3390310], ["5회차 조기퇴근데이", 2023172]]},
+        "시즌8": {"직급전": 5769642, "contents": [["1회차 퐁당퐁당 상벌금데이", 4291255], ["2회차 주차방지데이", 2356810], ["3회차 대표 vs 이사 팀전", 3932965], ["4회차 조기퇴근데이", 1766989], ["5회차 기여도펌핑데이", 1815026]]},
+        "시즌9": {"직급전": 4716222, "contents": [["1회차 퐁당퐁당데이", 2823519], ["2회차 팀데스매치", 2476563], ["3회차 직급 프리데이", 3035332], ["4회차 추석떡값데이", 2003513], ["5회차 YB를 이겨라", 4514325]]},
+        "시즌10": {"직급전": 5035289, "contents": [["1회차 와장창데이", 2470625], ["2회차 일급 프리데이", 2008740], ["3회차 염대표를이겨라", 2359007], ["4회차 직급프리데이", 2114014], ["5회차 기여도펌핑데이", 2430578]]},
+        "시즌11": {"직급전": 4222022, "contents": [["1회차 지분&퐁당데이", 2397972], ["2회차 1대1 데스매치", 1364489], ["3회차 조기퇴근데이", 1507997], ["4회차 용병데이", 4078678], ["5회차 룰렛상금 & 기여도펌핑데이", 1580993]]},
+        "시즌12": {"직급전": 3026835, "contents": [["1회차 지분 & 퐁당데이", 3038172], ["2회차 상금픽스 직급프리데이", 2960260], ["3회차 부장팀 vs 차장팀 팀데스매치", 1860656], ["4회차 주차방지 & 난사데이", 1356111], ["5회차 조기퇴근데이", 1465653]]},
+        "시즌13": {"직급전": 3342545, "contents": [["1회차 퐁당 & 극락데이", 3046622], ["2회차 염대표를 이겨라 & 상금갸차데이", 1426315], ["3회차 용병데이", 5941453], ["4회차 조기퇴근데이", 1049820], ["5회차 1대1 데스매치", 1762153]]}
     }
     js_labels = [f"시즌{i}" for i in range(1, 14)]
     js_rank_rev = [history_db[f"시즌{i}"]["직급전"] for i in range(1, 14)]
@@ -206,16 +207,16 @@ def generate_full_system(members):
         @keyframes blink {{ 50% {{ opacity: 0.5; }} }}
 
         /* 2. 매출표 */
-        .sales-header-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-left: 4px solid #8a2be2; padding-left: 10px; flex-wrap: wrap; gap: 10px; }}
+        .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 4px solid #8a2be2; padding-left: 10px; flex-wrap: wrap; gap: 10px; }}
         .sales-main-title {{ font-size: 18px; color: #8a2be2; letter-spacing: 1px; }}
         .legend-box {{ display: flex; gap: 10px; font-size: 12px; color: #fff; }}
         .legend-item {{ display: flex; align-items: center; gap: 4px; }}
         .dot {{ width: 10px; height: 10px; border-radius: 3px; }}
         .total-sum-badge {{ font-size: 14px; color: #fff; background: #8a2be2; padding: 6px 14px; border-radius: 20px; }}
+        .sales-desc-text {{ font-size: 12px; color: #aaa; margin-top: 5px; font-weight: 500; display: block; }}
         
         .sales-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 15px; padding: 20px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); width: 100%; }}
         
-        /* 💡 고급형 커스텀 스크롤바 디자인 */
         .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
         .chart-scroll-wrapper::-webkit-scrollbar {{ height: 10px; }}
         .chart-scroll-wrapper::-webkit-scrollbar-track {{ background: rgba(0,0,0,0.4); border-radius: 10px; border: 1px solid rgba(138, 43, 226, 0.2); box-shadow: inset 0 0 5px rgba(0,0,0,0.8); }}
@@ -281,8 +282,8 @@ def generate_full_system(members):
             align-items: flex-start; justify-content: center; backdrop-filter: blur(5px); padding: 20px; 
             padding-top: 12vh;
         }}
-        .s-modal-card {{ background: #12121b; width: 100%; max-width: 450px; border-radius: 15px; border: 1px solid #444; padding: 25px; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }}
-        .content-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 14px; }}
+        .s-modal-card {{ background: #12121b; width: 100%; max-width: 500px; border-radius: 15px; border: 1px solid #444; padding: 25px; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }}
+        .content-item {{ display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; }}
         
         .profile-modal-inner {{ background: #12121b; width: 100%; max-width: 550px; border-radius: 15px; border: 1px solid #444; display: flex; flex-wrap: wrap; padding: 30px; position:relative; box-sizing: border-box; gap: 20px; justify-content: center; box-shadow: 0 20px 60px rgba(138,43,226,0.4); }}
         .profile-details-row {{ display: flex; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
@@ -312,8 +313,13 @@ def generate_full_system(members):
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
-                    <span class="sales-main-title">YXL 히스토리 (시즌 1-13)</span>
-                    <div class="legend-box"><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #8a2be2, #4a00e0);"></div>직급전</div><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #ff69b4, #ff1493);"></div>일반회차</div></div>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
+                            <span class="sales-main-title">YXL 히스토리 (시즌 1-13)</span>
+                            <div class="legend-box"><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #8a2be2, #4a00e0);"></div>직급전</div><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #ff69b4, #ff1493);"></div>일반회차</div></div>
+                        </div>
+                        <span class="sales-desc-text">※ 막대바 클릭시 회차별 상세정보가 나옵니다</span>
+                    </div>
                     <div class="total-sum-badge">총 합산: {all_season_sum:,}</div>
                 </div>
                 <div class="chart-scroll-wrapper">
@@ -422,7 +428,6 @@ def generate_full_system(members):
             if(id === 'sales') setTimeout(renderCharts, 50);
         }}
 
-        // 💡 럭셔리 그라데이션 차트 생성 함수
         function getGradient(ctx, chartArea, colorStart, colorEnd) {{
             if(!chartArea) return colorEnd;
             let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
@@ -475,8 +480,8 @@ def generate_full_system(members):
         function openSalesModal(season) {{
             const data = historyDb[season]; if(!data) return;
             document.getElementById('s-title').innerText = season + " 상세 매출";
-            let html = `<li class="content-item"><span style="color:#8a2be2;">직급전</span> <b style="color:#FFD700;">${{data.직급전.toLocaleString()}}개</b></li>`;
-            data.contents.forEach(item => html += `<li class="content-item"><span style="color:#ddd;">${{item[0]}}</span> <b style="color:#00e5ff;">${{item[1].toLocaleString()}}개</b></li>`);
+            let html = `<li class="content-item"><span style="color:#8a2be2; flex:1;">직급전</span> <b style="color:#FFD700; margin-left: 10px;">${{data.직급전.toLocaleString()}}개</b></li>`;
+            data.contents.forEach(item => html += `<li class="content-item"><span style="color:#ddd; flex:1;">${{item[0]}}</span> <b style="color:#00e5ff; margin-left: 10px;">${{item[1].toLocaleString()}}개</b></li>`);
             document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}

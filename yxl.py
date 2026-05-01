@@ -68,7 +68,6 @@ def generate_full_system(members):
     data_map = {m['name']: get_yxl_status(m['name'], m['id'], m['pos'], m['img']) for m in members}
     js_member_data = json.dumps({m['name']: m for m in members}, ensure_ascii=False)
     
-    # 요청하신 새로운 6열 구조 (사원/인턴장/시급이 합침, 신입 분리, 웨이터 분리)
     rows_structure = [
         ["염보성"], 
         ["리윤", "후잉", "냥냥수주"], 
@@ -206,7 +205,7 @@ def generate_full_system(members):
         .on-air .circle-frame {{ border: 2px solid #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.6); }}
         @keyframes blink {{ 50% {{ opacity: 0.5; }} }}
 
-        /* 2. 매출표 (차트 데이터 가독성 해결) */
+        /* 2. 매출표 */
         .sales-header-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-left: 4px solid #8a2be2; padding-left: 10px; flex-wrap: wrap; gap: 10px; }}
         .sales-main-title {{ font-size: 18px; color: #8a2be2; letter-spacing: 1px; }}
         .legend-box {{ display: flex; gap: 10px; font-size: 12px; color: #fff; }}
@@ -216,12 +215,17 @@ def generate_full_system(members):
         
         .sales-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 15px; padding: 20px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); width: 100%; }}
         
-        /* 💡 가로폭을 강제로 1000px로 늘려서 숫자가 겹치지 않게 하고, 스크롤을 생성합니다 */
-        .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 10px; }}
+        /* 💡 고급형 커스텀 스크롤바 디자인 */
+        .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
+        .chart-scroll-wrapper::-webkit-scrollbar {{ height: 10px; }}
+        .chart-scroll-wrapper::-webkit-scrollbar-track {{ background: rgba(0,0,0,0.4); border-radius: 10px; border: 1px solid rgba(138, 43, 226, 0.2); box-shadow: inset 0 0 5px rgba(0,0,0,0.8); }}
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb {{ background: linear-gradient(90deg, #5b1aa6, #ff4099); border-radius: 10px; box-shadow: inset 0 0 5px rgba(255,255,255,0.2); }}
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb:hover {{ background: linear-gradient(90deg, #8a2be2, #ff69b4); }}
+        
         .chart-container {{ min-width: 1000px; height: 350px; }}
         .chart-container-small {{ min-width: 400px; height: 250px; }}
 
-        /* 3. 일정표 (호버 강조 효과 완벽 적용) */
+        /* 3. 일정표 */
         .next-event-card {{ background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%); border: 1px solid #8a2be2; border-radius: 15px; padding: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 25px rgba(138, 43, 226, 0.3); margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }}
         .next-event-info h3 {{ font-size: 15px; color: #FFD700; margin: 0 0 8px 0; }}
         .next-event-info h1 {{ font-size: 28px; color: #fff; margin: 0 0 10px 0; }}
@@ -231,7 +235,6 @@ def generate_full_system(members):
         .timeline-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 25px; }}
         .timeline-title {{ font-size: 18px; color: #fff; border-left: 4px solid #8a2be2; padding-left: 10px; margin-bottom: 20px; }}
         
-        /* 💡 타임라인 호버(선택) 강조 CSS */
         .timeline-item {{ 
             position: relative; background: rgba(0,0,0,0.5); border: 1px solid rgba(138, 43, 226, 0.2); border-left: 4px solid #333; 
             border-radius: 10px; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; 
@@ -272,11 +275,11 @@ def generate_full_system(members):
         .vod-text h4 {{ margin: 0 0 6px 0; font-size: 13px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }}
         .vod-text p {{ margin: 0; font-size: 11px; color: #aaa; }}
 
-        /* 💡 모달 디자인 (상단 노출로 위치 변경) */
+        /* 모달창 */
         #sales-modal, #p-modal {{ 
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 6000; 
             align-items: flex-start; justify-content: center; backdrop-filter: blur(5px); padding: 20px; 
-            padding-top: 12vh; /* 중앙(center) 대신 상단에서 12% 내려온 위치에 고정 */
+            padding-top: 12vh;
         }}
         .s-modal-card {{ background: #12121b; width: 100%; max-width: 450px; border-radius: 15px; border: 1px solid #444; padding: 25px; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }}
         .content-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 14px; }}
@@ -310,10 +313,9 @@ def generate_full_system(members):
             <div class="sales-section">
                 <div class="sales-header-container">
                     <span class="sales-main-title">YXL 히스토리 (시즌 1-13)</span>
-                    <div class="legend-box"><div class="legend-item"><div class="dot" style="background:#8a2be2;"></div>직급전</div><div class="legend-item"><div class="dot" style="background:#ff69b4;"></div>일반회차</div></div>
+                    <div class="legend-box"><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #8a2be2, #4a00e0);"></div>직급전</div><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #ff69b4, #ff1493);"></div>일반회차</div></div>
                     <div class="total-sum-badge">총 합산: {all_season_sum:,}</div>
                 </div>
-                <!-- 💡 넓은 차트 영역을 감싸는 스크롤 래퍼 추가 -->
                 <div class="chart-scroll-wrapper">
                     <div class="chart-container"><canvas id="historyChart"></canvas></div>
                 </div>
@@ -420,14 +422,54 @@ def generate_full_system(members):
             if(id === 'sales') setTimeout(renderCharts, 50);
         }}
 
+        // 💡 럭셔리 그라데이션 차트 생성 함수
+        function getGradient(ctx, chartArea, colorStart, colorEnd) {{
+            if(!chartArea) return colorEnd;
+            let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+            gradient.addColorStop(0, colorStart);
+            gradient.addColorStop(1, colorEnd);
+            return gradient;
+        }}
+
         function renderCharts() {{
             Chart.register(ChartDataLabels);
             if(hChart) hChart.destroy();
             if(cChart) cChart.destroy();
-            // 💡 숫자 가독성을 위해 폰트 사이즈를 11px로 조절하고 겹치지 않게 했습니다.
+            
             const commonOptions = {{ responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 30 }} }}, plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#fff', font: {{ weight: '900', size: 11 }}, formatter: (v, ctx) => ctx.chart.canvas.id === 'historyChart' && ctx.datasetIndex === 1 ? (ctx.chart.data.datasets[0].data[ctx.dataIndex] + v).toLocaleString() : (ctx.chart.canvas.id === 'currentChart' ? v.toLocaleString() : null) }} }}, scales: {{ y: {{ display: false }}, x: {{ ticks: {{ color: '#fff', font: {{ weight: '900', size: 11 }} }}, grid: {{ display: false }} }} }} }};
-            hChart = new Chart(document.getElementById('historyChart'), {{ type: 'bar', data: {{ labels: {json.dumps(js_labels, ensure_ascii=False)}, datasets: [{{ label: '직급전', data: {js_rank_rev}, backgroundColor: '#8a2be2', borderRadius: 0 }}, {{ label: '일반회차', data: {js_norm_rev}, backgroundColor: '#ff69b4', borderRadius: {{topLeft: 4, topRight: 4}} }}] }}, options: {{ ...commonOptions, scales: {{ y: {{ stacked: true, display: false, max: 35000000 }}, x: {{ stacked: true, ticks: {{ color: '#fff', font: {{ weight: '900', size: 11 }} }}, grid: {{ display: false }} }} }}, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} }});
-            cChart = new Chart(document.getElementById('currentChart'), {{ type: 'bar', data: {{ labels: ['직급전', '1회차', '2회차'], datasets: [{{ data: {current_season_vals}, backgroundColor: ['#FFD700', '#00e5ff', '#00e5ff'], borderRadius: 4 }}] }}, options: {{ ...commonOptions, layout: {{ padding: {{ top: 20 }} }} }} }});
+            
+            hChart = new Chart(document.getElementById('historyChart'), {{ 
+                type: 'bar', 
+                data: {{ 
+                    labels: {json.dumps(js_labels, ensure_ascii=False)}, 
+                    datasets: [
+                        {{ 
+                            label: '직급전', data: {js_rank_rev}, 
+                            backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(74, 0, 224, 0.7)', '#8a2be2'); }}, 
+                            borderRadius: 0, borderWidth: 1, borderColor: 'rgba(138,43,226,0.5)', hoverBackgroundColor: '#fff' 
+                        }}, 
+                        {{ 
+                            label: '일반회차', data: {js_norm_rev}, 
+                            backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(255, 20, 147, 0.7)', '#ff69b4'); }}, 
+                            borderRadius: {{topLeft: 6, topRight: 6}}, borderWidth: 1, borderColor: 'rgba(255,105,180,0.5)', hoverBackgroundColor: '#fff' 
+                        }}
+                    ] 
+                }}, 
+                options: {{ ...commonOptions, scales: {{ y: {{ stacked: true, display: false, max: 35000000 }}, x: {{ stacked: true, ticks: {{ color: '#fff', font: {{ weight: '900', size: 11 }} }}, grid: {{ display: false }} }} }}, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} 
+            }});
+            
+            cChart = new Chart(document.getElementById('currentChart'), {{ 
+                type: 'bar', 
+                data: {{ 
+                    labels: ['직급전', '1회차', '2회차'], 
+                    datasets: [{{ 
+                        data: {current_season_vals}, 
+                        backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(255, 140, 0, 0.7)', '#FFD700'); }}, 
+                        borderRadius: 6, borderWidth: 1, borderColor: 'rgba(255,215,0,0.5)', hoverBackgroundColor: '#fff' 
+                    }}] 
+                }}, 
+                options: {{ ...commonOptions, layout: {{ padding: {{ top: 20 }} }} }} 
+            }});
         }}
 
         function openSalesModal(season) {{

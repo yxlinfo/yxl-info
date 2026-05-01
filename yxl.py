@@ -160,128 +160,121 @@ def generate_full_system(members):
 <html>
 <head>
     <meta charset="UTF-8">
-    <!-- 💡 와이고수 이미지 차단(엑스박스)을 막아주는 마법의 한 줄 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <title>YXL MANAGEMENT SYSTEM</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
-        body {{ background: radial-gradient(circle at center, #0f0c1a 0%, #050507 100%); background-attachment: fixed; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow-x: hidden; }}
-        h1, h2, h3, h4, p, span, div {{ font-weight: 900; }}
+        body {{ background: #0f0c1a; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow-x: hidden; box-sizing: border-box; }}
+        h1, h2, h3, h4, p, span, div {{ font-weight: 900; box-sizing: border-box; }}
         
-        .nav-header {{ position: sticky; top: 0; background: rgba(15, 12, 26, 0.95); border-bottom: 1px solid rgba(138, 43, 226, 0.2); padding: 10px 60px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; backdrop-filter: blur(15px); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }}
+        .nav-header {{ position: sticky; top: 0; background: rgba(15, 12, 26, 0.95); border-bottom: 1px solid rgba(138, 43, 226, 0.2); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; backdrop-filter: blur(15px); box-shadow: 0 5px 20px rgba(0,0,0,0.5); flex-wrap: wrap; gap: 10px; }}
         .logo-section {{ display: flex; align-items: center; cursor: pointer; }}
-        .update-timer {{ font-size: 15px; font-weight: 900; color: #8a2be2; margin-left: 20px; text-shadow: 0 0 10px rgba(138,43,226,0.4); letter-spacing: 1px; }}
+        .update-timer {{ font-size: 14px; font-weight: 900; color: #8a2be2; margin-left: 15px; text-shadow: 0 0 10px rgba(138,43,226,0.4); letter-spacing: 1px; }}
         
-        .tab-menu {{ display: flex; gap: 40px; margin-right: 40px; }}
-        .tab-item {{ font-size: 17px; font-weight: 900; cursor: pointer; color: rgba(255,255,255,0.3); padding: 12px 5px; position: relative; text-transform: uppercase; transition: 0.3s; }}
+        .tab-menu {{ display: flex; gap: 15px; flex-wrap: wrap; }}
+        .tab-item {{ font-size: 15px; font-weight: 900; cursor: pointer; color: rgba(255,255,255,0.3); padding: 10px 5px; position: relative; text-transform: uppercase; transition: 0.3s; }}
         .tab-item.active {{ color: #fff; text-shadow: 0 0 10px rgba(138, 43, 226, 0.5); }}
         .tab-item.active::after {{ content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: #8a2be2; box-shadow: 0 0 15px #8a2be2; }}
         
-        .main-container {{ padding: 40px 60px; max-width: 1400px; margin: 0 auto; min-height: 100vh; }}
-        .tab-content {{ display: none; animation: fadeIn 0.4s ease; }}
+        .main-container {{ padding: 25px 15px; width: 100%; max-width: 900px; margin: 0 auto; min-height: 100vh; }}
+        .tab-content {{ display: none; animation: fadeIn 0.4s ease; width: 100%; }}
         .tab-content.active {{ display: block; }}
         @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; }} }}
 
-        /* 1. 현황판 */
-        .row {{ display: flex; flex-wrap: wrap; gap: 35px; margin-bottom: 45px; justify-content: center; perspective: 1000px; }}
-        .member-unit {{ position: relative; width: 150px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }}
-        .member-unit:hover {{ transform: scale(1.1) translateZ(50px); z-index: 50; }}
-        .circle-frame {{ position: relative; width: 130px; height: 130px; border-radius: 50%; padding: 4px; background: #fff; border: 1px solid #ddd; overflow: hidden; cursor: pointer; box-shadow: 0 5px 25px rgba(0,0,0,0.5); }}
+        /* 1. 현황판 (반응형 적용) */
+        .row {{ display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 35px; justify-content: center; }}
+        .member-unit {{ position: relative; width: 130px; transition: transform 0.3s; }}
+        .member-unit:hover {{ transform: scale(1.08); z-index: 50; }}
+        .circle-frame {{ position: relative; width: 120px; height: 120px; border-radius: 50%; padding: 4px; background: #fff; border: 1px solid #ddd; overflow: hidden; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.5); margin: 0 auto; }}
         .profile-img {{ width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }}
         .embedded-info {{ position: absolute; bottom: 0; width: 100%; height: 45%; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3; }}
-        .pos-tag {{ font-size: 11px; margin-bottom: 2px; text-shadow: 0 0 5px rgba(0,0,0,0.8); }}
-        .name-label {{ font-size: 16px; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.8); }}
+        .pos-tag {{ font-size: 10px; margin-bottom: 2px; text-shadow: 0 0 5px rgba(0,0,0,0.8); }}
+        .name-label {{ font-size: 14px; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.8); }}
         .overlay-menu {{ position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; z-index: 10; border-radius: 50%; }}
         .member-unit:hover .overlay-menu {{ opacity: 1; }}
-        .click-guide {{ font-size: 10px; color: #fff; background: #8a2be2; padding: 4px 10px; border-radius: 10px; margin-bottom: 8px; box-shadow: 0 0 10px #8a2be2; }}
-        .btn {{ width: 80px; padding: 5px 0; border-radius: 15px; font-size: 11px; color: #fff; border: 1px solid rgba(255,255,255,0.3); text-decoration: none; text-align: center; margin-bottom: 5px; transition: 0.2s; }}
+        .click-guide {{ font-size: 9px; color: #fff; background: #8a2be2; padding: 3px 8px; border-radius: 10px; margin-bottom: 6px; }}
+        .btn {{ width: 70px; padding: 4px 0; border-radius: 15px; font-size: 10px; color: #fff; border: 1px solid rgba(255,255,255,0.3); text-decoration: none; text-align: center; margin-bottom: 4px; transition: 0.2s; }}
         .btn:hover {{ background: #fff; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.6); }}
         .btn-live {{ background: #ff0000; border: none; }}
         .btn-live:hover {{ background: #ff3333; color: #fff; box-shadow: 0 0 15px #ff0000; }}
-        .purple-aura {{ position: absolute; width: 160px; height: 160px; background: radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, transparent 70%); filter: blur(12px); z-index: 1; }}
-        .live-indicator {{ position: absolute; top: 5px; right: 5px; background: #ff0000; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 4px; z-index: 15; display: none; box-shadow: 0 0 10px #ff0000; }}
+        .purple-aura {{ position: absolute; width: 140px; height: 140px; top:-6px; left:-6px; background: radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, transparent 70%); filter: blur(10px); z-index: 1; }}
+        .live-indicator {{ position: absolute; top: 0; right: 0; background: #ff0000; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; z-index: 15; display: none; }}
         .on-air .live-indicator {{ display: block; animation: blink 1s infinite; }}
-        .on-air .circle-frame {{ border: 3px solid #ff0000; box-shadow: 0 0 25px rgba(255,0,0,0.6); }}
+        .on-air .circle-frame {{ border: 2px solid #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.6); }}
         @keyframes blink {{ 50% {{ opacity: 0.5; }} }}
 
-        /* 2. 매출표 */
-        .sales-header-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; border-left: 5px solid #8a2be2; padding-left: 15px; }}
-        .sales-main-title {{ font-size: 20px; color: #8a2be2; letter-spacing: 1px; }}
-        .legend-box {{ display: flex; gap: 15px; font-size: 13px; color: #fff; margin-left: 20px; }}
-        .legend-item {{ display: flex; align-items: center; gap: 6px; text-shadow: 0 0 5px rgba(255,255,255,0.3); }}
-        .dot {{ width: 12px; height: 12px; border-radius: 3px; }}
-        .click-hint {{ font-size: 13px; color: rgba(255,255,255,0.6); margin-left: 20px; }}
-        .total-sum-badge {{ font-size: 16px; color: #fff; background: #8a2be2; padding: 8px 18px; border-radius: 30px; box-shadow: 0 0 15px rgba(138,43,226,0.6); letter-spacing: 1px; }}
-        .sales-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 20px; padding: 30px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }}
+        /* 2. 매출표 (반응형 최적화) */
+        .sales-header-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-left: 4px solid #8a2be2; padding-left: 10px; flex-wrap: wrap; gap: 10px; }}
+        .sales-main-title {{ font-size: 18px; color: #8a2be2; letter-spacing: 1px; }}
+        .legend-box {{ display: flex; gap: 10px; font-size: 12px; color: #fff; }}
+        .legend-item {{ display: flex; align-items: center; gap: 4px; }}
+        .dot {{ width: 10px; height: 10px; border-radius: 3px; }}
+        .total-sum-badge {{ font-size: 14px; color: #fff; background: #8a2be2; padding: 6px 14px; border-radius: 20px; }}
+        .sales-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 15px; padding: 20px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); width: 100%; overflow-x: auto; }}
+        
+        .chart-container {{ min-width: 600px; height: 350px; }}
+        .chart-container-small {{ min-width: 400px; height: 250px; }}
 
         /* 3. 일정표 */
-        .next-event-card {{ background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%); border: 1px solid #8a2be2; border-radius: 20px; padding: 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(138, 43, 226, 0.3); transition: transform 0.4s; margin-bottom: 40px; }}
-        .next-event-card:hover {{ transform: scale(1.02); box-shadow: 0 15px 50px rgba(138, 43, 226, 0.6); border-color: #fff; }}
-        .next-event-info h3 {{ font-size: 18px; color: #FFD700; margin: 0 0 10px 0; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.5); }}
-        .next-event-info h1 {{ font-size: 40px; color: #fff; margin: 0 0 15px 0; text-shadow: 0 0 15px #8a2be2; }}
-        .next-event-info p {{ font-size: 16px; color: #aaa; margin: 0; }}
-        .d-day-badge {{ font-size: 50px; color: #8a2be2; text-shadow: 0 0 20px rgba(138,43,226,0.8); }}
-        .timeline-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; }}
-        .timeline-title {{ font-size: 20px; color: #fff; border-left: 5px solid #8a2be2; padding-left: 15px; margin-bottom: 30px; text-shadow: 0 0 10px rgba(138, 43, 226, 0.5); }}
-        .timeline-list {{ display: flex; flex-direction: column; gap: 20px; padding-left: 20px; border-left: 3px solid rgba(138,43,226,0.3); margin-left: 10px; }}
-        .timeline-item {{ position: relative; background: rgba(0,0,0,0.5); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 15px; padding: 20px 30px; margin-left: 30px; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }}
-        .timeline-item:hover {{ transform: translateX(10px) scale(1.02); background: rgba(138, 43, 226, 0.1); border-color: #8a2be2; box-shadow: 0 0 20px rgba(138,43,226,0.4); }}
-        .timeline-item::before {{ content: ''; position: absolute; left: -43px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; background: #8a2be2; border-radius: 50%; box-shadow: 0 0 10px #8a2be2; transition: 0.3s; }}
-        .timeline-item:hover::before {{ background: #fff; box-shadow: 0 0 15px #fff; scale: 1.2; }}
-        .t-date {{ font-size: 15px; color: #FFD700; margin-bottom: 8px; text-shadow: 0 0 5px rgba(255,215,0,0.5); }}
-        .t-title {{ font-size: 22px; color: #fff; margin-bottom: 8px; }}
-        .t-desc {{ font-size: 15px; color: #aaa; }}
-        .t-status {{ padding: 8px 18px; border-radius: 20px; font-size: 13px; background: rgba(255,255,255,0.1); color: #fff; }}
-        .t-status.upcoming {{ background: #8a2be2; box-shadow: 0 0 15px rgba(138, 43, 226, 0.6); }}
+        .next-event-card {{ background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%); border: 1px solid #8a2be2; border-radius: 15px; padding: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 25px rgba(138, 43, 226, 0.3); margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }}
+        .next-event-info h3 {{ font-size: 15px; color: #FFD700; margin: 0 0 8px 0; }}
+        .next-event-info h1 {{ font-size: 28px; color: #fff; margin: 0 0 10px 0; }}
+        .next-event-info p {{ font-size: 14px; color: #aaa; margin: 0; }}
+        .d-day-badge {{ font-size: 40px; color: #8a2be2; text-shadow: 0 0 15px rgba(138,43,226,0.8); }}
+        
+        .timeline-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 25px; }}
+        .timeline-title {{ font-size: 18px; color: #fff; border-left: 4px solid #8a2be2; padding-left: 10px; margin-bottom: 20px; }}
+        .timeline-item {{ position: relative; background: rgba(0,0,0,0.5); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 10px; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }}
+        .t-date {{ font-size: 13px; color: #FFD700; margin-bottom: 5px; }}
+        .t-title {{ font-size: 18px; color: #fff; margin-bottom: 5px; }}
+        .t-desc {{ font-size: 13px; color: #aaa; }}
+        .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }}
+        .t-status.upcoming {{ background: #8a2be2; }}
 
-        /* 4. VOD */
-        .search-wrapper {{ position: relative; width: 350px; }}
-        .search-input {{ width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #8a2be2; padding: 12px 20px; border-radius: 30px; color: #fff; outline: none; font-size: 15px; transition: 0.3s; }}
-        .search-input:focus {{ box-shadow: 0 0 20px rgba(138,43,226,0.6); background: rgba(0,0,0,0.8); }}
-        .main-stage {{ background: rgba(15, 12, 26, 0.6); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 20px; padding: 30px; display: flex; gap: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); margin-bottom: 50px; }}
-        .player-wrapper {{ flex: 2; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid #333; transition: 0.3s; }}
-        .player-wrapper:hover {{ border-color: #8a2be2; box-shadow: 0 0 30px rgba(138,43,226,0.5); }}
+        /* 4. VOD (반응형 최적화) */
+        .search-wrapper {{ position: relative; width: 100%; max-width: 300px; margin-top: 10px; }}
+        .search-input {{ width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #8a2be2; padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; box-sizing: border-box; }}
+        
+        .main-stage {{ background: rgba(15, 12, 26, 0.6); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }}
+        .player-wrapper {{ width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }}
         .player-wrapper iframe {{ width: 100%; height: 100%; border: none; }}
-        .player-info {{ flex: 1; display: flex; flex-direction: column; justify-content: center; }}
-        .top-badge {{ background: linear-gradient(to right, #ff0000, #ff8c00); padding: 5px 12px; border-radius: 5px; font-size: 12px; margin-bottom: 15px; width: fit-content; box-shadow: 0 0 10px rgba(255,0,0,0.5); }}
-        .vod-grid {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-top: 20px; }}
-        .vod-card {{ background: rgba(0,0,0,0.6); border-radius: 12px; border: 1px solid rgba(138, 43, 226, 0.2); cursor: pointer; transition: 0.3s; overflow: hidden; display:flex; flex-direction:column; }}
-        .vod-card:hover {{ transform: translateY(-8px); border-color: #8a2be2; box-shadow: 0 15px 30px rgba(138,43,226,0.4); }}
-        .vod-thumb {{ width: 100%; aspect-ratio: 16/9; background: #111; position: relative; overflow: hidden; }}
+        .player-info {{ width: 100%; }}
+        .top-badge {{ background: linear-gradient(to right, #ff0000, #ff8c00); padding: 4px 10px; border-radius: 4px; font-size: 11px; margin-bottom: 10px; display: inline-block; }}
+        
+        .vod-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; margin-bottom: 40px; }}
+        .vod-card {{ background: rgba(0,0,0,0.6); border-radius: 10px; border: 1px solid rgba(138, 43, 226, 0.2); cursor: pointer; transition: 0.3s; overflow: hidden; display:flex; flex-direction:column; }}
+        .vod-card:hover {{ transform: translateY(-5px); border-color: #8a2be2; box-shadow: 0 10px 20px rgba(138,43,226,0.3); }}
+        .vod-thumb {{ width: 100%; aspect-ratio: 16/9; background: #111; overflow: hidden; }}
         .vod-thumb img {{ width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }}
         .vod-card:hover .vod-thumb img {{ opacity: 1; transform: scale(1.05); }}
-        .vod-text {{ padding: 15px; flex:1; display:flex; flex-direction:column; justify-content:space-between; }}
-        .vod-text h4 {{ margin: 0 0 8px 0; font-size: 14px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }}
-        .vod-text p {{ margin: 0; font-size: 12px; color: #aaa; margin-top: 5px; }}
+        .vod-text {{ padding: 12px; flex:1; display:flex; flex-direction:column; justify-content:space-between; }}
+        .vod-text h4 {{ margin: 0 0 6px 0; font-size: 13px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }}
+        .vod-text p {{ margin: 0; font-size: 11px; color: #aaa; }}
 
-        #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 320px; background: #0f0c1a; border: 2px solid #8a2be2; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); overflow: hidden; }}
-        .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #333; }}
-        .p-info {{ padding: 15px; text-align: center; }}
-        .p-title {{ font-size: 14px; color: #fff; margin-bottom: 8px; word-break: keep-all; line-height: 1.4; }}
-        .p-live-badge {{ font-size: 13px; color: #ff0000; text-shadow: 0 0 10px rgba(255,0,0,0.5); }}
-        #sales-modal, #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }}
-        .s-modal-card {{ background: #12121b; width: 500px; border-radius: 20px; border: 1px solid #444; padding: 35px; box-shadow: 0 0 50px rgba(138,43,226,0.3); }}
-        .content-item {{ display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #222; font-size: 15px; }}
+        /* 모달창 반응형 */
+        #sales-modal, #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }}
+        .s-modal-card {{ background: #12121b; width: 100%; max-width: 450px; border-radius: 15px; border: 1px solid #444; padding: 25px; box-sizing: border-box; }}
+        .content-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 14px; }}
         
-        /* 프로필 상세 모달 */
-        .profile-modal-inner {{ background: #12121b; width: 650px; border-radius: 20px; border: 1px solid #444; display: flex; padding: 40px; position:relative; box-shadow: 0 20px 60px rgba(138,43,226,0.4); }}
-        .profile-details-row {{ display: flex; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }}
-        .profile-details-label {{ color: #8a2be2; font-size: 15px; width: 70px; display: inline-block; font-weight: 900; }}
-        .profile-details-value {{ color: #fff; font-size: 15px; flex: 1; }}
+        .profile-modal-inner {{ background: #12121b; width: 100%; max-width: 550px; border-radius: 15px; border: 1px solid #444; display: flex; flex-wrap: wrap; padding: 30px; position:relative; box-sizing: border-box; gap: 20px; justify-content: center; }}
+        .profile-details-row {{ display: flex; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
+        .profile-details-label {{ color: #8a2be2; width: 60px; font-weight: 900; }}
+        .profile-details-value {{ color: #fff; flex: 1; }}
     </style>
 </head>
 <body>
     <header class="nav-header">
         <div class="logo-section" onclick="location.reload()">
-            <img src="https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif" height="55">
+            <img src="https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif" height="45">
             <span class="update-timer" id="timer-text">NEXT: 5:00</span>
         </div>
         <nav class="tab-menu">
             <div class="tab-item active" onclick="switchTab(event, 'status')">현황판</div>
             <div class="tab-item" onclick="switchTab(event, 'sales')">매출표</div>
             <div class="tab-item" onclick="switchTab(event, 'schedule')">일정표</div>
-            <div class="tab-item" onclick="switchTab(event, 'radio')">보이는 라디오</div>
+            <div class="tab-item" onclick="switchTab(event, 'radio')">VOD</div>
         </nav>
     </header>
 
@@ -293,21 +286,18 @@ def generate_full_system(members):
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
-                    <div style="display:flex; align-items:center;">
-                        <span class="sales-main-title">YXL 히스토리 (시즌 1-13)</span>
-                        <div class="legend-box"><div class="legend-item"><div class="dot" style="background:#8a2be2;"></div>직급전</div><div class="legend-item"><div class="dot" style="background:#ff69b4;"></div>일반회차</div></div>
-                        <span class="click-hint">※ 막대바 클릭 시 상세 정보 제공</span>
-                    </div>
+                    <span class="sales-main-title">YXL 히스토리 (시즌 1-13)</span>
+                    <div class="legend-box"><div class="legend-item"><div class="dot" style="background:#8a2be2;"></div>직급전</div><div class="legend-item"><div class="dot" style="background:#ff69b4;"></div>일반회차</div></div>
                     <div class="total-sum-badge">총 합산: {all_season_sum:,}</div>
                 </div>
-                <div style="height: 450px;"><canvas id="historyChart"></canvas></div>
+                <div style="overflow-x: auto;"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
             </div>
             <div class="sales-section">
                 <div class="sales-header-container">
                     <span class="sales-main-title">시즌 14 회차</span>
                     <div class="total-sum-badge">시즌 합산: {current_season_sum:,}</div>
                 </div>
-                <div style="height: 280px;"><canvas id="currentChart"></canvas></div>
+                <div style="overflow-x: auto;"><div class="chart-container-small"><canvas id="currentChart"></canvas></div></div>
             </div>
         </section>
 
@@ -316,28 +306,25 @@ def generate_full_system(members):
             <div class="next-event-card">
                 <div class="next-event-info">
                     <h3>NEXT HIGHLIGHT</h3>
-                    <h1>시즌 14 - 3회차 : YXL</h1>
+                    <h1>시즌 14 - 3회차</h1>
                     <p>일시: 2026년 05월 07일 (목) 오후 5시</p>
                 </div>
                 <div class="d-day-badge">D-6</div>
             </div>
             <div class="timeline-section">
                 <div class="timeline-title">YXL TIMELINE</div>
-                <div class="timeline-list">
-                    <div class="timeline-item"><div><div class="t-date">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: YXL 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
-                    <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: YXL 멤버 전원</div></div><div class="t-status">대기중</div></div>
-                    <div class="timeline-item"><div><div class="t-date">05.14 (목) 17:00</div><div class="t-title">시즌 14 - 5회차 : YXL</div><div class="t-desc">참여: YXL 멤버 전원</div></div><div class="t-status">대기중</div></div>
-                    <div class="timeline-item"><div><div class="t-date">05.21 (목) 17:00</div><div class="t-title">시즌 15 - 직급전 : YXL</div><div class="t-desc">참여: YXL 멤버 전원</div></div><div class="t-status">대기중</div></div>
-                </div>
+                <div class="timeline-item"><div><div class="t-date">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
+                <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">대기중</div></div>
+                <div class="timeline-item"><div><div class="t-date">05.14 (목) 17:00</div><div class="t-title">시즌 14 - 5회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">대기중</div></div>
             </div>
         </section>
 
         <!-- 4. VOD -->
         <section id="radio" class="tab-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
                 <span class="timeline-title" style="margin:0;">LATEST BROADCAST</span>
                 <div class="search-wrapper">
-                    <input type="text" id="vodSearch" class="search-input" placeholder="영상 제목을 검색하세요..." onkeyup="searchVOD()">
+                    <input type="text" id="vodSearch" class="search-input" placeholder="영상 검색..." onkeyup="searchVOD()">
                 </div>
             </div>
 
@@ -347,20 +334,20 @@ def generate_full_system(members):
                 </div>
                 <div class="player-info">
                     <div class="top-badge">최신 VOD 업데이트</div>
-                    <h1 id="main-vod-title" style="font-size:24px; color:#fff; margin:0 0 15px 0; line-height:1.4;">{main_vod['title']}</h1>
-                    <p id="main-vod-date" style="font-size:14px; color:#aaa; margin:0 0 10px 0;">방송일: {main_vod['date']}</p>
-                    <p id="main-vod-views" style="font-size:16px; color:#FFD700; margin:0;">조회수: {format(main_vod['views'], ',')}회</p>
+                    <h1 id="main-vod-title" style="font-size:20px; color:#fff; margin:0 0 10px 0;">{main_vod['title']}</h1>
+                    <p id="main-vod-date" style="font-size:13px; color:#aaa; margin:0 0 5px 0;">방송일: {main_vod['date']}</p>
+                    <p id="main-vod-views" style="font-size:14px; color:#FFD700; margin:0;">조회수: {format(main_vod['views'], ',')}회</p>
                 </div>
             </div>
 
             <div class="timeline-title" style="margin-bottom:0;">POPULAR TOP 5</div>
-            <div class="vod-grid" style="margin-bottom: 50px;">
+            <div class="vod-grid">
                 {"".join([f'''
                 <div class="vod-card" onclick="changeMainPlayer('{v['id']}', '{v['title']}', '{v['date']}', '{v['views']}')">
-                    <div class="vod-thumb"><img src="{v['thumb']}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL+VOD'"></div>
+                    <div class="vod-thumb"><img src="{v['thumb']}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL'"></div>
                     <div class="vod-text">
-                        <div><div style="background:#8a2be2; color:#fff; font-size:10px; padding:3px 6px; border-radius:3px; display:inline-block; margin-bottom:5px;">HOT RANKING</div><h4>{v['title']}</h4></div>
-                        <p>{v['date']} • 조회수: {format(v['views'], ',')}회</p>
+                        <div><div style="background:#8a2be2; color:#fff; font-size:9px; padding:2px 5px; border-radius:3px; display:inline-block; margin-bottom:4px;">HOT</div><h4>{v['title']}</h4></div>
+                        <p>{v['date']} • {format(v['views'], ',')}회</p>
                     </div>
                 </div>''' for v in top_5_vods])}
             </div>
@@ -369,32 +356,28 @@ def generate_full_system(members):
             <div class="vod-grid" id="vodListContainer"></div>
         </section>
     </div>
-
-    <!-- UI -->
-    <div id="preview"><img src="" id="p-img" class="p-thumb"><div class="p-info"><div id="p-title" class="p-title"></div><div class="p-live-badge">🔴 LIVE • <span id="p-viewers"></span>명 시청중</div></div></div>
     
+    <!-- 모달 -->
     <div id="sales-modal" onclick="closeSalesModal()">
         <div class="s-modal-card" onclick="event.stopPropagation()">
-            <div id="s-title" style="font-size:24px; color:#8a2be2; margin-bottom:20px; border-bottom:2px solid #333; padding-bottom:12px;"></div>
+            <div id="s-title" style="font-size:20px; color:#8a2be2; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;"></div>
             <ul id="s-list" style="list-style:none; padding:0; margin:0;"></ul>
-            <div style="margin-top:25px; text-align:center; color:#777; font-size:13px; cursor:pointer;" onclick="closeSalesModal()">[ 닫기 ]</div>
+            <div style="margin-top:20px; text-align:center; color:#777; font-size:12px; cursor:pointer;" onclick="closeSalesModal()">[ 닫기 ]</div>
         </div>
     </div>
     
-    <!-- 프로필 상세 모달 -->
     <div id="p-modal" onclick="closeProfile()">
         <div class="profile-modal-inner" onclick="event.stopPropagation()">
-            <div style="position:absolute; top:20px; right:25px; cursor:pointer; font-size:28px; color:#888;" onclick="closeProfile()">×</div>
-            <img src="" id="m-img" style="width:220px; height:220px; border-radius:50%; border:4px solid #8a2be2; object-fit:cover; box-shadow: 0 0 20px rgba(138,43,226,0.6);">
-            <div style="flex:1; padding-left:40px; display:flex; flex-direction:column; justify-content:center;">
-                <div id="m-name" style="font-size:35px; color:#fff;"></div>
-                <div id="m-pos" style="font-size:18px; color:#8a2be2; margin-bottom:15px;"></div>
-                <div id="m-details" style="display:flex; flex-direction:column; gap:2px; margin-top:10px;"></div>
+            <div style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#888;" onclick="closeProfile()">×</div>
+            <img src="" id="m-img" style="width:180px; height:180px; border-radius:50%; border:3px solid #8a2be2; object-fit:cover; box-shadow: 0 0 15px rgba(138,43,226,0.5);">
+            <div style="flex:1; min-width: 200px; display:flex; flex-direction:column; justify-content:center;">
+                <div id="m-name" style="font-size:28px; color:#fff;"></div>
+                <div id="m-pos" style="font-size:15px; color:#8a2be2; margin-bottom:10px;"></div>
+                <div id="m-details" style="display:flex; flex-direction:column; gap:2px; margin-top:5px;"></div>
             </div>
         </div>
     </div>
 
-    <!-- JS -->
     <script>
         const members = {js_member_data};
         const historyDb = {json.dumps(history_db, ensure_ascii=False)};
@@ -413,35 +396,29 @@ def generate_full_system(members):
             Chart.register(ChartDataLabels);
             if(hChart) hChart.destroy();
             if(cChart) cChart.destroy();
-            const commonOptions = {{ responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 50 }} }}, plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#fff', font: {{ weight: '900', size: 13 }}, formatter: (v, ctx) => ctx.chart.canvas.id === 'historyChart' && ctx.datasetIndex === 1 ? (ctx.chart.data.datasets[0].data[ctx.dataIndex] + v).toLocaleString() : (ctx.chart.canvas.id === 'currentChart' ? v.toLocaleString() : null) }} }}, scales: {{ y: {{ display: false }}, x: {{ ticks: {{ color: '#fff', font: {{ weight: '900', size: 12 }} }}, grid: {{ display: false }} }} }} }};
-            hChart = new Chart(document.getElementById('historyChart'), {{ type: 'bar', data: {{ labels: {json.dumps(js_labels, ensure_ascii=False)}, datasets: [{{ label: '직급전', data: {js_rank_rev}, backgroundColor: '#8a2be2', hoverBackgroundColor: '#ffffff', hoverBorderColor: '#8a2be2', hoverBorderWidth: 4, borderRadius: 0 }}, {{ label: '일반회차', data: {js_norm_rev}, backgroundColor: '#ff69b4', hoverBackgroundColor: '#ffffff', hoverBorderColor: '#ff69b4', hoverBorderWidth: 4, borderRadius: {{topLeft: 6, topRight: 6}} }}] }}, options: {{ ...commonOptions, scales: {{ y: {{ stacked: true, display: false, max: 35000000 }}, x: {{ stacked: true, ticks: {{ color: '#fff', font: {{ weight: '900', size: 12 }} }}, grid: {{ display: false }} }} }}, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} }});
-            cChart = new Chart(document.getElementById('currentChart'), {{ type: 'bar', data: {{ labels: ['직급전', '1회차', '2회차'], datasets: [{{ data: {current_season_vals}, backgroundColor: ['#FFD700', '#00e5ff', '#00e5ff'], hoverBackgroundColor: '#ffffff', hoverBorderColor: ['#FFD700', '#00e5ff', '#00e5ff'], hoverBorderWidth: 4, borderRadius: 6 }}] }}, options: {{ ...commonOptions, layout: {{ padding: {{ top: 30 }} }} }} }});
+            const commonOptions = {{ responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 30 }} }}, plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#fff', font: {{ weight: '900', size: 11 }}, formatter: (v, ctx) => ctx.chart.canvas.id === 'historyChart' && ctx.datasetIndex === 1 ? (ctx.chart.data.datasets[0].data[ctx.dataIndex] + v).toLocaleString() : (ctx.chart.canvas.id === 'currentChart' ? v.toLocaleString() : null) }} }}, scales: {{ y: {{ display: false }}, x: {{ ticks: {{ color: '#fff', font: {{ weight: '900', size: 10 }} }}, grid: {{ display: false }} }} }} }};
+            hChart = new Chart(document.getElementById('historyChart'), {{ type: 'bar', data: {{ labels: {json.dumps(js_labels, ensure_ascii=False)}, datasets: [{{ label: '직급전', data: {js_rank_rev}, backgroundColor: '#8a2be2', borderRadius: 0 }}, {{ label: '일반회차', data: {js_norm_rev}, backgroundColor: '#ff69b4', borderRadius: {{topLeft: 4, topRight: 4}} }}] }}, options: {{ ...commonOptions, scales: {{ y: {{ stacked: true, display: false, max: 35000000 }}, x: {{ stacked: true, ticks: {{ color: '#fff', font: {{ weight: '900', size: 10 }} }}, grid: {{ display: false }} }} }}, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} }});
+            cChart = new Chart(document.getElementById('currentChart'), {{ type: 'bar', data: {{ labels: ['직급전', '1회차', '2회차'], datasets: [{{ data: {current_season_vals}, backgroundColor: ['#FFD700', '#00e5ff', '#00e5ff'], borderRadius: 4 }}] }}, options: {{ ...commonOptions, layout: {{ padding: {{ top: 20 }} }} }} }});
         }}
 
         function openSalesModal(season) {{
             const data = historyDb[season]; if(!data) return;
             document.getElementById('s-title').innerText = season + " 상세 매출";
-            let html = `<li class="content-item"><span style="color:#8a2be2;">직급전</span> <b style="color:#FFD700; text-shadow:0 0 10px #FFD700;">${{data.직급전.toLocaleString()}}개</b></li>`;
+            let html = `<li class="content-item"><span style="color:#8a2be2;">직급전</span> <b style="color:#FFD700;">${{data.직급전.toLocaleString()}}개</b></li>`;
             data.contents.forEach(item => html += `<li class="content-item"><span style="color:#ddd;">${{item[0]}}</span> <b style="color:#00e5ff;">${{item[1].toLocaleString()}}개</b></li>`);
             document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
         
         function openProfile(n) {{ 
-            const m = members[n];
-            document.getElementById('m-img').src = m.img; 
-            document.getElementById('m-name').innerText = n; 
-            document.getElementById('m-pos').innerText = m.pos; 
-            
-            let detailsHtml = '';
-            if(m.age) detailsHtml += `<div class="profile-details-row"><span class="profile-details-label">나이</span><span class="profile-details-value">${{m.age}}</span></div>`;
-            if(m.join_date) detailsHtml += `<div class="profile-details-row"><span class="profile-details-label">입사일</span><span class="profile-details-value">${{m.join_date}}</span></div>`;
-            if(m.stats) detailsHtml += `<div class="profile-details-row"><span class="profile-details-label">스탯</span><span class="profile-details-value">${{m.stats}}</span></div>`;
-            if(m.mbti) detailsHtml += `<div class="profile-details-row"><span class="profile-details-label">MBTI</span><span class="profile-details-value">${{m.mbti}}</span></div>`;
-            if(m.skill) detailsHtml += `<div class="profile-details-row"><span class="profile-details-label">특기</span><span class="profile-details-value">${{m.skill}}</span></div>`;
-            
-            document.getElementById('m-details').innerHTML = detailsHtml;
-            document.getElementById('p-modal').style.display = 'flex'; 
+            const m = members[n]; document.getElementById('m-img').src = m.img; document.getElementById('m-name').innerText = n; document.getElementById('m-pos').innerText = m.pos; 
+            let html = '';
+            if(m.age) html += `<div class="profile-details-row"><span class="profile-details-label">나이</span><span class="profile-details-value">${{m.age}}</span></div>`;
+            if(m.join_date) html += `<div class="profile-details-row"><span class="profile-details-label">입사일</span><span class="profile-details-value">${{m.join_date}}</span></div>`;
+            if(m.stats) html += `<div class="profile-details-row"><span class="profile-details-label">스탯</span><span class="profile-details-value">${{m.stats}}</span></div>`;
+            if(m.mbti) html += `<div class="profile-details-row"><span class="profile-details-label">MBTI</span><span class="profile-details-value">${{m.mbti}}</span></div>`;
+            if(m.skill) html += `<div class="profile-details-row"><span class="profile-details-label">특기</span><span class="profile-details-value">${{m.skill}}</span></div>`;
+            document.getElementById('m-details').innerHTML = html; document.getElementById('p-modal').style.display = 'flex'; 
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}
 
@@ -456,8 +433,8 @@ def generate_full_system(members):
         function renderVODList(data) {{
             document.getElementById('vodListContainer').innerHTML = data.map(v => `
                 <div class="vod-card" onclick="changeMainPlayer('${{v.id}}', '${{v.title.replace(/'/g, "&#39;")}}', '${{v.date}}', '${{v.views}}')">
-                    <div class="vod-thumb"><img src="${{v.thumb}}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL+VOD'"></div>
-                    <div class="vod-text"><h4>${{v.title}}</h4><p>${{v.date}} • 조회수: ${{Number(v.views).toLocaleString()}}회</p></div>
+                    <div class="vod-thumb"><img src="${{v.thumb}}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL'"></div>
+                    <div class="vod-text"><h4>${{v.title}}</h4><p>${{v.date}} • ${{Number(v.views).toLocaleString()}}회</p></div>
                 </div>`).join('');
         }}
 
@@ -470,29 +447,16 @@ def generate_full_system(members):
 
         let time = 300;
         setInterval(() => {{ time--; const min = Math.floor(time/60); const sec = time%60; const el = document.getElementById('timer-text'); if(el) el.innerText = `NEXT: ${{min}}:${{sec<10?'0':''}}${{sec}}`; if(time<=0) location.reload(); }}, 1000);
-
-        const units = document.querySelectorAll('.member-unit'); const preview = document.getElementById('preview');
-        units.forEach(unit => {{
-            unit.addEventListener('mousemove', (e) => {{
-                const thumb = unit.getAttribute('data-thumb');
-                if (thumb && thumb !== "None" && thumb !== "") {{
-                    document.getElementById('p-img').src = thumb; document.getElementById('p-title').textContent = unit.getAttribute('data-title'); document.getElementById('p-viewers').textContent = unit.getAttribute('data-viewers');
-                    preview.style.display = 'block'; preview.style.left = (e.clientX + 15) + 'px'; preview.style.top = (e.clientY + 15) + 'px';
-                }}
-            }});
-            unit.addEventListener('mouseleave', () => preview.style.display = 'none');
-        }});
-
         renderVODList(allVODs);
     </script>
 </body>
 </html>
 """
-    # 1. 메인 웹페이지 파일 (index.html) 생성
+    # 1. 완벽한 index.html 생성
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(full_html)
 
-    # 2. 봇 에러(128) 방지용 빈 파일 (status.json) 생성
+    # 2. 깃허브 액션 에러(128)를 막기 위한 가짜 status.json 자동 생성
     with open("status.json", "w", encoding="utf-8") as f:
         f.write("{}")
 

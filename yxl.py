@@ -129,6 +129,7 @@ def fetch_vod_data_by_api(vid):
     return {"id": vid, "title": "정보 없음", "date": "-", "views": 0, "thumb": ""}
 
 def generate_full_system(members, history_db):
+    print("\n[1/3] 생방송 상태 업데이트 중...")
     data_map = {m['name']: get_yxl_status(m['name'], m['id'], m['pos'], m['img']) for m in members}
     js_member_data = json.dumps({m['name']: m for m in members}, ensure_ascii=False)
     
@@ -156,18 +157,21 @@ def generate_full_system(members, history_db):
             </div>"""
         status_html += '</div></div>'
 
+    print("[2/3] 매출 데이터 로드 중...")
     js_labels = [f"시즌{i}" for i in range(1, len(history_db) + 1)]
     js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db) + 1)]
     js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db) + 1)]
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
     current_season_sum = sum([4343316, 2164822, 3135452])
 
+    print("[3/3] VOD 영상 가져오는 중 (약간의 시간이 소요됩니다)...")
     vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", "146665451", "149341401", "149372371", "149482895", "149543791", "151963511", "152673671", "152932371", "153270385", "153906161", "155022377", "156072307", "156233659", "156443147", "156897587", "157766473", "159784167", "159835159", "160179551", "160229793", "163314531", "163507573", "165090649", "165095477", "166797677", "167711523", "168507233", "169165861", "171334577", "171346633", "171517903", "171625221", "181193639", "181202165", "181212107", "181319655", "182185345", "182561159", "185332075", "186322409", "188589109", "193831035"]
     vod_ids.reverse() 
     vod_list = [fetch_vod_data_by_api(vid) for vid in vod_ids]
     valid_vods = [v for v in vod_list if v["views"] > 0]
     top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
     main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
+    js_vod_data = json.dumps(vod_list, ensure_ascii=False)
 
     full_html = f"""
 <!DOCTYPE html>
@@ -226,7 +230,7 @@ def generate_full_system(members, history_db):
         @keyframes pulseRed {{ 0% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7); }} 70% {{ box-shadow: 0 0 0 10px rgba(220, 20, 60, 0); }} 100% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0); }} }}
 
         .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
-        .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; }}
+        .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; flex-wrap: wrap; gap: 10px; }}
         .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; }}
         .total-sum-badge {{ font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 8px 18px; border-radius: 8px; font-weight: 900; }}
         
@@ -234,6 +238,7 @@ def generate_full_system(members, history_db):
         .chart-scroll-wrapper::-webkit-scrollbar {{ height: 8px; }}
         .chart-scroll-wrapper::-webkit-scrollbar-thumb {{ background: linear-gradient(90deg, #8a6327, #d4af37, #8a6327); border-radius: 10px; }}
         .chart-container {{ min-width: 1000px; height: 350px; }}
+        .chart-container-small {{ min-width: 400px; height: 250px; }}
 
         /* 💡 럭셔리 주간 달력 디자인 */
         .calendar-nav-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 15px; }}
@@ -251,7 +256,7 @@ def generate_full_system(members, history_db):
         .dc-event {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 10px; padding: 4px 2px; border-radius: 5px; font-weight: 900; width: 95%; margin: 0 auto; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }}
         
         /* 💡 프로필 모달 & 직급 폰트 부드럽게 */
-        #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }}
+        #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }}
         .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 600px; display: flex; gap: 40px; position: relative; align-items: center; flex-wrap: wrap; justify-content: center; }}
         .profile-left {{ display: flex; flex-direction: column; align-items: center; }}
         .profile-left img {{ width: 150px; height: 150px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; margin-bottom: 15px; }}
@@ -265,6 +270,32 @@ def generate_full_system(members, history_db):
         .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; }}
         
         .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Cinzel', serif; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 10px; }}
+        .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; transition: 0.3s; cursor:pointer; }}
+        .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); transform: translateX(10px); }}
+        .t-date {{ font-size: 13px; color: #d4af37; margin-bottom: 5px; }}
+        .t-title {{ font-size: 18px; color: #fff; margin-bottom: 5px; }}
+        .t-desc {{ font-size: 13px; color: #aaa; }}
+        .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }}
+        .t-status.upcoming {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; }}
+
+        /* 💡 VOD 스타일 */
+        .search-wrapper {{ position: relative; width: 100%; max-width: 300px; margin-top: 10px; }}
+        .search-input {{ width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; }}
+        .main-stage {{ background: rgba(8, 8, 12, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }}
+        .player-wrapper {{ width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }}
+        .player-wrapper iframe {{ width: 100%; height: 100%; border: none; }}
+        .player-info {{ width: 100%; }}
+        .top-badge {{ background: linear-gradient(135deg, #d4af37, #aa801e); padding: 4px 10px; border-radius: 4px; font-size: 11px; margin-bottom: 10px; display: inline-block; color: #000; font-weight: 900; }}
+        
+        .vod-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; margin-bottom: 40px; }}
+        .vod-card {{ background: #0a0a0f; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s; overflow: hidden; display:flex; flex-direction:column; }}
+        .vod-card:hover {{ transform: translateY(-5px); border-color: #d4af37; box-shadow: 0 10px 25px rgba(212,175,55,0.15); }}
+        .vod-thumb {{ width: 100%; aspect-ratio: 16/9; background: #111; overflow: hidden; }}
+        .vod-thumb img {{ width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }}
+        .vod-card:hover .vod-thumb img {{ opacity: 1; transform: scale(1.05); }}
+        .vod-text {{ padding: 12px; flex:1; display:flex; flex-direction:column; justify-content:space-between; }}
+        .vod-text h4 {{ margin: 0 0 6px 0; font-size: 13px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }}
+        .vod-text p {{ margin: 0; font-size: 11px; color: #aaa; }}
     </style>
 </head>
 <body>
@@ -274,12 +305,15 @@ def generate_full_system(members, history_db):
             <div class="tab-item active" onclick="switchTab(event, 'status')">LOUNGE</div>
             <div class="tab-item" onclick="switchTab(event, 'sales')">REVENUE</div>
             <div class="tab-item" onclick="switchTab(event, 'schedule')">SCHEDULE</div>
+            <div class="tab-item" onclick="switchTab(event, 'radio')">MEDIA</div>
         </nav>
     </header>
 
     <div class="main-container">
+        <!-- 1. 현황판 -->
         <section id="status" class="tab-content active">{status_html}</section>
 
+        <!-- 2. 매출표 -->
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
@@ -288,8 +322,16 @@ def generate_full_system(members, history_db):
                 </div>
                 <div class="chart-scroll-wrapper"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
             </div>
+            <div class="sales-section">
+                <div class="sales-header-container">
+                    <span class="sales-main-title">YXL 시즌 14</span>
+                    <div class="total-sum-badge">시즌 합산: {format(current_season_sum, ',')}개</div>
+                </div>
+                <div class="chart-scroll-wrapper"><div class="chart-container-small"><canvas id="currentChart"></canvas></div></div>
+            </div>
         </section>
 
+        <!-- 3. 💡 주간 달력 & 타임라인 -->
         <section id="schedule" class="tab-content">
             <div class="timeline-section" style="margin-bottom: 40px;">
                 <div class="timeline-title">WEEKLY SCHEDULE</div>
@@ -301,11 +343,49 @@ def generate_full_system(members, history_db):
             </div>
             <div class="timeline-section">
                 <div class="timeline-title">OFFICIAL TIMELINE</div>
-                <div id="timelineContainer"></div>
+                <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
+                <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
+                <div class="timeline-item"><div><div class="t-date">05.14 (목) 17:00</div><div class="t-title">시즌 14 - 5회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
             </div>
+        </section>
+
+        <!-- 4. 💡 MEDIA 탭 (VOD 영상) 복구 -->
+        <section id="radio" class="tab-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
+                <span class="timeline-title" style="margin:0; border:none;">LATEST RECORD</span>
+                <div class="search-wrapper">
+                    <input type="text" id="vodSearch" class="search-input" placeholder="영상 검색..." onkeyup="searchVOD()">
+                </div>
+            </div>
+            
+            <div class="main-stage">
+                <div class="player-wrapper"><iframe id="main-player-iframe" src="https://vod.sooplive.com/player/{main_vod['id']}" allowfullscreen></iframe></div>
+                <div class="player-info">
+                    <div class="top-badge">최신 VOD</div>
+                    <h1 id="main-vod-title" style="font-size:18px; color:#fff; margin:0 0 10px 0;">{main_vod['title']}</h1>
+                    <p id="main-vod-date" style="font-size:12px; color:#aaa; margin:0 0 5px 0;">방송일: {main_vod['date']}</p>
+                    <p id="main-vod-views" style="font-size:13px; color:#d4af37; margin:0;">조회수: {format(main_vod['views'], ',')}회</p>
+                </div>
+            </div>
+
+            <div class="timeline-title" style="margin-bottom:0; font-size: 16px;">POPULAR TOP 5</div>
+            <div class="vod-grid">
+                {"".join([f'''
+                <div class="vod-card" onclick="changeMainPlayer('{v['id']}', '{v['title']}', '{v['date']}', '{v['views']}')">
+                    <div class="vod-thumb"><img src="{v['thumb']}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL'"></div>
+                    <div class="vod-text">
+                        <div><div style="background:#d4af37; color:#000; font-size:9px; padding:2px 5px; border-radius:3px; display:inline-block; margin-bottom:4px; font-weight:900;">HOT</div><h4>{v['title']}</h4></div>
+                        <p>{v['date']} • {format(v['views'], ',')}회</p>
+                    </div>
+                </div>''' for v in top_5_vods])}
+            </div>
+
+            <div class="timeline-title" id="list-title" style="margin-bottom:0; font-size: 16px;">ALL VIDEOS</div>
+            <div class="vod-grid" id="vodListContainer"></div>
         </section>
     </div>
 
+    <!-- 프로필 모달 -->
     <div id="p-modal" onclick="closeProfile()">
         <div class="profile-container" onclick="event.stopPropagation()">
             <div class="close-btn" onclick="closeProfile()">×</div>
@@ -314,8 +394,18 @@ def generate_full_system(members, history_db):
         </div>
     </div>
 
+    <!-- 매출 상세 모달 -->
+    <div id="sales-modal" onclick="closeSalesModal()">
+        <div class="sales-modal-inner" onclick="event.stopPropagation()">
+            <div id="s-title" style="font-size:22px; font-family:'Cinzel', serif; color:#d4af37; margin-bottom:20px; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px; text-align:center; letter-spacing:2px;"></div>
+            <ul id="s-list" style="list-style:none; padding:0; margin:0;"></ul>
+            <div style="margin-top:25px; text-align:center; color:#777; font-size:12px; cursor:pointer; letter-spacing:1px;" onclick="closeSalesModal()">[ 닫기 ]</div>
+        </div>
+    </div>
+
     <script>
         const members = {js_member_data};
+        const allVODs = {js_vod_data};
         const events = {{
             "2026.05.07": "YXL 3회차",
             "2026.05.11": "YXL 4회차",
@@ -323,7 +413,6 @@ def generate_full_system(members, history_db):
         }};
         
         let currentStartDate = new Date(); 
-        // 시작일을 이번 주 월요일로 맞춤
         const day = currentStartDate.getDay() || 7;
         currentStartDate.setDate(currentStartDate.getDate() - day + 1);
 
@@ -370,17 +459,38 @@ def generate_full_system(members, history_db):
             }}
         }}
 
+        let hChart = null, cChart = null;
         function renderCharts() {{
             Chart.register(ChartDataLabels);
-            new Chart(document.getElementById('historyChart'), {{ 
+            if(hChart) hChart.destroy();
+            if(cChart) cChart.destroy();
+            
+            const commonOptions = {{ responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 40 }} }}, plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#d4af37', font: {{ weight: '900', size: 12 }}, formatter: (v, ctx) => {{ if(ctx.datasetIndex === 1 || ctx.chart.data.datasets.length === 1) {{ let total = ctx.chart.data.datasets[0].data[ctx.dataIndex] + (ctx.datasetIndex === 1 ? v : 0); return Math.floor(total / 10000).toLocaleString() + '만'; }} return null; }} }}, tooltip: {{ callbacks: {{ label: (ctx) => `${{ctx.dataset.label}}: ${{ctx.raw.toLocaleString()}}개` }} }} }}, scales: {{ y: {{ stacked: true, display: false }}, x: {{ stacked: true, ticks: {{ color: '#aaa', font: {{ weight: '900', size: 12 }} }}, grid: {{ color: 'rgba(212,175,55,0.1)' }} }} }} }};
+
+            hChart = new Chart(document.getElementById('historyChart'), {{ 
                 type: 'bar', 
                 data: {{ labels: {json.dumps(js_labels)}, datasets: [
                     {{ label: '직급전', data: {json.dumps(js_rank_rev)}, backgroundColor: '#d4af37' }},
                     {{ label: '일반회차', data: {json.dumps(js_norm_rev)}, backgroundColor: '#aa801e' }}
                 ] }},
-                options: {{ responsive: true, maintainAspectRatio: false, plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor:'end', align:'top', color:'#d4af37', formatter: v => Math.floor(v/10000)+'만' }} }}, scales: {{ y:{{stacked:true, display:false}}, x:{{stacked:true, ticks:{{color:'#aaa'}}}} }} }}
+                options: {{ ...commonOptions, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} 
+            }});
+
+            cChart = new Chart(document.getElementById('currentChart'), {{ 
+                type: 'bar', 
+                data: {{ labels: ['직급전', '1회차', '2회차'], datasets: [{{ label: '매출', data: [4343316, 2164822, 3135452], backgroundColor: '#d4af37' }}] }}, 
+                options: commonOptions 
             }});
         }}
+
+        function openSalesModal(season) {{
+            const data = {historyDb}[season]; if(!data) return;
+            document.getElementById('s-title').innerText = season + " 세부 리포트";
+            let html = `<li class="sales-list-item"><span style="color:#d4af37; font-weight:800;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}} 개</b></li>`;
+            data.contents.forEach(item => html += `<li class="sales-list-item"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}} 개</b></li>`);
+            document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
+        }}
+        function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
         function openProfile(n) {{
             const m = members[n];
@@ -397,7 +507,44 @@ def generate_full_system(members, history_db):
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}
 
+        function changeMainPlayer(id, title, date, views) {{
+            document.getElementById('main-player-iframe').src = `https://vod.sooplive.com/player/${{id}}`;
+            document.getElementById('main-vod-title').innerText = title;
+            document.getElementById('main-vod-date').innerText = `방송일: ${{date}}`;
+            document.getElementById('main-vod-views').innerText = `조회수: ${{Number(views).toLocaleString()}}회`;
+            window.scrollTo({{top: 0, behavior: 'smooth'}});
+        }}
+
+        function renderVODList(data) {{
+            document.getElementById('vodListContainer').innerHTML = data.map(v => `
+                <div class="vod-card" onclick="changeMainPlayer('${{v.id}}', '${{v.title.replace(/'/g, "&#39;")}}', '${{v.date}}', '${{v.views}}')">
+                    <div class="vod-thumb"><img src="${{v.thumb}}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL'"></div>
+                    <div class="vod-text"><h4>${{v.title}}</h4><p>${{v.date}} • ${{Number(v.views).toLocaleString()}}회</p></div>
+                </div>`).join('');
+        }}
+
+        function searchVOD() {{
+            const query = document.getElementById('vodSearch').value.toLowerCase();
+            const filtered = allVODs.filter(v => v.title.toLowerCase().includes(query) || v.id.includes(query));
+            document.getElementById('list-title').innerText = query === "" ? "ALL VIDEOS" : `SEARCH RESULTS (${{filtered.length}})`;
+            renderVODList(filtered);
+        }}
+
+        let time = 300;
+        setInterval(() => {{ time--; const min = Math.floor(time/60); const sec = time%60; const el = document.getElementById('timer-text'); if(el) el.innerText = `NEXT: ${{min}}:${{sec<10?'0':''}}${{sec}}`; if(time<=0) location.reload(); }}, 1000);
+        
         renderCalendar();
+        renderVODList(allVODs);
     </script>
 </body>
 </html>
+"""
+    # ⚠️ 복사할 때 이 아래쪽 Python 파일 쓰기 및 실행 부분까지 전부 긁어서 복사하셔야 합니다!
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(full_html)
+
+if __name__ == "__main__":
+    init_db_if_empty()
+    db_members = get_members_from_db()
+    db_history = get_history_from_db()
+    generate_full_system(db_members, db_history)

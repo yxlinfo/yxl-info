@@ -1,6 +1,52 @@
 import requests
 import json
 import re
+import sqlite3 # 💡 데이터베이스를 사용하기 위해 추가됨
+
+# ==========================================
+# [DB 연동 1] 멤버 데이터 불러오기
+# ==========================================
+def get_members_from_db():
+    conn = sqlite3.connect('yxl_management.db')
+    cur = conn.cursor()
+    # 멤버 정보와 직급 정보를 조인(JOIN)하여 한 번에 가져옵니다.
+    cur.execute('''
+        SELECT m.name, m.soop_id, p.name, m.img_url, m.age, m.join_date, m.stats, m.mbti, m.skill
+        FROM Members m
+        JOIN Positions p ON m.position_id = p.id
+        ORDER BY p.rank_order, m.id
+    ''')
+    rows = cur.fetchall()
+    conn.close()
+    
+    members = []
+    for r in rows:
+        members.append({
+            "name": r[0], "id": r[1], "pos": r[2], "img": r[3],
+            "age": r[4], "join_date": r[5], "stats": r[6], "mbti": r[7], "skill": r[8]
+        })
+    return members
+
+# ==========================================
+# [DB 연동 2] 매출(시즌/회차) 데이터 불러오기
+# ==========================================
+def get_history_from_db():
+    conn = sqlite3.connect('yxl_management.db')
+    cur = conn.cursor()
+    cur.execute('SELECT id, season_num, rank_revenue FROM Seasons ORDER BY season_num')
+    seasons = cur.fetchall()
+    
+    history_db = {}
+    for sid, snum, srev in seasons:
+        cur.execute('SELECT title, revenue FROM Episodes WHERE season_id=? ORDER BY id', (sid,))
+        episodes = cur.fetchall()
+        history_db[f"시즌{snum}"] = {
+            "직급전": srev,
+            "contents": [[ep[0], ep[1]] for ep in episodes]
+        }
+    conn.close()
+    return history_db
+
 
 # ==========================================
 # 1. 생방송 상태 체크 API
@@ -63,7 +109,7 @@ def fetch_vod_data_by_api(vid):
 # ==========================================
 # 3. 메인 대시보드 시스템 생성
 # ==========================================
-def generate_full_system(members):
+def generate_full_system(members, history_db):
     print("\n[1/3] 생방송 상태를 체크합니다...")
     data_map = {m['name']: get_yxl_status(m['name'], m['id'], m['pos'], m['img']) for m in members}
     js_member_data = json.dumps({m['name']: m for m in members}, ensure_ascii=False)
@@ -107,26 +153,13 @@ def generate_full_system(members):
                 </div>"""
         status_html += f'<div class="row">{cards}</div>'
 
-    print("[2/3] 매출 데이터를 생성합니다...")
-    history_db = {
-        "시즌1": {"직급전": 5374481, "contents": [["1회차 전후반전", 2426065], ["2회차 팀전", 2732426], ["3회차 직급프리데이", 3890922], ["4회차 전후반 지분전쟁", 3833288], ["5회차 3천만원 기여도 펌핑데이", 3054893]]},
-        "시즌2": {"직급전": 6610938, "contents": [["1회차 상벌금데이", 6078903], ["2회차 명품데이", 3390108], ["3회차 직급프리데이", 4124926], ["4회차 팀전", 2313129], ["5회차 펌핑룰렛 및 퇴근전쟁", 1969188]]},
-        "시즌3": {"직급전": 13445194, "contents": [["1회차 블라인드 상금데이", 2683770], ["2회차 데스매치 및 퇴근전쟁", 2011356], ["3회차 직급프리데이", 1852181], ["4회차 전후반 지분전쟁", 1703576], ["5회차 일급데이 및 벌칙", 1863867]]},
-        "시즌4": {"직급전": 2561153, "contents": [["1회차 그녀를 이겨라 및 퇴근전쟁", 2035685], ["2회차 퐁당퐁당데이", 1702385], ["3회차 장들의 전쟁", 2676513], ["4회차 직급프리데이", 1216858], ["5회차 기여도 펌핑데이 및 퇴근전쟁", 1939123]]},
-        "시즌5": {"직급전": 4252794, "contents": [["1회차 대표 VS 부장 팀전", 3400157], ["2회차 퐁당 & 가챠 상금데이", 2996095], ["3회차 조기퇴근데이", 2300171], ["4회차 직급프리데이", 2122733], ["5회차 기여도펌핑룰렛데이", 370113]]},
-        "시즌6": {"직급전": 5953195, "contents": [["1회차 퐁당 & 비키니 벌칙데이", 2822840], ["2회차 난사데이 및 퇴근전쟁", 2076273], ["3회차 직급 프리데이", 2642197], ["4회차 팀전", 2948979], ["5회차 한방룰렛골드데이", 2043429]]},
-        "시즌7": {"직급전": 5746700, "contents": [["1회차 퐁당퐁당 상벌금데이", 3076958], ["2회차 대표님을 이겨라 및 퇴근전쟁", 2961402], ["3회차 직급 프리데이", 3738078], ["4회차 기여도 펌핑데이", 3390310], ["5회차 조기퇴근데이", 2023172]]},
-        "시즌8": {"직급전": 5769642, "contents": [["1회차 퐁당퐁당 상벌금데이", 4291255], ["2회차 주차방지데이", 2356810], ["3회차 대표 vs 이사 팀전", 3932965], ["4회차 조기퇴근데이", 1766989], ["5회차 기여도펌핑데이", 1815026]]},
-        "시즌9": {"직급전": 4716222, "contents": [["1회차 퐁당퐁당데이", 2823519], ["2회차 팀데스매치", 2476563], ["3회차 직급 프리데이", 3035332], ["4회차 추석떡값데이", 2003513], ["5회차 YB를 이겨라", 4514325]]},
-        "시즌10": {"직급전": 5035289, "contents": [["1회차 와장창데이", 2470625], ["2회차 일급 프리데이", 2008740], ["3회차 염대표를이겨라", 2359007], ["4회차 직급프리데이", 2114014], ["5회차 기여도펌핑데이", 2430578]]},
-        "시즌11": {"직급전": 4222022, "contents": [["1회차 지분&퐁당데이", 2397972], ["2회차 1대1 데스매치", 1364489], ["3회차 조기퇴근데이", 1507997], ["4회차 용병데이", 4078678], ["5회차 룰렛상금 & 기여도펌핑데이", 1580993]]},
-        "시즌12": {"직급전": 3026835, "contents": [["1회차 지분 & 퐁당데이", 3038172], ["2회차 상금픽스 직급프리데이", 2960260], ["3회차 부장팀 vs 차장팀 팀데스매치", 1860656], ["4회차 주차방지 & 난사데이", 1356111], ["5회차 조기퇴근데이", 1465653]]},
-        "시즌13": {"직급전": 3342545, "contents": [["1회차 퐁당 & 극락데이", 3046622], ["2회차 염대표를 이겨라 & 상금갸차데이", 1426315], ["3회차 용병데이", 5941453], ["4회차 조기퇴근데이", 1049820], ["5회차 1대1 데스매치", 1762153]]}
-    }
-    js_labels = [f"시즌{i}" for i in range(1, 14)]
-    js_rank_rev = [history_db[f"시즌{i}"]["직급전"] for i in range(1, 14)]
-    js_norm_rev = [sum(item[1] for item in history_db[f"시즌{i}"]["contents"]) for i in range(1, 14)]
+    print("[2/3] 매출 데이터를 처리합니다...")
+    js_labels = [f"시즌{i}" for i in range(1, len(history_db)+1)]
+    js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db)+1)]
+    js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db)+1)]
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
+    
+    # 14시즌은 아직 DB에 안 넣었으므로 하드코딩 유지 (추후 DB에 넣으면 로직 변경 가능)
     current_season_vals = [4343316, 2164822, 3135452]
     current_season_sum = sum(current_season_vals)
 
@@ -155,6 +188,7 @@ def generate_full_system(members):
 
     print("\n✅ 모든 데이터 수집 완료! HTML 및 더미 JSON 파일 생성 중...")
 
+    # HTML 코드는 이전과 100% 동일합니다 (디자인 유지)
     full_html = f"""
 <!DOCTYPE html>
 <html>
@@ -184,7 +218,6 @@ def generate_full_system(members):
         @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; }} }}
 
         /* 1. 현황판 */
-        /* 💡 현황판 카드가 아래로 내려오도록 padding-top 30px 추가 */
         #status {{ padding-top: 30px; }} 
         .row {{ display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 35px; justify-content: center; }}
         .member-unit {{ position: relative; width: 130px; transition: transform 0.3s; }}
@@ -207,7 +240,7 @@ def generate_full_system(members):
         .on-air .circle-frame {{ border: 2px solid #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.6); }}
         @keyframes blink {{ 50% {{ opacity: 0.5; }} }}
 
-        /* 💡 미리보기(Preview) 툴팁 CSS 복구 */
+        /* 미리보기(Preview) 툴팁 CSS */
         #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 300px; background: #0f0c1a; border: 2px solid #8a2be2; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); overflow: hidden; }}
         .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #333; }}
         .p-info {{ padding: 15px; text-align: center; }}
@@ -323,7 +356,7 @@ def generate_full_system(members):
                 <div class="sales-header-container">
                     <div style="display:flex; flex-direction:column; gap:5px;">
                         <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
-                            <span class="sales-main-title">YXL 히스토리 (시즌 1-13)</span>
+                            <span class="sales-main-title">YXL 히스토리 (시즌 1-{len(history_db)})</span>
                             <div class="legend-box"><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #8a2be2, #4a00e0);"></div>직급전</div><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #ff69b4, #ff1493);"></div>일반회차</div></div>
                         </div>
                         <span class="sales-desc-text">※ 막대바 클릭시 회차별 상세정보가 나옵니다</span>
@@ -401,7 +434,7 @@ def generate_full_system(members):
         </section>
     </div>
     
-    <!-- 💡 복구된 방송 썸네일 미리보기 UI -->
+    <!-- 복구된 미리보기 UI -->
     <div id="preview">
         <img src="" id="p-img" class="p-thumb">
         <div class="p-info">
@@ -538,7 +571,7 @@ def generate_full_system(members):
             renderVODList(filtered);
         }}
 
-        // 💡 복구된 자바스크립트 미리보기 (Hover) 기능
+        // 복구된 미리보기(Preview) 이벤트 리스너
         const units = document.querySelectorAll('.member-unit'); 
         const preview = document.getElementById('preview');
         units.forEach(unit => {{
@@ -550,7 +583,6 @@ def generate_full_system(members):
                     document.getElementById('p-viewers').textContent = unit.getAttribute('data-viewers');
                     
                     preview.style.display = 'block';
-                    // 화면 오른쪽 밖으로 잘리지 않게 위치 계산
                     let x = e.clientX + 15; 
                     let y = e.clientY + 15;
                     if(x + 320 > window.innerWidth) x = window.innerWidth - 330;
@@ -577,23 +609,9 @@ def generate_full_system(members):
         f.write("{}")
 
 if __name__ == "__main__":
-    yxl_members = [
-        {"name": "염보성", "id": "yuambo", "pos": "대표", "img": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692", "age": "1990.03.29", "join_date": "2024.10.01", "stats": "171.4cm / 76kg / B형", "mbti": "ENFJ", "skill": "스타크래프트"},
-        {"name": "리윤", "id": "sladk51", "pos": "부장", "img": "https://storage2.ygosu.com/?code=S696b627eddf978.03910279", "age": "1996년생", "join_date": "2025.06.29", "stats": "164cm", "mbti": "ISTP", "skill": ""},
-        {"name": "후잉", "id": "jaeha010", "pos": "차장", "img": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475", "age": "2001.01.19", "join_date": "2024.10.12", "stats": "160cm / 47kg / AB형", "mbti": "ISTJ", "skill": "춤"},
-        {"name": "냥냥수주", "id": "star49", "pos": "과장", "img": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971", "age": "1997년생", "join_date": "2026.01.25", "stats": "", "mbti": "", "skill": ""},
-        {"name": "류서하", "id": "smkim82372", "pos": "비서실장", "img": "https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017", "age": "2000년생", "join_date": "2026.01.25", "stats": "", "mbti": "", "skill": ""},
-        {"name": "율무", "id": "offside629", "pos": "대리", "img": "https://storage2.ygosu.com/?code=S6929cfcd99d997.32232313", "age": "1997년생", "join_date": "2025.10.19", "stats": "167cm", "mbti": "INTJ", "skill": ""},
-        {"name": "하랑짱", "id": "asy1218", "pos": "주임", "img": "https://storage2.ygosu.com/?code=S696b61f365c0e3.11842146", "age": "1991년생", "join_date": "2025.10.12", "stats": "", "mbti": "", "skill": ""},
-        {"name": "미로", "id": "fhwm0602", "pos": "사원", "img": "https://storage2.ygosu.com/?code=S69f0a947083819.23416908", "age": "1995년생", "join_date": "2026.01.13", "stats": "168cm", "mbti": "INTJ", "skill": ""},
-        {"name": "유나연", "id": "jeewon1202", "pos": "인턴장", "img": "https://storage2.ygosu.com/?code=S696641fe535711.46782639", "age": "1999년생", "join_date": "2025.12.11", "stats": "163cm", "mbti": "ISFP", "skill": ""},
-        {"name": "소다", "id": "zbxlzzz", "pos": "시급이", "img": "https://storage2.ygosu.com/?code=S696b623ea18219.09523333", "age": "1993년생", "join_date": "2024.10.29", "stats": "160cm", "mbti": "INFP", "skill": "필라테스"},
-        {"name": "김유정", "id": "tkek55", "pos": "시급이", "img": "https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878", "age": "2000년생", "join_date": "2025.09.04", "stats": "164cm", "mbti": "ENTJ", "skill": ""},
-        {"name": "백나현", "id": "wk3220", "pos": "신입", "img": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531", "age": "1996년생", "join_date": "2026.03.28", "stats": "160cm", "mbti": "ISFP", "skill": ""},
-        {"name": "아름", "id": "ahrum0912", "pos": "신입", "img": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064", "age": "1997년생", "join_date": "2026.03.29", "stats": "168cm", "mbti": "INFP", "skill": "골프"},
-        {"name": "서니", "id": "iluvpp", "pos": "신입", "img": "https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035", "age": "1997년생", "join_date": "2025.06.17", "stats": "160cm", "mbti": "ISTP", "skill": ""},
-        {"name": "너의멜로디", "id": "meldoy777", "pos": "신입", "img": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633", "age": "1999년생", "join_date": "2026.03.31", "stats": "163cm", "mbti": "ESFP", "skill": ""},
-        {"name": "꺼니", "id": "callgg", "pos": "웨이터", "img": "https://storage2.ygosu.com/?code=S69f0a951064842.70871652", "age": "1993년생", "join_date": "2025.10.02", "stats": "", "mbti": "", "skill": ""},
-        {"name": "김푸", "id": "kimpooh0707", "pos": "웨이터", "img": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517", "age": "1993년생", "join_date": "2025.10.02", "stats": "", "mbti": "", "skill": ""}
-    ]
-    generate_full_system(yxl_members)
+    # DB에서 최신 데이터를 읽어옵니다. (하드코딩 제거!)
+    db_members = get_members_from_db()
+    db_history = get_history_from_db()
+    
+    # 가져온 데이터로 메인 함수를 실행합니다.
+    generate_full_system(db_members, db_history)

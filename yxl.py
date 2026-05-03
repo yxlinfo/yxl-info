@@ -13,11 +13,9 @@ db_path = os.path.join(BASE_DIR, 'yxl_management.db')
 def init_db_if_empty():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    
     cur.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Members'")
     if cur.fetchone()[0] == 0:
         print("⚠️ 텅 빈 DB를 감지했습니다. 초기 데이터를 자동으로 세팅합니다...")
-        
         cur.execute('''CREATE TABLE IF NOT EXISTS Positions (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, theme_color TEXT, rank_order INTEGER)''')
         cur.execute('''CREATE TABLE IF NOT EXISTS Members (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, soop_id TEXT NOT NULL, position_id INTEGER, img_url TEXT, age TEXT, join_date TEXT, stats TEXT, mbti TEXT, skill TEXT, FOREIGN KEY (position_id) REFERENCES Positions (id))''')
         cur.execute('''CREATE TABLE IF NOT EXISTS Seasons (id INTEGER PRIMARY KEY AUTOINCREMENT, season_num INTEGER NOT NULL, rank_revenue INTEGER DEFAULT 0)''')
@@ -67,7 +65,6 @@ def init_db_if_empty():
             s_id = cur.lastrowid
             ep_data = [(s_id, title, rev) for title, rev in data["ep"]]
             cur.executemany("INSERT INTO Episodes (season_id, title, revenue) VALUES (?, ?, ?)", ep_data)
-
         conn.commit()
     conn.close()
 
@@ -78,7 +75,7 @@ def get_members_from_db():
     rows = cur.fetchall()
     conn.close()
     
-    # 💡 입사일 D-Day 계산 로직 추가
+    # D-Day 계산 로직
     kst = timezone(timedelta(hours=9))
     now = datetime.now(kst)
     
@@ -91,7 +88,7 @@ def get_members_from_db():
                 clean_date = join_date_str.strip()
                 j_date = datetime.strptime(clean_date, "%Y.%m.%d").replace(tzinfo=kst)
                 d_day = (now - j_date).days
-                d_day_str = f" (D+{d_day})"
+                d_day_str = f"D+{d_day}"
             except: pass
             
         members.append({
@@ -141,7 +138,6 @@ def fetch_vod_data_by_api(vid):
     return {"id": vid, "title": "정보 없음", "date": "-", "views": 0, "thumb": ""}
 
 def generate_full_system(members, history_db):
-    print("\n[1/3] 생방송 상태 체크중...")
     data_map = {m['name']: get_yxl_status(m['name'], m['id'], m['pos'], m['img']) for m in members}
     js_member_data = json.dumps({m['name']: m for m in members}, ensure_ascii=False)
     
@@ -179,10 +175,10 @@ def generate_full_system(members, history_db):
                         <img src="{info['profile']}" class="profile-img">
                         <div class="embedded-info">
                             <div class="pos-tag" style="color: {info['theme']};">{info['pos']}</div>
-                            <div class="name-label">{info['name']} <span class="d-day-text">{m['d_day']}</span></div>
+                            <div class="name-label">{info['name']}</div>
                         </div>
                         <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('{m['name']}')">프로필 보기</div>
+                            <div class="click-guide" onclick="openProfile('{m['name']}')">PROFILE</div>
                             <div class="btn-group">
                                 <a href="{info["home_link"]}" target="_blank" class="btn btn-home">방송국</a>
                                 {f'<a href="{info["live_link"]}" target="_blank" class="btn btn-live">LIVE</a>' if info['is_live'] else ''}
@@ -191,21 +187,17 @@ def generate_full_system(members, history_db):
                     </div>
                     <div class="live-indicator">LIVE</div>
                 </div>
+                <div class="d-day-outside">{m['d_day']}</div>
             </div>"""
         status_html += '</div></div>'
 
-    print("[2/3] 매출 데이터 처리중...")
     js_labels = [f"시즌{i}" for i in range(1, len(history_db) + 1)]
     js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db) + 1)]
     js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db) + 1)]
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
-    
-    # 💡 시즌 14 데이터 복구
     current_season_vals = [4343316, 2164822, 3135452]
     current_season_sum = sum(current_season_vals)
 
-    print("[3/3] 49개 VOD 데이터 가져오는중 (잠시만 기다려주세요)...")
-    # 💡 VOD 49개 리스트 완벽 복구
     vod_ids = [
         "139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", 
         "146665451", "149341401", "149372371", "149482895", "149543791", "151963511", "152673671", 
@@ -257,7 +249,7 @@ def generate_full_system(members, history_db):
         .tier-line {{ height: 1px; flex: 1; max-width: 250px; background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent); }}
 
         .row {{ display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; }}
-        .member-unit {{ position: relative; width: 130px; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }}
+        .member-unit {{ position: relative; width: 130px; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; align-items: center; }}
         .member-unit:hover {{ transform: translateY(-8px) scale(1.05); z-index: 50; }}
         
         .circle-frame {{ position: relative; width: 120px; height: 120px; border-radius: 50%; padding: 3px; background: #111; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.8); margin: 0 auto; transition: 0.3s; }}
@@ -267,12 +259,14 @@ def generate_full_system(members, history_db):
         
         .embedded-info {{ position: absolute; bottom: 0; width: 100%; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 12px; z-index: 3; }}
         .pos-tag {{ font-size: 10px; margin-bottom: 3px; font-weight: 800; letter-spacing: 0.5px; }}
-        .name-label {{ font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }}
-        .d-day-text {{ font-size: 9px; color: #d4af37; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }}
+        .name-label {{ font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }}
+        
+        /* 💡 카드 아래 D-Day (정중앙 텍스트) */
+        .d-day-outside {{ margin-top: 10px; font-size: 12px; color: #d4af37; font-weight: 700; letter-spacing: 1px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); opacity: 0.9; }}
         
         .overlay-menu {{ position: absolute; inset: 0; background: rgba(8,8,12,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; z-index: 10; border-radius: 50%; backdrop-filter: blur(3px); }}
         .member-unit:hover .overlay-menu {{ opacity: 1; }}
-        .click-guide {{ font-size: 9px; color: #000; background: #d4af37; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; font-weight: 900; }}
+        .click-guide {{ font-size: 9px; color: #000; background: #d4af37; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; font-weight: 900; letter-spacing: 0.5px; }}
         .btn {{ width: 75px; padding: 5px 0; border-radius: 15px; font-size: 10px; color: #fff; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; text-align: center; margin-bottom: 5px; transition: 0.3s; }}
         .btn:hover {{ background: rgba(255,255,255,0.1); border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }}
         .btn-live {{ background: rgba(220, 20, 60, 0.2); border-color: #dc143c; color: #ff4d4d; }}
@@ -292,10 +286,9 @@ def generate_full_system(members, history_db):
         .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
         .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; flex-wrap: wrap; gap: 10px; }}
         .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; }}
-        
-        /* 💡 토탈 대시보드 사이즈 및 우측 배치 최적화 */
         .total-sum-badge {{ font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 8px 18px; border-radius: 8px; font-weight: 900; box-shadow: 0 4px 10px rgba(212,175,55,0.3); white-space: nowrap; }}
         
+        /* 💡 달력 및 타임라인 */
         .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Cinzel', serif; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 10px; }}
         .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; transition: 0.3s; cursor:pointer; }}
         .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); transform: translateX(10px); }}
@@ -305,24 +298,39 @@ def generate_full_system(members, history_db):
         .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }}
         .t-status.upcoming {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; }}
 
-        /* 💡 매출표 스크롤바 고급화 */
+        /* 💡 주간 달력 디자인 */
+        .weekly-calendar-wrapper {{ display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px; }}
+        .weekly-calendar-wrapper::-webkit-scrollbar {{ height: 6px; }}
+        .weekly-calendar-wrapper::-webkit-scrollbar-track {{ background: rgba(0,0,0,0.3); border-radius: 10px; }}
+        .weekly-calendar-wrapper::-webkit-scrollbar-thumb {{ background: rgba(212, 175, 55, 0.5); border-radius: 10px; }}
+        .day-card {{ flex: 1; min-width: 105px; background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15); border-radius: 12px; padding: 15px 10px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }}
+        .day-card.today {{ border-color: #d4af37; background: rgba(212,175,55,0.08); box-shadow: 0 0 20px rgba(212,175,55,0.2); }}
+        .day-card.has-event {{ border-color: #aa801e; }}
+        .dc-day {{ font-size: 12px; color: #aaa; margin-bottom: 5px; font-weight: 800; letter-spacing: 1px; }}
+        .day-card.today .dc-day {{ color: #d4af37; }}
+        .dc-date {{ font-size: 20px; color: #fff; font-family: 'Cinzel', serif; font-weight: 900; margin-bottom: 15px; }}
+        .dc-event {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 11px; padding: 5px 8px; border-radius: 6px; font-weight: 900; width: 90%; word-break: keep-all; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.8); }}
+        .dc-no-event {{ color: #444; font-size: 12px; }}
+
+        /* 💡 차트 스크롤바 고급화 */
         .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
         .chart-scroll-wrapper::-webkit-scrollbar {{ height: 8px; }}
         .chart-scroll-wrapper::-webkit-scrollbar-track {{ background: rgba(0,0,0,0.5); border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.1); }}
-        .chart-scroll-wrapper::-webkit-scrollbar-thumb {{ background: linear-gradient(90deg, #aa801e, #d4af37, #aa801e); border-radius: 10px; border: 1px solid rgba(0,0,0,0.8); }}
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb {{ background: linear-gradient(90deg, #8a6327, #d4af37, #8a6327); border-radius: 10px; border: 1px solid rgba(0,0,0,0.8); }}
         .chart-scroll-wrapper::-webkit-scrollbar-thumb:hover {{ background: #e5c158; }}
         
         .chart-container {{ min-width: 1000px; height: 350px; }}
         .chart-container-small {{ min-width: 400px; height: 250px; }}
 
-        /* 💡 프로필 모달 (한글화 & 럭셔리 그리드) */
         #sales-modal, #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }}
         .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 650px; display: flex; flex-wrap: wrap; gap: 40px; position: relative; align-items: center; justify-content: center; }}
         
         .profile-left {{ display: flex; flex-direction: column; align-items: center; padding-right: 20px; }}
         .profile-left img {{ width: 160px; height: 160px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); margin-bottom: 20px; }}
-        .profile-name {{ font-size: 28px; color: #fff; letter-spacing: 2px; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }}
-        .profile-tier {{ font-family: 'Cinzel', serif; font-size: 13px; color: #d4af37; letter-spacing: 3px; background: rgba(212,175,55,0.1); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.3); }}
+        .profile-name {{ font-size: 28px; color: #fff; letter-spacing: 2px; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }}
+        
+        /* 💡 직급 텍스트 폰트 부드럽게 개선 (고딕 기반) */
+        .profile-tier {{ font-family: 'Pretendard', sans-serif; font-size: 14px; color: #d4af37; font-weight: 700; letter-spacing: 1px; background: rgba(212,175,55,0.1); padding: 6px 18px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.3); }}
         
         .profile-right {{ flex: 1; display: grid; grid-template-columns: 1fr; gap: 15px; align-content: center; min-width: 250px; border-left: 1px solid rgba(212,175,55,0.15); padding-left: 40px; }}
         .stat-box {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }}
@@ -336,7 +344,6 @@ def generate_full_system(members, history_db):
         .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; }}
         .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
 
-        /* VOD 디자인 복구 */
         .search-wrapper {{ position: relative; width: 100%; max-width: 300px; margin-top: 10px; }}
         .search-input {{ width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; }}
         .main-stage {{ background: rgba(8, 8, 12, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }}
@@ -374,7 +381,7 @@ def generate_full_system(members, history_db):
         <!-- 1. 현황판 -->
         <section id="status" class="tab-content active">{status_html}</section>
 
-        <!-- 2. 매출표 (시즌 14 복구) -->
+        <!-- 2. 매출표 -->
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
@@ -395,8 +402,24 @@ def generate_full_system(members, history_db):
             </div>
         </section>
 
-        <!-- 3. 일정표 복구 -->
+        <!-- 3. 일정표 및 주간 달력 -->
         <section id="schedule" class="tab-content">
+            <!-- 주간 달력 위젯 -->
+            <div class="timeline-section" style="margin-bottom: 30px;">
+                <div class="timeline-title">WEEKLY CALENDAR</div>
+                <div class="weekly-calendar-wrapper">
+                    <div class="day-card today"><div class="dc-day">MON</div><div class="dc-date">05.04</div><div class="dc-event" style="background:transparent; color:#888; border:1px solid #444; box-shadow:none;">오늘</div></div>
+                    <div class="day-card"><div class="dc-day">TUE</div><div class="dc-date">05.05</div><div class="dc-no-event">-</div></div>
+                    <div class="day-card"><div class="dc-day">WED</div><div class="dc-date">05.06</div><div class="dc-no-event">-</div></div>
+                    <div class="day-card has-event"><div class="dc-day">THU</div><div class="dc-date">05.07</div><div class="dc-event">YXL<br>3회차</div></div>
+                    <div class="day-card"><div class="dc-day">FRI</div><div class="dc-date">05.08</div><div class="dc-no-event">-</div></div>
+                    <div class="day-card"><div class="dc-day">SAT</div><div class="dc-date">05.09</div><div class="dc-no-event">-</div></div>
+                    <div class="day-card"><div class="dc-day">SUN</div><div class="dc-date">05.10</div><div class="dc-no-event">-</div></div>
+                    <div class="day-card has-event"><div class="dc-day">MON</div><div class="dc-date">05.11</div><div class="dc-event">YXL<br>4회차</div></div>
+                </div>
+            </div>
+
+            <!-- 타임라인 리스트 -->
             <div class="timeline-section">
                 <div class="timeline-title">OFFICIAL TIMELINE</div>
                 <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
@@ -405,7 +428,7 @@ def generate_full_system(members, history_db):
             </div>
         </section>
 
-        <!-- 4. VOD 복구 -->
+        <!-- 4. VOD -->
         <section id="radio" class="tab-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
                 <span class="timeline-title" style="margin:0; border:none;">LATEST RECORD</span>
@@ -453,7 +476,7 @@ def generate_full_system(members, history_db):
         </div>
     </div>
 
-    <!-- 💡 프로필 럭셔리 모달 (한글화) -->
+    <!-- 💡 프로필 모달 -->
     <div id="p-modal" onclick="closeProfile()">
         <div class="profile-container" onclick="event.stopPropagation()">
             <div class="close-btn" onclick="closeProfile()">×</div>
@@ -463,7 +486,7 @@ def generate_full_system(members, history_db):
                 <div id="m-pos" class="profile-tier"></div>
             </div>
             <div class="profile-right" id="m-details">
-                <!-- JS에서 한글 스탯 박스들이 세팅됨 -->
+                <!-- JS에서 스탯 박스 렌더링 -->
             </div>
         </div>
     </div>
@@ -509,7 +532,6 @@ def generate_full_system(members, history_db):
                 options: {{ ...commonOptions, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} 
             }});
             
-            // 💡 시즌 14 차트 복구
             cChart = new Chart(document.getElementById('currentChart'), {{ 
                 type: 'bar', 
                 data: {{ 
@@ -529,7 +551,7 @@ def generate_full_system(members, history_db):
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
-        // 💡 프로필 텍스트 한글 & 고급화
+        // 💡 프로필 텍스트 한글 세팅
         function openProfile(n) {{ 
             const m = members[n]; 
             document.getElementById('m-img').src = m.img; 
@@ -548,7 +570,6 @@ def generate_full_system(members, history_db):
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}
 
-        // 💡 VOD 리스트 렌더링 복구
         function changeMainPlayer(id, title, date, views) {{
             document.getElementById('main-player-iframe').src = `https://vod.sooplive.com/player/${{id}}`;
             document.getElementById('main-vod-title').innerText = title;

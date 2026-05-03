@@ -172,6 +172,7 @@ def generate_full_system(members, history_db):
     top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
     main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
     js_vod_data = json.dumps(vod_list, ensure_ascii=False)
+    js_history_db = json.dumps(history_db, ensure_ascii=False)
 
     full_html = f"""
 <!DOCTYPE html>
@@ -331,7 +332,7 @@ def generate_full_system(members, history_db):
             </div>
         </section>
 
-        <!-- 3. 💡 주간 달력 & 타임라인 -->
+        <!-- 3. 주간 달력 & 타임라인 -->
         <section id="schedule" class="tab-content">
             <div class="timeline-section" style="margin-bottom: 40px;">
                 <div class="timeline-title">WEEKLY SCHEDULE</div>
@@ -349,7 +350,7 @@ def generate_full_system(members, history_db):
             </div>
         </section>
 
-        <!-- 4. 💡 MEDIA 탭 (VOD 영상) 복구 -->
+        <!-- 4. MEDIA 탭 (VOD 영상) -->
         <section id="radio" class="tab-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
                 <span class="timeline-title" style="margin:0; border:none;">LATEST RECORD</span>
@@ -406,6 +407,8 @@ def generate_full_system(members, history_db):
     <script>
         const members = {js_member_data};
         const allVODs = {js_vod_data};
+        const historyDb = {js_history_db}; // 💡 자바스크립트용 DB 변수 복구
+        
         const events = {{
             "2026.05.07": "YXL 3회차",
             "2026.05.11": "YXL 4회차",
@@ -484,11 +487,15 @@ def generate_full_system(members, history_db):
         }}
 
         function openSalesModal(season) {{
-            const data = {historyDb}[season]; if(!data) return;
+            // 💡 변수명 에러 픽스: 자바스크립트 변수 historyDb 사용
+            const data = historyDb[season]; 
+            if(!data) return;
+            
             document.getElementById('s-title').innerText = season + " 세부 리포트";
             let html = `<li class="sales-list-item"><span style="color:#d4af37; font-weight:800;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}} 개</b></li>`;
             data.contents.forEach(item => html += `<li class="sales-list-item"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}} 개</b></li>`);
-            document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
+            document.getElementById('s-list').innerHTML = html; 
+            document.getElementById('sales-modal').style.display = 'flex';
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
@@ -539,7 +546,6 @@ def generate_full_system(members, history_db):
 </body>
 </html>
 """
-    # ⚠️ 복사할 때 이 아래쪽 Python 파일 쓰기 및 실행 부분까지 전부 긁어서 복사하셔야 합니다!
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(full_html)
 

@@ -32,47 +32,68 @@
         .tier-title { font-family: 'Cinzel', serif; font-size: 22px; color: #f5f5dc; letter-spacing: 4px; text-shadow: 0 2px 15px rgba(212, 175, 55, 0.4); }
         .tier-line { height: 1px; flex: 1; max-width: 250px; background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent); }
 
-        .row { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; }
+        .row { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; align-items: flex-start; }
         .member-unit { position: relative; width: 130px; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; align-items: center; }
         .member-unit:hover { transform: translateY(-8px) scale(1.05); z-index: 50; }
         
         .circle-frame { position: relative; width: 120px; height: 120px; border-radius: 50%; padding: 3px; background: #111; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.8); margin: 0 auto; transition: 0.3s; }
-        .member-unit:hover .circle-frame { border-color: rgba(212, 175, 55, 0.5); box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2); }
         .profile-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: contrast(1.1) saturate(1.1); transition: 0.5s; }
-        .member-unit:hover .profile-img { transform: scale(1.1); }
-        
         .embedded-info { position: absolute; bottom: 0; width: 100%; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 12px; z-index: 3; }
-        .pos-tag { font-size: 10px; margin-bottom: 3px; font-weight: 800; letter-spacing: 0.5px; }
+        .pos-tag { font-size: 10px; margin-bottom: 3px; font-weight: 800; }
         .name-label { font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
         
-        /* 💡 카드 아래 D-Day (정중앙 텍스트) */
-        .d-day-outside { margin-top: 10px; font-size: 12px; color: #d4af37; font-weight: 700; letter-spacing: 1px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); opacity: 0.9; }
+        .d-day-outside { margin-top: 10px; font-size: 11px; color: #d4af37; font-weight: 900; letter-spacing: 0.5px; opacity: 0.8; }
         
         .overlay-menu { position: absolute; inset: 0; background: rgba(8,8,12,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; z-index: 10; border-radius: 50%; backdrop-filter: blur(3px); }
         .member-unit:hover .overlay-menu { opacity: 1; }
-        .click-guide { font-size: 9px; color: #000; background: #d4af37; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; font-weight: 900; letter-spacing: 0.5px; }
+        .click-guide { font-size: 9px; color: #000; background: #d4af37; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; font-weight: 900; letter-spacing: 1px; }
         .btn { width: 75px; padding: 5px 0; border-radius: 15px; font-size: 10px; color: #fff; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; text-align: center; margin-bottom: 5px; transition: 0.3s; }
-        .btn:hover { background: rgba(255,255,255,0.1); border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
         .btn-live { background: rgba(220, 20, 60, 0.2); border-color: #dc143c; color: #ff4d4d; }
-        .btn-live:hover { background: #dc143c; color: #fff; box-shadow: 0 0 15px rgba(220, 20, 60, 0.6); }
         
         .live-indicator { position: absolute; top: -5px; right: -5px; background: #dc143c; color: #fff; font-size: 9px; font-weight: 900; padding: 3px 8px; border-radius: 6px; box-shadow: 0 2px 10px rgba(220, 20, 60, 0.5); z-index: 15; display: none; border: 1px solid rgba(255,255,255,0.3); }
         .on-air .live-indicator { display: block; animation: pulseRed 2s infinite; }
-        .on-air .circle-frame { border: 2px solid #dc143c; box-shadow: 0 0 20px rgba(220, 20, 60, 0.4); }
         @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(220, 20, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 20, 60, 0); } }
-
-        #preview { position: fixed; pointer-events: none; display: none; z-index: 9999; width: 320px; background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.95); overflow: hidden; }
-        .p-thumb { width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #222; }
-        .p-info { padding: 15px; text-align: center; }
-        .p-title { font-size: 14px; color: #f5f5dc; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .p-live-badge { font-size: 12px; color: #ff4d4d; letter-spacing: 1px; }
 
         .sales-section { background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }
         .sales-header-container { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; flex-wrap: wrap; gap: 10px; }
         .sales-main-title { font-size: 18px; color: #d4af37; letter-spacing: 1px; }
-        .total-sum-badge { font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 8px 18px; border-radius: 8px; font-weight: 900; box-shadow: 0 4px 10px rgba(212,175,55,0.3); white-space: nowrap; }
+        .total-sum-badge { font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 8px 18px; border-radius: 8px; font-weight: 900; }
         
-        /* 💡 달력 및 타임라인 */
+        .chart-scroll-wrapper { overflow-x: auto; width: 100%; padding-bottom: 12px; }
+        .chart-scroll-wrapper::-webkit-scrollbar { height: 8px; }
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #8a6327, #d4af37, #8a6327); border-radius: 10px; }
+        .chart-container { min-width: 1000px; height: 350px; }
+        .chart-container-small { min-width: 400px; height: 250px; }
+
+        /* 💡 럭셔리 주간 달력 디자인 */
+        .calendar-nav-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 15px; }
+        .nav-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: 0.3s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .nav-btn:hover { background: #d4af37; color: #000; transform: scale(1.1); box-shadow: 0 0 15px rgba(212,175,55,0.4); }
+        
+        .weekly-calendar-row { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .day-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); min-width: 0; position: relative; overflow: hidden; }
+        .day-card:hover { background: rgba(212,175,55,0.05); transform: translateY(-5px); border-color: rgba(212,175,55,0.5); }
+        .day-card.selected { background: rgba(212,175,55,0.12); border-color: #d4af37; box-shadow: 0 0 20px rgba(212,175,55,0.2), inset 0 0 10px rgba(212,175,55,0.1); transform: scale(1.03); }
+        .day-card.selected::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #d4af37; }
+        
+        .dc-day { font-size: 11px; color: #aaa; margin-bottom: 6px; font-weight: 900; letter-spacing: 1px; }
+        .dc-date { font-size: 18px; color: #fff; font-family: 'Cinzel', serif; font-weight: 900; margin-bottom: 12px; }
+        .dc-event { background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 10px; padding: 4px 2px; border-radius: 5px; font-weight: 900; width: 95%; margin: 0 auto; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+        
+        /* 💡 프로필 모달 & 직급 폰트 부드럽게 */
+        #p-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
+        .profile-container { background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 600px; display: flex; gap: 40px; position: relative; align-items: center; flex-wrap: wrap; justify-content: center; }
+        .profile-left { display: flex; flex-direction: column; align-items: center; }
+        .profile-left img { width: 150px; height: 150px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; margin-bottom: 15px; }
+        .profile-name { font-size: 26px; color: #fff; margin-bottom: 10px; }
+        .profile-tier { font-family: 'Pretendard', sans-serif; font-size: 13px; color: #d4af37; background: rgba(212,175,55,0.1); padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.4); font-weight: 700; }
+        
+        .profile-right { flex: 1; min-width: 250px; display: grid; grid-template-columns: 1fr; gap: 12px; border-left: 1px solid rgba(212,175,55,0.15); padding-left: 30px; }
+        .stat-box { background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-label { font-size: 11px; color: #aa801e; font-weight: 900; }
+        .stat-value { font-size: 14px; color: #fff; }
+        .close-btn { position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; }
+        
         .timeline-title { font-size: 18px; color: #d4af37; font-family: 'Cinzel', serif; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 10px; }
         .timeline-item { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; transition: 0.3s; cursor:pointer; }
         .timeline-item:hover { border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); transform: translateX(10px); }
@@ -82,59 +103,14 @@
         .t-status { padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }
         .t-status.upcoming { background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; }
 
-        /* 💡 주간 달력 디자인 */
-        .weekly-calendar-wrapper { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px; }
-        .weekly-calendar-wrapper::-webkit-scrollbar { height: 6px; }
-        .weekly-calendar-wrapper::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
-        .weekly-calendar-wrapper::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.5); border-radius: 10px; }
-        .day-card { flex: 1; min-width: 105px; background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15); border-radius: 12px; padding: 15px 10px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .day-card.today { border-color: #d4af37; background: rgba(212,175,55,0.08); box-shadow: 0 0 20px rgba(212,175,55,0.2); }
-        .day-card.has-event { border-color: #aa801e; }
-        .dc-day { font-size: 12px; color: #aaa; margin-bottom: 5px; font-weight: 800; letter-spacing: 1px; }
-        .day-card.today .dc-day { color: #d4af37; }
-        .dc-date { font-size: 20px; color: #fff; font-family: 'Cinzel', serif; font-weight: 900; margin-bottom: 15px; }
-        .dc-event { background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 11px; padding: 5px 8px; border-radius: 6px; font-weight: 900; width: 90%; word-break: keep-all; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.8); }
-        .dc-no-event { color: #444; font-size: 12px; }
-
-        /* 💡 차트 스크롤바 고급화 */
-        .chart-scroll-wrapper { overflow-x: auto; width: 100%; padding-bottom: 12px; }
-        .chart-scroll-wrapper::-webkit-scrollbar { height: 8px; }
-        .chart-scroll-wrapper::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.1); }
-        .chart-scroll-wrapper::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #8a6327, #d4af37, #8a6327); border-radius: 10px; border: 1px solid rgba(0,0,0,0.8); }
-        .chart-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: #e5c158; }
-        
-        .chart-container { min-width: 1000px; height: 350px; }
-        .chart-container-small { min-width: 400px; height: 250px; }
-
-        #sales-modal, #p-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
-        .profile-container { background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 650px; display: flex; flex-wrap: wrap; gap: 40px; position: relative; align-items: center; justify-content: center; }
-        
-        .profile-left { display: flex; flex-direction: column; align-items: center; padding-right: 20px; }
-        .profile-left img { width: 160px; height: 160px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); margin-bottom: 20px; }
-        .profile-name { font-size: 28px; color: #fff; letter-spacing: 2px; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-        
-        /* 💡 직급 텍스트 폰트 부드럽게 개선 (고딕 기반) */
-        .profile-tier { font-family: 'Pretendard', sans-serif; font-size: 14px; color: #d4af37; font-weight: 700; letter-spacing: 1px; background: rgba(212,175,55,0.1); padding: 6px 18px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.3); }
-        
-        .profile-right { flex: 1; display: grid; grid-template-columns: 1fr; gap: 15px; align-content: center; min-width: 250px; border-left: 1px solid rgba(212,175,55,0.15); padding-left: 40px; }
-        .stat-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
-        .stat-box:hover { border-color: rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.05); }
-        .stat-label { font-size: 12px; color: #aa801e; font-weight: 900; letter-spacing: 1px; }
-        .stat-value { font-size: 14px; color: #f5f5dc; font-weight: 500; text-align: right; }
-        
-        .close-btn { position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; transition: 0.3s; font-family: sans-serif; }
-        .close-btn:hover { color: #d4af37; transform: rotate(90deg); }
-        
-        .sales-modal-inner { background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; }
-        .sales-list-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
-
+        /* 💡 VOD 스타일 */
         .search-wrapper { position: relative; width: 100%; max-width: 300px; margin-top: 10px; }
         .search-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; }
         .main-stage { background: rgba(8, 8, 12, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
         .player-wrapper { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
         .player-wrapper iframe { width: 100%; height: 100%; border: none; }
         .player-info { width: 100%; }
-        .top-badge { background: linear-gradient(135deg, #d4af37, #aa801e); padding: 4px 10px; border-radius: 4px; font-size: 11px; margin-bottom: 10px; display: inline-block; color: #000; }
+        .top-badge { background: linear-gradient(135deg, #d4af37, #aa801e); padding: 4px 10px; border-radius: 4px; font-size: 11px; margin-bottom: 10px; display: inline-block; color: #000; font-weight: 900; }
         
         .vod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; margin-bottom: 40px; }
         .vod-card { background: #0a0a0f; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s; overflow: hidden; display:flex; flex-direction:column; }
@@ -149,10 +125,7 @@
 </head>
 <body>
     <header class="nav-header">
-        <div class="logo-section" onclick="location.reload()">
-            <img src="./logo.gif" height="40" decoding="async" fetchpriority="high" style="filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));" onerror="this.src='https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif'">
-            <span class="update-timer" id="timer-text">NEXT: 5:00</span>
-        </div>
+        <div class="logo-section" onclick="location.reload()"><img src="./logo.gif" height="40" decoding="async" fetchpriority="high" onerror="this.src='https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif'"><span class="update-timer" id="timer-text">NEXT: 5:00</span></div>
         <nav class="tab-menu">
             <div class="tab-item active" onclick="switchTab(event, 'status')">LOUNGE</div>
             <div class="tab-item" onclick="switchTab(event, 'sales')">REVENUE</div>
@@ -163,385 +136,140 @@
 
     <div class="main-container">
         <!-- 1. 현황판 -->
-        <section id="status" class="tab-content active">
-        <div class="tier-section">
-            <div class="tier-header"><div class="tier-line"></div><div class="tier-title">EXECUTIVE</div><div class="tier-line"></div></div>
-            <div class="row">
-        
+        <section id="status" class="tab-content active"><div class="tier-section"><div class="tier-header"><div class="tier-line"></div><div class="tier-title">EXECUTIVE</div><div class="tier-line"></div></div><div class="row">
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('염보성')">
-                        <img src="https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #FFD700;">대표</div>
-                            <div class="name-label">염보성</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('염보성')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/yuambo" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('염보성')">
+                    <img src="https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">대표</div><div class="name-label">염보성</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('염보성')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/yuambo" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+580</div>
-            </div></div></div>
-        <div class="tier-section">
-            <div class="tier-header"><div class="tier-line"></div><div class="tier-title">LEAD</div><div class="tier-line"></div></div>
-            <div class="row">
-        
+            </div></div></div><div class="tier-section"><div class="tier-header"><div class="tier-line"></div><div class="tier-title">LEAD</div><div class="tier-line"></div></div><div class="row">
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('리윤')">
-                        <img src="https://storage2.ygosu.com/?code=S696b627eddf978.03910279" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #C0C0C0;">부장</div>
-                            <div class="name-label">리윤</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('리윤')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/sladk51" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('리윤')">
+                    <img src="https://storage2.ygosu.com/?code=S696b627eddf978.03910279" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">부장</div><div class="name-label">리윤</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('리윤')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/sladk51" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+309</div>
             </div>
-            <div class="member-unit on-air" data-thumb="https://liveimg.sooplive.com/h/293722685.webp" data-title="[YXL 차장] 비가오는 적적한 일요일 . ㅋ.." data-viewers="188">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('후잉')">
-                        <img src="https://storage2.ygosu.com/?code=S688d2e96622764.18115475" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #99A3A4;">차장</div>
-                            <div class="name-label">후잉</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('후잉')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/jaeha010" target="_blank" class="btn btn-home">방송국</a>
-                                <a href="https://play.sooplive.com/jaeha010/293722685" target="_blank" class="btn btn-live">LIVE</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+            <div class="member-unit on-air" data-thumb="https://liveimg.sooplive.com/h/293722685.webp" data-title="[YXL 차장] 비가오는 적적한 일요일 . ㅋ.." data-viewers="182">
+                <div class="circle-frame" onclick="openProfile('후잉')">
+                    <img src="https://storage2.ygosu.com/?code=S688d2e96622764.18115475" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #d4af37;">차장</div><div class="name-label">후잉</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('후잉')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/jaeha010" target="_blank" class="btn btn-home">방송국</a><a href="https://play.sooplive.com/jaeha010/293722685" target="_blank" class="btn btn-live">LIVE</a></div></div>
                 </div>
                 <div class="d-day-outside">D+569</div>
             </div>
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('냥냥수주')">
-                        <img src="https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #CD7F32;">과장</div>
-                            <div class="name-label">냥냥수주</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('냥냥수주')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/star49" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('냥냥수주')">
+                    <img src="https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">과장</div><div class="name-label">냥냥수주</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('냥냥수주')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/star49" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+99</div>
-            </div></div></div>
-        <div class="tier-section">
-            <div class="tier-header"><div class="tier-line"></div><div class="tier-title">SENIOR</div><div class="tier-line"></div></div>
-            <div class="row">
-        
+            </div></div></div><div class="tier-section"><div class="tier-header"><div class="tier-line"></div><div class="tier-title">SENIOR</div><div class="tier-line"></div></div><div class="row">
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('류서하')">
-                        <img src="https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #E5E4E2;">비서실장</div>
-                            <div class="name-label">류서하</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('류서하')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/smkim82372" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('류서하')">
+                    <img src="https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">비서실장</div><div class="name-label">류서하</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('류서하')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/smkim82372" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+99</div>
             </div>
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('율무')">
-                        <img src="https://storage2.ygosu.com/?code=S6929cfcd99d997.32232313" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #5DADE2;">대리</div>
-                            <div class="name-label">율무</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('율무')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/offside629" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('율무')">
+                    <img src="https://storage2.ygosu.com/?code=S6929cfcd99d997.32232313" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">대리</div><div class="name-label">율무</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('율무')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/offside629" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+197</div>
             </div>
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('하랑짱')">
-                        <img src="https://storage2.ygosu.com/?code=S696b61f365c0e3.11842146" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #48C9B0;">주임</div>
-                            <div class="name-label">하랑짱</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('하랑짱')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/asy1218" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('하랑짱')">
+                    <img src="https://storage2.ygosu.com/?code=S696b61f365c0e3.11842146" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">주임</div><div class="name-label">하랑짱</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('하랑짱')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/asy1218" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+204</div>
-            </div></div></div>
-        <div class="tier-section">
-            <div class="tier-header"><div class="tier-line"></div><div class="tier-title">JUNIOR</div><div class="tier-line"></div></div>
-            <div class="row">
-        
+            </div></div></div><div class="tier-section"><div class="tier-header"><div class="tier-line"></div><div class="tier-title">JUNIOR</div><div class="tier-line"></div></div><div class="row">
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('미로')">
-                        <img src="https://storage2.ygosu.com/?code=S69f0a947083819.23416908" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #F7DC6F;">사원</div>
-                            <div class="name-label">미로</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('미로')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/fhwm0602" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('미로')">
+                    <img src="https://storage2.ygosu.com/?code=S69f0a947083819.23416908" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">사원</div><div class="name-label">미로</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('미로')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/fhwm0602" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+111</div>
             </div>
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('유나연')">
-                        <img src="https://storage2.ygosu.com/?code=S696641fe535711.46782639" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #F08080;">인턴장</div>
-                            <div class="name-label">유나연</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('유나연')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/jeewon1202" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('유나연')">
+                    <img src="https://storage2.ygosu.com/?code=S696641fe535711.46782639" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">인턴장</div><div class="name-label">유나연</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('유나연')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/jeewon1202" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+144</div>
             </div>
-            <div class="member-unit on-air" data-thumb="https://liveimg.sooplive.com/h/293729755.webp" data-title="[YXL:시급]자연몸매♡노템 비서룩 일요일밤은 소다랑 > <" data-viewers="212">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('소다')">
-                        <img src="https://storage2.ygosu.com/?code=S696b623ea18219.09523333" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #F5B041;">시급이</div>
-                            <div class="name-label">소다</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('소다')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/zbxlzzz" target="_blank" class="btn btn-home">방송국</a>
-                                <a href="https://play.sooplive.com/zbxlzzz/293729755" target="_blank" class="btn btn-live">LIVE</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+            <div class="member-unit on-air" data-thumb="https://liveimg.sooplive.com/h/293729755.webp" data-title="[YXL:시급]자연몸매♡노템 비서룩 일요일밤은 소다랑 > <" data-viewers="238">
+                <div class="circle-frame" onclick="openProfile('소다')">
+                    <img src="https://storage2.ygosu.com/?code=S696b623ea18219.09523333" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #d4af37;">시급이</div><div class="name-label">소다</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('소다')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/zbxlzzz" target="_blank" class="btn btn-home">방송국</a><a href="https://play.sooplive.com/zbxlzzz/293729755" target="_blank" class="btn btn-live">LIVE</a></div></div>
                 </div>
                 <div class="d-day-outside">D+552</div>
             </div>
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('김유정')">
-                        <img src="https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #F5B041;">시급이</div>
-                            <div class="name-label">김유정</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('김유정')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/tkek55" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('김유정')">
+                    <img src="https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">시급이</div><div class="name-label">김유정</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('김유정')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/tkek55" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+242</div>
-            </div></div></div>
-        <div class="tier-section">
-            <div class="tier-header"><div class="tier-line"></div><div class="tier-title">ROOKIE</div><div class="tier-line"></div></div>
-            <div class="row">
-        
+            </div></div></div><div class="tier-section"><div class="tier-header"><div class="tier-line"></div><div class="tier-title">ROOKIE</div><div class="tier-line"></div></div><div class="row">
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('백나현')">
-                        <img src="https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #EB984E;">신입</div>
-                            <div class="name-label">백나현</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('백나현')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/wk3220" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('백나현')">
+                    <img src="https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">신입</div><div class="name-label">백나현</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('백나현')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/wk3220" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+37</div>
             </div>
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('아름')">
-                        <img src="https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #EB984E;">신입</div>
-                            <div class="name-label">아름</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('아름')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/ahrum0912" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('아름')">
+                    <img src="https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">신입</div><div class="name-label">아름</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('아름')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/ahrum0912" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+36</div>
             </div>
-            <div class="member-unit on-air" data-thumb="https://liveimg.sooplive.com/h/293731575.webp" data-title="[YXL 신입] 새벽은 ㅅㄴ" data-viewers="136">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('서니')">
-                        <img src="https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #EB984E;">신입</div>
-                            <div class="name-label">서니</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('서니')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/iluvpp" target="_blank" class="btn btn-home">방송국</a>
-                                <a href="https://play.sooplive.com/iluvpp/293731575" target="_blank" class="btn btn-live">LIVE</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+            <div class="member-unit on-air" data-thumb="https://liveimg.sooplive.com/h/293731575.webp" data-title="[YXL 신입] 새벽은 ㅅㄴ" data-viewers="142">
+                <div class="circle-frame" onclick="openProfile('서니')">
+                    <img src="https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #d4af37;">신입</div><div class="name-label">서니</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('서니')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/iluvpp" target="_blank" class="btn btn-home">방송국</a><a href="https://play.sooplive.com/iluvpp/293731575" target="_blank" class="btn btn-live">LIVE</a></div></div>
                 </div>
                 <div class="d-day-outside">D+321</div>
             </div>
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('너의멜로디')">
-                        <img src="https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #EB984E;">신입</div>
-                            <div class="name-label">너의멜로디</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('너의멜로디')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/meldoy777" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('너의멜로디')">
+                    <img src="https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">신입</div><div class="name-label">너의멜로디</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('너의멜로디')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/meldoy777" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+34</div>
-            </div></div></div>
-        <div class="tier-section">
-            <div class="tier-header"><div class="tier-line"></div><div class="tier-title">WAITER</div><div class="tier-line"></div></div>
-            <div class="row">
-        
-            <div class="member-unit on-air" data-thumb="https://liveimg.sooplive.com/h/293730315.webp" data-title="[YXL] 큰손 귀신이 붙었나 실실 웃음이 나오네" data-viewers="28">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('꺼니')">
-                        <img src="https://storage2.ygosu.com/?code=S69f0a951064842.70871652" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #AF7AC5;">웨이터</div>
-                            <div class="name-label">꺼니</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('꺼니')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/callgg" target="_blank" class="btn btn-home">방송국</a>
-                                <a href="https://play.sooplive.com/callgg/293730315" target="_blank" class="btn btn-live">LIVE</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+            </div></div></div><div class="tier-section"><div class="tier-header"><div class="tier-line"></div><div class="tier-title">WAITER</div><div class="tier-line"></div></div><div class="row">
+            <div class="member-unit on-air" data-thumb="https://liveimg.sooplive.com/h/293730315.webp" data-title="[YXL] 큰손 귀신이 붙었나 실실 웃음이 나오네" data-viewers="30">
+                <div class="circle-frame" onclick="openProfile('꺼니')">
+                    <img src="https://storage2.ygosu.com/?code=S69f0a951064842.70871652" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #d4af37;">웨이터</div><div class="name-label">꺼니</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('꺼니')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/callgg" target="_blank" class="btn btn-home">방송국</a><a href="https://play.sooplive.com/callgg/293730315" target="_blank" class="btn btn-live">LIVE</a></div></div>
                 </div>
                 <div class="d-day-outside">D+214</div>
             </div>
             <div class="member-unit " data-thumb="" data-title="OFFLINE" data-viewers="0">
-                <div class="aura-container">
-                    <div class="purple-aura"></div>
-                    <div class="circle-frame" onclick="openProfile('김푸')">
-                        <img src="https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517" class="profile-img">
-                        <div class="embedded-info">
-                            <div class="pos-tag" style="color: #AF7AC5;">웨이터</div>
-                            <div class="name-label">김푸</div>
-                        </div>
-                        <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('김푸')">PROFILE</div>
-                            <div class="btn-group">
-                                <a href="https://www.sooplive.com/station/kimpooh0707" target="_blank" class="btn btn-home">방송국</a>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <div class="live-indicator">LIVE</div>
+                <div class="circle-frame" onclick="openProfile('김푸')">
+                    <img src="https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517" class="profile-img">
+                    <div class="embedded-info"><div class="pos-tag" style="color: #eee;">웨이터</div><div class="name-label">김푸</div></div>
+                    <div class="overlay-menu" onclick="event.stopPropagation()"><div class="click-guide" onclick="openProfile('김푸')">PROFILE</div><div class="btn-group"><a href="https://www.sooplive.com/station/kimpooh0707" target="_blank" class="btn btn-home">방송국</a></div></div>
                 </div>
                 <div class="d-day-outside">D+214</div>
             </div></div></div></section>
@@ -550,11 +278,8 @@
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
-                    <div style="display:flex; flex-direction:column; gap:5px;">
-                        <span class="sales-main-title">YXL HISTORY (시즌 1-13)</span>
-                        <span class="sales-desc-text" style="color:#777;">※ 막대바 클릭시 회차별 세부 데이터를 확인할 수 있습니다.</span>
-                    </div>
-                    <div class="total-sum-badge">총 합산: 237,705,684개</div>
+                    <span class="sales-main-title">YXL REVENUE HISTORY</span>
+                    <div class="total-sum-badge">TOTAL: 237,705,684개</div>
                 </div>
                 <div class="chart-scroll-wrapper"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
             </div>
@@ -567,24 +292,16 @@
             </div>
         </section>
 
-        <!-- 3. 일정표 및 주간 달력 -->
+        <!-- 3. 주간 달력 & 타임라인 -->
         <section id="schedule" class="tab-content">
-            <!-- 주간 달력 위젯 -->
-            <div class="timeline-section" style="margin-bottom: 30px;">
-                <div class="timeline-title">WEEKLY CALENDAR</div>
-                <div class="weekly-calendar-wrapper">
-                    <div class="day-card today"><div class="dc-day">MON</div><div class="dc-date">05.04</div><div class="dc-event" style="background:transparent; color:#888; border:1px solid #444; box-shadow:none;">오늘</div></div>
-                    <div class="day-card"><div class="dc-day">TUE</div><div class="dc-date">05.05</div><div class="dc-no-event">-</div></div>
-                    <div class="day-card"><div class="dc-day">WED</div><div class="dc-date">05.06</div><div class="dc-no-event">-</div></div>
-                    <div class="day-card has-event"><div class="dc-day">THU</div><div class="dc-date">05.07</div><div class="dc-event">YXL<br>3회차</div></div>
-                    <div class="day-card"><div class="dc-day">FRI</div><div class="dc-date">05.08</div><div class="dc-no-event">-</div></div>
-                    <div class="day-card"><div class="dc-day">SAT</div><div class="dc-date">05.09</div><div class="dc-no-event">-</div></div>
-                    <div class="day-card"><div class="dc-day">SUN</div><div class="dc-date">05.10</div><div class="dc-no-event">-</div></div>
-                    <div class="day-card has-event"><div class="dc-day">MON</div><div class="dc-date">05.11</div><div class="dc-event">YXL<br>4회차</div></div>
+            <div class="timeline-section" style="margin-bottom: 40px;">
+                <div class="timeline-title">WEEKLY SCHEDULE</div>
+                <div class="calendar-nav-container">
+                    <button class="nav-btn" onclick="changeWeek(-7)">⟨</button>
+                    <div class="weekly-calendar-row" id="calendarRow"></div>
+                    <button class="nav-btn" onclick="changeWeek(7)">⟩</button>
                 </div>
             </div>
-
-            <!-- 타임라인 리스트 -->
             <div class="timeline-section">
                 <div class="timeline-title">OFFICIAL TIMELINE</div>
                 <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
@@ -593,7 +310,7 @@
             </div>
         </section>
 
-        <!-- 4. VOD -->
+        <!-- 4. MEDIA 탭 (VOD 영상) -->
         <section id="radio" class="tab-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
                 <span class="timeline-title" style="margin:0; border:none;">LATEST RECORD</span>
@@ -656,10 +373,16 @@
             <div class="vod-grid" id="vodListContainer"></div>
         </section>
     </div>
-    
-    <!-- 툴팁 -->
-    <div id="preview"><img src="" id="p-img" class="p-thumb"><div class="p-info"><div id="p-title" class="p-title"></div><div class="p-live-badge">🔴 ON AIR • <span id="p-viewers"></span> Vw.</div></div></div>
-    
+
+    <!-- 프로필 모달 -->
+    <div id="p-modal" onclick="closeProfile()">
+        <div class="profile-container" onclick="event.stopPropagation()">
+            <div class="close-btn" onclick="closeProfile()">×</div>
+            <div class="profile-left"><img src="" id="m-img"><div id="m-name" class="profile-name"></div><div id="m-pos" class="profile-tier"></div></div>
+            <div class="profile-right" id="m-details"></div>
+        </div>
+    </div>
+
     <!-- 매출 상세 모달 -->
     <div id="sales-modal" onclick="closeSalesModal()">
         <div class="sales-modal-inner" onclick="event.stopPropagation()">
@@ -669,97 +392,113 @@
         </div>
     </div>
 
-    <!-- 💡 프로필 모달 -->
-    <div id="p-modal" onclick="closeProfile()">
-        <div class="profile-container" onclick="event.stopPropagation()">
-            <div class="close-btn" onclick="closeProfile()">×</div>
-            <div class="profile-left">
-                <img src="" id="m-img">
-                <div id="m-name" class="profile-name"></div>
-                <div id="m-pos" class="profile-tier"></div>
-            </div>
-            <div class="profile-right" id="m-details">
-                <!-- JS에서 스탯 박스 렌더링 -->
-            </div>
-        </div>
-    </div>
-
     <script>
         const members = {"염보성": {"name": "염보성", "id": "yuambo", "pos": "대표", "img": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692", "age": "1990.03.29", "join_date": "2024.10.01", "stats": "171.4cm / 76kg / B형", "mbti": "ENFJ", "skill": "스타크래프트", "d_day": "D+580"}, "류서하": {"name": "류서하", "id": "smkim82372", "pos": "비서실장", "img": "https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017", "age": "2000년생", "join_date": "2026.01.25", "stats": "", "mbti": "", "skill": "", "d_day": "D+99"}, "리윤": {"name": "리윤", "id": "sladk51", "pos": "부장", "img": "https://storage2.ygosu.com/?code=S696b627eddf978.03910279", "age": "1996년생", "join_date": "2025.06.29", "stats": "164cm", "mbti": "ISTP", "skill": "", "d_day": "D+309"}, "후잉": {"name": "후잉", "id": "jaeha010", "pos": "차장", "img": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475", "age": "2001.01.19", "join_date": "2024.10.12", "stats": "160cm / 47kg / AB형", "mbti": "ISTJ", "skill": "춤", "d_day": "D+569"}, "냥냥수주": {"name": "냥냥수주", "id": "star49", "pos": "과장", "img": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971", "age": "1997년생", "join_date": "2026.01.25", "stats": "", "mbti": "", "skill": "", "d_day": "D+99"}, "율무": {"name": "율무", "id": "offside629", "pos": "대리", "img": "https://storage2.ygosu.com/?code=S6929cfcd99d997.32232313", "age": "1997년생", "join_date": "2025.10.19", "stats": "167cm", "mbti": "INTJ", "skill": "", "d_day": "D+197"}, "하랑짱": {"name": "하랑짱", "id": "asy1218", "pos": "주임", "img": "https://storage2.ygosu.com/?code=S696b61f365c0e3.11842146", "age": "1991년생", "join_date": "2025.10.12", "stats": "", "mbti": "", "skill": "", "d_day": "D+204"}, "미로": {"name": "미로", "id": "fhwm0602", "pos": "사원", "img": "https://storage2.ygosu.com/?code=S69f0a947083819.23416908", "age": "1995년생", "join_date": "2026.01.13", "stats": "168cm", "mbti": "INTJ", "skill": "", "d_day": "D+111"}, "유나연": {"name": "유나연", "id": "jeewon1202", "pos": "인턴장", "img": "https://storage2.ygosu.com/?code=S696641fe535711.46782639", "age": "1999년생", "join_date": "2025.12.11", "stats": "163cm", "mbti": "ISFP", "skill": "", "d_day": "D+144"}, "소다": {"name": "소다", "id": "zbxlzzz", "pos": "시급이", "img": "https://storage2.ygosu.com/?code=S696b623ea18219.09523333", "age": "1993년생", "join_date": "2024.10.29", "stats": "160cm", "mbti": "INFP", "skill": "필라테스", "d_day": "D+552"}, "김유정": {"name": "김유정", "id": "tkek55", "pos": "시급이", "img": "https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878", "age": "2000년생", "join_date": "2025.09.04", "stats": "164cm", "mbti": "ENTJ", "skill": "", "d_day": "D+242"}, "백나현": {"name": "백나현", "id": "wk3220", "pos": "신입", "img": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531", "age": "1996년생", "join_date": "2026.03.28", "stats": "160cm", "mbti": "ISFP", "skill": "", "d_day": "D+37"}, "아름": {"name": "아름", "id": "ahrum0912", "pos": "신입", "img": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064", "age": "1997년생", "join_date": "2026.03.29", "stats": "168cm", "mbti": "INFP", "skill": "골프", "d_day": "D+36"}, "서니": {"name": "서니", "id": "iluvpp", "pos": "신입", "img": "https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035", "age": "1997년생", "join_date": "2025.06.17", "stats": "160cm", "mbti": "ISTP", "skill": "", "d_day": "D+321"}, "너의멜로디": {"name": "너의멜로디", "id": "meldoy777", "pos": "신입", "img": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633", "age": "1999년생", "join_date": "2026.03.31", "stats": "163cm", "mbti": "ESFP", "skill": "", "d_day": "D+34"}, "꺼니": {"name": "꺼니", "id": "callgg", "pos": "웨이터", "img": "https://storage2.ygosu.com/?code=S69f0a951064842.70871652", "age": "1993년생", "join_date": "2025.10.02", "stats": "", "mbti": "", "skill": "", "d_day": "D+214"}, "김푸": {"name": "김푸", "id": "kimpooh0707", "pos": "웨이터", "img": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517", "age": "1993년생", "join_date": "2025.10.02", "stats": "", "mbti": "", "skill": "", "d_day": "D+214"}};
-        const historyDb = {"시즌1": {"직급전": 5374481, "contents": [["1회차 전후반전", 2426065], ["2회차 팀전", 2732426], ["3회차 직급프리데이", 3890922], ["4회차 전후반 지분전쟁", 3833288], ["5회차 3천만원 기여도 펌핑데이", 3054893]]}, "시즌2": {"직급전": 6610938, "contents": [["1회차 상벌금데이", 6078903], ["2회차 명품데이", 3390108], ["3회차 직급프리데이", 4124926], ["4회차 팀전", 2313129], ["5회차 펌핑룰렛 및 퇴근전쟁", 1969188]]}, "시즌3": {"직급전": 13445194, "contents": [["1회차 블라인드 상금데이", 2683770], ["2회차 데스매치 및 퇴근전쟁", 2011356], ["3회차 직급프리데이", 1852181], ["4회차 전후반 지분전쟁", 1703576], ["5회차 일급데이 및 벌칙", 1863867]]}, "시즌4": {"직급전": 2561153, "contents": [["1회차 그녀를 이겨라 및 퇴근전쟁", 2035685], ["2회차 퐁당퐁당데이", 1702385], ["3회차 장들의 전쟁", 2676513], ["4회차 직급프리데이", 1216858], ["5회차 기여도 펌핑데이 및 퇴근전쟁", 1939123]]}, "시즌5": {"직급전": 4252794, "contents": [["1회차 대표 VS 부장 팀전", 3400157], ["2회차 퐁당 & 가챠 상금데이", 2996095], ["3회차 조기퇴근데이", 2300171], ["4회차 직급프리데이", 2122733], ["5회차 기여도펌핑룰렛데이", 370113]]}, "시즌6": {"직급전": 5953195, "contents": [["1회차 퐁당 & 비키니 벌칙데이", 2822840], ["2회차 난사데이 및 퇴근전쟁", 2076273], ["3회차 직급 프리데이", 2642197], ["4회차 팀전", 2948979], ["5회차 한방룰렛골드데이", 2043429]]}, "시즌7": {"직급전": 5746700, "contents": [["1회차 퐁당퐁당 상벌금데이", 3076958], ["2회차 대표님을 이겨라 및 퇴근전쟁", 2961402], ["3회차 직급 프리데이", 3738078], ["4회차 기여도 펌핑데이", 3390310], ["5회차 조기퇴근데이", 2023172]]}, "시즌8": {"직급전": 5769642, "contents": [["1회차 퐁당퐁당 상벌금데이", 4291255], ["2회차 주차방지데이", 2356810], ["3회차 대표 vs 이사 팀전", 3932965], ["4회차 조기퇴근데이", 1766989], ["5회차 기여도펌핑데이", 1815026]]}, "시즌9": {"직급전": 4716222, "contents": [["1회차 퐁당퐁당데이", 2823519], ["2회차 팀데스매치", 2476563], ["3회차 직급 프리데이", 3035332], ["4회차 추석떡값데이", 2003513], ["5회차 YB를 이겨라", 4514325]]}, "시즌10": {"직급전": 5035289, "contents": [["1회차 와장창데이", 2470625], ["2회차 일급 프리데이", 2008740], ["3회차 염대표를이겨라", 2359007], ["4회차 직급프리데이", 2114014], ["5회차 기여도펌핑데이", 2430578]]}, "시즌11": {"직급전": 4222022, "contents": [["1회차 지분&퐁당데이", 2397972], ["2회차 1대1 데스매치", 1364489], ["3회차 조기퇴근데이", 1507997], ["4회차 용병데이", 4078678], ["5회차 룰렛상금 & 기여도펌핑데이", 1580993]]}, "시즌12": {"직급전": 3026835, "contents": [["1회차 지분 & 퐁당데이", 3038172], ["2회차 상금픽스 직급프리데이", 2960260], ["3회차 부장팀 vs 차장팀 팀데스매치", 1860656], ["4회차 주차방지 & 난사데이", 1356111], ["5회차 조기퇴근데이", 1465653]]}, "시즌13": {"직급전": 3342545, "contents": [["1회차 퐁당 & 극락데이", 3046622], ["2회차 염대표를 이겨라 & 상금갸차데이", 1426315], ["3회차 용병데이", 5941453], ["4회차 조기퇴근데이", 1049820], ["5회차 1대1 데스매치", 1762153]]}};
-        const allVODs = [{"id": "193831035", "title": "염보성 YB YXL 병맛가요제 (킴성태x장지수)", "date": "2026.04.25", "views": 121458, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260425_4F8C7EBA_293511025_1_r"}, {"id": "188589109", "title": "YXL 영월여행 ❤️ 리윤 × 냥냥수주 x 하랑짱 x 미로 x 김유정 x 나연", "date": "2026.03.03", "views": 11872, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260303_3307B2E1_292078661_1_r&column=2&t=1772530135"}, {"id": "186322409", "title": "[YXL:부장] 하랑짱x꺼니 두쫀쿠 클래스🍫💝", "date": "2026.02.09", "views": 5458, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260209_43E008F6_291471136_2_r"}, {"id": "185332075", "title": "yxl&yb 합동mt방송", "date": "2026.01.30", "views": 158172, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260130_DD2DC4D1_291189118_3_r"}, {"id": "182561159", "title": "[YXL:사원] 디진다돈까스 먹방 벌칙 성공 서니X김푸X꺼니", "date": "2026.01.02", "views": 3830, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260102_B8B766E7_290428646_1_r"}, {"id": "182185345", "title": "[YXL/YB] 2025 염빡 어워드 시상식 합니다.", "date": "2025.12.29", "views": 75994, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251229_F665D863_290335982_1_r"}, {"id": "181319655", "title": "[YXL]리윤 메이드카페 보성x김푸", "date": "2025.12.21", "views": 12900, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251221_088453D3_290126536_1_r"}, {"id": "181212107", "title": "[YXL:시급이] 염미도 3회차", "date": "2025.12.20", "views": 4000, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251220_5DFC53F4_290095442_1_r&column=2&t=1766268150"}, {"id": "181202165", "title": "[YXL] 염미도 2회차 (잠방)", "date": "2025.12.20", "views": 12365, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251219_B4AF8581_290074932_6_r&column=2&t=1766268126"}, {"id": "181193639", "title": "[YXL:시급이] 염미도1회차", "date": "2025.12.19", "views": 11352, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251219_2830637E_290074932_2_r&column=2&t=1766268092"}, {"id": "171625221", "title": "[YXL:차장] YXL 단체안무 연습중♡", "date": "2025.09.11", "views": 5817, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250911_E224BFF7_287423544_3_r"}, {"id": "171517903", "title": "[YXL]은우x염보성 갯벌공약 제부도 조개구이먹방 리윤x서니x쩔밍", "date": "2025.09.10", "views": 19757, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250910_08460F16_287392498_1_r&column=2&t=1757573204"}, {"id": "171346633", "title": "[YXL 비실]윤시세끼 with 서니 쩔밍 델리박❤️", "date": "2025.09.08", "views": 9822, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250908_517C5956_287340604_2_r"}, {"id": "171334577", "title": "[YXL]그녀와의 데이트 슬돌이X소다  ❤️", "date": "2025.09.08", "views": 10740, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250908_668643AE_287340266_3_r"}, {"id": "169165861", "title": "[YXL] 소릴래영 아차산에 왔습니댜  ❤️", "date": "2025.08.17", "views": 30412, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250816_5DAEB1A3_286729074_9_r&column=2&t=1755405076"}, {"id": "168507233", "title": "[YB YXL] 골빈벨 총 상금 600만원 벌칙 24시간 있습니다", "date": "2025.08.10", "views": 52792, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250810_8BC118CC_286549224_1_r"}, {"id": "167711523", "title": "은우x염보성 홍대 맨인블랙(YXL)", "date": "2025.08.02", "views": 24930, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250802_8F603F26_286324592_1_r&column=2&t=1756122680"}, {"id": "166797677", "title": "[YXL:차장]메이드 리아쨩의 염대표님 1일케어🩷", "date": "2025.07.23", "views": 34847, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250723_77705A62_286054596_1_r&column=2&t=1753269985"}, {"id": "165095477", "title": "[YXL:대리]장화 빌린 이리아 in 위례궁", "date": "2025.07.05", "views": 8981, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250705_5A50A2B2_285568220_2_r"}, {"id": "165090649", "title": "[YXL:대리]장화 빌린 이리아 in 위례궁", "date": "2025.07.05", "views": 16361, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250705_80794C13_285565412_2_r"}, {"id": "163507573", "title": "염보성 YXL 마피아 총출동 상금(400) ", "date": "2025.06.18", "views": 54472, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250618_C0777F14_285100898_1_r"}, {"id": "163314531", "title": "풍낭고 with YB & YXL", "date": "2025.06.16", "views": 54366, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250616_A1B58A1B_285044870_2_r"}, {"id": "160229793", "title": "염보성 울릉도 야간낚시(YXL) by더힐", "date": "2025.05.15", "views": 28357, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250515_D6BACC22_283969844_1_r"}, {"id": "160179551", "title": "염보성 울릉도 고기잡기미션(YXL) by더힐", "date": "2025.05.15", "views": 96330, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250515_8EB7D7E7_283951914_3_r"}, {"id": "159835159", "title": "[YXL:부장] 죽음의 취두부먹방 소다x도맑음 ", "date": "2025.05.11", "views": 14087, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250511_AC72672D_283853754_1_r"}, {"id": "159784167", "title": "[yxl]이슬배 피시방정모🩷", "date": "2025.05.11", "views": 15998, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250511_40DF8FF7_283841812_7_r"}, {"id": "157766473", "title": "염총무가 쏜다 vs 한남더힐 30만개 (yxl yb)", "date": "2025.04.20", "views": 133762, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250420_097938ED_283251888_1_r"}, {"id": "156897587", "title": "염보성관상 연애운 봅니다 과연어떤인물인가..[YXL] [YB]", "date": "2025.04.11", "views": 43254, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250411_85E79335_282995476_1_r"}, {"id": "156443147", "title": "YXL MT!!", "date": "2025.04.06", "views": 74318, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250406_BD74B4D3_282851190_4_r"}, {"id": "156233659", "title": "[YXL]아다사냥 시즌2염보성x이슬x리아x박하악x리아x은똥x라박", "date": "2025.04.04", "views": 24886, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250404_BF3AA2E5_282804246_1_r"}, {"id": "156072307", "title": "[YXL:부장] 미녀들의 수다! 소다x가비x한유이x윤주아", "date": "2025.04.02", "views": 8450, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250402_50A568AE_282748758_1_r"}, {"id": "155022377", "title": "[YXL:대리] 소선사님과 데이트", "date": "2025.03.23", "views": 8947, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250323_C15A95AC_282450684_2_r"}, {"id": "153906161", "title": "YXL 그녀들의 이야기... 유누x소다x윤주아x파이x박성진x한유이", "date": "2025.03.11", "views": 17884, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250311_C93220F0_282112698_1_r"}, {"id": "153270385", "title": "염보성x이슬이 아다사냥 그남자의사랑이야기 썰 풉니다..비밀게스트", "date": "2025.03.05", "views": 32439, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250305_58D0DE35_281931970_1_r"}, {"id": "152932371", "title": "[YXL:대리]죽음의 물먹방 염보성x리아x가비x소다x델리  ", "date": "2025.03.02", "views": 15295, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250302_A7EEC372_281836898_1_r"}, {"id": "152673671", "title": "[YXL]대전 성심당 오픈런 ! (윤랑과장님 소환  ❤)", "date": "2025.02.28", "views": 4675, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250228_57BC15F4_281762036_2_r"}, {"id": "151963511", "title": "[YXL] 울릉도소다 ❤️ 고기를 잡으러 ~❤️", "date": "2025.02.21", "views": 18062, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250221_216FE0C4_281547276_1_r&column=2&t=1740108999"}, {"id": "149543791", "title": "[YXL]류시세끼 1박2일", "date": "2025.01.28", "views": 30887, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250128_03B8E103_280836450_4_r"}, {"id": "149482895", "title": "[YXL]류시세끼 1박2일", "date": "2025.01.27", "views": 54077, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250127_3B59F5F6_280812628_4_r"}, {"id": "149372371", "title": "[YXL] 낭살포차 with 과쿠잉", "date": "2025.01.26", "views": 7397, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250126_18037330_280796442_3_r"}, {"id": "149341401", "title": "[YXL]댄스제대로좀 해볼까요?", "date": "2025.01.26", "views": 17625, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250126_793EEE7C_280782020_2_r"}, {"id": "146665451", "title": "YXL시즌2 2화(명품데이 총상금5천만원)", "date": "2024.12.30", "views": 7134, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241230_38E9C629_280002188_1_r"}, {"id": "145694247", "title": "[yxl] YB 하랑e x YXL 이슬이 힐링하기", "date": "2024.12.20", "views": 982, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241220_8FAAC47A_279721662_5_r"}, {"id": "145686859", "title": "[yxl] YB 하랑e x YXL 이슬이 폐급듀오 댄스콜라보", "date": "2024.12.20", "views": 544, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241220_AF55174E_279721662_1_r"}, {"id": "145430667", "title": "[YXL] 다 죽었어 모두 될때까지 오후반 후잉선생님", "date": "2024.12.17", "views": 1376, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241217_B2996458_279634068_2_r"}, {"id": "145395293", "title": "[YXL부장]오늘 다죽엇어 잘할때까지 반복 오전반 선생님 라사원", "date": "2024.12.17", "views": 720, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241217_EB02CC12_279629168_2_r"}, {"id": "145078781", "title": "[YXL:부장] 디코회의&소음단,시그단 룰렛", "date": "2024.12.13", "views": 1292, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241213_362B7D79_279530412_2_r"}, {"id": "140474073", "title": "YXL 전체 야유회", "date": "2024.10.27", "views": 13726, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241027_E4615EA1_278161548_10_r"}, {"id": "139389129", "title": "[YXL]염보성 주주총회 다모였습니다...", "date": "2024.10.16", "views": 15594, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241016_CFB25A41_277832558_1_r"}];
-        let hChart = null, cChart = null;
+        const allVODs = [{"id": "193831035", "title": "염보성 YB YXL 병맛가요제 (킴성태x장지수)", "date": "2026.04.25", "views": 121458, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260425_4F8C7EBA_293511025_1_r"}, {"id": "188589109", "title": "YXL 영월여행 ❤️ 리윤 × 냥냥수주 x 하랑짱 x 미로 x 김유정 x 나연", "date": "2026.03.03", "views": 11872, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260303_3307B2E1_292078661_1_r&column=2&t=1772530135"}, {"id": "186322409", "title": "[YXL:부장] 하랑짱x꺼니 두쫀쿠 클래스🍫💝", "date": "2026.02.09", "views": 5458, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260209_43E008F6_291471136_2_r"}, {"id": "185332075", "title": "yxl&yb 합동mt방송", "date": "2026.01.30", "views": 158172, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260130_DD2DC4D1_291189118_3_r"}, {"id": "182561159", "title": "[YXL:사원] 디진다돈까스 먹방 벌칙 성공 서니X김푸X꺼니", "date": "2026.01.02", "views": 3830, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260102_B8B766E7_290428646_1_r"}, {"id": "182185345", "title": "[YXL/YB] 2025 염빡 어워드 시상식 합니다.", "date": "2025.12.29", "views": 75994, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251229_F665D863_290335982_1_r"}, {"id": "181319655", "title": "[YXL]리윤 메이드카페 보성x김푸", "date": "2025.12.21", "views": 12900, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251221_088453D3_290126536_1_r"}, {"id": "181212107", "title": "[YXL:시급이] 염미도 3회차", "date": "2025.12.20", "views": 4000, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251220_5DFC53F4_290095442_1_r&column=2&t=1766268150"}, {"id": "181202165", "title": "[YXL] 염미도 2회차 (잠방)", "date": "2025.12.20", "views": 12365, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251219_B4AF8581_290074932_6_r&column=2&t=1766268126"}, {"id": "181193639", "title": "[YXL:시급이] 염미도1회차", "date": "2025.12.19", "views": 11352, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20251219_2830637E_290074932_2_r&column=2&t=1766268092"}, {"id": "171625221", "title": "[YXL:차장] YXL 단체안무 연습중♡", "date": "2025.09.11", "views": 5817, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250911_E224BFF7_287423544_3_r"}, {"id": "171517903", "title": "[YXL]은우x염보성 갯벌공약 제부도 조개구이먹방 리윤x서니x쩔밍", "date": "2025.09.10", "views": 19757, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250910_08460F16_287392498_1_r&column=2&t=1757573204"}, {"id": "171346633", "title": "[YXL 비실]윤시세끼 with 서니 쩔밍 델리박❤️", "date": "2025.09.08", "views": 9822, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250908_517C5956_287340604_2_r"}, {"id": "171334577", "title": "[YXL]그녀와의 데이트 슬돌이X소다  ❤️", "date": "2025.09.08", "views": 10740, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250908_668643AE_287340266_3_r"}, {"id": "169165861", "title": "[YXL] 소릴래영 아차산에 왔습니댜  ❤️", "date": "2025.08.17", "views": 30412, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250816_5DAEB1A3_286729074_9_r&column=2&t=1755405076"}, {"id": "168507233", "title": "[YB YXL] 골빈벨 총 상금 600만원 벌칙 24시간 있습니다", "date": "2025.08.10", "views": 52792, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250810_8BC118CC_286549224_1_r"}, {"id": "167711523", "title": "은우x염보성 홍대 맨인블랙(YXL)", "date": "2025.08.02", "views": 24930, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250802_8F603F26_286324592_1_r&column=2&t=1756122680"}, {"id": "166797677", "title": "[YXL:차장]메이드 리아쨩의 염대표님 1일케어🩷", "date": "2025.07.23", "views": 34847, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250723_77705A62_286054596_1_r&column=2&t=1753269985"}, {"id": "165095477", "title": "[YXL:대리]장화 빌린 이리아 in 위례궁", "date": "2025.07.05", "views": 8981, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250705_5A50A2B2_285568220_2_r"}, {"id": "165090649", "title": "[YXL:대리]장화 빌린 이리아 in 위례궁", "date": "2025.07.05", "views": 16361, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250705_80794C13_285565412_2_r"}, {"id": "163507573", "title": "염보성 YXL 마피아 총출동 상금(400) ", "date": "2025.06.18", "views": 54472, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250618_C0777F14_285100898_1_r"}, {"id": "163314531", "title": "풍낭고 with YB & YXL", "date": "2025.06.16", "views": 54366, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250616_A1B58A1B_285044870_2_r"}, {"id": "160229793", "title": "염보성 울릉도 야간낚시(YXL) by더힐", "date": "2025.05.15", "views": 28357, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250515_D6BACC22_283969844_1_r"}, {"id": "160179551", "title": "염보성 울릉도 고기잡기미션(YXL) by더힐", "date": "2025.05.15", "views": 96330, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250515_8EB7D7E7_283951914_3_r"}, {"id": "159835159", "title": "[YXL:부장] 죽음의 취두부먹방 소다x도맑음 ", "date": "2025.05.11", "views": 14087, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250511_AC72672D_283853754_1_r"}, {"id": "159784167", "title": "[yxl]이슬배 피시방정모🩷", "date": "2025.05.11", "views": 15998, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250511_40DF8FF7_283841812_7_r"}, {"id": "157766473", "title": "염총무가 쏜다 vs 한남더힐 30만개 (yxl yb)", "date": "2025.04.20", "views": 133762, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250420_097938ED_283251888_1_r"}, {"id": "156897587", "title": "염보성관상 연애운 봅니다 과연어떤인물인가..[YXL] [YB]", "date": "2025.04.11", "views": 43254, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250411_85E79335_282995476_1_r"}, {"id": "156443147", "title": "YXL MT!!", "date": "2025.04.06", "views": 74319, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250406_BD74B4D3_282851190_4_r"}, {"id": "156233659", "title": "[YXL]아다사냥 시즌2염보성x이슬x리아x박하악x리아x은똥x라박", "date": "2025.04.04", "views": 24886, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250404_BF3AA2E5_282804246_1_r"}, {"id": "156072307", "title": "[YXL:부장] 미녀들의 수다! 소다x가비x한유이x윤주아", "date": "2025.04.02", "views": 8450, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250402_50A568AE_282748758_1_r"}, {"id": "155022377", "title": "[YXL:대리] 소선사님과 데이트", "date": "2025.03.23", "views": 8947, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250323_C15A95AC_282450684_2_r"}, {"id": "153906161", "title": "YXL 그녀들의 이야기... 유누x소다x윤주아x파이x박성진x한유이", "date": "2025.03.11", "views": 17884, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250311_C93220F0_282112698_1_r"}, {"id": "153270385", "title": "염보성x이슬이 아다사냥 그남자의사랑이야기 썰 풉니다..비밀게스트", "date": "2025.03.05", "views": 32439, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250305_58D0DE35_281931970_1_r"}, {"id": "152932371", "title": "[YXL:대리]죽음의 물먹방 염보성x리아x가비x소다x델리  ", "date": "2025.03.02", "views": 15295, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250302_A7EEC372_281836898_1_r"}, {"id": "152673671", "title": "[YXL]대전 성심당 오픈런 ! (윤랑과장님 소환  ❤)", "date": "2025.02.28", "views": 4675, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250228_57BC15F4_281762036_2_r"}, {"id": "151963511", "title": "[YXL] 울릉도소다 ❤️ 고기를 잡으러 ~❤️", "date": "2025.02.21", "views": 18062, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250221_216FE0C4_281547276_1_r&column=2&t=1740108999"}, {"id": "149543791", "title": "[YXL]류시세끼 1박2일", "date": "2025.01.28", "views": 30887, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250128_03B8E103_280836450_4_r"}, {"id": "149482895", "title": "[YXL]류시세끼 1박2일", "date": "2025.01.27", "views": 54077, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250127_3B59F5F6_280812628_4_r"}, {"id": "149372371", "title": "[YXL] 낭살포차 with 과쿠잉", "date": "2025.01.26", "views": 7397, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250126_18037330_280796442_3_r"}, {"id": "149341401", "title": "[YXL]댄스제대로좀 해볼까요?", "date": "2025.01.26", "views": 17625, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20250126_793EEE7C_280782020_2_r"}, {"id": "146665451", "title": "YXL시즌2 2화(명품데이 총상금5천만원)", "date": "2024.12.30", "views": 7134, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241230_38E9C629_280002188_1_r"}, {"id": "145694247", "title": "[yxl] YB 하랑e x YXL 이슬이 힐링하기", "date": "2024.12.20", "views": 982, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241220_8FAAC47A_279721662_5_r"}, {"id": "145686859", "title": "[yxl] YB 하랑e x YXL 이슬이 폐급듀오 댄스콜라보", "date": "2024.12.20", "views": 544, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241220_AF55174E_279721662_1_r"}, {"id": "145430667", "title": "[YXL] 다 죽었어 모두 될때까지 오후반 후잉선생님", "date": "2024.12.17", "views": 1376, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241217_B2996458_279634068_2_r"}, {"id": "145395293", "title": "[YXL부장]오늘 다죽엇어 잘할때까지 반복 오전반 선생님 라사원", "date": "2024.12.17", "views": 720, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241217_EB02CC12_279629168_2_r"}, {"id": "145078781", "title": "[YXL:부장] 디코회의&소음단,시그단 룰렛", "date": "2024.12.13", "views": 1292, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241213_362B7D79_279530412_2_r"}, {"id": "140474073", "title": "YXL 전체 야유회", "date": "2024.10.27", "views": 13726, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241027_E4615EA1_278161548_10_r"}, {"id": "139389129", "title": "[YXL]염보성 주주총회 다모였습니다...", "date": "2024.10.16", "views": 15594, "thumb": "https://videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20241016_CFB25A41_277832558_1_r"}];
+        const historyDb = {"시즌1": {"직급전": 5374481, "contents": [["1회차 전후반전", 2426065], ["2회차 팀전", 2732426], ["3회차 직급프리데이", 3890922], ["4회차 전후반 지분전쟁", 3833288], ["5회차 3천만원 기여도 펌핑데이", 3054893]]}, "시즌2": {"직급전": 6610938, "contents": [["1회차 상벌금데이", 6078903], ["2회차 명품데이", 3390108], ["3회차 직급프리데이", 4124926], ["4회차 팀전", 2313129], ["5회차 펌핑룰렛 및 퇴근전쟁", 1969188]]}, "시즌3": {"직급전": 13445194, "contents": [["1회차 블라인드 상금데이", 2683770], ["2회차 데스매치 및 퇴근전쟁", 2011356], ["3회차 직급프리데이", 1852181], ["4회차 전후반 지분전쟁", 1703576], ["5회차 일급데이 및 벌칙", 1863867]]}, "시즌4": {"직급전": 2561153, "contents": [["1회차 그녀를 이겨라 및 퇴근전쟁", 2035685], ["2회차 퐁당퐁당데이", 1702385], ["3회차 장들의 전쟁", 2676513], ["4회차 직급프리데이", 1216858], ["5회차 기여도 펌핑데이 및 퇴근전쟁", 1939123]]}, "시즌5": {"직급전": 4252794, "contents": [["1회차 대표 VS 부장 팀전", 3400157], ["2회차 퐁당 & 가챠 상금데이", 2996095], ["3회차 조기퇴근데이", 2300171], ["4회차 직급프리데이", 2122733], ["5회차 기여도펌핑룰렛데이", 370113]]}, "시즌6": {"직급전": 5953195, "contents": [["1회차 퐁당 & 비키니 벌칙데이", 2822840], ["2회차 난사데이 및 퇴근전쟁", 2076273], ["3회차 직급 프리데이", 2642197], ["4회차 팀전", 2948979], ["5회차 한방룰렛골드데이", 2043429]]}, "시즌7": {"직급전": 5746700, "contents": [["1회차 퐁당퐁당 상벌금데이", 3076958], ["2회차 대표님을 이겨라 및 퇴근전쟁", 2961402], ["3회차 직급 프리데이", 3738078], ["4회차 기여도 펌핑데이", 3390310], ["5회차 조기퇴근데이", 2023172]]}, "시즌8": {"직급전": 5769642, "contents": [["1회차 퐁당퐁당 상벌금데이", 4291255], ["2회차 주차방지데이", 2356810], ["3회차 대표 vs 이사 팀전", 3932965], ["4회차 조기퇴근데이", 1766989], ["5회차 기여도펌핑데이", 1815026]]}, "시즌9": {"직급전": 4716222, "contents": [["1회차 퐁당퐁당데이", 2823519], ["2회차 팀데스매치", 2476563], ["3회차 직급 프리데이", 3035332], ["4회차 추석떡값데이", 2003513], ["5회차 YB를 이겨라", 4514325]]}, "시즌10": {"직급전": 5035289, "contents": [["1회차 와장창데이", 2470625], ["2회차 일급 프리데이", 2008740], ["3회차 염대표를이겨라", 2359007], ["4회차 직급프리데이", 2114014], ["5회차 기여도펌핑데이", 2430578]]}, "시즌11": {"직급전": 4222022, "contents": [["1회차 지분&퐁당데이", 2397972], ["2회차 1대1 데스매치", 1364489], ["3회차 조기퇴근데이", 1507997], ["4회차 용병데이", 4078678], ["5회차 룰렛상금 & 기여도펌핑데이", 1580993]]}, "시즌12": {"직급전": 3026835, "contents": [["1회차 지분 & 퐁당데이", 3038172], ["2회차 상금픽스 직급프리데이", 2960260], ["3회차 부장팀 vs 차장팀 팀데스매치", 1860656], ["4회차 주차방지 & 난사데이", 1356111], ["5회차 조기퇴근데이", 1465653]]}, "시즌13": {"직급전": 3342545, "contents": [["1회차 퐁당 & 극락데이", 3046622], ["2회차 염대표를 이겨라 & 상금갸차데이", 1426315], ["3회차 용병데이", 5941453], ["4회차 조기퇴근데이", 1049820], ["5회차 1대1 데스매치", 1762153]]}}; // 💡 자바스크립트용 DB 변수 복구
         
+        const events = {
+            "2026.05.07": "YXL 3회차",
+            "2026.05.11": "YXL 4회차",
+            "2026.05.14": "YXL 5회차"
+        };
+        
+        let currentStartDate = new Date(); 
+        const day = currentStartDate.getDay() || 7;
+        currentStartDate.setDate(currentStartDate.getDate() - day + 1);
+
         function switchTab(e, id) {
             document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             e.currentTarget.classList.add('active');
             document.getElementById(id).classList.add('active');
             if(id === 'sales') setTimeout(renderCharts, 50);
+            if(id === 'schedule') renderCalendar();
         }
 
-        function getGradient(ctx, colorStart, colorEnd) {
-            if(!ctx.chartArea) return colorEnd;
-            let gradient = ctx.ctx.createLinearGradient(0, ctx.chartArea.bottom, 0, ctx.chartArea.top);
-            gradient.addColorStop(0, colorStart);
-            gradient.addColorStop(1, colorEnd);
-            return gradient;
+        function changeWeek(days) {
+            currentStartDate.setDate(currentStartDate.getDate() + days);
+            renderCalendar();
         }
 
+        function renderCalendar() {
+            const row = document.getElementById('calendarRow');
+            row.innerHTML = '';
+            const daysArr = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+            const todayStr = new Date().toLocaleDateString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit'}).replace(/ /g,'').replace(/\./g,'.').slice(0,-1);
+
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(currentStartDate);
+                d.setDate(d.getDate() + i);
+                const dStr = d.toLocaleDateString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit'}).replace(/ /g,'').replace(/\./g,'.').slice(0,-1);
+                const displayDate = (d.getMonth()+1) + '.' + (d.getDate() < 10 ? '0'+d.getDate() : d.getDate());
+                const event = events[dStr] || null;
+                const isToday = dStr === todayStr;
+
+                const card = document.createElement('div');
+                card.className = `day-card ${isToday ? 'selected' : ''}`;
+                card.onclick = () => {
+                    document.querySelectorAll('.day-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                };
+                card.innerHTML = `
+                    <div class="dc-day">${daysArr[i]}</div>
+                    <div class="dc-date">${displayDate}</div>
+                    ${event ? `<div class="dc-event">${event}</div>` : '<div style="height:20px;"></div>'}
+                `;
+                row.appendChild(card);
+            }
+        }
+
+        let hChart = null, cChart = null;
         function renderCharts() {
             Chart.register(ChartDataLabels);
             if(hChart) hChart.destroy();
             if(cChart) cChart.destroy();
             
             const commonOptions = { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 40 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#d4af37', font: { weight: '900', size: 12 }, formatter: (v, ctx) => { if(ctx.datasetIndex === 1 || ctx.chart.data.datasets.length === 1) { let total = ctx.chart.data.datasets[0].data[ctx.dataIndex] + (ctx.datasetIndex === 1 ? v : 0); return Math.floor(total / 10000).toLocaleString() + '만'; } return null; } }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString()}개` } } }, scales: { y: { stacked: true, display: false }, x: { stacked: true, ticks: { color: '#aaa', font: { weight: '900', size: 12 } }, grid: { color: 'rgba(212,175,55,0.1)' } } } };
-            
+
             hChart = new Chart(document.getElementById('historyChart'), { 
                 type: 'bar', 
-                data: { 
-                    labels: ["시즌1", "시즌2", "시즌3", "시즌4", "시즌5", "시즌6", "시즌7", "시즌8", "시즌9", "시즌10", "시즌11", "시즌12", "시즌13"], 
-                    datasets: [
-                        { label: '직급전', data: [5374481, 6610938, 13445194, 2561153, 4252794, 5953195, 5746700, 5769642, 4716222, 5035289, 4222022, 3026835, 3342545], backgroundColor: (c) => getGradient(c.chart, 'rgba(212, 175, 55, 0.4)', '#d4af37'), borderRadius: 0, borderWidth: 1, borderColor: 'rgba(212,175,55,0.8)' }, 
-                        { label: '일반회차', data: [15937594, 17876254, 10114750, 9570564, 11189269, 12533718, 15189920, 14163045, 14853252, 11382964, 10930129, 10680852, 13226363], backgroundColor: (c) => getGradient(c.chart, 'rgba(170, 128, 30, 0.4)', '#aa801e'), borderRadius: {topLeft: 6, topRight: 6}, borderWidth: 1, borderColor: 'rgba(170,128,30,0.8)' }
-                    ] 
-                }, 
+                data: { labels: ["\uc2dc\uc98c1", "\uc2dc\uc98c2", "\uc2dc\uc98c3", "\uc2dc\uc98c4", "\uc2dc\uc98c5", "\uc2dc\uc98c6", "\uc2dc\uc98c7", "\uc2dc\uc98c8", "\uc2dc\uc98c9", "\uc2dc\uc98c10", "\uc2dc\uc98c11", "\uc2dc\uc98c12", "\uc2dc\uc98c13"], datasets: [
+                    { label: '직급전', data: [5374481, 6610938, 13445194, 2561153, 4252794, 5953195, 5746700, 5769642, 4716222, 5035289, 4222022, 3026835, 3342545], backgroundColor: '#d4af37' },
+                    { label: '일반회차', data: [15937594, 17876254, 10114750, 9570564, 11189269, 12533718, 15189920, 14163045, 14853252, 11382964, 10930129, 10680852, 13226363], backgroundColor: '#aa801e' }
+                ] },
                 options: { ...commonOptions, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) } 
             });
-            
+
             cChart = new Chart(document.getElementById('currentChart'), { 
                 type: 'bar', 
-                data: { 
-                    labels: ['직급전', '1회차', '2회차'], 
-                    datasets: [{ label: '매출', data: [4343316, 2164822, 3135452], backgroundColor: (c) => getGradient(c.chart, 'rgba(212, 175, 55, 0.4)', '#d4af37'), borderRadius: 6, borderWidth: 1, borderColor: 'rgba(212,175,55,0.8)' }] 
-                }, 
+                data: { labels: ['직급전', '1회차', '2회차'], datasets: [{ label: '매출', data: [4343316, 2164822, 3135452], backgroundColor: '#d4af37' }] }, 
                 options: commonOptions 
             });
         }
 
         function openSalesModal(season) {
-            const data = historyDb[season]; if(!data) return;
+            // 💡 변수명 에러 픽스: 자바스크립트 변수 historyDb 사용
+            const data = historyDb[season]; 
+            if(!data) return;
+            
             document.getElementById('s-title').innerText = season + " 세부 리포트";
             let html = `<li class="sales-list-item"><span style="color:#d4af37; font-weight:800;">직급전</span> <b style="color:#f5f5dc;">${data.직급전.toLocaleString()} 개</b></li>`;
             data.contents.forEach(item => html += `<li class="sales-list-item"><span style="color:#aaa;">${item[0]}</span> <b style="color:#fff;">${item[1].toLocaleString()} 개</b></li>`);
-            document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
+            document.getElementById('s-list').innerHTML = html; 
+            document.getElementById('sales-modal').style.display = 'flex';
         }
         function closeSalesModal() { document.getElementById('sales-modal').style.display = 'none'; }
 
-        // 💡 프로필 텍스트 한글 세팅
-        function openProfile(n) { 
-            const m = members[n]; 
-            document.getElementById('m-img').src = m.img; 
-            document.getElementById('m-name').innerText = n; 
-            document.getElementById('m-pos').innerText = m.pos; 
-            
-            let html = '';
-            if(m.age) html += `<div class="stat-box"><span class="stat-label">나이</span><span class="stat-value">${m.age}</span></div>`;
-            if(m.join_date) html += `<div class="stat-box"><span class="stat-label">입사일</span><span class="stat-value">${m.join_date}</span></div>`;
-            if(m.mbti) html += `<div class="stat-box"><span class="stat-label">MBTI</span><span class="stat-value">${m.mbti}</span></div>`;
-            if(m.stats) html += `<div class="stat-box"><span class="stat-label">신체정보</span><span class="stat-value">${m.stats}</span></div>`;
-            if(m.skill) html += `<div class="stat-box"><span class="stat-label">특기</span><span class="stat-value">${m.skill}</span></div>`;
-            
-            document.getElementById('m-details').innerHTML = html; 
-            document.getElementById('p-modal').style.display = 'flex'; 
+        function openProfile(n) {
+            const m = members[n];
+            document.getElementById('m-img').src = m.img;
+            document.getElementById('m-name').innerText = n;
+            document.getElementById('m-pos').innerText = m.pos;
+            document.getElementById('m-details').innerHTML = `
+                <div class="stat-box"><span class="stat-label">나이</span><span class="stat-value">${m.age}</span></div>
+                <div class="stat-box"><span class="stat-label">입사일</span><span class="stat-value">${m.join_date}</span></div>
+                <div class="stat-box"><span class="stat-label">MBTI</span><span class="stat-value">${m.mbti}</span></div>
+                <div class="stat-box"><span class="stat-label">신체정보</span><span class="stat-value">${m.stats}</span></div>
+                <div class="stat-box"><span class="stat-label">특기</span><span class="stat-value">${m.skill}</span></div>`;
+            document.getElementById('p-modal').style.display = 'flex';
         }
         function closeProfile() { document.getElementById('p-modal').style.display = 'none'; }
 
@@ -786,26 +525,10 @@
             renderVODList(filtered);
         }
 
-        const units = document.querySelectorAll('.member-unit'); 
-        const preview = document.getElementById('preview');
-        units.forEach(unit => {
-            unit.addEventListener('mousemove', (e) => {
-                const thumb = unit.getAttribute('data-thumb');
-                if (thumb && thumb !== "None" && thumb !== "") {
-                    document.getElementById('p-img').src = thumb; 
-                    document.getElementById('p-title').textContent = unit.getAttribute('data-title'); 
-                    document.getElementById('p-viewers').textContent = unit.getAttribute('data-viewers');
-                    preview.style.display = 'block';
-                    let x = e.clientX + 15; let y = e.clientY + 15;
-                    if(x + 340 > window.innerWidth) x = window.innerWidth - 350;
-                    preview.style.left = x + 'px'; preview.style.top = y + 'px';
-                }
-            });
-            unit.addEventListener('mouseleave', () => preview.style.display = 'none');
-        });
-
         let time = 300;
         setInterval(() => { time--; const min = Math.floor(time/60); const sec = time%60; const el = document.getElementById('timer-text'); if(el) el.innerText = `NEXT: ${min}:${sec<10?'0':''}${sec}`; if(time<=0) location.reload(); }, 1000);
+        
+        renderCalendar();
         renderVODList(allVODs);
     </script>
 </body>

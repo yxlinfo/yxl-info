@@ -1,15 +1,19 @@
+import os
 import requests
 import json
 import re
-import sqlite3 # 💡 데이터베이스를 사용하기 위해 추가됨
+import sqlite3
+
+# 💡 깃허브 서버 환경에서 에러 방지를 위한 절대 경로 설정
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, 'yxl_management.db')
 
 # ==========================================
 # [DB 연동 1] 멤버 데이터 불러오기
 # ==========================================
 def get_members_from_db():
-    conn = sqlite3.connect('yxl_management.db')
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    # 멤버 정보와 직급 정보를 조인(JOIN)하여 한 번에 가져옵니다.
     cur.execute('''
         SELECT m.name, m.soop_id, p.name, m.img_url, m.age, m.join_date, m.stats, m.mbti, m.skill
         FROM Members m
@@ -31,7 +35,7 @@ def get_members_from_db():
 # [DB 연동 2] 매출(시즌/회차) 데이터 불러오기
 # ==========================================
 def get_history_from_db():
-    conn = sqlite3.connect('yxl_management.db')
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     cur.execute('SELECT id, season_num, rank_revenue FROM Seasons ORDER BY season_num')
     seasons = cur.fetchall()
@@ -154,12 +158,17 @@ def generate_full_system(members, history_db):
         status_html += f'<div class="row">{cards}</div>'
 
     print("[2/3] 매출 데이터를 처리합니다...")
-    js_labels = [f"시즌{i}" for i in range(1, len(history_db)+1)]
-    js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db)+1)]
-    js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db)+1)]
+    js_labels = []
+    js_rank_rev = []
+    js_norm_rev = []
+    for i in range(1, len(history_db) + 1):
+        key = f"시즌{i}"
+        if key in history_db:
+            js_labels.append(key)
+            js_rank_rev.append(history_db[key]["직급전"])
+            js_norm_rev.append(sum(item[1] for item in history_db[key]["contents"]))
+            
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
-    
-    # 14시즌은 아직 DB에 안 넣었으므로 하드코딩 유지 (추후 DB에 넣으면 로직 변경 가능)
     current_season_vals = [4343316, 2164822, 3135452]
     current_season_sum = sum(current_season_vals)
 
@@ -188,7 +197,6 @@ def generate_full_system(members, history_db):
 
     print("\n✅ 모든 데이터 수집 완료! HTML 및 더미 JSON 파일 생성 중...")
 
-    # HTML 코드는 이전과 100% 동일합니다 (디자인 유지)
     full_html = f"""
 <!DOCTYPE html>
 <html>
@@ -609,7 +617,7 @@ def generate_full_system(members, history_db):
         f.write("{}")
 
 if __name__ == "__main__":
-    # DB에서 최신 데이터를 읽어옵니다. (하드코딩 제거!)
+    # DB에서 최신 데이터를 읽어옵니다.
     db_members = get_members_from_db()
     db_history = get_history_from_db()
     

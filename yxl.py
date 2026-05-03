@@ -1,10 +1,8 @@
 import os
 import requests
 import json
-import re
 import sqlite3
 
-# 💡 깃허브 서버 환경에서 에러 방지를 위한 절대 경로 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, 'yxl_management.db')
 
@@ -51,7 +49,6 @@ def get_history_from_db():
     conn.close()
     return history_db
 
-
 # ==========================================
 # 1. 생방송 상태 체크 API
 # ==========================================
@@ -85,30 +82,19 @@ def get_yxl_status(name, user_id, position, profile_url):
 # ==========================================
 def fetch_vod_data_by_api(vid):
     api_url = "https://api.m.sooplive.co.kr/station/video/a/view"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36",
-        "Origin": "https://m.sooplive.co.kr",
-        "Referer": f"https://m.sooplive.co.kr/player/{vid}"
-    }
+    headers = {"User-Agent": "Mozilla/5.0"}
     data = {"nTitleNo": vid}
-    
     try:
         res = requests.post(api_url, headers=headers, data=data, timeout=5).json()
         if res.get("result") == 1 and "data" in res:
             v_data = res["data"]
             title = v_data.get("title", f"VOD ({vid})").replace('"', '&quot;').replace("'", "&#39;")
-            views = int(v_data.get("view_cnt", 0))
-            raw_date = str(v_data.get("broad_start", "2026-00-00 00:00:00"))
-            date = raw_date[:10].replace("-", ".")
-            
+            date = str(v_data.get("broad_start", "2026-00-00"))[:10].replace("-", ".")
             thumb = v_data.get("thumb", "")
-            if thumb and thumb.startswith("//"):
-                thumb = "https:" + thumb
-                
-            return {"id": vid, "title": title, "date": date, "views": views, "thumb": thumb}
-    except Exception as e:
-        pass
-    return {"id": vid, "title": f"정보 없음 ({vid})", "date": "-", "views": 0, "thumb": ""}
+            if thumb and thumb.startswith("//"): thumb = "https:" + thumb
+            return {"id": vid, "title": title, "date": date, "views": int(v_data.get("view_cnt", 0)), "thumb": thumb}
+    except: pass
+    return {"id": vid, "title": "정보 없음", "date": "-", "views": 0, "thumb": ""}
 
 # ==========================================
 # 3. 메인 대시보드 시스템 생성
@@ -118,84 +104,81 @@ def generate_full_system(members, history_db):
     data_map = {m['name']: get_yxl_status(m['name'], m['id'], m['pos'], m['img']) for m in members}
     js_member_data = json.dumps({m['name']: m for m in members}, ensure_ascii=False)
     
-    rows_structure = [
-        ["염보성"], 
-        ["리윤", "후잉", "냥냥수주"], 
-        ["류서하", "율무", "하랑짱"], 
-        ["미로", "유나연", "소다", "김유정"], 
-        ["백나현", "아름", "서니", "너의멜로디"], 
-        ["꺼니", "김푸"]
-    ]
+    # 💡 직급 기반 층(Tier) 맵핑
+    tier_mapping = {
+        "대표": "EXECUTIVE",
+        "비서실장": "LEAD", "부장": "LEAD",
+        "차장": "SENIOR", "과장": "SENIOR", "대리": "SENIOR",
+        "주임": "JUNIOR", "선임사원": "JUNIOR", "사원": "JUNIOR", "인턴장": "JUNIOR", "시급이": "JUNIOR",
+        "신입": "ROOKIE",
+        "웨이터": "WAITER"
+    }
     
+    tiers_order = ["EXECUTIVE", "LEAD", "SENIOR", "JUNIOR", "ROOKIE", "WAITER"]
+    tier_groups = {tier: [] for tier in tiers_order}
+    
+    for m in members:
+        tier = tier_mapping.get(m['pos'], "JUNIOR")
+        tier_groups[tier].append(m)
+
     status_html = ""
-    for row in rows_structure:
-        cards = ""
-        for name in row:
-            if name in data_map:
-                info = data_map[name]
-                live_class = "on-air" if info['is_live'] else ""
-                cards += f"""
-                <div class="member-unit {live_class}" data-thumb="{info['thumb']}" data-title="{info['title']}" data-viewers="{info['viewers']}">
-                    <div class="aura-container">
-                        <div class="purple-aura"></div>
-                        <div class="circle-frame" onclick="openProfile('{name}')">
-                            <img src="{info['profile']}" class="profile-img">
-                            <div class="embedded-info">
-                                <div class="pos-tag" style="color: {info['theme']};">{info['pos']}</div>
-                                <div class="name-label">{info['name']}</div>
-                            </div>
-                            <div class="overlay-menu" onclick="event.stopPropagation()">
-                                <div class="click-guide" onclick="openProfile('{name}')">PROFILE CLICK</div>
-                                <div class="btn-group">
-                                    <a href="{info["home_link"]}" target="_blank" class="btn btn-home">방송국</a>
-                                    {f'<a href="{info["live_link"]}" target="_blank" class="btn btn-live">LIVE</a>' if info['is_live'] else ''}
-                                </div>
+    for tier_name in tiers_order:
+        tier_members = tier_groups[tier_name]
+        if not tier_members: continue
+        
+        # 💡 고급스러운 티어 헤더 추가
+        status_html += f'''
+        <div class="tier-section">
+            <div class="tier-header">
+                <div class="tier-line"></div>
+                <div class="tier-title">{tier_name}</div>
+                <div class="tier-line"></div>
+            </div>
+            <div class="row">
+        '''
+        
+        for m in tier_members:
+            info = data_map[m['name']]
+            live_class = "on-air" if info['is_live'] else ""
+            status_html += f"""
+            <div class="member-unit {live_class}" data-thumb="{info['thumb']}" data-title="{info['title']}" data-viewers="{info['viewers']}">
+                <div class="aura-container">
+                    <div class="purple-aura"></div>
+                    <div class="circle-frame" onclick="openProfile('{m['name']}')">
+                        <img src="{info['profile']}" class="profile-img">
+                        <div class="embedded-info">
+                            <div class="pos-tag" style="color: {info['theme']};">{info['pos']}</div>
+                            <div class="name-label">{info['name']}</div>
+                        </div>
+                        <div class="overlay-menu" onclick="event.stopPropagation()">
+                            <div class="click-guide" onclick="openProfile('{m['name']}')">PROFILE</div>
+                            <div class="btn-group">
+                                <a href="{info["home_link"]}" target="_blank" class="btn btn-home">방송국</a>
+                                {f'<a href="{info["live_link"]}" target="_blank" class="btn btn-live">LIVE</a>' if info['is_live'] else ''}
                             </div>
                         </div>
-                        <div class="live-indicator">LIVE</div>
                     </div>
-                </div>"""
-        status_html += f'<div class="row">{cards}</div>'
+                    <div class="live-indicator">LIVE</div>
+                </div>
+            </div>"""
+        status_html += '</div></div>'
 
     print("[2/3] 매출 데이터를 처리합니다...")
-    js_labels = []
-    js_rank_rev = []
-    js_norm_rev = []
-    for i in range(1, len(history_db) + 1):
-        key = f"시즌{i}"
-        if key in history_db:
-            js_labels.append(key)
-            js_rank_rev.append(history_db[key]["직급전"])
-            js_norm_rev.append(sum(item[1] for item in history_db[key]["contents"]))
-            
+    js_labels = [f"시즌{i}" for i in range(1, len(history_db) + 1)]
+    js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db) + 1)]
+    js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db) + 1)]
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
-    current_season_vals = [4343316, 2164822, 3135452]
-    current_season_sum = sum(current_season_vals)
+    current_season_sum = sum([4343316, 2164822, 3135452])
 
-    print("[3/3] SOOP 서버에서 49개 VOD 실제 데이터를 가져옵니다. (약 10~15초 소요)")
-    vod_ids = [
-        "139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", 
-        "146665451", "149341401", "149372371", "149482895", "149543791", "151963511", "152673671", 
-        "152932371", "153270385", "153906161", "155022377", "156072307", "156233659", "156443147", 
-        "156897587", "157766473", "159784167", "159835159", "160179551", "160229793", "163314531", 
-        "163507573", "165090649", "165095477", "166797677", "167711523", "168507233", "169165861", 
-        "171334577", "171346633", "171517903", "171625221", "181193639", "181202165", "181212107", 
-        "181319655", "182185345", "182561159", "185332075", "186322409", "188589109", "193831035"
-    ]
+    print("[3/3] SOOP VOD 데이터를 가져옵니다...")
+    vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", "146665451", "149341401", "149372371"]
     vod_ids.reverse() 
-    
-    vod_list = []
-    for idx, vid in enumerate(vod_ids):
-        print(f"   -> [{idx+1}/{len(vod_ids)}] VOD {vid} 로딩중...")
-        vod_data = fetch_vod_data_by_api(vid)
-        vod_list.append(vod_data)
-
+    vod_list = [fetch_vod_data_by_api(vid) for vid in vod_ids]
     valid_vods = [v for v in vod_list if v["views"] > 0]
     top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
-    main_vod = vod_list[0] if vod_list else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
-    js_vod_data = json.dumps(vod_list, ensure_ascii=False)
+    main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
 
-    print("\n✅ 모든 데이터 수집 완료! HTML 및 더미 JSON 파일 생성 중...")
+    print("\n✅ 모든 데이터 수집 완료! HTML 생성 중...")
 
     full_html = f"""
 <!DOCTYPE html>
@@ -204,382 +187,176 @@ def generate_full_system(members, history_db):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <title>YXL MANAGEMENT SYSTEM</title>
+    <title>YXL VIP LOUNGE</title>
+    <!-- 💡 고급스러운 영문 폰트 (Cinzel) 추가 -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
-        body {{ background: #0f0c1a; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow-x: hidden; box-sizing: border-box; }}
+        body {{ background: #08080c; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow-x: hidden; box-sizing: border-box; }}
         h1, h2, h3, h4, p, span, div {{ font-weight: 900; box-sizing: border-box; }}
         
-        .nav-header {{ position: sticky; top: 0; background: rgba(15, 12, 26, 0.95); border-bottom: 1px solid rgba(138, 43, 226, 0.2); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; backdrop-filter: blur(15px); box-shadow: 0 5px 20px rgba(0,0,0,0.5); flex-wrap: wrap; gap: 10px; }}
+        /* 네비게이션바 고급화 */
+        .nav-header {{ position: sticky; top: 0; background: rgba(8, 8, 12, 0.85); border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-wrap: wrap; gap: 10px; }}
         .logo-section {{ display: flex; align-items: center; cursor: pointer; }}
-        .update-timer {{ font-size: 14px; font-weight: 900; color: #8a2be2; margin-left: 15px; text-shadow: 0 0 10px rgba(138,43,226,0.4); letter-spacing: 1px; }}
+        .update-timer {{ font-size: 13px; font-weight: 900; color: #d4af37; margin-left: 15px; letter-spacing: 2px; font-family: 'Cinzel', serif; }}
         
-        .tab-menu {{ display: flex; gap: 15px; flex-wrap: wrap; }}
-        .tab-item {{ font-size: 15px; font-weight: 900; cursor: pointer; color: rgba(255,255,255,0.3); padding: 10px 5px; position: relative; text-transform: uppercase; transition: 0.3s; }}
-        .tab-item.active {{ color: #fff; text-shadow: 0 0 10px rgba(138, 43, 226, 0.5); }}
-        .tab-item.active::after {{ content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: #8a2be2; box-shadow: 0 0 15px #8a2be2; }}
+        .tab-menu {{ display: flex; gap: 20px; flex-wrap: wrap; }}
+        .tab-item {{ font-size: 14px; font-weight: 900; cursor: pointer; color: rgba(255,255,255,0.4); padding: 8px 5px; position: relative; text-transform: uppercase; transition: 0.4s; letter-spacing: 1px; }}
+        .tab-item.active {{ color: #d4af37; text-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }}
+        .tab-item.active::after {{ content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #d4af37, transparent); box-shadow: 0 0 10px #d4af37; }}
         
-        .main-container {{ padding: 25px 15px; width: 100%; max-width: 900px; margin: 0 auto; min-height: 100vh; }}
-        .tab-content {{ display: none; animation: fadeIn 0.4s ease; width: 100%; }}
+        .main-container {{ padding: 30px 15px; width: 100%; max-width: 950px; margin: 0 auto; min-height: 100vh; }}
+        .tab-content {{ display: none; animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); width: 100%; }}
         .tab-content.active {{ display: block; }}
-        @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; }} }}
+        @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(15px); }} to {{ opacity: 1; }} }}
 
-        /* 1. 현황판 */
-        #status {{ padding-top: 30px; }} 
-        .row {{ display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 35px; justify-content: center; }}
-        .member-unit {{ position: relative; width: 130px; transition: transform 0.3s; }}
-        .member-unit:hover {{ transform: scale(1.08); z-index: 50; }}
-        .circle-frame {{ position: relative; width: 120px; height: 120px; border-radius: 50%; padding: 4px; background: #fff; border: 1px solid #ddd; overflow: hidden; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.5); margin: 0 auto; }}
-        .profile-img {{ width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }}
-        .embedded-info {{ position: absolute; bottom: 0; width: 100%; height: 45%; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3; }}
-        .pos-tag {{ font-size: 10px; margin-bottom: 2px; text-shadow: 0 0 5px rgba(0,0,0,0.8); }}
-        .name-label {{ font-size: 14px; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.8); }}
-        .overlay-menu {{ position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; z-index: 10; border-radius: 50%; }}
+        /* 💡 현황판 티어(층) UI 고급화 */
+        .tier-section {{ margin-bottom: 50px; }}
+        .tier-header {{ display: flex; align-items: center; justify-content: center; margin-bottom: 30px; gap: 20px; }}
+        .tier-title {{ font-family: 'Cinzel', serif; font-size: 22px; color: #f5f5dc; letter-spacing: 4px; text-shadow: 0 2px 15px rgba(212, 175, 55, 0.4); }}
+        .tier-line {{ height: 1px; flex: 1; max-width: 250px; background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent); }}
+
+        .row {{ display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; }}
+        .member-unit {{ position: relative; width: 130px; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }}
+        .member-unit:hover {{ transform: translateY(-8px) scale(1.05); z-index: 50; }}
+        
+        /* 프레임 디자인 럭셔리화 */
+        .circle-frame {{ position: relative; width: 120px; height: 120px; border-radius: 50%; padding: 3px; background: #111; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.8); margin: 0 auto; transition: 0.3s; }}
+        .member-unit:hover .circle-frame {{ border-color: rgba(212, 175, 55, 0.5); box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2); }}
+        .profile-img {{ width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: contrast(1.1) saturate(1.1); transition: 0.5s; }}
+        .member-unit:hover .profile-img {{ transform: scale(1.1); }}
+        
+        .embedded-info {{ position: absolute; bottom: 0; width: 100%; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 12px; z-index: 3; }}
+        .pos-tag {{ font-size: 10px; margin-bottom: 3px; font-weight: 800; letter-spacing: 0.5px; }}
+        .name-label {{ font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }}
+        
+        .overlay-menu {{ position: absolute; inset: 0; background: rgba(8,8,12,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; z-index: 10; border-radius: 50%; backdrop-filter: blur(3px); }}
         .member-unit:hover .overlay-menu {{ opacity: 1; }}
-        .click-guide {{ font-size: 9px; color: #fff; background: #8a2be2; padding: 3px 8px; border-radius: 10px; margin-bottom: 6px; }}
-        .btn {{ width: 70px; padding: 4px 0; border-radius: 15px; font-size: 10px; color: #fff; border: 1px solid rgba(255,255,255,0.3); text-decoration: none; text-align: center; margin-bottom: 4px; transition: 0.2s; }}
-        .btn:hover {{ background: #fff; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.6); }}
-        .btn-live {{ background: #ff0000; border: none; }}
-        .btn-live:hover {{ background: #ff3333; color: #fff; box-shadow: 0 0 15px #ff0000; }}
-        .purple-aura {{ position: absolute; width: 140px; height: 140px; top:-6px; left:-6px; background: radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, transparent 70%); filter: blur(10px); z-index: 1; }}
-        .live-indicator {{ position: absolute; top: 0; right: 0; background: #ff0000; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; z-index: 15; display: none; }}
-        .on-air .live-indicator {{ display: block; animation: blink 1s infinite; }}
-        .on-air .circle-frame {{ border: 2px solid #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.6); }}
-        @keyframes blink {{ 50% {{ opacity: 0.5; }} }}
+        .click-guide {{ font-size: 9px; color: #000; background: #d4af37; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; font-weight: 900; }}
+        .btn {{ width: 75px; padding: 5px 0; border-radius: 15px; font-size: 10px; color: #fff; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; text-align: center; margin-bottom: 5px; transition: 0.3s; }}
+        .btn:hover {{ background: rgba(255,255,255,0.1); border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }}
+        .btn-live {{ background: rgba(220, 20, 60, 0.2); border-color: #dc143c; color: #ff4d4d; }}
+        .btn-live:hover {{ background: #dc143c; color: #fff; box-shadow: 0 0 15px rgba(220, 20, 60, 0.6); }}
+        
+        .live-indicator {{ position: absolute; top: -5px; right: -5px; background: #dc143c; color: #fff; font-size: 9px; font-weight: 900; padding: 3px 8px; border-radius: 6px; box-shadow: 0 2px 10px rgba(220, 20, 60, 0.5); z-index: 15; display: none; border: 1px solid rgba(255,255,255,0.3); }}
+        .on-air .live-indicator {{ display: block; animation: pulseRed 2s infinite; }}
+        .on-air .circle-frame {{ border: 2px solid #dc143c; box-shadow: 0 0 20px rgba(220, 20, 60, 0.4); }}
+        @keyframes pulseRed {{ 0% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7); }} 70% {{ box-shadow: 0 0 0 10px rgba(220, 20, 60, 0); }} 100% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0); }} }}
 
-        /* 미리보기(Preview) 툴팁 CSS */
-        #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 300px; background: #0f0c1a; border: 2px solid #8a2be2; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); overflow: hidden; }}
-        .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #333; }}
+        /* 미리보기 툴팁 */
+        #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 320px; background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.95); overflow: hidden; }}
+        .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #222; }}
         .p-info {{ padding: 15px; text-align: center; }}
-        .p-title {{ font-size: 14px; color: #fff; margin-bottom: 8px; word-break: keep-all; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
-        .p-live-badge {{ font-size: 13px; color: #ff0000; text-shadow: 0 0 10px rgba(255,0,0,0.5); }}
+        .p-title {{ font-size: 14px; color: #f5f5dc; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
+        .p-live-badge {{ font-size: 12px; color: #ff4d4d; letter-spacing: 1px; }}
 
-        /* 2. 매출표 */
-        .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 4px solid #8a2be2; padding-left: 10px; flex-wrap: wrap; gap: 10px; }}
-        .sales-main-title {{ font-size: 18px; color: #8a2be2; letter-spacing: 1px; }}
-        .legend-box {{ display: flex; gap: 10px; font-size: 12px; color: #fff; }}
-        .legend-item {{ display: flex; align-items: center; gap: 4px; }}
-        .dot {{ width: 10px; height: 10px; border-radius: 3px; }}
-        .total-sum-badge {{ font-size: 14px; color: #fff; background: #8a2be2; padding: 6px 14px; border-radius: 20px; }}
-        .sales-desc-text {{ font-size: 12px; color: #aaa; margin-top: 5px; font-weight: 500; display: block; }}
+        /* 모달 및 기타 UI (색상 톤 다운 및 골드 포인트 추가) */
+        .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
+        .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; border-left: 3px solid #d4af37; padding-left: 12px; }}
+        .total-sum-badge {{ font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 6px 16px; border-radius: 20px; }}
         
-        .sales-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 15px; padding: 20px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); width: 100%; }}
+        .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Cinzel', serif; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 10px; }}
+        .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; }}
+        .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); }}
         
-        .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
-        .chart-scroll-wrapper::-webkit-scrollbar {{ height: 10px; }}
-        .chart-scroll-wrapper::-webkit-scrollbar-track {{ background: rgba(0,0,0,0.4); border-radius: 10px; border: 1px solid rgba(138, 43, 226, 0.2); box-shadow: inset 0 0 5px rgba(0,0,0,0.8); }}
-        .chart-scroll-wrapper::-webkit-scrollbar-thumb {{ background: linear-gradient(90deg, #5b1aa6, #ff4099); border-radius: 10px; box-shadow: inset 0 0 5px rgba(255,255,255,0.2); }}
-        .chart-scroll-wrapper::-webkit-scrollbar-thumb:hover {{ background: linear-gradient(90deg, #8a2be2, #ff69b4); }}
+        #sales-modal, #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: flex-start; justify-content: center; backdrop-filter: blur(10px); padding: 20px; padding-top: 15vh; }}
+        .profile-modal-inner {{ background: #0c0c11; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 35px; width: 100%; max-width: 550px; display: flex; flex-wrap: wrap; gap: 25px; position: relative; }}
+        .profile-details-label {{ color: #aa801e; width: 65px; font-weight: 900; }}
         
-        .chart-container {{ min-width: 1000px; height: 350px; }}
-        .chart-container-small {{ min-width: 400px; height: 250px; }}
-
-        /* 3. 일정표 */
-        .next-event-card {{ background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%); border: 1px solid #8a2be2; border-radius: 15px; padding: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 25px rgba(138, 43, 226, 0.3); margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }}
-        .next-event-info h3 {{ font-size: 15px; color: #FFD700; margin: 0 0 8px 0; }}
-        .next-event-info h1 {{ font-size: 28px; color: #fff; margin: 0 0 10px 0; }}
-        .next-event-info p {{ font-size: 14px; color: #aaa; margin: 0; }}
-        .d-day-badge {{ font-size: 40px; color: #8a2be2; text-shadow: 0 0 15px rgba(138,43,226,0.8); }}
-        
-        .timeline-section {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 25px; }}
-        .timeline-title {{ font-size: 18px; color: #fff; border-left: 4px solid #8a2be2; padding-left: 10px; margin-bottom: 20px; }}
-        
-        .timeline-item {{ 
-            position: relative; background: rgba(0,0,0,0.5); border: 1px solid rgba(138, 43, 226, 0.2); border-left: 4px solid #333; 
-            border-radius: 10px; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; 
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-        }}
-        .timeline-item:hover {{ 
-            transform: translateX(12px) scale(1.02); 
-            background: linear-gradient(90deg, rgba(138, 43, 226, 0.15) 0%, rgba(0,0,0,0.8) 100%); 
-            border-color: #8a2be2; border-left: 5px solid #8a2be2; 
-            box-shadow: 0 10px 25px rgba(138, 43, 226, 0.5); 
-        }}
-        
-        .t-date {{ font-size: 13px; color: #FFD700; margin-bottom: 5px; }}
-        .t-title {{ font-size: 18px; color: #fff; margin-bottom: 5px; transition: color 0.3s; }}
-        .timeline-item:hover .t-title {{ color: #e0b0ff; text-shadow: 0 0 10px rgba(138,43,226,0.6); }}
-        .t-desc {{ font-size: 13px; color: #aaa; }}
-        .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; transition: 0.3s; }}
-        .t-status.upcoming {{ background: #8a2be2; }}
-        .timeline-item:hover .t-status {{ box-shadow: 0 0 15px rgba(255,255,255,0.4); }}
-
-        /* 4. VOD */
-        .search-wrapper {{ position: relative; width: 100%; max-width: 300px; margin-top: 10px; }}
-        .search-input {{ width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #8a2be2; padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; box-sizing: border-box; }}
-        
-        .main-stage {{ background: rgba(15, 12, 26, 0.6); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }}
-        .player-wrapper {{ width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }}
-        .player-wrapper iframe {{ width: 100%; height: 100%; border: none; }}
-        .player-info {{ width: 100%; }}
-        .top-badge {{ background: linear-gradient(to right, #ff0000, #ff8c00); padding: 4px 10px; border-radius: 4px; font-size: 11px; margin-bottom: 10px; display: inline-block; }}
-        
-        .vod-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; margin-bottom: 40px; }}
-        .vod-card {{ background: rgba(0,0,0,0.6); border-radius: 10px; border: 1px solid rgba(138, 43, 226, 0.2); cursor: pointer; transition: 0.3s; overflow: hidden; display:flex; flex-direction:column; }}
-        .vod-card:hover {{ transform: translateY(-5px); border-color: #8a2be2; box-shadow: 0 10px 20px rgba(138,43,226,0.3); }}
-        .vod-thumb {{ width: 100%; aspect-ratio: 16/9; background: #111; overflow: hidden; }}
-        .vod-thumb img {{ width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }}
-        .vod-card:hover .vod-thumb img {{ opacity: 1; transform: scale(1.05); }}
-        .vod-text {{ padding: 12px; flex:1; display:flex; flex-direction:column; justify-content:space-between; }}
-        .vod-text h4 {{ margin: 0 0 6px 0; font-size: 13px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }}
-        .vod-text p {{ margin: 0; font-size: 11px; color: #aaa; }}
-
-        /* 모달창 */
-        #sales-modal, #p-modal {{ 
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 6000; 
-            align-items: flex-start; justify-content: center; backdrop-filter: blur(5px); padding: 20px; 
-            padding-top: 12vh;
-        }}
-        .s-modal-card {{ background: #12121b; width: 100%; max-width: 500px; border-radius: 15px; border: 1px solid #444; padding: 25px; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }}
-        .content-item {{ display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; }}
-        
-        .profile-modal-inner {{ background: #12121b; width: 100%; max-width: 550px; border-radius: 15px; border: 1px solid #444; display: flex; flex-wrap: wrap; padding: 30px; position:relative; box-sizing: border-box; gap: 20px; justify-content: center; box-shadow: 0 20px 60px rgba(138,43,226,0.4); }}
-        .profile-details-row {{ display: flex; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
-        .profile-details-label {{ color: #8a2be2; width: 60px; font-weight: 900; }}
-        .profile-details-value {{ color: #fff; flex: 1; }}
+        .search-input {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); }}
+        .vod-card {{ background: #0a0a0f; border: 1px solid rgba(255,255,255,0.05); }}
+        .vod-card:hover {{ border-color: #d4af37; box-shadow: 0 10px 25px rgba(212,175,55,0.15); }}
     </style>
 </head>
 <body>
     <header class="nav-header">
         <div class="logo-section" onclick="location.reload()">
-            <img src="https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif" height="45">
+            <img src="https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif" height="40" style="filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">
             <span class="update-timer" id="timer-text">NEXT: 5:00</span>
         </div>
         <nav class="tab-menu">
-            <div class="tab-item active" onclick="switchTab(event, 'status')">현황판</div>
-            <div class="tab-item" onclick="switchTab(event, 'sales')">매출표</div>
-            <div class="tab-item" onclick="switchTab(event, 'schedule')">일정표</div>
-            <div class="tab-item" onclick="switchTab(event, 'radio')">VOD</div>
+            <div class="tab-item active" onclick="switchTab(event, 'status')">LOUNGE</div>
+            <div class="tab-item" onclick="switchTab(event, 'sales')">REVENUE</div>
+            <div class="tab-item" onclick="switchTab(event, 'schedule')">SCHEDULE</div>
+            <div class="tab-item" onclick="switchTab(event, 'radio')">MEDIA</div>
         </nav>
     </header>
 
     <div class="main-container">
-        <!-- 1. 현황판 -->
+        <!-- 1. 현황판 (고급 티어 뷰) -->
         <section id="status" class="tab-content active">{status_html}</section>
 
-        <!-- 2. 매출표 -->
+        <!-- 2. 매출표 (색상 톤 다운 수정 필요시 Chart.js 옵션에서 변경 가능) -->
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
                     <div style="display:flex; flex-direction:column; gap:5px;">
-                        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
-                            <span class="sales-main-title">YXL 히스토리 (시즌 1-{len(history_db)})</span>
-                            <div class="legend-box"><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #8a2be2, #4a00e0);"></div>직급전</div><div class="legend-item"><div class="dot" style="background: linear-gradient(180deg, #ff69b4, #ff1493);"></div>일반회차</div></div>
-                        </div>
-                        <span class="sales-desc-text">※ 막대바 클릭시 회차별 상세정보가 나옵니다</span>
+                        <span class="sales-main-title">YXL HISTORY (SS 1-{len(history_db)})</span>
+                        <span class="sales-desc-text">※ 막대바 클릭시 상세 데이터 열람</span>
                     </div>
-                    <div class="total-sum-badge">총 합산: {all_season_sum:,}</div>
+                    <div class="total-sum-badge">TOTAL: {all_season_sum:,}</div>
                 </div>
-                <div class="chart-scroll-wrapper">
-                    <div class="chart-container"><canvas id="historyChart"></canvas></div>
-                </div>
-            </div>
-            <div class="sales-section">
-                <div class="sales-header-container">
-                    <span class="sales-main-title">시즌 14 회차</span>
-                    <div class="total-sum-badge">시즌 합산: {current_season_sum:,}</div>
-                </div>
-                <div class="chart-scroll-wrapper">
-                    <div class="chart-container-small"><canvas id="currentChart"></canvas></div>
-                </div>
+                <div class="chart-scroll-wrapper"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
             </div>
         </section>
 
         <!-- 3. 일정표 -->
         <section id="schedule" class="tab-content">
-            <div class="next-event-card">
-                <div class="next-event-info">
-                    <h3>NEXT HIGHLIGHT</h3>
-                    <h1>시즌 14 - 3회차</h1>
-                    <p>일시: 2026년 05월 07일 (목) 오후 5시</p>
-                </div>
-                <div class="d-day-badge">D-6</div>
-            </div>
             <div class="timeline-section">
-                <div class="timeline-title">YXL TIMELINE</div>
-                <div class="timeline-item"><div><div class="t-date">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
-                <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">대기중</div></div>
-                <div class="timeline-item"><div><div class="t-date">05.14 (목) 17:00</div><div class="t-title">시즌 14 - 5회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">대기중</div></div>
+                <div class="timeline-title">OFFICIAL TIMELINE</div>
+                <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming" style="background: linear-gradient(135deg, #d4af37, #8a6327); color:#000;">UPCOMING</div></div>
+                <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
             </div>
         </section>
 
         <!-- 4. VOD -->
         <section id="radio" class="tab-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
-                <span class="timeline-title" style="margin:0;">LATEST BROADCAST</span>
-                <div class="search-wrapper">
-                    <input type="text" id="vodSearch" class="search-input" placeholder="영상 검색..." onkeyup="searchVOD()">
-                </div>
+                <span class="timeline-title" style="margin:0; border:none;">LATEST RECORD</span>
             </div>
-
             <div class="main-stage">
-                <div class="player-wrapper">
-                    <iframe id="main-player-iframe" src="https://vod.sooplive.com/player/{main_vod['id']}" allowfullscreen></iframe>
-                </div>
-                <div class="player-info">
-                    <div class="top-badge">최신 VOD 업데이트</div>
-                    <h1 id="main-vod-title" style="font-size:20px; color:#fff; margin:0 0 10px 0;">{main_vod['title']}</h1>
-                    <p id="main-vod-date" style="font-size:13px; color:#aaa; margin:0 0 5px 0;">방송일: {main_vod['date']}</p>
-                    <p id="main-vod-views" style="font-size:14px; color:#FFD700; margin:0;">조회수: {format(main_vod['views'], ',')}회</p>
-                </div>
+                <div class="player-wrapper"><iframe id="main-player-iframe" src="https://vod.sooplive.com/player/{main_vod['id']}" allowfullscreen></iframe></div>
             </div>
-
-            <div class="timeline-title" style="margin-bottom:0;">POPULAR TOP 5</div>
-            <div class="vod-grid">
-                {"".join([f'''
-                <div class="vod-card" onclick="changeMainPlayer('{v['id']}', '{v['title']}', '{v['date']}', '{v['views']}')">
-                    <div class="vod-thumb"><img src="{v['thumb']}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL'"></div>
-                    <div class="vod-text">
-                        <div><div style="background:#8a2be2; color:#fff; font-size:9px; padding:2px 5px; border-radius:3px; display:inline-block; margin-bottom:4px;">HOT</div><h4>{v['title']}</h4></div>
-                        <p>{v['date']} • {format(v['views'], ',')}회</p>
-                    </div>
-                </div>''' for v in top_5_vods])}
-            </div>
-
-            <div class="timeline-title" id="list-title" style="margin-bottom:0;">ALL VIDEOS</div>
-            <div class="vod-grid" id="vodListContainer"></div>
         </section>
     </div>
     
-    <!-- 복구된 미리보기 UI -->
-    <div id="preview">
-        <img src="" id="p-img" class="p-thumb">
-        <div class="p-info">
-            <div id="p-title" class="p-title"></div>
-            <div class="p-live-badge">🔴 LIVE • <span id="p-viewers"></span>명 시청중</div>
-        </div>
-    </div>
-    
-    <!-- 모달 -->
-    <div id="sales-modal" onclick="closeSalesModal()">
-        <div class="s-modal-card" onclick="event.stopPropagation()">
-            <div id="s-title" style="font-size:20px; color:#8a2be2; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;"></div>
-            <ul id="s-list" style="list-style:none; padding:0; margin:0;"></ul>
-            <div style="margin-top:20px; text-align:center; color:#777; font-size:12px; cursor:pointer;" onclick="closeSalesModal()">[ 닫기 ]</div>
-        </div>
-    </div>
+    <!-- 툴팁 및 모달 -->
+    <div id="preview"><img src="" id="p-img" class="p-thumb"><div class="p-info"><div id="p-title" class="p-title"></div><div class="p-live-badge">🔴 ON AIR • <span id="p-viewers"></span> Vw.</div></div></div>
     
     <div id="p-modal" onclick="closeProfile()">
         <div class="profile-modal-inner" onclick="event.stopPropagation()">
-            <div style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#888;" onclick="closeProfile()">×</div>
-            <img src="" id="m-img" style="width:180px; height:180px; border-radius:50%; border:3px solid #8a2be2; object-fit:cover; box-shadow: 0 0 15px rgba(138,43,226,0.5);">
+            <div style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#555; transition:0.3s;" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#555'" onclick="closeProfile()">×</div>
+            <img src="" id="m-img" style="width:160px; height:160px; border-radius:50%; border:2px solid #d4af37; object-fit:cover; padding:5px;">
             <div style="flex:1; min-width: 200px; display:flex; flex-direction:column; justify-content:center;">
-                <div id="m-name" style="font-size:28px; color:#fff;"></div>
-                <div id="m-pos" style="font-size:15px; color:#8a2be2; margin-bottom:10px;"></div>
-                <div id="m-details" style="display:flex; flex-direction:column; gap:2px; margin-top:5px;"></div>
+                <div id="m-name" style="font-size:26px; color:#fff; letter-spacing:1px; margin-bottom:5px;"></div>
+                <div id="m-pos" style="font-size:13px; color:#aa801e; margin-bottom:15px; font-weight:800;"></div>
+                <div id="m-details" style="display:flex; flex-direction:column; gap:4px;"></div>
             </div>
         </div>
     </div>
 
     <script>
         const members = {js_member_data};
-        const historyDb = {json.dumps(history_db, ensure_ascii=False)};
-        const allVODs = {js_vod_data};
-        let hChart = null, cChart = null;
-
+        
         function switchTab(e, id) {{
             document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             e.currentTarget.classList.add('active');
             document.getElementById(id).classList.add('active');
-            if(id === 'sales') setTimeout(renderCharts, 50);
         }}
 
-        function getGradient(ctx, chartArea, colorStart, colorEnd) {{
-            if(!chartArea) return colorEnd;
-            let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-            gradient.addColorStop(0, colorStart);
-            gradient.addColorStop(1, colorEnd);
-            return gradient;
-        }}
-
-        function renderCharts() {{
-            Chart.register(ChartDataLabels);
-            if(hChart) hChart.destroy();
-            if(cChart) cChart.destroy();
-            
-            const commonOptions = {{ responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 30 }} }}, plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#fff', font: {{ weight: '900', size: 11 }}, formatter: (v, ctx) => ctx.chart.canvas.id === 'historyChart' && ctx.datasetIndex === 1 ? (ctx.chart.data.datasets[0].data[ctx.dataIndex] + v).toLocaleString() : (ctx.chart.canvas.id === 'currentChart' ? v.toLocaleString() : null) }} }}, scales: {{ y: {{ display: false }}, x: {{ ticks: {{ color: '#fff', font: {{ weight: '900', size: 11 }} }}, grid: {{ display: false }} }} }} }};
-            
-            hChart = new Chart(document.getElementById('historyChart'), {{ 
-                type: 'bar', 
-                data: {{ 
-                    labels: {json.dumps(js_labels, ensure_ascii=False)}, 
-                    datasets: [
-                        {{ 
-                            label: '직급전', data: {js_rank_rev}, 
-                            backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(74, 0, 224, 0.7)', '#8a2be2'); }}, 
-                            borderRadius: 0, borderWidth: 1, borderColor: 'rgba(138,43,226,0.5)', hoverBackgroundColor: '#fff' 
-                        }}, 
-                        {{ 
-                            label: '일반회차', data: {js_norm_rev}, 
-                            backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(255, 20, 147, 0.7)', '#ff69b4'); }}, 
-                            borderRadius: {{topLeft: 6, topRight: 6}}, borderWidth: 1, borderColor: 'rgba(255,105,180,0.5)', hoverBackgroundColor: '#fff' 
-                        }}
-                    ] 
-                }}, 
-                options: {{ ...commonOptions, scales: {{ y: {{ stacked: true, display: false, max: 35000000 }}, x: {{ stacked: true, ticks: {{ color: '#fff', font: {{ weight: '900', size: 11 }} }}, grid: {{ display: false }} }} }}, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} 
-            }});
-            
-            cChart = new Chart(document.getElementById('currentChart'), {{ 
-                type: 'bar', 
-                data: {{ 
-                    labels: ['직급전', '1회차', '2회차'], 
-                    datasets: [{{ 
-                        data: {current_season_vals}, 
-                        backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(255, 140, 0, 0.7)', '#FFD700'); }}, 
-                        borderRadius: 6, borderWidth: 1, borderColor: 'rgba(255,215,0,0.5)', hoverBackgroundColor: '#fff' 
-                    }}] 
-                }}, 
-                options: {{ ...commonOptions, layout: {{ padding: {{ top: 20 }} }} }} 
-            }});
-        }}
-
-        function openSalesModal(season) {{
-            const data = historyDb[season]; if(!data) return;
-            document.getElementById('s-title').innerText = season + " 상세 매출";
-            let html = `<li class="content-item"><span style="color:#8a2be2; flex:1;">직급전</span> <b style="color:#FFD700; margin-left: 10px;">${{data.직급전.toLocaleString()}}개</b></li>`;
-            data.contents.forEach(item => html += `<li class="content-item"><span style="color:#ddd; flex:1;">${{item[0]}}</span> <b style="color:#00e5ff; margin-left: 10px;">${{item[1].toLocaleString()}}개</b></li>`);
-            document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
-        }}
-        function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
-        
         function openProfile(n) {{ 
             const m = members[n]; document.getElementById('m-img').src = m.img; document.getElementById('m-name').innerText = n; document.getElementById('m-pos').innerText = m.pos; 
             let html = '';
-            if(m.age) html += `<div class="profile-details-row"><span class="profile-details-label">나이</span><span class="profile-details-value">${{m.age}}</span></div>`;
-            if(m.join_date) html += `<div class="profile-details-row"><span class="profile-details-label">입사일</span><span class="profile-details-value">${{m.join_date}}</span></div>`;
-            if(m.stats) html += `<div class="profile-details-row"><span class="profile-details-label">스탯</span><span class="profile-details-value">${{m.stats}}</span></div>`;
+            if(m.age) html += `<div class="profile-details-row"><span class="profile-details-label">AGE</span><span class="profile-details-value">${{m.age}}</span></div>`;
+            if(m.join_date) html += `<div class="profile-details-row"><span class="profile-details-label">JOINED</span><span class="profile-details-value">${{m.join_date}}</span></div>`;
             if(m.mbti) html += `<div class="profile-details-row"><span class="profile-details-label">MBTI</span><span class="profile-details-value">${{m.mbti}}</span></div>`;
-            if(m.skill) html += `<div class="profile-details-row"><span class="profile-details-label">특기</span><span class="profile-details-value">${{m.skill}}</span></div>`;
             document.getElementById('m-details').innerHTML = html; document.getElementById('p-modal').style.display = 'flex'; 
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}
 
-        function changeMainPlayer(id, title, date, views) {{
-            document.getElementById('main-player-iframe').src = `https://vod.sooplive.com/player/${{id}}`;
-            document.getElementById('main-vod-title').innerText = title;
-            document.getElementById('main-vod-date').innerText = `방송일: ${{date}}`;
-            document.getElementById('main-vod-views').innerText = `조회수: ${{Number(views).toLocaleString()}}회`;
-            window.scrollTo({{top: 0, behavior: 'smooth'}});
-        }}
-
-        function renderVODList(data) {{
-            document.getElementById('vodListContainer').innerHTML = data.map(v => `
-                <div class="vod-card" onclick="changeMainPlayer('${{v.id}}', '${{v.title.replace(/'/g, "&#39;")}}', '${{v.date}}', '${{v.views}}')">
-                    <div class="vod-thumb"><img src="${{v.thumb}}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL'"></div>
-                    <div class="vod-text"><h4>${{v.title}}</h4><p>${{v.date}} • ${{Number(v.views).toLocaleString()}}회</p></div>
-                </div>`).join('');
-        }}
-
-        function searchVOD() {{
-            const query = document.getElementById('vodSearch').value.toLowerCase();
-            const filtered = allVODs.filter(v => v.title.toLowerCase().includes(query) || v.id.includes(query));
-            document.getElementById('list-title').innerText = query === "" ? "ALL VIDEOS" : `SEARCH RESULTS (${{filtered.length}})`;
-            renderVODList(filtered);
-        }}
-
-        // 복구된 미리보기(Preview) 이벤트 리스너
+        // 호버 툴팁
         const units = document.querySelectorAll('.member-unit'); 
         const preview = document.getElementById('preview');
         units.forEach(unit => {{
@@ -589,13 +366,10 @@ def generate_full_system(members, history_db):
                     document.getElementById('p-img').src = thumb; 
                     document.getElementById('p-title').textContent = unit.getAttribute('data-title'); 
                     document.getElementById('p-viewers').textContent = unit.getAttribute('data-viewers');
-                    
                     preview.style.display = 'block';
-                    let x = e.clientX + 15; 
-                    let y = e.clientY + 15;
-                    if(x + 320 > window.innerWidth) x = window.innerWidth - 330;
-                    preview.style.left = x + 'px'; 
-                    preview.style.top = y + 'px';
+                    let x = e.clientX + 15; let y = e.clientY + 15;
+                    if(x + 340 > window.innerWidth) x = window.innerWidth - 350;
+                    preview.style.left = x + 'px'; preview.style.top = y + 'px';
                 }}
             }});
             unit.addEventListener('mouseleave', () => preview.style.display = 'none');
@@ -603,23 +377,14 @@ def generate_full_system(members, history_db):
 
         let time = 300;
         setInterval(() => {{ time--; const min = Math.floor(time/60); const sec = time%60; const el = document.getElementById('timer-text'); if(el) el.innerText = `NEXT: ${{min}}:${{sec<10?'0':''}}${{sec}}`; if(time<=0) location.reload(); }}, 1000);
-        renderVODList(allVODs);
     </script>
 </body>
 </html>
 """
-    # 1. 완벽한 index.html 생성
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(full_html)
 
-    # 2. 깃허브 액션 에러(128)를 막기 위한 가짜 status.json 자동 생성
-    with open("status.json", "w", encoding="utf-8") as f:
-        f.write("{}")
-
 if __name__ == "__main__":
-    # DB에서 최신 데이터를 읽어옵니다.
     db_members = get_members_from_db()
     db_history = get_history_from_db()
-    
-    # 가져온 데이터로 메인 함수를 실행합니다.
     generate_full_system(db_members, db_history)

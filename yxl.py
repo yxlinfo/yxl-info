@@ -7,7 +7,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, 'yxl_management.db')
 
 # ==========================================
-# [DB 자동 초기화] 파일이 없거나 0바이트일 때 스스로 복구하는 마법의 코드
+# [DB 자동 세팅]
 # ==========================================
 def init_db_if_empty():
     conn = sqlite3.connect(db_path)
@@ -68,68 +68,38 @@ def init_db_if_empty():
             cur.executemany("INSERT INTO Episodes (season_id, title, revenue) VALUES (?, ?, ?)", ep_data)
 
         conn.commit()
-        print("✅ DB 자동 세팅 완료!")
     conn.close()
 
 def get_members_from_db():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute('''
-        SELECT m.name, m.soop_id, p.name, m.img_url, m.age, m.join_date, m.stats, m.mbti, m.skill
-        FROM Members m
-        JOIN Positions p ON m.position_id = p.id
-        ORDER BY p.rank_order, m.id
-    ''')
+    cur.execute('''SELECT m.name, m.soop_id, p.name, m.img_url, m.age, m.join_date, m.stats, m.mbti, m.skill FROM Members m JOIN Positions p ON m.position_id = p.id ORDER BY p.rank_order, m.id''')
     rows = cur.fetchall()
     conn.close()
-    
-    members = []
-    for r in rows:
-        members.append({
-            "name": r[0], "id": r[1], "pos": r[2], "img": r[3],
-            "age": r[4], "join_date": r[5], "stats": r[6], "mbti": r[7], "skill": r[8]
-        })
-    return members
+    return [{"name": r[0], "id": r[1], "pos": r[2], "img": r[3], "age": r[4], "join_date": r[5], "stats": r[6], "mbti": r[7], "skill": r[8]} for r in rows]
 
 def get_history_from_db():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     cur.execute('SELECT id, season_num, rank_revenue FROM Seasons ORDER BY season_num')
     seasons = cur.fetchall()
-    
     history_db = {}
     for sid, snum, srev in seasons:
         cur.execute('SELECT title, revenue FROM Episodes WHERE season_id=? ORDER BY id', (sid,))
         episodes = cur.fetchall()
-        history_db[f"시즌{snum}"] = {
-            "직급전": srev,
-            "contents": [[ep[0], ep[1]] for ep in episodes]
-        }
+        history_db[f"시즌{snum}"] = {"직급전": srev, "contents": [[ep[0], ep[1]] for ep in episodes]}
     conn.close()
     return history_db
 
 def get_yxl_status(name, user_id, position, profile_url):
     url = f"https://api-channel.sooplive.com/v1.1/channel/{user_id}/home/section/broad"
     headers = {"User-Agent": "Mozilla/5.0"}
-    colors = {
-        "대표": "#FFD700", "비서실장": "#E5E4E2", "부장": "#C0C0C0", "차장": "#99A3A4",
-        "과장": "#CD7F32", "대리": "#5DADE2", "주임": "#48C9B0",
-        "선임사원": "#58D68D", "사원": "#F7DC6F", "인턴장": "#F08080", "시급이": "#F5B041", 
-        "신입": "#EB984E", "웨이터": "#AF7AC5"
-    }
+    colors = {"대표": "#FFD700", "비서실장": "#E5E4E2", "부장": "#C0C0C0", "차장": "#99A3A4", "과장": "#CD7F32", "대리": "#5DADE2", "주임": "#48C9B0", "선임사원": "#58D68D", "사원": "#F7DC6F", "인턴장": "#F08080", "시급이": "#F5B041", "신입": "#EB984E", "웨이터": "#AF7AC5"}
     theme = colors.get(position, "#eee")
     try:
         res = requests.get(url, headers=headers, timeout=5).json()
         if res and "broadNo" in res:
-            safe_title = res.get("broadTitle", "").replace('"', '&quot;').replace("'", "&#39;")
-            return {
-                "is_live": True, "name": name, "id": user_id, "pos": position,
-                "theme": theme, "profile": profile_url, "title": safe_title,
-                "viewers": format(res.get("currentSumViewer", 0), ','),
-                "thumb": f"https://liveimg.sooplive.com/h/{res['broadNo']}.webp",
-                "live_link": f"https://play.sooplive.com/{user_id}/{res['broadNo']}",
-                "home_link": f"https://www.sooplive.com/station/{user_id}"
-            }
+            return {"is_live": True, "name": name, "id": user_id, "pos": position, "theme": theme, "profile": profile_url, "title": res.get("broadTitle", "").replace('"', '&quot;'), "viewers": format(res.get("currentSumViewer", 0), ','), "thumb": f"https://liveimg.sooplive.com/h/{res['broadNo']}.webp", "live_link": f"https://play.sooplive.com/{user_id}/{res['broadNo']}", "home_link": f"https://www.sooplive.com/station/{user_id}"}
     except: pass
     return {"is_live": False, "name": name, "id": user_id, "pos": position, "theme": theme, "profile": profile_url, "title": "OFFLINE", "viewers": "0", "thumb": "", "live_link": "#", "home_link": f"https://www.sooplive.com/station/{user_id}"}
 
@@ -141,20 +111,17 @@ def fetch_vod_data_by_api(vid):
         res = requests.post(api_url, headers=headers, data=data, timeout=5).json()
         if res.get("result") == 1 and "data" in res:
             v_data = res["data"]
-            title = v_data.get("title", f"VOD ({vid})").replace('"', '&quot;').replace("'", "&#39;")
-            date = str(v_data.get("broad_start", "2026-00-00"))[:10].replace("-", ".")
             thumb = v_data.get("thumb", "")
             if thumb and thumb.startswith("//"): thumb = "https:" + thumb
-            return {"id": vid, "title": title, "date": date, "views": int(v_data.get("view_cnt", 0)), "thumb": thumb}
+            return {"id": vid, "title": v_data.get("title", f"VOD").replace('"', '&quot;'), "date": str(v_data.get("broad_start", "2026-00-00"))[:10].replace("-", "."), "views": int(v_data.get("view_cnt", 0)), "thumb": thumb}
     except: pass
     return {"id": vid, "title": "정보 없음", "date": "-", "views": 0, "thumb": ""}
 
 def generate_full_system(members, history_db):
-    print("\n[1/3] 생방송 상태를 체크합니다...")
+    print("\n[1/3] 생방송 상태 체크중...")
     data_map = {m['name']: get_yxl_status(m['name'], m['id'], m['pos'], m['img']) for m in members}
     js_member_data = json.dumps({m['name']: m for m in members}, ensure_ascii=False)
     
-    # 💡 층별로 나누는 새로운 티어 맵핑 적용
     tier_mapping = {
         "대표": "EXECUTIVE",
         "부장": "LEAD", "차장": "LEAD", "과장": "LEAD",
@@ -166,10 +133,7 @@ def generate_full_system(members, history_db):
     
     tiers_order = ["EXECUTIVE", "LEAD", "SENIOR", "JUNIOR", "ROOKIE", "WAITER"]
     tier_groups = {tier: [] for tier in tiers_order}
-    
-    for m in members:
-        tier = tier_mapping.get(m['pos'], "JUNIOR")
-        tier_groups[tier].append(m)
+    for m in members: tier_groups[tier_mapping.get(m['pos'], "JUNIOR")].append(m)
 
     status_html = ""
     for tier_name in tiers_order:
@@ -178,14 +142,9 @@ def generate_full_system(members, history_db):
         
         status_html += f'''
         <div class="tier-section">
-            <div class="tier-header">
-                <div class="tier-line"></div>
-                <div class="tier-title">{tier_name}</div>
-                <div class="tier-line"></div>
-            </div>
+            <div class="tier-header"><div class="tier-line"></div><div class="tier-title">{tier_name}</div><div class="tier-line"></div></div>
             <div class="row">
         '''
-        
         for m in tier_members:
             info = data_map[m['name']]
             live_class = "on-air" if info['is_live'] else ""
@@ -212,21 +171,17 @@ def generate_full_system(members, history_db):
             </div>"""
         status_html += '</div></div>'
 
-    print("[2/3] 매출 데이터를 처리합니다...")
+    print("[2/3] 매출 데이터 처리중...")
     js_labels = [f"시즌{i}" for i in range(1, len(history_db) + 1)]
     js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db) + 1)]
     js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db) + 1)]
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
 
-    print("[3/3] SOOP VOD 데이터를 가져옵니다...")
-    vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", "146665451", "149341401", "149372371"]
-    vod_ids.reverse() 
+    print("[3/3] VOD 데이터 처리중...")
+    vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667"]
     vod_list = [fetch_vod_data_by_api(vid) for vid in vod_ids]
     valid_vods = [v for v in vod_list if v["views"] > 0]
-    top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
     main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
-
-    print("\n✅ 모든 데이터 수집 완료! HTML 생성 중...")
 
     full_html = f"""
 <!DOCTYPE html>
@@ -302,22 +257,38 @@ def generate_full_system(members, history_db):
         .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; }}
         .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); }}
         
-        #sales-modal, #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: flex-start; justify-content: center; backdrop-filter: blur(10px); padding: 20px; padding-top: 15vh; }}
-        .profile-modal-inner {{ background: #0c0c11; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 35px; width: 100%; max-width: 550px; display: flex; flex-wrap: wrap; gap: 25px; position: relative; }}
-        .profile-details-label {{ color: #aa801e; width: 65px; font-weight: 900; }}
+        /* 💡 모달창 고급화 및 간섭 방지 CSS */
+        #sales-modal, #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }}
         
-        .search-input {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); }}
-        .vod-card {{ background: #0a0a0f; border: 1px solid rgba(255,255,255,0.05); }}
-        .vod-card:hover {{ border-color: #d4af37; box-shadow: 0 10px 25px rgba(212,175,55,0.15); }}
+        .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 650px; display: flex; gap: 40px; position: relative; align-items: center; }}
+        
+        /* 왼쪽: 사진과 직급 */
+        .profile-left {{ display: flex; flex-direction: column; align-items: center; border-right: 1px solid rgba(212,175,55,0.15); padding-right: 40px; }}
+        .profile-left img {{ width: 160px; height: 160px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); margin-bottom: 20px; }}
+        .profile-name {{ font-size: 28px; color: #fff; letter-spacing: 2px; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }}
+        .profile-tier {{ font-family: 'Cinzel', serif; font-size: 13px; color: #d4af37; letter-spacing: 3px; background: rgba(212,175,55,0.1); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.3); }}
+        
+        /* 오른쪽: 상세 정보 (Grid 레이아웃으로 간섭 완전 차단) */
+        .profile-right {{ flex: 1; display: grid; grid-template-columns: 1fr; gap: 15px; align-content: center; }}
+        .stat-box {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 10px; display: flex; flex-direction: column; }}
+        .stat-label {{ font-family: 'Cinzel', serif; font-size: 11px; color: #aa801e; margin-bottom: 4px; letter-spacing: 1px; }}
+        .stat-value {{ font-size: 15px; color: #f5f5dc; }}
+        
+        .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; transition: 0.3s; font-family: sans-serif; }}
+        .close-btn:hover {{ color: #d4af37; transform: rotate(90deg); }}
         
         .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
         .chart-container {{ min-width: 1000px; height: 350px; }}
+        
+        /* 매출 상세 모달 UI */
+        .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; }}
+        .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
     </style>
 </head>
 <body>
     <header class="nav-header">
         <div class="logo-section" onclick="location.reload()">
-            <img src="https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif" height="40" style="filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">
+            <img src="./logo.gif" height="40" decoding="async" fetchpriority="high" style="filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));" onerror="this.src='https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif'">
             <span class="update-timer" id="timer-text">NEXT: 5:00</span>
         </div>
         <nav class="tab-menu">
@@ -329,7 +300,7 @@ def generate_full_system(members, history_db):
     </header>
 
     <div class="main-container">
-        <!-- 1. 현황판 (고급 티어 뷰) -->
+        <!-- 1. 현황판 -->
         <section id="status" class="tab-content active">{status_html}</section>
 
         <!-- 2. 매출표 -->
@@ -337,10 +308,10 @@ def generate_full_system(members, history_db):
             <div class="sales-section">
                 <div class="sales-header-container">
                     <div style="display:flex; flex-direction:column; gap:5px;">
-                        <span class="sales-main-title">YXL HISTORY (SS 1-{len(history_db)})</span>
-                        <span class="sales-desc-text">※ 막대바 클릭시 상세 데이터 열람</span>
+                        <span class="sales-main-title">YXL REVENUE HISTORY</span>
+                        <span class="sales-desc-text" style="color:#777;">※ 막대바 클릭시 회차별 세부 데이터를 확인할 수 있습니다.</span>
                     </div>
-                    <div class="total-sum-badge">TOTAL: {all_season_sum:,}</div>
+                    <div class="total-sum-badge">TOTAL: {format(all_season_sum, ',')}개</div>
                 </div>
                 <div class="chart-scroll-wrapper"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
             </div>
@@ -366,25 +337,31 @@ def generate_full_system(members, history_db):
         </section>
     </div>
     
-    <!-- 툴팁 및 모달 -->
+    <!-- 툴팁 -->
     <div id="preview"><img src="" id="p-img" class="p-thumb"><div class="p-info"><div id="p-title" class="p-title"></div><div class="p-live-badge">🔴 ON AIR • <span id="p-viewers"></span> Vw.</div></div></div>
     
+    <!-- 매출 상세 모달 -->
     <div id="sales-modal" onclick="closeSalesModal()">
-        <div class="profile-modal-inner" style="max-width:400px; padding:25px;" onclick="event.stopPropagation()">
-            <div id="s-title" style="font-size:20px; color:#d4af37; margin-bottom:15px; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px; width:100%;"></div>
-            <ul id="s-list" style="list-style:none; padding:0; margin:0; width:100%;"></ul>
-            <div style="margin-top:20px; width:100%; text-align:center; color:#777; font-size:12px; cursor:pointer;" onclick="closeSalesModal()">[ 닫기 ]</div>
+        <div class="sales-modal-inner" onclick="event.stopPropagation()">
+            <div id="s-title" style="font-size:22px; font-family:'Cinzel', serif; color:#d4af37; margin-bottom:20px; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px; text-align:center; letter-spacing:2px;"></div>
+            <ul id="s-list" style="list-style:none; padding:0; margin:0;"></ul>
+            <div style="margin-top:25px; text-align:center; color:#777; font-size:12px; cursor:pointer; letter-spacing:1px;" onclick="closeSalesModal()">[ CLOSE ]</div>
         </div>
     </div>
 
+    <!-- 💡 프로필 럭셔리 모달 (영역 분리로 간섭 완전 해결) -->
     <div id="p-modal" onclick="closeProfile()">
-        <div class="profile-modal-inner" onclick="event.stopPropagation()">
-            <div style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#555; transition:0.3s;" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#555'" onclick="closeProfile()">×</div>
-            <img src="" id="m-img" style="width:160px; height:160px; border-radius:50%; border:2px solid #d4af37; object-fit:cover; padding:5px;">
-            <div style="flex:1; min-width: 200px; display:flex; flex-direction:column; justify-content:center;">
-                <div id="m-name" style="font-size:26px; color:#fff; letter-spacing:1px; margin-bottom:5px;"></div>
-                <div id="m-pos" style="font-size:13px; color:#aa801e; margin-bottom:15px; font-weight:800;"></div>
-                <div id="m-details" style="display:flex; flex-direction:column; gap:4px;"></div>
+        <div class="profile-container" onclick="event.stopPropagation()">
+            <div class="close-btn" onclick="closeProfile()">×</div>
+            
+            <div class="profile-left">
+                <img src="" id="m-img">
+                <div id="m-name" class="profile-name"></div>
+                <div id="m-pos" class="profile-tier"></div>
+            </div>
+            
+            <div class="profile-right" id="m-details">
+                <!-- JS에서 stat-box들이 이 영역에 깔끔하게 바둑판으로 들어갑니다 -->
             </div>
         </div>
     </div>
@@ -402,9 +379,9 @@ def generate_full_system(members, history_db):
             if(id === 'sales') setTimeout(renderCharts, 50);
         }}
 
-        function getGradient(ctx, chartArea, colorStart, colorEnd) {{
-            if(!chartArea) return colorEnd;
-            let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+        function getGradient(ctx, colorStart, colorEnd) {{
+            if(!ctx.chartArea) return colorEnd;
+            let gradient = ctx.ctx.createLinearGradient(0, ctx.chartArea.bottom, 0, ctx.chartArea.top);
             gradient.addColorStop(0, colorStart);
             gradient.addColorStop(1, colorEnd);
             return gradient;
@@ -421,20 +398,42 @@ def generate_full_system(members, history_db):
                     datasets: [
                         {{ 
                             label: '직급전', data: {json.dumps(js_rank_rev)}, 
-                            backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(212, 175, 55, 0.4)', '#d4af37'); }}, 
-                            borderRadius: 0, borderWidth: 1, borderColor: 'rgba(212,175,55,0.8)', hoverBackgroundColor: '#fff' 
+                            backgroundColor: (c) => getGradient(c.chart, 'rgba(212, 175, 55, 0.4)', '#d4af37'), 
+                            borderRadius: 0, borderWidth: 1, borderColor: 'rgba(212,175,55,0.8)'
                         }}, 
                         {{ 
                             label: '일반회차', data: {json.dumps(js_norm_rev)}, 
-                            backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(170, 128, 30, 0.4)', '#aa801e'); }}, 
-                            borderRadius: {{topLeft: 6, topRight: 6}}, borderWidth: 1, borderColor: 'rgba(170,128,30,0.8)', hoverBackgroundColor: '#fff' 
+                            backgroundColor: (c) => getGradient(c.chart, 'rgba(170, 128, 30, 0.4)', '#aa801e'), 
+                            borderRadius: {{topLeft: 6, topRight: 6}}, borderWidth: 1, borderColor: 'rgba(170,128,30,0.8)'
                         }}
                     ] 
                 }}, 
                 options: {{ 
-                    responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 30 }} }}, 
-                    plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#fff', font: {{ weight: '900', size: 11 }}, formatter: (v, ctx) => ctx.datasetIndex === 1 ? (ctx.chart.data.datasets[0].data[ctx.dataIndex] + v).toLocaleString() : null }} }}, 
-                    scales: {{ y: {{ stacked: true, display: false }}, x: {{ stacked: true, ticks: {{ color: '#fff', font: {{ weight: '900', size: 11 }} }}, grid: {{ display: false }} }} }},
+                    responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 40 }} }}, 
+                    plugins: {{ 
+                        legend: {{ display: false }}, 
+                        /* 💡 숫자 오류 수정: 차트 상단 숫자를 'OOO만' 단위로 축약하여 가독성 확보 */
+                        datalabels: {{ 
+                            anchor: 'end', align: 'top', color: '#d4af37', font: {{ weight: '900', size: 12 }}, 
+                            formatter: (v, ctx) => {{
+                                if(ctx.datasetIndex === 1) {{
+                                    let total = ctx.chart.data.datasets[0].data[ctx.dataIndex] + v;
+                                    return Math.floor(total / 10000).toLocaleString() + '만';
+                                }}
+                                return null;
+                            }}
+                        }},
+                        /* 마우스 올렸을때 나오는 툴팁은 정확한 수치 표시 */
+                        tooltip: {{
+                            callbacks: {{
+                                label: (ctx) => `${{ctx.dataset.label}}: ${{ctx.raw.toLocaleString()}}개`
+                            }}
+                        }}
+                    }}, 
+                    scales: {{ 
+                        y: {{ stacked: true, display: false }}, 
+                        x: {{ stacked: true, ticks: {{ color: '#aaa', font: {{ weight: '900', size: 12 }} }}, grid: {{ color: 'rgba(212,175,55,0.1)' }} }} 
+                    }},
                     onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index])
                 }} 
             }});
@@ -442,20 +441,29 @@ def generate_full_system(members, history_db):
 
         function openSalesModal(season) {{
             const data = historyDb[season]; if(!data) return;
-            document.getElementById('s-title').innerText = season + " 세부 데이터";
-            let html = `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #333; font-size:13px;"><span style="color:#d4af37;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}}개</b></li>`;
-            data.contents.forEach(item => html += `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #333; font-size:13px;"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}}개</b></li>`);
+            document.getElementById('s-title').innerText = season + " REPORT";
+            let html = `<li class="sales-list-item"><span style="color:#d4af37; font-weight:800;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}} 개</b></li>`;
+            data.contents.forEach(item => html += `<li class="sales-list-item"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}} 개</b></li>`);
             document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
+        // 💡 럭셔리 모달에 데이터 깔끔하게 세팅 (간섭 원천 차단)
         function openProfile(n) {{ 
-            const m = members[n]; document.getElementById('m-img').src = m.img; document.getElementById('m-name').innerText = n; document.getElementById('m-pos').innerText = m.pos; 
+            const m = members[n]; 
+            document.getElementById('m-img').src = m.img; 
+            document.getElementById('m-name').innerText = n; 
+            document.getElementById('m-pos').innerText = m.pos; 
+            
             let html = '';
-            if(m.age) html += `<div class="profile-details-row"><span class="profile-details-label">AGE</span><span class="profile-details-value">${{m.age}}</span></div>`;
-            if(m.join_date) html += `<div class="profile-details-row"><span class="profile-details-label">JOINED</span><span class="profile-details-value">${{m.join_date}}</span></div>`;
-            if(m.mbti) html += `<div class="profile-details-row"><span class="profile-details-label">MBTI</span><span class="profile-details-value">${{m.mbti}}</span></div>`;
-            document.getElementById('m-details').innerHTML = html; document.getElementById('p-modal').style.display = 'flex'; 
+            if(m.age) html += `<div class="stat-box"><span class="stat-label">AGE</span><span class="stat-value">${{m.age}}</span></div>`;
+            if(m.join_date) html += `<div class="stat-box"><span class="stat-label">JOINED DATE</span><span class="stat-value">${{m.join_date}}</span></div>`;
+            if(m.mbti) html += `<div class="stat-box"><span class="stat-label">MBTI / TYPE</span><span class="stat-value">${{m.mbti}}</span></div>`;
+            if(m.stats) html += `<div class="stat-box"><span class="stat-label">PHYSICAL STATS</span><span class="stat-value">${{m.stats}}</span></div>`;
+            if(m.skill) html += `<div class="stat-box"><span class="stat-label">SPECIALTY</span><span class="stat-value">${{m.skill}}</span></div>`;
+            
+            document.getElementById('m-details').innerHTML = html; 
+            document.getElementById('p-modal').style.display = 'flex'; 
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}
 

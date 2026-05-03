@@ -7,8 +7,70 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, 'yxl_management.db')
 
 # ==========================================
-# [DB 연동 1] 멤버 데이터 불러오기
+# [DB 자동 초기화] 파일이 없거나 0바이트일 때 스스로 복구하는 마법의 코드
 # ==========================================
+def init_db_if_empty():
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    
+    cur.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Members'")
+    if cur.fetchone()[0] == 0:
+        print("⚠️ 텅 빈 DB를 감지했습니다. 초기 데이터를 자동으로 세팅합니다...")
+        
+        cur.execute('''CREATE TABLE IF NOT EXISTS Positions (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, theme_color TEXT, rank_order INTEGER)''')
+        cur.execute('''CREATE TABLE IF NOT EXISTS Members (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, soop_id TEXT NOT NULL, position_id INTEGER, img_url TEXT, age TEXT, join_date TEXT, stats TEXT, mbti TEXT, skill TEXT, FOREIGN KEY (position_id) REFERENCES Positions (id))''')
+        cur.execute('''CREATE TABLE IF NOT EXISTS Seasons (id INTEGER PRIMARY KEY AUTOINCREMENT, season_num INTEGER NOT NULL, rank_revenue INTEGER DEFAULT 0)''')
+        cur.execute('''CREATE TABLE IF NOT EXISTS Episodes (id INTEGER PRIMARY KEY AUTOINCREMENT, season_id INTEGER, title TEXT NOT NULL, revenue INTEGER NOT NULL, FOREIGN KEY (season_id) REFERENCES Seasons (id))''')
+
+        positions = [('대표', '#FFD700', 1), ('비서실장', '#E5E4E2', 2), ('부장', '#C0C0C0', 3), ('차장', '#99A3A4', 4), ('과장', '#CD7F32', 5), ('대리', '#5DADE2', 6), ('주임', '#48C9B0', 7), ('사원', '#F7DC6F', 8), ('인턴장', '#F08080', 9), ('시급이', '#F5B041', 10), ('신입', '#EB984E', 11), ('웨이터', '#AF7AC5', 12)]
+        cur.executemany('INSERT INTO Positions (name, theme_color, rank_order) VALUES (?, ?, ?)', positions)
+
+        members = [
+            ('염보성', 'yuambo', 1, 'https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692', '1990.03.29', '2024.10.01', '171.4cm / 76kg / B형', 'ENFJ', '스타크래프트'),
+            ('리윤', 'sladk51', 3, 'https://storage2.ygosu.com/?code=S696b627eddf978.03910279', '1996년생', '2025.06.29', '164cm', 'ISTP', ''),
+            ('후잉', 'jaeha010', 4, 'https://storage2.ygosu.com/?code=S688d2e96622764.18115475', '2001.01.19', '2024.10.12', '160cm / 47kg / AB형', 'ISTJ', '춤'),
+            ('냥냥수주', 'star49', 5, 'https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971', '1997년생', '2026.01.25', '', '', ''),
+            ('류서하', 'smkim82372', 2, 'https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017', '2000년생', '2026.01.25', '', '', ''),
+            ('율무', 'offside629', 6, 'https://storage2.ygosu.com/?code=S6929cfcd99d997.32232313', '1997년생', '2025.10.19', '167cm', 'INTJ', ''),
+            ('하랑짱', 'asy1218', 7, 'https://storage2.ygosu.com/?code=S696b61f365c0e3.11842146', '1991년생', '2025.10.12', '', '', ''),
+            ('미로', 'fhwm0602', 8, 'https://storage2.ygosu.com/?code=S69f0a947083819.23416908', '1995년생', '2026.01.13', '168cm', 'INTJ', ''),
+            ('유나연', 'jeewon1202', 9, 'https://storage2.ygosu.com/?code=S696641fe535711.46782639', '1999년생', '2025.12.11', '163cm', 'ISFP', ''),
+            ('소다', 'zbxlzzz', 10, 'https://storage2.ygosu.com/?code=S696b623ea18219.09523333', '1993년생', '2024.10.29', '160cm', 'INFP', '필라테스'),
+            ('김유정', 'tkek55', 10, 'https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878', '2000년생', '2025.09.04', '164cm', 'ENTJ', ''),
+            ('백나현', 'wk3220', 11, 'https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531', '1996년생', '2026.03.28', '160cm', 'ISFP', ''),
+            ('아름', 'ahrum0912', 11, 'https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064', '1997년생', '2026.03.29', '168cm', 'INFP', '골프'),
+            ('서니', 'iluvpp', 11, 'https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035', '1997년생', '2025.06.17', '160cm', 'ISTP', ''),
+            ('너의멜로디', 'meldoy777', 11, 'https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633', '1999년생', '2026.03.31', '163cm', 'ESFP', ''),
+            ('꺼니', 'callgg', 12, 'https://storage2.ygosu.com/?code=S69f0a951064842.70871652', '1993년생', '2025.10.02', '', '', ''),
+            ('김푸', 'kimpooh0707', 12, 'https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517', '1993년생', '2025.10.02', '', '', '')
+        ]
+        cur.executemany('INSERT INTO Members (name, soop_id, position_id, img_url, age, join_date, stats, mbti, skill) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', members)
+
+        history = {
+            1: {"rank": 5374481, "ep": [("1회차 전후반전", 2426065), ("2회차 팀전", 2732426), ("3회차 직급프리데이", 3890922), ("4회차 전후반 지분전쟁", 3833288), ("5회차 3천만원 기여도 펌핑데이", 3054893)]},
+            2: {"rank": 6610938, "ep": [("1회차 상벌금데이", 6078903), ("2회차 명품데이", 3390108), ("3회차 직급프리데이", 4124926), ("4회차 팀전", 2313129), ("5회차 펌핑룰렛 및 퇴근전쟁", 1969188)]},
+            3: {"rank": 13445194, "ep": [("1회차 블라인드 상금데이", 2683770), ("2회차 데스매치 및 퇴근전쟁", 2011356), ("3회차 직급프리데이", 1852181), ("4회차 전후반 지분전쟁", 1703576), ("5회차 일급데이 및 벌칙", 1863867)]},
+            4: {"rank": 2561153, "ep": [("1회차 그녀를 이겨라 및 퇴근전쟁", 2035685), ("2회차 퐁당퐁당데이", 1702385), ("3회차 장들의 전쟁", 2676513), ("4회차 직급프리데이", 1216858), ("5회차 기여도 펌핑데이 및 퇴근전쟁", 1939123)]},
+            5: {"rank": 4252794, "ep": [("1회차 대표 VS 부장 팀전", 3400157), ("2회차 퐁당 & 가챠 상금데이", 2996095), ("3회차 조기퇴근데이", 2300171), ("4회차 직급프리데이", 2122733), ("5회차 기여도펌핑룰렛데이", 370113)]},
+            6: {"rank": 5953195, "ep": [("1회차 퐁당 & 비키니 벌칙데이", 2822840), ("2회차 난사데이 및 퇴근전쟁", 2076273), ("3회차 직급 프리데이", 2642197), ("4회차 팀전", 2948979), ("5회차 한방룰렛골드데이", 2043429)]},
+            7: {"rank": 5746700, "ep": [("1회차 퐁당퐁당 상벌금데이", 3076958), ("2회차 대표님을 이겨라 및 퇴근전쟁", 2961402), ("3회차 직급 프리데이", 3738078), ("4회차 기여도 펌핑데이", 3390310), ("5회차 조기퇴근데이", 2023172)]},
+            8: {"rank": 5769642, "ep": [("1회차 퐁당퐁당 상벌금데이", 4291255), ("2회차 주차방지데이", 2356810), ("3회차 대표 vs 이사 팀전", 3932965), ("4회차 조기퇴근데이", 1766989), ("5회차 기여도펌핑데이", 1815026)]},
+            9: {"rank": 4716222, "ep": [("1회차 퐁당퐁당데이", 2823519), ("2회차 팀데스매치", 2476563), ("3회차 직급 프리데이", 3035332), ("4회차 추석떡값데이", 2003513), ("5회차 YB를 이겨라", 4514325)]},
+            10: {"rank": 5035289, "ep": [("1회차 와장창데이", 2470625), ("2회차 일급 프리데이", 2008740), ("3회차 염대표를이겨라", 2359007), ("4회차 직급프리데이", 2114014), ("5회차 기여도펌핑데이", 2430578)]},
+            11: {"rank": 4222022, "ep": [("1회차 지분&퐁당데이", 2397972), ("2회차 1대1 데스매치", 1364489), ("3회차 조기퇴근데이", 1507997), ("4회차 용병데이", 4078678), ("5회차 룰렛상금 & 기여도펌핑데이", 1580993)]},
+            12: {"rank": 3026835, "ep": [("1회차 지분 & 퐁당데이", 3038172), ("2회차 상금픽스 직급프리데이", 2960260), ("3회차 부장팀 vs 차장팀 팀데스매치", 1860656), ("4회차 주차방지 & 난사데이", 1356111), ("5회차 조기퇴근데이", 1465653)]},
+            13: {"rank": 3342545, "ep": [("1회차 퐁당 & 극락데이", 3046622), ("2회차 염대표를 이겨라 & 상금갸차데이", 1426315), ("3회차 용병데이", 5941453), ("4회차 조기퇴근데이", 1049820), ("5회차 1대1 데스매치", 1762153)]}
+        }
+        for s_num, data in history.items():
+            cur.execute("INSERT INTO Seasons (season_num, rank_revenue) VALUES (?, ?)", (s_num, data["rank"]))
+            s_id = cur.lastrowid
+            ep_data = [(s_id, title, rev) for title, rev in data["ep"]]
+            cur.executemany("INSERT INTO Episodes (season_id, title, revenue) VALUES (?, ?, ?)", ep_data)
+
+        conn.commit()
+        print("✅ DB 자동 세팅 완료!")
+    conn.close()
+
 def get_members_from_db():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -29,9 +91,6 @@ def get_members_from_db():
         })
     return members
 
-# ==========================================
-# [DB 연동 2] 매출(시즌/회차) 데이터 불러오기
-# ==========================================
 def get_history_from_db():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -49,9 +108,6 @@ def get_history_from_db():
     conn.close()
     return history_db
 
-# ==========================================
-# 1. 생방송 상태 체크 API
-# ==========================================
 def get_yxl_status(name, user_id, position, profile_url):
     url = f"https://api-channel.sooplive.com/v1.1/channel/{user_id}/home/section/broad"
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -77,9 +133,6 @@ def get_yxl_status(name, user_id, position, profile_url):
     except: pass
     return {"is_live": False, "name": name, "id": user_id, "pos": position, "theme": theme, "profile": profile_url, "title": "OFFLINE", "viewers": "0", "thumb": "", "live_link": "#", "home_link": f"https://www.sooplive.com/station/{user_id}"}
 
-# ==========================================
-# 2. VOD 진짜 정보 SOOP API 호출 
-# ==========================================
 def fetch_vod_data_by_api(vid):
     api_url = "https://api.m.sooplive.co.kr/station/video/a/view"
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -96,20 +149,17 @@ def fetch_vod_data_by_api(vid):
     except: pass
     return {"id": vid, "title": "정보 없음", "date": "-", "views": 0, "thumb": ""}
 
-# ==========================================
-# 3. 메인 대시보드 시스템 생성
-# ==========================================
 def generate_full_system(members, history_db):
     print("\n[1/3] 생방송 상태를 체크합니다...")
     data_map = {m['name']: get_yxl_status(m['name'], m['id'], m['pos'], m['img']) for m in members}
     js_member_data = json.dumps({m['name']: m for m in members}, ensure_ascii=False)
     
-    # 💡 직급 기반 층(Tier) 맵핑
+    # 💡 층별로 나누는 새로운 티어 맵핑 적용
     tier_mapping = {
         "대표": "EXECUTIVE",
-        "비서실장": "LEAD", "부장": "LEAD",
-        "차장": "SENIOR", "과장": "SENIOR", "대리": "SENIOR",
-        "주임": "JUNIOR", "선임사원": "JUNIOR", "사원": "JUNIOR", "인턴장": "JUNIOR", "시급이": "JUNIOR",
+        "부장": "LEAD", "차장": "LEAD", "과장": "LEAD",
+        "비서실장": "SENIOR", "대리": "SENIOR", "주임": "SENIOR",
+        "사원": "JUNIOR", "인턴장": "JUNIOR", "시급이": "JUNIOR",
         "신입": "ROOKIE",
         "웨이터": "WAITER"
     }
@@ -126,7 +176,6 @@ def generate_full_system(members, history_db):
         tier_members = tier_groups[tier_name]
         if not tier_members: continue
         
-        # 💡 고급스러운 티어 헤더 추가
         status_html += f'''
         <div class="tier-section">
             <div class="tier-header">
@@ -168,7 +217,6 @@ def generate_full_system(members, history_db):
     js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db) + 1)]
     js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db) + 1)]
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
-    current_season_sum = sum([4343316, 2164822, 3135452])
 
     print("[3/3] SOOP VOD 데이터를 가져옵니다...")
     vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", "146665451", "149341401", "149372371"]
@@ -188,7 +236,6 @@ def generate_full_system(members, history_db):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <title>YXL VIP LOUNGE</title>
-    <!-- 💡 고급스러운 영문 폰트 (Cinzel) 추가 -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -196,7 +243,6 @@ def generate_full_system(members, history_db):
         body {{ background: #08080c; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow-x: hidden; box-sizing: border-box; }}
         h1, h2, h3, h4, p, span, div {{ font-weight: 900; box-sizing: border-box; }}
         
-        /* 네비게이션바 고급화 */
         .nav-header {{ position: sticky; top: 0; background: rgba(8, 8, 12, 0.85); border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-wrap: wrap; gap: 10px; }}
         .logo-section {{ display: flex; align-items: center; cursor: pointer; }}
         .update-timer {{ font-size: 13px; font-weight: 900; color: #d4af37; margin-left: 15px; letter-spacing: 2px; font-family: 'Cinzel', serif; }}
@@ -211,7 +257,6 @@ def generate_full_system(members, history_db):
         .tab-content.active {{ display: block; }}
         @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(15px); }} to {{ opacity: 1; }} }}
 
-        /* 💡 현황판 티어(층) UI 고급화 */
         .tier-section {{ margin-bottom: 50px; }}
         .tier-header {{ display: flex; align-items: center; justify-content: center; margin-bottom: 30px; gap: 20px; }}
         .tier-title {{ font-family: 'Cinzel', serif; font-size: 22px; color: #f5f5dc; letter-spacing: 4px; text-shadow: 0 2px 15px rgba(212, 175, 55, 0.4); }}
@@ -221,7 +266,6 @@ def generate_full_system(members, history_db):
         .member-unit {{ position: relative; width: 130px; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }}
         .member-unit:hover {{ transform: translateY(-8px) scale(1.05); z-index: 50; }}
         
-        /* 프레임 디자인 럭셔리화 */
         .circle-frame {{ position: relative; width: 120px; height: 120px; border-radius: 50%; padding: 3px; background: #111; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.8); margin: 0 auto; transition: 0.3s; }}
         .member-unit:hover .circle-frame {{ border-color: rgba(212, 175, 55, 0.5); box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2); }}
         .profile-img {{ width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: contrast(1.1) saturate(1.1); transition: 0.5s; }}
@@ -244,14 +288,12 @@ def generate_full_system(members, history_db):
         .on-air .circle-frame {{ border: 2px solid #dc143c; box-shadow: 0 0 20px rgba(220, 20, 60, 0.4); }}
         @keyframes pulseRed {{ 0% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7); }} 70% {{ box-shadow: 0 0 0 10px rgba(220, 20, 60, 0); }} 100% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0); }} }}
 
-        /* 미리보기 툴팁 */
         #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 320px; background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.95); overflow: hidden; }}
         .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #222; }}
         .p-info {{ padding: 15px; text-align: center; }}
         .p-title {{ font-size: 14px; color: #f5f5dc; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
         .p-live-badge {{ font-size: 12px; color: #ff4d4d; letter-spacing: 1px; }}
 
-        /* 모달 및 기타 UI (색상 톤 다운 및 골드 포인트 추가) */
         .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
         .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; border-left: 3px solid #d4af37; padding-left: 12px; }}
         .total-sum-badge {{ font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 6px 16px; border-radius: 20px; }}
@@ -267,6 +309,9 @@ def generate_full_system(members, history_db):
         .search-input {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); }}
         .vod-card {{ background: #0a0a0f; border: 1px solid rgba(255,255,255,0.05); }}
         .vod-card:hover {{ border-color: #d4af37; box-shadow: 0 10px 25px rgba(212,175,55,0.15); }}
+        
+        .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
+        .chart-container {{ min-width: 1000px; height: 350px; }}
     </style>
 </head>
 <body>
@@ -287,7 +332,7 @@ def generate_full_system(members, history_db):
         <!-- 1. 현황판 (고급 티어 뷰) -->
         <section id="status" class="tab-content active">{status_html}</section>
 
-        <!-- 2. 매출표 (색상 톤 다운 수정 필요시 Chart.js 옵션에서 변경 가능) -->
+        <!-- 2. 매출표 -->
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
@@ -324,6 +369,14 @@ def generate_full_system(members, history_db):
     <!-- 툴팁 및 모달 -->
     <div id="preview"><img src="" id="p-img" class="p-thumb"><div class="p-info"><div id="p-title" class="p-title"></div><div class="p-live-badge">🔴 ON AIR • <span id="p-viewers"></span> Vw.</div></div></div>
     
+    <div id="sales-modal" onclick="closeSalesModal()">
+        <div class="profile-modal-inner" style="max-width:400px; padding:25px;" onclick="event.stopPropagation()">
+            <div id="s-title" style="font-size:20px; color:#d4af37; margin-bottom:15px; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px; width:100%;"></div>
+            <ul id="s-list" style="list-style:none; padding:0; margin:0; width:100%;"></ul>
+            <div style="margin-top:20px; width:100%; text-align:center; color:#777; font-size:12px; cursor:pointer;" onclick="closeSalesModal()">[ 닫기 ]</div>
+        </div>
+    </div>
+
     <div id="p-modal" onclick="closeProfile()">
         <div class="profile-modal-inner" onclick="event.stopPropagation()">
             <div style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#555; transition:0.3s;" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#555'" onclick="closeProfile()">×</div>
@@ -338,13 +391,63 @@ def generate_full_system(members, history_db):
 
     <script>
         const members = {js_member_data};
+        const historyDb = {json.dumps(history_db, ensure_ascii=False)};
+        let hChart = null;
         
         function switchTab(e, id) {{
             document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             e.currentTarget.classList.add('active');
             document.getElementById(id).classList.add('active');
+            if(id === 'sales') setTimeout(renderCharts, 50);
         }}
+
+        function getGradient(ctx, chartArea, colorStart, colorEnd) {{
+            if(!chartArea) return colorEnd;
+            let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+            gradient.addColorStop(0, colorStart);
+            gradient.addColorStop(1, colorEnd);
+            return gradient;
+        }}
+
+        function renderCharts() {{
+            Chart.register(ChartDataLabels);
+            if(hChart) hChart.destroy();
+            
+            hChart = new Chart(document.getElementById('historyChart'), {{ 
+                type: 'bar', 
+                data: {{ 
+                    labels: {json.dumps(js_labels, ensure_ascii=False)}, 
+                    datasets: [
+                        {{ 
+                            label: '직급전', data: {json.dumps(js_rank_rev)}, 
+                            backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(212, 175, 55, 0.4)', '#d4af37'); }}, 
+                            borderRadius: 0, borderWidth: 1, borderColor: 'rgba(212,175,55,0.8)', hoverBackgroundColor: '#fff' 
+                        }}, 
+                        {{ 
+                            label: '일반회차', data: {json.dumps(js_norm_rev)}, 
+                            backgroundColor: function(c) {{ return getGradient(c.chart.ctx, c.chart.chartArea, 'rgba(170, 128, 30, 0.4)', '#aa801e'); }}, 
+                            borderRadius: {{topLeft: 6, topRight: 6}}, borderWidth: 1, borderColor: 'rgba(170,128,30,0.8)', hoverBackgroundColor: '#fff' 
+                        }}
+                    ] 
+                }}, 
+                options: {{ 
+                    responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 30 }} }}, 
+                    plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#fff', font: {{ weight: '900', size: 11 }}, formatter: (v, ctx) => ctx.datasetIndex === 1 ? (ctx.chart.data.datasets[0].data[ctx.dataIndex] + v).toLocaleString() : null }} }}, 
+                    scales: {{ y: {{ stacked: true, display: false }}, x: {{ stacked: true, ticks: {{ color: '#fff', font: {{ weight: '900', size: 11 }} }}, grid: {{ display: false }} }} }},
+                    onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index])
+                }} 
+            }});
+        }}
+
+        function openSalesModal(season) {{
+            const data = historyDb[season]; if(!data) return;
+            document.getElementById('s-title').innerText = season + " 세부 데이터";
+            let html = `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #333; font-size:13px;"><span style="color:#d4af37;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}}개</b></li>`;
+            data.contents.forEach(item => html += `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #333; font-size:13px;"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}}개</b></li>`);
+            document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
+        }}
+        function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
         function openProfile(n) {{ 
             const m = members[n]; document.getElementById('m-img').src = m.img; document.getElementById('m-name').innerText = n; document.getElementById('m-pos').innerText = m.pos; 
@@ -356,7 +459,6 @@ def generate_full_system(members, history_db):
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}
 
-        // 호버 툴팁
         const units = document.querySelectorAll('.member-unit'); 
         const preview = document.getElementById('preview');
         units.forEach(unit => {{
@@ -385,6 +487,7 @@ def generate_full_system(members, history_db):
         f.write(full_html)
 
 if __name__ == "__main__":
+    init_db_if_empty()
     db_members = get_members_from_db()
     db_history = get_history_from_db()
     generate_full_system(db_members, db_history)

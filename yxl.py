@@ -2,6 +2,7 @@ import os
 import requests
 import json
 import sqlite3
+from datetime import datetime, timezone, timedelta
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, 'yxl_management.db')
@@ -76,7 +77,29 @@ def get_members_from_db():
     cur.execute('''SELECT m.name, m.soop_id, p.name, m.img_url, m.age, m.join_date, m.stats, m.mbti, m.skill FROM Members m JOIN Positions p ON m.position_id = p.id ORDER BY p.rank_order, m.id''')
     rows = cur.fetchall()
     conn.close()
-    return [{"name": r[0], "id": r[1], "pos": r[2], "img": r[3], "age": r[4], "join_date": r[5], "stats": r[6], "mbti": r[7], "skill": r[8]} for r in rows]
+    
+    # 💡 입사일 D-Day 계산 로직 추가
+    kst = timezone(timedelta(hours=9))
+    now = datetime.now(kst)
+    
+    members = []
+    for r in rows:
+        join_date_str = r[5]
+        d_day_str = ""
+        if join_date_str:
+            try:
+                clean_date = join_date_str.strip()
+                j_date = datetime.strptime(clean_date, "%Y.%m.%d").replace(tzinfo=kst)
+                d_day = (now - j_date).days
+                d_day_str = f" (D+{d_day})"
+            except: pass
+            
+        members.append({
+            "name": r[0], "id": r[1], "pos": r[2], "img": r[3],
+            "age": r[4], "join_date": r[5], "stats": r[6], "mbti": r[7], "skill": r[8],
+            "d_day": d_day_str
+        })
+    return members
 
 def get_history_from_db():
     conn = sqlite3.connect(db_path)
@@ -156,10 +179,10 @@ def generate_full_system(members, history_db):
                         <img src="{info['profile']}" class="profile-img">
                         <div class="embedded-info">
                             <div class="pos-tag" style="color: {info['theme']};">{info['pos']}</div>
-                            <div class="name-label">{info['name']}</div>
+                            <div class="name-label">{info['name']} <span class="d-day-text">{m['d_day']}</span></div>
                         </div>
                         <div class="overlay-menu" onclick="event.stopPropagation()">
-                            <div class="click-guide" onclick="openProfile('{m['name']}')">PROFILE</div>
+                            <div class="click-guide" onclick="openProfile('{m['name']}')">프로필 보기</div>
                             <div class="btn-group">
                                 <a href="{info["home_link"]}" target="_blank" class="btn btn-home">방송국</a>
                                 {f'<a href="{info["live_link"]}" target="_blank" class="btn btn-live">LIVE</a>' if info['is_live'] else ''}
@@ -176,12 +199,28 @@ def generate_full_system(members, history_db):
     js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db) + 1)]
     js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db) + 1)]
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
+    
+    # 💡 시즌 14 데이터 복구
+    current_season_vals = [4343316, 2164822, 3135452]
+    current_season_sum = sum(current_season_vals)
 
-    print("[3/3] VOD 데이터 처리중...")
-    vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667"]
+    print("[3/3] 49개 VOD 데이터 가져오는중 (잠시만 기다려주세요)...")
+    # 💡 VOD 49개 리스트 완벽 복구
+    vod_ids = [
+        "139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", 
+        "146665451", "149341401", "149372371", "149482895", "149543791", "151963511", "152673671", 
+        "152932371", "153270385", "153906161", "155022377", "156072307", "156233659", "156443147", 
+        "156897587", "157766473", "159784167", "159835159", "160179551", "160229793", "163314531", 
+        "163507573", "165090649", "165095477", "166797677", "167711523", "168507233", "169165861", 
+        "171334577", "171346633", "171517903", "171625221", "181193639", "181202165", "181212107", 
+        "181319655", "182185345", "182561159", "185332075", "186322409", "188589109", "193831035"
+    ]
+    vod_ids.reverse() 
     vod_list = [fetch_vod_data_by_api(vid) for vid in vod_ids]
     valid_vods = [v for v in vod_list if v["views"] > 0]
+    top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
     main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
+    js_vod_data = json.dumps(vod_list, ensure_ascii=False)
 
     full_html = f"""
 <!DOCTYPE html>
@@ -228,7 +267,8 @@ def generate_full_system(members, history_db):
         
         .embedded-info {{ position: absolute; bottom: 0; width: 100%; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 12px; z-index: 3; }}
         .pos-tag {{ font-size: 10px; margin-bottom: 3px; font-weight: 800; letter-spacing: 0.5px; }}
-        .name-label {{ font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }}
+        .name-label {{ font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }}
+        .d-day-text {{ font-size: 9px; color: #d4af37; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }}
         
         .overlay-menu {{ position: absolute; inset: 0; background: rgba(8,8,12,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; z-index: 10; border-radius: 50%; backdrop-filter: blur(3px); }}
         .member-unit:hover .overlay-menu {{ opacity: 1; }}
@@ -250,39 +290,70 @@ def generate_full_system(members, history_db):
         .p-live-badge {{ font-size: 12px; color: #ff4d4d; letter-spacing: 1px; }}
 
         .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
-        .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; border-left: 3px solid #d4af37; padding-left: 12px; }}
-        .total-sum-badge {{ font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 6px 16px; border-radius: 20px; }}
+        .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; flex-wrap: wrap; gap: 10px; }}
+        .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; }}
+        
+        /* 💡 토탈 대시보드 사이즈 및 우측 배치 최적화 */
+        .total-sum-badge {{ font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 8px 18px; border-radius: 8px; font-weight: 900; box-shadow: 0 4px 10px rgba(212,175,55,0.3); white-space: nowrap; }}
         
         .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Cinzel', serif; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 10px; }}
-        .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; }}
-        .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); }}
+        .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; transition: 0.3s; cursor:pointer; }}
+        .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); transform: translateX(10px); }}
+        .t-date {{ font-size: 13px; color: #d4af37; margin-bottom: 5px; }}
+        .t-title {{ font-size: 18px; color: #fff; margin-bottom: 5px; }}
+        .t-desc {{ font-size: 13px; color: #aaa; }}
+        .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }}
+        .t-status.upcoming {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; }}
+
+        /* 💡 매출표 스크롤바 고급화 */
+        .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
+        .chart-scroll-wrapper::-webkit-scrollbar {{ height: 8px; }}
+        .chart-scroll-wrapper::-webkit-scrollbar-track {{ background: rgba(0,0,0,0.5); border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.1); }}
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb {{ background: linear-gradient(90deg, #aa801e, #d4af37, #aa801e); border-radius: 10px; border: 1px solid rgba(0,0,0,0.8); }}
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb:hover {{ background: #e5c158; }}
         
-        /* 💡 모달창 고급화 및 간섭 방지 CSS */
+        .chart-container {{ min-width: 1000px; height: 350px; }}
+        .chart-container-small {{ min-width: 400px; height: 250px; }}
+
+        /* 💡 프로필 모달 (한글화 & 럭셔리 그리드) */
         #sales-modal, #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }}
+        .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 650px; display: flex; flex-wrap: wrap; gap: 40px; position: relative; align-items: center; justify-content: center; }}
         
-        .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 650px; display: flex; gap: 40px; position: relative; align-items: center; }}
-        
-        /* 왼쪽: 사진과 직급 */
-        .profile-left {{ display: flex; flex-direction: column; align-items: center; border-right: 1px solid rgba(212,175,55,0.15); padding-right: 40px; }}
+        .profile-left {{ display: flex; flex-direction: column; align-items: center; padding-right: 20px; }}
         .profile-left img {{ width: 160px; height: 160px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); margin-bottom: 20px; }}
         .profile-name {{ font-size: 28px; color: #fff; letter-spacing: 2px; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }}
         .profile-tier {{ font-family: 'Cinzel', serif; font-size: 13px; color: #d4af37; letter-spacing: 3px; background: rgba(212,175,55,0.1); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.3); }}
         
-        /* 오른쪽: 상세 정보 (Grid 레이아웃으로 간섭 완전 차단) */
-        .profile-right {{ flex: 1; display: grid; grid-template-columns: 1fr; gap: 15px; align-content: center; }}
-        .stat-box {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 10px; display: flex; flex-direction: column; }}
-        .stat-label {{ font-family: 'Cinzel', serif; font-size: 11px; color: #aa801e; margin-bottom: 4px; letter-spacing: 1px; }}
-        .stat-value {{ font-size: 15px; color: #f5f5dc; }}
+        .profile-right {{ flex: 1; display: grid; grid-template-columns: 1fr; gap: 15px; align-content: center; min-width: 250px; border-left: 1px solid rgba(212,175,55,0.15); padding-left: 40px; }}
+        .stat-box {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }}
+        .stat-box:hover {{ border-color: rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.05); }}
+        .stat-label {{ font-size: 12px; color: #aa801e; font-weight: 900; letter-spacing: 1px; }}
+        .stat-value {{ font-size: 14px; color: #f5f5dc; font-weight: 500; text-align: right; }}
         
         .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; transition: 0.3s; font-family: sans-serif; }}
         .close-btn:hover {{ color: #d4af37; transform: rotate(90deg); }}
         
-        .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
-        .chart-container {{ min-width: 1000px; height: 350px; }}
-        
-        /* 매출 상세 모달 UI */
         .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; }}
         .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
+
+        /* VOD 디자인 복구 */
+        .search-wrapper {{ position: relative; width: 100%; max-width: 300px; margin-top: 10px; }}
+        .search-input {{ width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; }}
+        .main-stage {{ background: rgba(8, 8, 12, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }}
+        .player-wrapper {{ width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }}
+        .player-wrapper iframe {{ width: 100%; height: 100%; border: none; }}
+        .player-info {{ width: 100%; }}
+        .top-badge {{ background: linear-gradient(135deg, #d4af37, #aa801e); padding: 4px 10px; border-radius: 4px; font-size: 11px; margin-bottom: 10px; display: inline-block; color: #000; }}
+        
+        .vod-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; margin-bottom: 40px; }}
+        .vod-card {{ background: #0a0a0f; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s; overflow: hidden; display:flex; flex-direction:column; }}
+        .vod-card:hover {{ transform: translateY(-5px); border-color: #d4af37; box-shadow: 0 10px 25px rgba(212,175,55,0.15); }}
+        .vod-thumb {{ width: 100%; aspect-ratio: 16/9; background: #111; overflow: hidden; }}
+        .vod-thumb img {{ width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }}
+        .vod-card:hover .vod-thumb img {{ opacity: 1; transform: scale(1.05); }}
+        .vod-text {{ padding: 12px; flex:1; display:flex; flex-direction:column; justify-content:space-between; }}
+        .vod-text h4 {{ margin: 0 0 6px 0; font-size: 13px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }}
+        .vod-text p {{ margin: 0; font-size: 11px; color: #aaa; }}
     </style>
 </head>
 <body>
@@ -303,37 +374,70 @@ def generate_full_system(members, history_db):
         <!-- 1. 현황판 -->
         <section id="status" class="tab-content active">{status_html}</section>
 
-        <!-- 2. 매출표 -->
+        <!-- 2. 매출표 (시즌 14 복구) -->
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
                     <div style="display:flex; flex-direction:column; gap:5px;">
-                        <span class="sales-main-title">YXL REVENUE HISTORY</span>
+                        <span class="sales-main-title">YXL HISTORY (시즌 1-{len(history_db)})</span>
                         <span class="sales-desc-text" style="color:#777;">※ 막대바 클릭시 회차별 세부 데이터를 확인할 수 있습니다.</span>
                     </div>
-                    <div class="total-sum-badge">TOTAL: {format(all_season_sum, ',')}개</div>
+                    <div class="total-sum-badge">총 합산: {format(all_season_sum, ',')}개</div>
                 </div>
                 <div class="chart-scroll-wrapper"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
             </div>
+            <div class="sales-section">
+                <div class="sales-header-container">
+                    <span class="sales-main-title">YXL 시즌 14</span>
+                    <div class="total-sum-badge">시즌 합산: {format(current_season_sum, ',')}개</div>
+                </div>
+                <div class="chart-scroll-wrapper"><div class="chart-container-small"><canvas id="currentChart"></canvas></div></div>
+            </div>
         </section>
 
-        <!-- 3. 일정표 -->
+        <!-- 3. 일정표 복구 -->
         <section id="schedule" class="tab-content">
             <div class="timeline-section">
                 <div class="timeline-title">OFFICIAL TIMELINE</div>
-                <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming" style="background: linear-gradient(135deg, #d4af37, #8a6327); color:#000;">UPCOMING</div></div>
+                <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
                 <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
+                <div class="timeline-item"><div><div class="t-date">05.14 (목) 17:00</div><div class="t-title">시즌 14 - 5회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
             </div>
         </section>
 
-        <!-- 4. VOD -->
+        <!-- 4. VOD 복구 -->
         <section id="radio" class="tab-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
                 <span class="timeline-title" style="margin:0; border:none;">LATEST RECORD</span>
+                <div class="search-wrapper">
+                    <input type="text" id="vodSearch" class="search-input" placeholder="영상 검색..." onkeyup="searchVOD()">
+                </div>
             </div>
+            
             <div class="main-stage">
                 <div class="player-wrapper"><iframe id="main-player-iframe" src="https://vod.sooplive.com/player/{main_vod['id']}" allowfullscreen></iframe></div>
+                <div class="player-info">
+                    <div class="top-badge">최신 VOD</div>
+                    <h1 id="main-vod-title" style="font-size:18px; color:#fff; margin:0 0 10px 0;">{main_vod['title']}</h1>
+                    <p id="main-vod-date" style="font-size:12px; color:#aaa; margin:0 0 5px 0;">방송일: {main_vod['date']}</p>
+                    <p id="main-vod-views" style="font-size:13px; color:#d4af37; margin:0;">조회수: {format(main_vod['views'], ',')}회</p>
+                </div>
             </div>
+
+            <div class="timeline-title" style="margin-bottom:0; font-size: 16px;">POPULAR TOP 5</div>
+            <div class="vod-grid">
+                {"".join([f'''
+                <div class="vod-card" onclick="changeMainPlayer('{v['id']}', '{v['title']}', '{v['date']}', '{v['views']}')">
+                    <div class="vod-thumb"><img src="{v['thumb']}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL'"></div>
+                    <div class="vod-text">
+                        <div><div style="background:#d4af37; color:#000; font-size:9px; padding:2px 5px; border-radius:3px; display:inline-block; margin-bottom:4px; font-weight:900;">HOT</div><h4>{v['title']}</h4></div>
+                        <p>{v['date']} • {format(v['views'], ',')}회</p>
+                    </div>
+                </div>''' for v in top_5_vods])}
+            </div>
+
+            <div class="timeline-title" id="list-title" style="margin-bottom:0; font-size: 16px;">ALL VIDEOS</div>
+            <div class="vod-grid" id="vodListContainer"></div>
         </section>
     </div>
     
@@ -345,23 +449,21 @@ def generate_full_system(members, history_db):
         <div class="sales-modal-inner" onclick="event.stopPropagation()">
             <div id="s-title" style="font-size:22px; font-family:'Cinzel', serif; color:#d4af37; margin-bottom:20px; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px; text-align:center; letter-spacing:2px;"></div>
             <ul id="s-list" style="list-style:none; padding:0; margin:0;"></ul>
-            <div style="margin-top:25px; text-align:center; color:#777; font-size:12px; cursor:pointer; letter-spacing:1px;" onclick="closeSalesModal()">[ CLOSE ]</div>
+            <div style="margin-top:25px; text-align:center; color:#777; font-size:12px; cursor:pointer; letter-spacing:1px;" onclick="closeSalesModal()">[ 닫기 ]</div>
         </div>
     </div>
 
-    <!-- 💡 프로필 럭셔리 모달 (영역 분리로 간섭 완전 해결) -->
+    <!-- 💡 프로필 럭셔리 모달 (한글화) -->
     <div id="p-modal" onclick="closeProfile()">
         <div class="profile-container" onclick="event.stopPropagation()">
             <div class="close-btn" onclick="closeProfile()">×</div>
-            
             <div class="profile-left">
                 <img src="" id="m-img">
                 <div id="m-name" class="profile-name"></div>
                 <div id="m-pos" class="profile-tier"></div>
             </div>
-            
             <div class="profile-right" id="m-details">
-                <!-- JS에서 stat-box들이 이 영역에 깔끔하게 바둑판으로 들어갑니다 -->
+                <!-- JS에서 한글 스탯 박스들이 세팅됨 -->
             </div>
         </div>
     </div>
@@ -369,7 +471,8 @@ def generate_full_system(members, history_db):
     <script>
         const members = {js_member_data};
         const historyDb = {json.dumps(history_db, ensure_ascii=False)};
-        let hChart = null;
+        const allVODs = {js_vod_data};
+        let hChart = null, cChart = null;
         
         function switchTab(e, id) {{
             document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
@@ -390,65 +493,43 @@ def generate_full_system(members, history_db):
         function renderCharts() {{
             Chart.register(ChartDataLabels);
             if(hChart) hChart.destroy();
+            if(cChart) cChart.destroy();
+            
+            const commonOptions = {{ responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 40 }} }}, plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#d4af37', font: {{ weight: '900', size: 12 }}, formatter: (v, ctx) => {{ if(ctx.datasetIndex === 1 || ctx.chart.data.datasets.length === 1) {{ let total = ctx.chart.data.datasets[0].data[ctx.dataIndex] + (ctx.datasetIndex === 1 ? v : 0); return Math.floor(total / 10000).toLocaleString() + '만'; }} return null; }} }}, tooltip: {{ callbacks: {{ label: (ctx) => `${{ctx.dataset.label}}: ${{ctx.raw.toLocaleString()}}개` }} }} }}, scales: {{ y: {{ stacked: true, display: false }}, x: {{ stacked: true, ticks: {{ color: '#aaa', font: {{ weight: '900', size: 12 }} }}, grid: {{ color: 'rgba(212,175,55,0.1)' }} }} }} }};
             
             hChart = new Chart(document.getElementById('historyChart'), {{ 
                 type: 'bar', 
                 data: {{ 
                     labels: {json.dumps(js_labels, ensure_ascii=False)}, 
                     datasets: [
-                        {{ 
-                            label: '직급전', data: {json.dumps(js_rank_rev)}, 
-                            backgroundColor: (c) => getGradient(c.chart, 'rgba(212, 175, 55, 0.4)', '#d4af37'), 
-                            borderRadius: 0, borderWidth: 1, borderColor: 'rgba(212,175,55,0.8)'
-                        }}, 
-                        {{ 
-                            label: '일반회차', data: {json.dumps(js_norm_rev)}, 
-                            backgroundColor: (c) => getGradient(c.chart, 'rgba(170, 128, 30, 0.4)', '#aa801e'), 
-                            borderRadius: {{topLeft: 6, topRight: 6}}, borderWidth: 1, borderColor: 'rgba(170,128,30,0.8)'
-                        }}
+                        {{ label: '직급전', data: {json.dumps(js_rank_rev)}, backgroundColor: (c) => getGradient(c.chart, 'rgba(212, 175, 55, 0.4)', '#d4af37'), borderRadius: 0, borderWidth: 1, borderColor: 'rgba(212,175,55,0.8)' }}, 
+                        {{ label: '일반회차', data: {json.dumps(js_norm_rev)}, backgroundColor: (c) => getGradient(c.chart, 'rgba(170, 128, 30, 0.4)', '#aa801e'), borderRadius: {{topLeft: 6, topRight: 6}}, borderWidth: 1, borderColor: 'rgba(170,128,30,0.8)' }}
                     ] 
                 }}, 
-                options: {{ 
-                    responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 40 }} }}, 
-                    plugins: {{ 
-                        legend: {{ display: false }}, 
-                        /* 💡 숫자 오류 수정: 차트 상단 숫자를 'OOO만' 단위로 축약하여 가독성 확보 */
-                        datalabels: {{ 
-                            anchor: 'end', align: 'top', color: '#d4af37', font: {{ weight: '900', size: 12 }}, 
-                            formatter: (v, ctx) => {{
-                                if(ctx.datasetIndex === 1) {{
-                                    let total = ctx.chart.data.datasets[0].data[ctx.dataIndex] + v;
-                                    return Math.floor(total / 10000).toLocaleString() + '만';
-                                }}
-                                return null;
-                            }}
-                        }},
-                        /* 마우스 올렸을때 나오는 툴팁은 정확한 수치 표시 */
-                        tooltip: {{
-                            callbacks: {{
-                                label: (ctx) => `${{ctx.dataset.label}}: ${{ctx.raw.toLocaleString()}}개`
-                            }}
-                        }}
-                    }}, 
-                    scales: {{ 
-                        y: {{ stacked: true, display: false }}, 
-                        x: {{ stacked: true, ticks: {{ color: '#aaa', font: {{ weight: '900', size: 12 }} }}, grid: {{ color: 'rgba(212,175,55,0.1)' }} }} 
-                    }},
-                    onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index])
-                }} 
+                options: {{ ...commonOptions, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} 
+            }});
+            
+            // 💡 시즌 14 차트 복구
+            cChart = new Chart(document.getElementById('currentChart'), {{ 
+                type: 'bar', 
+                data: {{ 
+                    labels: ['직급전', '1회차', '2회차'], 
+                    datasets: [{{ label: '매출', data: {current_season_vals}, backgroundColor: (c) => getGradient(c.chart, 'rgba(212, 175, 55, 0.4)', '#d4af37'), borderRadius: 6, borderWidth: 1, borderColor: 'rgba(212,175,55,0.8)' }}] 
+                }}, 
+                options: commonOptions 
             }});
         }}
 
         function openSalesModal(season) {{
             const data = historyDb[season]; if(!data) return;
-            document.getElementById('s-title').innerText = season + " REPORT";
+            document.getElementById('s-title').innerText = season + " 세부 리포트";
             let html = `<li class="sales-list-item"><span style="color:#d4af37; font-weight:800;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}} 개</b></li>`;
             data.contents.forEach(item => html += `<li class="sales-list-item"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}} 개</b></li>`);
             document.getElementById('s-list').innerHTML = html; document.getElementById('sales-modal').style.display = 'flex';
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
-        // 💡 럭셔리 모달에 데이터 깔끔하게 세팅 (간섭 원천 차단)
+        // 💡 프로필 텍스트 한글 & 고급화
         function openProfile(n) {{ 
             const m = members[n]; 
             document.getElementById('m-img').src = m.img; 
@@ -456,16 +537,40 @@ def generate_full_system(members, history_db):
             document.getElementById('m-pos').innerText = m.pos; 
             
             let html = '';
-            if(m.age) html += `<div class="stat-box"><span class="stat-label">AGE</span><span class="stat-value">${{m.age}}</span></div>`;
-            if(m.join_date) html += `<div class="stat-box"><span class="stat-label">JOINED DATE</span><span class="stat-value">${{m.join_date}}</span></div>`;
-            if(m.mbti) html += `<div class="stat-box"><span class="stat-label">MBTI / TYPE</span><span class="stat-value">${{m.mbti}}</span></div>`;
-            if(m.stats) html += `<div class="stat-box"><span class="stat-label">PHYSICAL STATS</span><span class="stat-value">${{m.stats}}</span></div>`;
-            if(m.skill) html += `<div class="stat-box"><span class="stat-label">SPECIALTY</span><span class="stat-value">${{m.skill}}</span></div>`;
+            if(m.age) html += `<div class="stat-box"><span class="stat-label">나이</span><span class="stat-value">${{m.age}}</span></div>`;
+            if(m.join_date) html += `<div class="stat-box"><span class="stat-label">입사일</span><span class="stat-value">${{m.join_date}}</span></div>`;
+            if(m.mbti) html += `<div class="stat-box"><span class="stat-label">MBTI</span><span class="stat-value">${{m.mbti}}</span></div>`;
+            if(m.stats) html += `<div class="stat-box"><span class="stat-label">신체정보</span><span class="stat-value">${{m.stats}}</span></div>`;
+            if(m.skill) html += `<div class="stat-box"><span class="stat-label">특기</span><span class="stat-value">${{m.skill}}</span></div>`;
             
             document.getElementById('m-details').innerHTML = html; 
             document.getElementById('p-modal').style.display = 'flex'; 
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}
+
+        // 💡 VOD 리스트 렌더링 복구
+        function changeMainPlayer(id, title, date, views) {{
+            document.getElementById('main-player-iframe').src = `https://vod.sooplive.com/player/${{id}}`;
+            document.getElementById('main-vod-title').innerText = title;
+            document.getElementById('main-vod-date').innerText = `방송일: ${{date}}`;
+            document.getElementById('main-vod-views').innerText = `조회수: ${{Number(views).toLocaleString()}}회`;
+            window.scrollTo({{top: 0, behavior: 'smooth'}});
+        }}
+
+        function renderVODList(data) {{
+            document.getElementById('vodListContainer').innerHTML = data.map(v => `
+                <div class="vod-card" onclick="changeMainPlayer('${{v.id}}', '${{v.title.replace(/'/g, "&#39;")}}', '${{v.date}}', '${{v.views}}')">
+                    <div class="vod-thumb"><img src="${{v.thumb}}" onerror="this.src='https://via.placeholder.com/320x180/1a1a2e/8a2be2?text=YXL'"></div>
+                    <div class="vod-text"><h4>${{v.title}}</h4><p>${{v.date}} • ${{Number(v.views).toLocaleString()}}회</p></div>
+                </div>`).join('');
+        }}
+
+        function searchVOD() {{
+            const query = document.getElementById('vodSearch').value.toLowerCase();
+            const filtered = allVODs.filter(v => v.title.toLowerCase().includes(query) || v.id.includes(query));
+            document.getElementById('list-title').innerText = query === "" ? "ALL VIDEOS" : `SEARCH RESULTS (${{filtered.length}})`;
+            renderVODList(filtered);
+        }}
 
         const units = document.querySelectorAll('.member-unit'); 
         const preview = document.getElementById('preview');
@@ -487,6 +592,7 @@ def generate_full_system(members, history_db):
 
         let time = 300;
         setInterval(() => {{ time--; const min = Math.floor(time/60); const sec = time%60; const el = document.getElementById('timer-text'); if(el) el.innerText = `NEXT: ${{min}}:${{sec<10?'0':''}}${{sec}}`; if(time<=0) location.reload(); }}, 1000);
+        renderVODList(allVODs);
     </script>
 </body>
 </html>

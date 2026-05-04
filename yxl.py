@@ -71,7 +71,6 @@ def init_db_if_empty():
 def get_members_from_db():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    # 서니님 프로필 모달 정보 업데이트
     cur.execute("UPDATE Members SET join_date = '2025.06.17 ~ 휴직전 (271일)<br>(휴직복귀) 2026.04.14' WHERE name = '서니'")
     conn.commit()
     
@@ -88,7 +87,6 @@ def get_members_from_db():
         join_date_str = r[5]
         d_day_str = ""
         
-        # 서니님 D-DAY 계산 
         if name == '서니':
             try:
                 j_date = datetime.strptime("2026.04.14", "%Y.%m.%d").replace(tzinfo=kst)
@@ -165,11 +163,11 @@ def generate_full_system(members, history_db):
             
             status_html += f"""
             <div class="member-unit {live_class}" data-islive="{is_live_str}" data-thumb="{info['thumb']}" data-title="{info['title']}" data-viewers="{info['viewers']}">
-                <div class="circle-frame" onclick="openProfile('{m['name']}')">
+                <div class="circle-frame" onclick="openProfile('{m['name']}', event)">
                     <img src="{info['profile']}" class="profile-img">
                     <div class="embedded-info"><div class="pos-tag" style="color: {info['theme']};">{info['pos']}</div><div class="name-label">{info['name']}</div></div>
                     <div class="overlay-menu" onclick="event.stopPropagation()">
-                        <div class="click-guide" onclick="openProfile('{m['name']}')">PROFILE</div>
+                        <div class="click-guide" onclick="openProfile('{m['name']}', event)">PROFILE</div>
                         <div class="btn-group">
                             <a href="{info["home_link"]}" target="_blank" class="btn btn-home">방송국</a>
                             {f'<a href="{info["live_link"]}" target="_blank" class="btn btn-live">LIVE</a>' if info['is_live'] else ''}
@@ -250,8 +248,9 @@ def generate_full_system(members, history_db):
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
-        body {{ background: #08080c; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow-x: hidden; box-sizing: border-box; }}
-        h1, h2, h3, h4, p, span, div {{ font-weight: 900; box-sizing: border-box; }}
+        *, *::before, *::after {{ box-sizing: border-box; }}
+        body {{ background: #08080c; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow-x: hidden; }}
+        h1, h2, h3, h4, p, span, div {{ font-weight: 900; }}
         
         .nav-header {{ position: sticky; top: 0; background: rgba(8, 8, 12, 0.85); border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-wrap: wrap; gap: 10px; }}
         .logo-section {{ display: flex; align-items: center; cursor: pointer; }}
@@ -319,7 +318,7 @@ def generate_full_system(members, history_db):
         .chart-container-small {{ min-width: 400px; height: 250px; }}
 
         .calendar-nav-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 15px; }}
-        .nav-btn {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: 0.3s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }}
+        .nav-btn {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: 0.3s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); flex-shrink: 0; }}
         .nav-btn:hover {{ background: #d4af37; color: #000; transform: scale(1.1); box-shadow: 0 0 15px rgba(212,175,55,0.4); }}
         
         .weekly-calendar-row {{ flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }}
@@ -332,9 +331,10 @@ def generate_full_system(members, history_db):
         .dc-date {{ font-size: 18px; font-weight: 900; margin-bottom: 12px; color: #fff; }}
         .dc-event {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 10px; padding: 4px 2px; border-radius: 5px; font-weight: 900; width: 95%; margin: 0 auto; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }}
         
-        #p-modal, #sales-modal {{ display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box; }}
+        /* 💡 모달 Iframe 최적화 CSS */
+        #p-modal, #sales-modal {{ display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; align-items: flex-start; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }}
         
-        .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 600px; display: flex; gap: 40px; position: relative; align-items: center; flex-wrap: wrap; justify-content: center; margin: 0 auto; }}
+        .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 600px; display: flex; gap: 40px; position: relative; align-items: center; flex-wrap: wrap; justify-content: center; }}
         .profile-left {{ display: flex; flex-direction: column; align-items: center; }}
         .profile-left img {{ width: 150px; height: 150px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; margin-bottom: 15px; }}
         .profile-name {{ font-size: 26px; color: #fff; margin-bottom: 10px; }}
@@ -347,7 +347,7 @@ def generate_full_system(members, history_db):
         .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; transition: 0.3s; }}
         .close-btn:hover {{ color: #d4af37; transform: rotate(90deg); }}
         
-        .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; margin: 0 auto; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }}
+        .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }}
         .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; align-items: center; }}
         
         .staff-info-row {{ display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.15); width: 100%; box-sizing: border-box; justify-content: space-around; margin-top: 10px; }}
@@ -368,8 +368,10 @@ def generate_full_system(members, history_db):
         .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }}
         .t-status.upcoming {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; }}
 
-        .search-wrapper {{ position: relative; width: 100%; max-width: 300px; margin-top: 10px; }}
+        /* 💡 검색바 여백 추가 (PC/모바일 공통 잘림 방지) */
+        .search-wrapper {{ position: relative; width: 100%; max-width: 250px; margin-top: 10px; margin-right: 10px; }}
         .search-input {{ width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; font-family: 'Pretendard', sans-serif; }}
+        
         .main-stage {{ background: rgba(8, 8, 12, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }}
         .player-wrapper {{ width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }}
         .player-wrapper iframe {{ width: 100%; height: 100%; border: none; }}
@@ -390,6 +392,26 @@ def generate_full_system(members, history_db):
         .sort-btn {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.3s; font-weight: 700; font-family: 'Pretendard', sans-serif; letter-spacing: 0.5px; }}
         .sort-btn:hover {{ background: rgba(212,175,55,0.1); color: #fff; }}
         .sort-btn.active {{ background: linear-gradient(135deg, #d4af37, #aa801e); color: #000; font-weight: 900; border-color: #d4af37; box-shadow: 0 2px 10px rgba(212,175,55,0.3); }}
+
+        /* 💡 모바일 최적화 미디어 쿼리 */
+        @media (max-width: 768px) {{
+            /* 주간 일정표 가로 스크롤 허용 (찌그러짐 방지) */
+            .weekly-calendar-row {{ 
+                display: flex; 
+                flex-wrap: nowrap; 
+                overflow-x: auto; 
+                gap: 8px; 
+                padding-bottom: 12px; 
+                -webkit-overflow-scrolling: touch; 
+            }}
+            .weekly-calendar-row::-webkit-scrollbar {{ height: 6px; }}
+            .weekly-calendar-row::-webkit-scrollbar-thumb {{ background: rgba(212,175,55,0.5); border-radius: 10px; }}
+            .day-card {{ min-width: 75px; flex-shrink: 0; }}
+            
+            /* 검색바 모바일 간격 조정 */
+            .search-wrapper {{ max-width: calc(100% - 20px); margin-right: 0; }}
+            .radio-header-wrap {{ padding-right: 10px; padding-left: 5px; }}
+        }}
     </style>
 </head>
 <body>
@@ -448,7 +470,7 @@ def generate_full_system(members, history_db):
 
         <!-- 4. 합동방송 -->
         <section id="radio" class="tab-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
+            <div class="radio-header-wrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; padding-right: 5px;">
                 <span class="timeline-title" style="margin:0; border:none;">최근 방송</span>
                 <div class="search-wrapper">
                     <input type="text" id="vodSearch" class="search-input" placeholder="영상 검색..." onkeyup="searchVOD()">
@@ -576,7 +598,6 @@ def generate_full_system(members, history_db):
             }}
         }}
 
-        // 💡 럭셔리 차트 렌더링 로직으로 전면 업그레이드
         let hChart = null, cChart = null;
         function renderCharts() {{
             Chart.register(ChartDataLabels);
@@ -647,8 +668,8 @@ def generate_full_system(members, history_db):
                             backgroundColor: gradBase,
                             borderColor: 'rgba(212, 175, 55, 0.8)',
                             borderWidth: {{top: 1, right: 1, left: 1, bottom: 0}},
-                            hoverBackgroundColor: '#fff',
-                            hoverBorderColor: '#ffd700',
+                            hoverBackgroundColor: gradBase, // 💡 호버 시 하얀색 빤짝임 제거
+                            hoverBorderColor: 'rgba(212, 175, 55, 0.8)',
                             barPercentage: 0.55
                         }},
                         {{ 
@@ -657,15 +678,15 @@ def generate_full_system(members, history_db):
                             borderColor: 'rgba(255, 235, 160, 0.8)',
                             borderWidth: {{top: 1, right: 1, left: 1, bottom: 0}},
                             borderRadius: {{topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0}},
-                            hoverBackgroundColor: '#fff',
-                            hoverBorderColor: '#ffd700',
+                            hoverBackgroundColor: gradTop, // 💡 호버 시 하얀색 빤짝임 제거
+                            hoverBorderColor: 'rgba(255, 235, 160, 0.8)',
                             barPercentage: 0.55
                         }}
                     ] 
                 }},
                 options: {{ 
                     ...commonOptions, 
-                    onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]),
+                    onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index], e.native),
                     onHover: (e, activeEls) => e.native.target.style.cursor = activeEls.length > 0 ? 'pointer' : 'default'
                 }} 
             }});
@@ -680,8 +701,8 @@ def generate_full_system(members, history_db):
                         borderColor: 'rgba(255, 235, 160, 0.8)',
                         borderWidth: {{top: 1, right: 1, left: 1, bottom: 0}},
                         borderRadius: {{topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0}},
-                        hoverBackgroundColor: '#fff',
-                        hoverBorderColor: '#ffd700',
+                        hoverBackgroundColor: gradTop,
+                        hoverBorderColor: 'rgba(255, 235, 160, 0.8)',
                         barPercentage: 0.4
                     }}] 
                 }}, 
@@ -689,7 +710,8 @@ def generate_full_system(members, history_db):
             }});
         }}
 
-        function openSalesModal(season) {{
+        // 💡 클릭 이벤트(e)의 위치값을 받아와서 모달을 눈앞에 띄웁니다.
+        function openSalesModal(season, event) {{
             const data = historyDb[season]; 
             if(!data) return;
             
@@ -728,11 +750,15 @@ def generate_full_system(members, history_db):
             
             data.contents.forEach(item => html += `<li class="sales-list-item"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}} 개</b></li>`);
             document.getElementById('s-list').innerHTML = html; 
+            
+            let y = event ? event.pageY : 100;
+            document.querySelector('.sales-modal-inner').style.margin = Math.max(20, y - 250) + "px auto 0 auto";
+            
             document.getElementById('sales-modal').style.display = 'flex';
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
-        function openProfile(n) {{
+        function openProfile(n, event) {{
             const m = members[n];
             document.getElementById('m-img').src = m.img;
             document.getElementById('m-name').innerText = n;
@@ -746,6 +772,10 @@ def generate_full_system(members, history_db):
             if(m.skill && m.skill.trim() !== '') detailsHtml += `<div class="stat-box"><span class="stat-label">특기</span><span class="stat-value">${{m.skill}}</span></div>`;
             
             document.getElementById('m-details').innerHTML = detailsHtml;
+            
+            let y = event ? event.pageY : 100;
+            document.querySelector('.profile-container').style.margin = Math.max(20, y - 250) + "px auto 0 auto";
+            
             document.getElementById('p-modal').style.display = 'flex';
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}

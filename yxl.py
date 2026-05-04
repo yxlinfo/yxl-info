@@ -90,14 +90,16 @@ def get_members_from_db():
         if name == '서니':
             try:
                 j_date = datetime.strptime("2026.04.14", "%Y.%m.%d").replace(tzinfo=kst)
-                d_day = 271 + (now - j_date).days
+                # 💡 서니님 계산에도 1일차 포함 (+1) 반영
+                d_day = 271 + (now - j_date).days + 1
                 d_day_str = f"D+{d_day}"
             except: pass
         else:
             if join_date_str:
                 try:
                     j_date = datetime.strptime(join_date_str.strip(), "%Y.%m.%d").replace(tzinfo=kst)
-                    d_day = (now - j_date).days
+                    # 💡 전체 멤버 계산에 1일차 포함 (+1) 일괄 반영
+                    d_day = (now - j_date).days + 1
                     d_day_str = f"D+{d_day}"
                 except: pass
                 
@@ -331,7 +333,6 @@ def generate_full_system(members, history_db):
         .dc-date {{ font-size: 18px; font-weight: 900; margin-bottom: 12px; color: #fff; }}
         .dc-event {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 10px; padding: 4px 2px; border-radius: 5px; font-weight: 900; width: 95%; margin: 0 auto; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }}
         
-        /* 💡 모달 Iframe 최적화 CSS */
         #p-modal, #sales-modal {{ display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; align-items: flex-start; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }}
         
         .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 600px; display: flex; gap: 40px; position: relative; align-items: center; flex-wrap: wrap; justify-content: center; }}
@@ -368,7 +369,6 @@ def generate_full_system(members, history_db):
         .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }}
         .t-status.upcoming {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; }}
 
-        /* 💡 검색바 여백 추가 (PC/모바일 공통 잘림 방지) */
         .search-wrapper {{ position: relative; width: 100%; max-width: 250px; margin-top: 10px; margin-right: 10px; }}
         .search-input {{ width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; font-family: 'Pretendard', sans-serif; }}
         
@@ -393,9 +393,7 @@ def generate_full_system(members, history_db):
         .sort-btn:hover {{ background: rgba(212,175,55,0.1); color: #fff; }}
         .sort-btn.active {{ background: linear-gradient(135deg, #d4af37, #aa801e); color: #000; font-weight: 900; border-color: #d4af37; box-shadow: 0 2px 10px rgba(212,175,55,0.3); }}
 
-        /* 💡 모바일 최적화 미디어 쿼리 */
         @media (max-width: 768px) {{
-            /* 주간 일정표 가로 스크롤 허용 (찌그러짐 방지) */
             .weekly-calendar-row {{ 
                 display: flex; 
                 flex-wrap: nowrap; 
@@ -408,7 +406,6 @@ def generate_full_system(members, history_db):
             .weekly-calendar-row::-webkit-scrollbar-thumb {{ background: rgba(212,175,55,0.5); border-radius: 10px; }}
             .day-card {{ min-width: 75px; flex-shrink: 0; }}
             
-            /* 검색바 모바일 간격 조정 */
             .search-wrapper {{ max-width: calc(100% - 20px); margin-right: 0; }}
             .radio-header-wrap {{ padding-right: 10px; padding-left: 5px; }}
         }}
@@ -614,8 +611,8 @@ def generate_full_system(members, history_db):
                 return gradient;
             }}
 
-            const gradBase = getGoldGradient(ctxH, '#d4af37', '#7a5214'); // 직급전 (다크골드)
-            const gradTop = getGoldGradient(ctxH, '#ffeba0', '#d4af37');  // 일반회차 (라이트골드)
+            const gradBase = getGoldGradient(ctxH, '#d4af37', '#7a5214'); 
+            const gradTop = getGoldGradient(ctxH, '#ffeba0', '#d4af37');  
 
             const commonOptions = {{ 
                 responsive: true, 
@@ -668,7 +665,7 @@ def generate_full_system(members, history_db):
                             backgroundColor: gradBase,
                             borderColor: 'rgba(212, 175, 55, 0.8)',
                             borderWidth: {{top: 1, right: 1, left: 1, bottom: 0}},
-                            hoverBackgroundColor: gradBase, // 💡 호버 시 하얀색 빤짝임 제거
+                            hoverBackgroundColor: gradBase, 
                             hoverBorderColor: 'rgba(212, 175, 55, 0.8)',
                             barPercentage: 0.55
                         }},
@@ -678,7 +675,7 @@ def generate_full_system(members, history_db):
                             borderColor: 'rgba(255, 235, 160, 0.8)',
                             borderWidth: {{top: 1, right: 1, left: 1, bottom: 0}},
                             borderRadius: {{topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0}},
-                            hoverBackgroundColor: gradTop, // 💡 호버 시 하얀색 빤짝임 제거
+                            hoverBackgroundColor: gradTop, 
                             hoverBorderColor: 'rgba(255, 235, 160, 0.8)',
                             barPercentage: 0.55
                         }}
@@ -710,7 +707,6 @@ def generate_full_system(members, history_db):
             }});
         }}
 
-        // 💡 클릭 이벤트(e)의 위치값을 받아와서 모달을 눈앞에 띄웁니다.
         function openSalesModal(season, event) {{
             const data = historyDb[season]; 
             if(!data) return;

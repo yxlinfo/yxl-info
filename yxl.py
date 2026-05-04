@@ -148,9 +148,8 @@ def generate_full_system(members, history_db):
             live_class = "on-air" if info['is_live'] else ""
             is_live_str = "true" if info['is_live'] else "false"
             
-            # 💡 data 속성에 프로필 이미지와 라이브 여부 명확히 저장
             status_html += f"""
-            <div class="member-unit {live_class}" data-islive="{is_live_str}" data-thumb="{info['thumb']}" data-profile="{info['profile']}" data-title="{info['title']}" data-viewers="{info['viewers']}">
+            <div class="member-unit {live_class}" data-islive="{is_live_str}" data-thumb="{info['thumb']}" data-title="{info['title']}" data-viewers="{info['viewers']}">
                 <div class="circle-frame" onclick="openProfile('{m['name']}')">
                     <img src="{info['profile']}" class="profile-img">
                     <div class="embedded-info"><div class="pos-tag" style="color: {info['theme']};">{info['pos']}</div><div class="name-label">{info['name']}</div></div>
@@ -192,7 +191,7 @@ def generate_full_system(members, history_db):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <title>YXL VIP LOUNGE</title>
-    <!-- 💡 Pretendard 폰트 완벽 추가 (고급스러운 글꼴 적용) -->
+    <!-- 💡 Pretendard 폰트 완벽 추가 -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -235,7 +234,6 @@ def generate_full_system(members, history_db):
         .overlay-menu {{ position: absolute; inset: 0; background: rgba(8,8,12,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; z-index: 10; border-radius: 50%; backdrop-filter: blur(3px); }}
         .member-unit:hover .overlay-menu {{ opacity: 1; }}
         
-        /* 💡 버튼 호버(선택) 효과 대폭 강화 */
         .click-guide {{ font-size: 10px; color: #000; background: #d4af37; padding: 5px 12px; border-radius: 12px; margin-bottom: 8px; font-weight: 900; letter-spacing: 1px; cursor: pointer; transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); border: 1px solid #d4af37; }}
         .click-guide:hover {{ transform: scale(1.15); box-shadow: 0 0 15px #d4af37, inset 0 0 5px #fff; background: #ffd700; }}
         
@@ -250,12 +248,11 @@ def generate_full_system(members, history_db):
         .on-air .circle-frame {{ border: 2px solid #dc143c; box-shadow: 0 0 20px rgba(220, 20, 60, 0.4); }}
         @keyframes pulseRed {{ 0% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7); }} 70% {{ box-shadow: 0 0 0 10px rgba(220, 20, 60, 0); }} 100% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0); }} }}
 
-        /* 💡 썸네일 툴팁 (오프라인일때도 동작하도록 보정) */
         #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 320px; background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.95); overflow: hidden; transition: opacity 0.2s; }}
         .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #222; }}
         .p-info {{ padding: 15px; text-align: center; }}
         .p-title {{ font-size: 14px; color: #f5f5dc; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
-        .p-live-badge {{ font-size: 12px; font-weight: 900; letter-spacing: 1px; }}
+        .p-live-badge {{ font-size: 12px; font-weight: 900; letter-spacing: 1px; color: #ff4d4d; }}
 
         .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
         .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; flex-wrap: wrap; gap: 10px; }}
@@ -268,7 +265,6 @@ def generate_full_system(members, history_db):
         .chart-container {{ min-width: 1000px; height: 350px; }}
         .chart-container-small {{ min-width: 400px; height: 250px; }}
 
-        /* 💡 럭셔리 주간 달력 디자인 */
         .calendar-nav-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 15px; }}
         .nav-btn {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: 0.3s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }}
         .nav-btn:hover {{ background: #d4af37; color: #000; transform: scale(1.1); box-shadow: 0 0 15px rgba(212,175,55,0.4); }}
@@ -283,7 +279,6 @@ def generate_full_system(members, history_db):
         .dc-date {{ font-size: 18px; font-weight: 900; margin-bottom: 12px; color: #fff; }}
         .dc-event {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 10px; padding: 4px 2px; border-radius: 5px; font-weight: 900; width: 95%; margin: 0 auto; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }}
         
-        /* 💡 모달 화면 중앙 고정 완벽 보완 */
         #p-modal, #sales-modal {{ display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box; }}
         
         .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 600px; display: flex; gap: 40px; position: relative; align-items: center; flex-wrap: wrap; justify-content: center; margin: 0 auto; }}
@@ -299,11 +294,15 @@ def generate_full_system(members, history_db):
         .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; transition: 0.3s; }}
         .close-btn:hover {{ color: #d4af37; transform: rotate(90deg); }}
         
-        /* 매출 상세 모달 내부 디자인 */
-        .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; margin: 0 auto; max-height: 90vh; overflow-y: auto; }}
+        .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; margin: 0 auto; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }}
         .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
         
-        .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Cinzel', serif; letter-spacing: 2px; padding-bottom: 10px; }}
+        /* 💡 타이틀 글씨체 고급스럽게 통일 (명조체 깨짐 방지) */
+        .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Pretendard', sans-serif; font-weight: 900; letter-spacing: 1.5px; padding-bottom: 10px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); }}
+        
+        /* 💡 매출표 세부리포트 타이틀 고급스럽게 */
+        #s-title {{ font-size: 22px; font-family: 'Pretendard', sans-serif; font-weight: 900; color: #d4af37; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px; text-align: center; letter-spacing: 2px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); }}
+
         .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; transition: 0.3s; cursor:pointer; }}
         .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); transform: translateX(10px); }}
         .t-date {{ font-size: 13px; color: #d4af37; margin-bottom: 5px; }}
@@ -340,7 +339,6 @@ def generate_full_system(members, history_db):
     <header class="nav-header">
         <div class="logo-section" onclick="location.reload()"><img src="./logo.gif" height="40" decoding="async" fetchpriority="high" onerror="this.src='https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif'"><span class="update-timer" id="timer-text">NEXT: 5:00</span></div>
         <nav class="tab-menu">
-            <!-- 💡 탭 한글명 수정 -->
             <div class="tab-item active" onclick="switchTab(event, 'status')">조직도</div>
             <div class="tab-item" onclick="switchTab(event, 'sales')">매출표</div>
             <div class="tab-item" onclick="switchTab(event, 'schedule')">일정표</div>
@@ -356,7 +354,6 @@ def generate_full_system(members, history_db):
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
-                    <!-- 💡 매출표 타이틀 수정 -->
                     <span class="sales-main-title">YXL 시즌 히스토리</span>
                     <div class="total-sum-badge">TOTAL: {format(all_season_sum, ',')}개</div>
                 </div>
@@ -374,7 +371,6 @@ def generate_full_system(members, history_db):
         <!-- 3. 일정표 -->
         <section id="schedule" class="tab-content">
             <div class="timeline-section" style="margin-bottom: 40px;">
-                <!-- 💡 주간일정 텍스트 수정 -->
                 <div class="timeline-title" style="border-bottom: 1px solid rgba(212,175,55,0.2);">주간일정</div>
                 <div class="calendar-nav-container">
                     <button class="nav-btn" onclick="changeWeek(-7)">⟨</button>
@@ -383,7 +379,6 @@ def generate_full_system(members, history_db):
                 </div>
             </div>
             <div class="timeline-section">
-                <!-- 💡 공식일정 텍스트 수정 -->
                 <div class="timeline-title" style="border-bottom: 1px solid rgba(212,175,55,0.2);">공식일정</div>
                 <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
                 <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
@@ -394,7 +389,6 @@ def generate_full_system(members, history_db):
         <!-- 4. 합동방송 -->
         <section id="radio" class="tab-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
-                <!-- 💡 최근 방송 수정 -->
                 <span class="timeline-title" style="margin:0; border:none;">최근 방송</span>
                 <div class="search-wrapper">
                     <input type="text" id="vodSearch" class="search-input" placeholder="영상 검색..." onkeyup="searchVOD()">
@@ -411,7 +405,6 @@ def generate_full_system(members, history_db):
                 </div>
             </div>
 
-            <!-- 💡 인기 TOP 5 수정 -->
             <div class="timeline-title" style="margin-bottom:0; font-size: 16px; border-bottom: 1px solid rgba(212,175,55,0.2);">인기 TOP 5</div>
             <div class="vod-grid">
                 {"".join([f'''
@@ -425,7 +418,6 @@ def generate_full_system(members, history_db):
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom:10px;">
-                <!-- 💡 전체 VOD 수정 -->
                 <span class="timeline-title" id="list-title" style="margin-bottom:0; border:none; padding:0; font-size: 16px;">전체 VOD</span>
                 <div class="sort-buttons">
                     <button onclick="sortVOD('latest')" class="sort-btn active" id="btn-sort-latest">최신순</button>
@@ -448,10 +440,10 @@ def generate_full_system(members, history_db):
         </div>
     </div>
 
-    <!-- 💡 중앙정렬 버그 픽스된 매출 상세 모달 -->
+    <!-- 매출 상세 모달 -->
     <div id="sales-modal" onclick="closeSalesModal()">
         <div class="sales-modal-inner" onclick="event.stopPropagation()">
-            <div id="s-title" style="font-size:22px; font-family:'Cinzel', serif; color:#d4af37; margin-bottom:20px; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px; text-align:center; letter-spacing:2px;"></div>
+            <div id="s-title"></div>
             <ul id="s-list" style="list-style:none; padding:0; margin:0;"></ul>
             <div style="margin-top:25px; text-align:center; color:#777; font-size:12px; cursor:pointer; letter-spacing:1px;" onclick="closeSalesModal()">[ 닫기 ]</div>
         </div>
@@ -471,7 +463,6 @@ def generate_full_system(members, history_db):
             "2026.05.14": "YXL 5회차"
         }};
         
-        // 💡 2026년 5월 주요 한국 공휴일
         const krHolidays = ['2026.05.05', '2026.05.24', '2026.05.25'];
         
         let currentStartDate = new Date(); 
@@ -495,7 +486,6 @@ def generate_full_system(members, history_db):
         function renderCalendar() {{
             const row = document.getElementById('calendarRow');
             row.innerHTML = '';
-            // 💡 요일 한글화
             const daysArr = ['월', '화', '수', '목', '금', '토', '일'];
             const todayStr = new Date().toLocaleDateString('ko-KR', {{year:'numeric', month:'2-digit', day:'2-digit'}}).replace(/ /g,'').replace(/\\./g,'.').slice(0,-1);
 
@@ -507,7 +497,6 @@ def generate_full_system(members, history_db):
                 const event = events[dStr] || null;
                 const isToday = dStr === todayStr;
                 
-                // 💡 주말 및 공휴일 빨간색 처리
                 const isHoliday = krHolidays.includes(dStr) || d.getDay() === 0 || d.getDay() === 6;
                 const textStyle = isHoliday ? 'color: #ff4d4d;' : '';
 
@@ -554,26 +543,31 @@ def generate_full_system(members, history_db):
             const data = historyDb[season]; 
             if(!data) return;
             
-            document.getElementById('s-title').innerText = season + " 세부 리포트";
+            // 💡 세부 리포트 타이틀 고급스럽게 변경
+            document.getElementById('s-title').innerText = `${{season}} 상세 리포트`;
+            
             let html = `<li class="sales-list-item"><span style="color:#d4af37; font-weight:800;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}} 개</b></li>`;
             data.contents.forEach(item => html += `<li class="sales-list-item"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}} 개</b></li>`);
             document.getElementById('s-list').innerHTML = html; 
-            // 💡 팝업 정렬 버그 픽스
             document.getElementById('sales-modal').style.display = 'flex';
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
+        // 💡 프로필 모달 정보 체크 (없는 정보는 HTML에서 제외)
         function openProfile(n) {{
             const m = members[n];
             document.getElementById('m-img').src = m.img;
             document.getElementById('m-name').innerText = n;
             document.getElementById('m-pos').innerText = m.pos;
-            document.getElementById('m-details').innerHTML = `
-                <div class="stat-box"><span class="stat-label">나이</span><span class="stat-value">${{m.age}}</span></div>
-                <div class="stat-box"><span class="stat-label">입사일</span><span class="stat-value">${{m.join_date}}</span></div>
-                <div class="stat-box"><span class="stat-label">MBTI</span><span class="stat-value">${{m.mbti}}</span></div>
-                <div class="stat-box"><span class="stat-label">신체정보</span><span class="stat-value">${{m.stats}}</span></div>
-                <div class="stat-box"><span class="stat-label">특기</span><span class="stat-value">${{m.skill}}</span></div>`;
+            
+            let detailsHtml = '';
+            if(m.age && m.age.trim() !== '') detailsHtml += `<div class="stat-box"><span class="stat-label">나이</span><span class="stat-value">${{m.age}}</span></div>`;
+            if(m.join_date && m.join_date.trim() !== '') detailsHtml += `<div class="stat-box"><span class="stat-label">입사일</span><span class="stat-value">${{m.join_date}}</span></div>`;
+            if(m.mbti && m.mbti.trim() !== '') detailsHtml += `<div class="stat-box"><span class="stat-label">MBTI</span><span class="stat-value">${{m.mbti}}</span></div>`;
+            if(m.stats && m.stats.trim() !== '') detailsHtml += `<div class="stat-box"><span class="stat-label">신체정보</span><span class="stat-value">${{m.stats}}</span></div>`;
+            if(m.skill && m.skill.trim() !== '') detailsHtml += `<div class="stat-box"><span class="stat-label">특기</span><span class="stat-value">${{m.skill}}</span></div>`;
+            
+            document.getElementById('m-details').innerHTML = detailsHtml;
             document.getElementById('p-modal').style.display = 'flex';
         }}
         function closeProfile() {{ document.getElementById('p-modal').style.display = 'none'; }}
@@ -617,7 +611,7 @@ def generate_full_system(members, history_db):
             sortAndRenderVODs();
         }}
 
-        // 💡 썸네일 프리뷰(Tooltip) 오프라인 상태 완벽 호환 로직
+        // 💡 오프라인 멤버 툴팁 안보이게 완벽 수정
         function initTooltips() {{
             const units = document.querySelectorAll('.member-unit'); 
             const preview = document.getElementById('preview');
@@ -625,20 +619,14 @@ def generate_full_system(members, history_db):
                 unit.addEventListener('mousemove', (e) => {{
                     // 방송 상태 파악 (true/false)
                     const isLive = unit.getAttribute('data-islive') === 'true';
-                    // 방송중이면 썸네일, 오프라인이면 프사 가져오기
-                    const thumb = isLive ? unit.getAttribute('data-thumb') : unit.getAttribute('data-profile');
                     
+                    // 💡 오프라인이면 아예 툴팁을 띄우지 않고 함수 종료
+                    if(!isLive) return; 
+                    
+                    const thumb = unit.getAttribute('data-thumb');
                     document.getElementById('p-img').src = thumb; 
                     document.getElementById('p-title').textContent = unit.getAttribute('data-title'); 
-                    
-                    // LIVE 여부에 따른 뱃지 변경
-                    if(isLive) {{
-                        document.getElementById('p-live-badge').innerHTML = `🔴 ON AIR • ${{unit.getAttribute('data-viewers')}} Vw.`;
-                        document.getElementById('p-live-badge').style.color = '#ff4d4d';
-                    }} else {{
-                        document.getElementById('p-live-badge').innerHTML = `⚪ OFFLINE`;
-                        document.getElementById('p-live-badge').style.color = '#aaa';
-                    }}
+                    document.getElementById('p-live-badge').innerHTML = `🔴 ON AIR • ${{unit.getAttribute('data-viewers')}} Vw.`;
                     
                     preview.style.display = 'block';
                     

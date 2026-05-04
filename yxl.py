@@ -71,6 +71,10 @@ def init_db_if_empty():
 def get_members_from_db():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
+    # 💡 서니님 프로필 모달 입사일 정보 (두 줄 형태) 강제 업데이트
+    cur.execute("UPDATE Members SET join_date = '2025.06.17 ~ 휴직전 (271일)<br>(휴직복귀) 2026.04.14' WHERE name = '서니'")
+    conn.commit()
+    
     cur.execute('''SELECT m.name, m.soop_id, p.name, m.img_url, m.age, m.join_date, m.stats, m.mbti, m.skill FROM Members m JOIN Positions p ON m.position_id = p.id ORDER BY p.rank_order, m.id''')
     rows = cur.fetchall()
     conn.close()
@@ -80,15 +84,26 @@ def get_members_from_db():
     
     members = []
     for r in rows:
+        name = r[0]
         join_date_str = r[5]
         d_day_str = ""
-        if join_date_str:
+        
+        # 💡 서니님을 위한 커스텀 D-DAY 합산 계산 (이전 271일 + 현재)
+        if name == '서니':
             try:
-                j_date = datetime.strptime(join_date_str.strip(), "%Y.%m.%d").replace(tzinfo=kst)
-                d_day = (now - j_date).days
+                j_date = datetime.strptime("2026.04.14", "%Y.%m.%d").replace(tzinfo=kst)
+                d_day = 271 + (now - j_date).days
                 d_day_str = f"D+{d_day}"
             except: pass
-        members.append({"name": r[0], "id": r[1], "pos": r[2], "img": r[3], "age": r[4], "join_date": r[5], "stats": r[6], "mbti": r[7], "skill": r[8], "d_day": d_day_str})
+        else:
+            if join_date_str:
+                try:
+                    j_date = datetime.strptime(join_date_str.strip(), "%Y.%m.%d").replace(tzinfo=kst)
+                    d_day = (now - j_date).days
+                    d_day_str = f"D+{d_day}"
+                except: pass
+                
+        members.append({"name": name, "id": r[1], "pos": r[2], "img": r[3], "age": r[4], "join_date": join_date_str, "stats": r[6], "mbti": r[7], "skill": r[8], "d_day": d_day_str})
     return members
 
 def get_history_from_db():
@@ -172,10 +187,33 @@ def generate_full_system(members, history_db):
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
     current_season_sum = sum([4343316, 2164822, 3135452])
 
-    print("[3/3] VOD 영상 가져오는 중 (약간의 시간이 소요됩니다)...")
+    print("[3/3] VOD 영상 캐시 확인 중 (스마트 업데이트)...")
     vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", "146665451", "149341401", "149372371", "149482895", "149543791", "151963511", "152673671", "152932371", "153270385", "153906161", "155022377", "156072307", "156233659", "156443147", "156897587", "157766473", "159784167", "159835159", "160179551", "160229793", "163314531", "163507573", "165090649", "165095477", "166797677", "167711523", "168507233", "169165861", "171334577", "171346633", "171517903", "171625221", "181193639", "181202165", "181212107", "181319655", "182185345", "182561159", "185332075", "186322409", "188589109", "193831035"]
     vod_ids.reverse() 
-    vod_list = [fetch_vod_data_by_api(vid) for vid in vod_ids]
+    
+    # 💡 VOD 캐싱 로직
+    cache_file = os.path.join(BASE_DIR, 'vod_cache.json')
+    vod_list = []
+    need_fetch = True
+    
+    if os.path.exists(cache_file):
+        try:
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cached_data = json.load(f)
+            if cached_data.get("ids") == vod_ids:
+                vod_list = cached_data.get("data", [])
+                print("⚡ 저장된 VOD 캐시를 성공적으로 불러왔습니다.")
+                need_fetch = False
+        except Exception as e:
+            print("⚠️ 캐시 읽기 실패, 새로 가져옵니다.", e)
+            
+    if need_fetch:
+        print("⏳ 새로운 VOD 데이터를 API로 가져오는 중...")
+        vod_list = [fetch_vod_data_by_api(vid) for vid in vod_ids]
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump({"ids": vod_ids, "data": vod_list}, f, ensure_ascii=False)
+        print("✅ 성공적으로 VOD 데이터를 캐시에 저장했습니다.")
+
     valid_vods = [v for v in vod_list if v["views"] > 0]
     top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
     main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
@@ -191,7 +229,6 @@ def generate_full_system(members, history_db):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <title>YXL VIP LOUNGE</title>
-    <!-- 💡 Pretendard 폰트 완벽 추가 -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -202,7 +239,7 @@ def generate_full_system(members, history_db):
         
         .nav-header {{ position: sticky; top: 0; background: rgba(8, 8, 12, 0.85); border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-wrap: wrap; gap: 10px; }}
         .logo-section {{ display: flex; align-items: center; cursor: pointer; }}
-        .update-timer {{ font-size: 13px; font-weight: 900; color: #d4af37; margin-left: 15px; letter-spacing: 2px; font-family: 'Cinzel', serif; }}
+        .update-timer {{ font-size: 14px; font-weight: 900; color: #d4af37; margin-left: 20px; letter-spacing: 3px; font-family: 'Cinzel', 'Pretendard', sans-serif; text-shadow: 0 2px 10px rgba(212,175,55,0.6); border-left: 2px solid rgba(212,175,55,0.3); padding-left: 20px; display: inline-flex; align-items: center; height: 20px; }}
         
         .tab-menu {{ display: flex; gap: 20px; flex-wrap: wrap; }}
         .tab-item {{ font-size: 15px; font-weight: 900; cursor: pointer; color: rgba(255,255,255,0.4); padding: 8px 5px; position: relative; transition: 0.4s; letter-spacing: 1px; }}
@@ -290,17 +327,17 @@ def generate_full_system(members, history_db):
         .profile-right {{ flex: 1; min-width: 250px; display: grid; grid-template-columns: 1fr; gap: 12px; border-left: 1px solid rgba(212,175,55,0.15); padding-left: 30px; }}
         .stat-box {{ background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }}
         .stat-label {{ font-size: 11px; color: #aa801e; font-weight: 900; }}
-        .stat-value {{ font-size: 14px; color: #fff; }}
+        
+        /* 💡 모달 내 두 줄 텍스트가 자연스럽게 보이도록 CSS 처리 */
+        .stat-value {{ font-size: 14px; color: #fff; text-align: right; word-break: keep-all; line-height: 1.4; }}
+        
         .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; transition: 0.3s; }}
         .close-btn:hover {{ color: #d4af37; transform: rotate(90deg); }}
         
         .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; margin: 0 auto; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }}
         .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
         
-        /* 💡 타이틀 글씨체 고급스럽게 통일 (명조체 깨짐 방지) */
         .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Pretendard', sans-serif; font-weight: 900; letter-spacing: 1.5px; padding-bottom: 10px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); }}
-        
-        /* 💡 매출표 세부리포트 타이틀 고급스럽게 */
         #s-title {{ font-size: 22px; font-family: 'Pretendard', sans-serif; font-weight: 900; color: #d4af37; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px; text-align: center; letter-spacing: 2px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); }}
 
         .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; transition: 0.3s; cursor:pointer; }}
@@ -543,7 +580,6 @@ def generate_full_system(members, history_db):
             const data = historyDb[season]; 
             if(!data) return;
             
-            // 💡 세부 리포트 타이틀 고급스럽게 변경
             document.getElementById('s-title').innerText = `${{season}} 상세 리포트`;
             
             let html = `<li class="sales-list-item"><span style="color:#d4af37; font-weight:800;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}} 개</b></li>`;
@@ -553,7 +589,6 @@ def generate_full_system(members, history_db):
         }}
         function closeSalesModal() {{ document.getElementById('sales-modal').style.display = 'none'; }}
 
-        // 💡 프로필 모달 정보 체크 (없는 정보는 HTML에서 제외)
         function openProfile(n) {{
             const m = members[n];
             document.getElementById('m-img').src = m.img;
@@ -611,16 +646,12 @@ def generate_full_system(members, history_db):
             sortAndRenderVODs();
         }}
 
-        // 💡 오프라인 멤버 툴팁 안보이게 완벽 수정
         function initTooltips() {{
             const units = document.querySelectorAll('.member-unit'); 
             const preview = document.getElementById('preview');
             units.forEach(unit => {{
                 unit.addEventListener('mousemove', (e) => {{
-                    // 방송 상태 파악 (true/false)
                     const isLive = unit.getAttribute('data-islive') === 'true';
-                    
-                    // 💡 오프라인이면 아예 툴팁을 띄우지 않고 함수 종료
                     if(!isLive) return; 
                     
                     const thumb = unit.getAttribute('data-thumb');

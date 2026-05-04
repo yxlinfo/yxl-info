@@ -71,7 +71,7 @@ def init_db_if_empty():
 def get_members_from_db():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    # 💡 서니님 프로필 모달 입사일 정보 (두 줄 형태) 강제 업데이트
+    # 서니님 프로필 모달 정보 업데이트
     cur.execute("UPDATE Members SET join_date = '2025.06.17 ~ 휴직전 (271일)<br>(휴직복귀) 2026.04.14' WHERE name = '서니'")
     conn.commit()
     
@@ -88,7 +88,7 @@ def get_members_from_db():
         join_date_str = r[5]
         d_day_str = ""
         
-        # 💡 서니님을 위한 커스텀 D-DAY 합산 계산 (이전 271일 + 현재)
+        # 서니님 D-DAY 계산 
         if name == '서니':
             try:
                 j_date = datetime.strptime("2026.04.14", "%Y.%m.%d").replace(tzinfo=kst)
@@ -191,7 +191,6 @@ def generate_full_system(members, history_db):
     vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", "146665451", "149341401", "149372371", "149482895", "149543791", "151963511", "152673671", "152932371", "153270385", "153906161", "155022377", "156072307", "156233659", "156443147", "156897587", "157766473", "159784167", "159835159", "160179551", "160229793", "163314531", "163507573", "165090649", "165095477", "166797677", "167711523", "168507233", "169165861", "171334577", "171346633", "171517903", "171625221", "181193639", "181202165", "181212107", "181319655", "182185345", "182561159", "185332075", "186322409", "188589109", "193831035"]
     vod_ids.reverse() 
     
-    # 💡 VOD 캐싱 로직
     cache_file = os.path.join(BASE_DIR, 'vod_cache.json')
     vod_list = []
     need_fetch = True
@@ -205,7 +204,7 @@ def generate_full_system(members, history_db):
                 print("⚡ 저장된 VOD 캐시를 성공적으로 불러왔습니다.")
                 need_fetch = False
         except Exception as e:
-            print("⚠️ 캐시 읽기 실패, 새로 가져옵니다.", e)
+            pass
             
     if need_fetch:
         print("⏳ 새로운 VOD 데이터를 API로 가져오는 중...")
@@ -218,8 +217,26 @@ def generate_full_system(members, history_db):
     top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
     main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
     
+    # 💡 시즌별 간부 정보 데이터
+    season_staff_data = {
+        "시즌1": {"부장": {"name": "류레카시아", "img": "https://stimg.sooplive.com/LOGO/vi/viviana7/viviana7.jpg"}, "차장": {"name": "낭니", "img": "https://stimg.sooplive.com/LOGO/sk/sksmsskdsl10/sksmsskdsl10.jpg"}, "과장": {"name": "윤수", "img": "https://stimg.sooplive.com/LOGO/wh/whdbstn7/whdbstn7.jpg"}},
+        "시즌2": {"부장": {"name": "류레카시아", "img": "https://stimg.sooplive.com/LOGO/vi/viviana7/viviana7.jpg"}, "차장": {"name": "채영", "img": "https://stimg.sooplive.com/LOGO/qk/qksgmlqksgml/qksgmlqksgml.jpg"}, "과장": {"name": "낭니", "img": "https://stimg.sooplive.com/LOGO/sk/sksmsskdsl10/sksmsskdsl10.jpg"}},
+        "시즌3": {"부장": {"name": "류레카시아", "img": "https://stimg.sooplive.com/LOGO/vi/viviana7/viviana7.jpg"}, "차장": {"name": "채영", "img": "https://stimg.sooplive.com/LOGO/qk/qksgmlqksgml/qksgmlqksgml.jpg"}, "과장": {"name": "유누", "img": "https://stimg.sooplive.com/LOGO/bl/bluetail01/bluetail01.jpg"}},
+        "시즌4": {"부장": {"name": "유누", "img": "https://stimg.sooplive.com/LOGO/bl/bluetail01/bluetail01.jpg"}, "차장": {"name": "이슬이", "img": "https://stimg.sooplive.com/LOGO/da/dasl8121/dasl8121.jpg"}, "과장": {"name": "윤하랑", "img": "https://stimg.sooplive.com/LOGO/xx/xx00uxx/xx00uxx.jpg"}},
+        "시즌5": {"부장": {"name": "유누", "img": "https://stimg.sooplive.com/LOGO/bl/bluetail01/bluetail01.jpg"}, "차장": {"name": "이슬이", "img": "https://stimg.sooplive.com/LOGO/da/dasl8121/dasl8121.jpg"}, "과장": {"name": "윤하랑", "img": "https://stimg.sooplive.com/LOGO/xx/xx00uxx/xx00uxx.jpg"}},
+        "시즌6": {"부장": {"name": "유누", "img": "https://stimg.sooplive.com/LOGO/bl/bluetail01/bluetail01.jpg"}, "차장": {"name": "윤하랑", "img": "https://stimg.sooplive.com/LOGO/xx/xx00uxx/xx00uxx.jpg"}, "과장": {"name": "이슬이", "img": "https://stimg.sooplive.com/LOGO/da/dasl8121/dasl8121.jpg"}},
+        "시즌7": {"부장": {"name": "루루", "img": "https://stimg.sooplive.com/LOGO/y9/y970308/y970308.jpg"}, "차장": {"name": "낭니", "img": "https://stimg.sooplive.com/LOGO/sk/sksmsskdsl10/sksmsskdsl10.jpg"}, "과장": {"name": "윤하랑", "img": "https://stimg.sooplive.com/LOGO/xx/xx00uxx/xx00uxx.jpg"}},
+        "시즌8": {"부장": {"name": "은우", "img": "https://stimg.sooplive.com/LOGO/pj/pjalstjs/pjalstjs.jpg"}, "차장": {"name": "리아", "img": "https://stimg.sooplive.com/LOGO/tm/tmdgus5411/tmdgus5411.jpg"}, "과장": {"name": "루루", "img": "https://stimg.sooplive.com/LOGO/y9/y970308/y970308.jpg"}},
+        "시즌9": {"부장": {"name": "은우", "img": "https://stimg.sooplive.com/LOGO/pj/pjalstjs/pjalstjs.jpg"}, "차장": {"name": "리아", "img": "https://stimg.sooplive.com/LOGO/tm/tmdgus5411/tmdgus5411.jpg"}, "과장": {"name": "채영", "img": "https://stimg.sooplive.com/LOGO/qk/qksgmlqksgml/qksgmlqksgml.jpg"}},
+        "시즌10": {"부장": {"name": "지유", "img": "https://stimg.sooplive.com/LOGO/ch/chzh1chzh/chzh1chzh.jpg"}, "차장": {"name": "은우", "img": "https://stimg.sooplive.com/LOGO/pj/pjalstjs/pjalstjs.jpg"}, "과장": {"name": "후잉", "img": "https://stimg.sooplive.com/LOGO/ja/jaeha010/jaeha010.jpg"}},
+        "시즌11": {"부장": {"name": "지유", "img": "https://stimg.sooplive.com/LOGO/ch/chzh1chzh/chzh1chzh.jpg"}, "차장": {"name": "은우", "img": "https://stimg.sooplive.com/LOGO/pj/pjalstjs/pjalstjs.jpg"}, "과장": {"name": "리윤", "img": "https://stimg.sooplive.com/LOGO/sl/sladk51/m/sladk51.webp"}},
+        "시즌12": {"부장": {"name": "리윤", "img": "https://stimg.sooplive.com/LOGO/sl/sladk51/m/sladk51.webp"}, "차장": {"name": "후잉", "img": "https://stimg.sooplive.com/LOGO/ja/jaeha010/jaeha010.jpg"}, "과장": {"name": "서니", "img": "https://stimg.sooplive.com/LOGO/il/iluvpp/m/iluvpp.webp"}},
+        "시즌13": {"부장": {"name": "리윤", "img": "https://stimg.sooplive.com/LOGO/sl/sladk51/m/sladk51.webp"}, "차장": {"name": "류서하", "img": "https://stimg.sooplive.com/LOGO/sm/smkim82372/m/smkim82372.webp"}, "과장": {"name": "후잉", "img": "https://stimg.sooplive.com/LOGO/ja/jaeha010/jaeha010.jpg"}}
+    }
+
     js_vod_data = json.dumps(vod_list, ensure_ascii=False)
     js_history_db = json.dumps(history_db, ensure_ascii=False)
+    js_staff_data = json.dumps(season_staff_data, ensure_ascii=False)
 
     full_html = f"""
 <!DOCTYPE html>
@@ -327,16 +344,21 @@ def generate_full_system(members, history_db):
         .profile-right {{ flex: 1; min-width: 250px; display: grid; grid-template-columns: 1fr; gap: 12px; border-left: 1px solid rgba(212,175,55,0.15); padding-left: 30px; }}
         .stat-box {{ background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }}
         .stat-label {{ font-size: 11px; color: #aa801e; font-weight: 900; }}
-        
-        /* 💡 모달 내 두 줄 텍스트가 자연스럽게 보이도록 CSS 처리 */
         .stat-value {{ font-size: 14px; color: #fff; text-align: right; word-break: keep-all; line-height: 1.4; }}
-        
         .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; transition: 0.3s; }}
         .close-btn:hover {{ color: #d4af37; transform: rotate(90deg); }}
         
         .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; margin: 0 auto; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }}
-        .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }}
+        .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; align-items: center; }}
         
+        /* 💡 시즌별 임원진 프로필 UI CSS */
+        .staff-info-row {{ display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.15); width: 100%; box-sizing: border-box; justify-content: space-around; margin-top: 10px; }}
+        .staff-badge {{ display: flex; align-items: center; gap: 8px; }}
+        .staff-pos {{ font-size: 11px; color: #d4af37; font-weight: 900; }}
+        .staff-img {{ width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(212,175,55,0.5); cursor: pointer; transition: 0.3s; background: #111; }}
+        .staff-img:hover {{ transform: scale(1.3); border-color: #d4af37; box-shadow: 0 0 10px rgba(212,175,55,0.6); z-index: 10; }}
+        .staff-divider {{ width: 1px; height: 20px; background: rgba(255,255,255,0.1); }}
+
         .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Pretendard', sans-serif; font-weight: 900; letter-spacing: 1.5px; padding-bottom: 10px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); }}
         #s-title {{ font-size: 22px; font-family: 'Pretendard', sans-serif; font-weight: 900; color: #d4af37; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px; text-align: center; letter-spacing: 2px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); }}
 
@@ -490,6 +512,7 @@ def generate_full_system(members, history_db):
         const members = {js_member_data};
         const allVODs = {js_vod_data};
         const historyDb = {js_history_db};
+        const staffData = {js_staff_data}; // 💡 시즌별 임원진 데이터 삽입
         
         let currentVODs = [...allVODs];
         let currentSort = 'latest'; 
@@ -576,13 +599,44 @@ def generate_full_system(members, history_db):
             }});
         }}
 
+        // 💡 매출 상세 모달 오픈 시 임원진 UI 렌더링 로직 추가
         function openSalesModal(season) {{
             const data = historyDb[season]; 
             if(!data) return;
             
             document.getElementById('s-title').innerText = `${{season}} 상세 리포트`;
             
-            let html = `<li class="sales-list-item"><span style="color:#d4af37; font-weight:800;">직급전</span> <b style="color:#f5f5dc;">${{data.직급전.toLocaleString()}} 개</b></li>`;
+            let staffHtml = '';
+            if (staffData[season]) {{
+                const s = staffData[season];
+                staffHtml = `
+                <div class="staff-info-row">
+                    <div class="staff-badge">
+                        <span class="staff-pos">부장</span>
+                        <img src="${{s['부장'].img}}" title="${{s['부장'].name}}" class="staff-img">
+                    </div>
+                    <div class="staff-divider"></div>
+                    <div class="staff-badge">
+                        <span class="staff-pos">차장</span>
+                        <img src="${{s['차장'].img}}" title="${{s['차장'].name}}" class="staff-img">
+                    </div>
+                    <div class="staff-divider"></div>
+                    <div class="staff-badge">
+                        <span class="staff-pos">과장</span>
+                        <img src="${{s['과장'].img}}" title="${{s['과장'].name}}" class="staff-img">
+                    </div>
+                </div>`;
+            }}
+            
+            let html = `
+            <li class="sales-list-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                <div style="display:flex; justify-content:space-between; width: 100%; align-items: center;">
+                    <span style="color:#d4af37; font-weight:800; font-size:15px;">직급전</span>
+                    <b style="color:#f5f5dc; font-size:15px;">${{data.직급전.toLocaleString()}} 개</b>
+                </div>
+                ${{staffHtml}}
+            </li>`;
+            
             data.contents.forEach(item => html += `<li class="sales-list-item"><span style="color:#aaa;">${{item[0]}}</span> <b style="color:#fff;">${{item[1].toLocaleString()}} 개</b></li>`);
             document.getElementById('s-list').innerHTML = html; 
             document.getElementById('sales-modal').style.display = 'flex';

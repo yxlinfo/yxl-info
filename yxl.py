@@ -217,7 +217,6 @@ def generate_full_system(members, history_db):
     top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
     main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
     
-    # 💡 시즌별 간부 정보 데이터
     season_staff_data = {
         "시즌1": {"부장": {"name": "류레카시아", "img": "https://stimg.sooplive.com/LOGO/vi/viviana7/viviana7.jpg"}, "차장": {"name": "낭니", "img": "https://stimg.sooplive.com/LOGO/sk/sksmsskdsl10/sksmsskdsl10.jpg"}, "과장": {"name": "윤수", "img": "https://stimg.sooplive.com/LOGO/wh/whdbstn7/whdbstn7.jpg"}},
         "시즌2": {"부장": {"name": "류레카시아", "img": "https://stimg.sooplive.com/LOGO/vi/viviana7/viviana7.jpg"}, "차장": {"name": "채영", "img": "https://stimg.sooplive.com/LOGO/qk/qksgmlqksgml/qksgmlqksgml.jpg"}, "과장": {"name": "낭니", "img": "https://stimg.sooplive.com/LOGO/sk/sksmsskdsl10/sksmsskdsl10.jpg"}},
@@ -351,7 +350,6 @@ def generate_full_system(members, history_db):
         .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; margin: 0 auto; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }}
         .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; align-items: center; }}
         
-        /* 💡 시즌별 임원진 프로필 UI CSS */
         .staff-info-row {{ display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.15); width: 100%; box-sizing: border-box; justify-content: space-around; margin-top: 10px; }}
         .staff-badge {{ display: flex; align-items: center; gap: 8px; }}
         .staff-pos {{ font-size: 11px; color: #d4af37; font-weight: 900; }}
@@ -413,7 +411,10 @@ def generate_full_system(members, history_db):
         <section id="sales" class="tab-content">
             <div class="sales-section">
                 <div class="sales-header-container">
-                    <span class="sales-main-title">YXL 시즌 히스토리</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span class="sales-main-title">YXL 시즌 히스토리</span>
+                        <span style="font-size: 11px; color: #999; margin-top: 6px; font-weight: 700; letter-spacing: 0.5px;">※ 시즌별 그래프 클릭시 상세정보가 나옵니다.</span>
+                    </div>
                     <div class="total-sum-badge">TOTAL: {format(all_season_sum, ',')}개</div>
                 </div>
                 <div class="chart-scroll-wrapper"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
@@ -512,7 +513,7 @@ def generate_full_system(members, history_db):
         const members = {js_member_data};
         const allVODs = {js_vod_data};
         const historyDb = {js_history_db};
-        const staffData = {js_staff_data}; // 💡 시즌별 임원진 데이터 삽입
+        const staffData = {js_staff_data}; 
         
         let currentVODs = [...allVODs];
         let currentSort = 'latest'; 
@@ -575,31 +576,119 @@ def generate_full_system(members, history_db):
             }}
         }}
 
+        // 💡 럭셔리 차트 렌더링 로직으로 전면 업그레이드
         let hChart = null, cChart = null;
         function renderCharts() {{
             Chart.register(ChartDataLabels);
             if(hChart) hChart.destroy();
             if(cChart) cChart.destroy();
             
-            const commonOptions = {{ responsive: true, maintainAspectRatio: false, layout: {{ padding: {{ top: 40 }} }}, plugins: {{ legend: {{ display: false }}, datalabels: {{ anchor: 'end', align: 'top', color: '#d4af37', font: {{ weight: '900', size: 12 }}, formatter: (v, ctx) => {{ if(ctx.datasetIndex === 1 || ctx.chart.data.datasets.length === 1) {{ let total = ctx.chart.data.datasets[0].data[ctx.dataIndex] + (ctx.datasetIndex === 1 ? v : 0); return Math.floor(total / 10000).toLocaleString() + '만'; }} return null; }} }}, tooltip: {{ callbacks: {{ label: (ctx) => `${{ctx.dataset.label}}: ${{ctx.raw.toLocaleString()}}개` }} }} }}, scales: {{ y: {{ stacked: true, display: false }}, x: {{ stacked: true, ticks: {{ color: '#aaa', font: {{ weight: '900', size: 12 }} }}, grid: {{ color: 'rgba(212,175,55,0.1)' }} }} }} }};
+            const ctxH = document.getElementById('historyChart').getContext('2d');
+            const ctxC = document.getElementById('currentChart').getContext('2d');
 
-            hChart = new Chart(document.getElementById('historyChart'), {{ 
+            function getGoldGradient(ctx, topColor, bottomColor) {{
+                let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, topColor);
+                gradient.addColorStop(1, bottomColor);
+                return gradient;
+            }}
+
+            const gradBase = getGoldGradient(ctxH, '#d4af37', '#7a5214'); // 직급전 (다크골드)
+            const gradTop = getGoldGradient(ctxH, '#ffeba0', '#d4af37');  // 일반회차 (라이트골드)
+
+            const commonOptions = {{ 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                layout: {{ padding: {{ top: 40 }} }}, 
+                interaction: {{ mode: 'index', intersect: false }},
+                plugins: {{ 
+                    legend: {{ display: false }}, 
+                    datalabels: {{ 
+                        anchor: 'end', align: 'top', 
+                        color: '#ffeba0', 
+                        font: {{ family: 'Pretendard', weight: '900', size: 12 }}, 
+                        formatter: (v, ctx) => {{ 
+                            if(ctx.datasetIndex === 1 || ctx.chart.data.datasets.length === 1) {{ 
+                                let total = ctx.chart.data.datasets[0].data[ctx.dataIndex] + (ctx.datasetIndex === 1 ? v : 0); 
+                                return Math.floor(total / 10000).toLocaleString() + '만'; 
+                            }} 
+                            return null; 
+                        }} 
+                    }},
+                    tooltip: {{
+                        backgroundColor: 'rgba(8, 8, 12, 0.95)',
+                        titleColor: '#d4af37',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(212, 175, 55, 0.4)',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true,
+                        callbacks: {{ label: (ctx) => ` ${{ctx.dataset.label}}: ${{ctx.raw.toLocaleString()}}개` }}
+                    }}
+                }}, 
+                scales: {{ 
+                    y: {{ stacked: true, display: false }}, 
+                    x: {{ 
+                        stacked: true, 
+                        ticks: {{ color: '#aaa', font: {{ family: 'Pretendard', weight: '800', size: 12 }} }}, 
+                        grid: {{ color: 'rgba(212,175,55,0.05)', drawBorder: false }} 
+                    }} 
+                }} 
+            }};
+
+            hChart = new Chart(ctxH, {{ 
                 type: 'bar', 
-                data: {{ labels: {json.dumps(js_labels)}, datasets: [
-                    {{ label: '직급전', data: {json.dumps(js_rank_rev)}, backgroundColor: '#d4af37' }},
-                    {{ label: '일반회차', data: {json.dumps(js_norm_rev)}, backgroundColor: '#aa801e' }}
-                ] }},
-                options: {{ ...commonOptions, onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]) }} 
+                data: {{ 
+                    labels: {json.dumps(js_labels)}, 
+                    datasets: [
+                        {{ 
+                            label: '직급전', data: {json.dumps(js_rank_rev)}, 
+                            backgroundColor: gradBase,
+                            borderColor: 'rgba(212, 175, 55, 0.8)',
+                            borderWidth: {{top: 1, right: 1, left: 1, bottom: 0}},
+                            hoverBackgroundColor: '#fff',
+                            hoverBorderColor: '#ffd700',
+                            barPercentage: 0.55
+                        }},
+                        {{ 
+                            label: '일반회차', data: {json.dumps(js_norm_rev)}, 
+                            backgroundColor: gradTop,
+                            borderColor: 'rgba(255, 235, 160, 0.8)',
+                            borderWidth: {{top: 1, right: 1, left: 1, bottom: 0}},
+                            borderRadius: {{topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0}},
+                            hoverBackgroundColor: '#fff',
+                            hoverBorderColor: '#ffd700',
+                            barPercentage: 0.55
+                        }}
+                    ] 
+                }},
+                options: {{ 
+                    ...commonOptions, 
+                    onClick: (e, activeEls) => activeEls.length > 0 && openSalesModal(hChart.data.labels[activeEls[0].index]),
+                    onHover: (e, activeEls) => e.native.target.style.cursor = activeEls.length > 0 ? 'pointer' : 'default'
+                }} 
             }});
 
-            cChart = new Chart(document.getElementById('currentChart'), {{ 
+            cChart = new Chart(ctxC, {{ 
                 type: 'bar', 
-                data: {{ labels: ['직급전', '1회차', '2회차'], datasets: [{{ label: '매출', data: [4343316, 2164822, 3135452], backgroundColor: '#d4af37' }}] }}, 
+                data: {{ 
+                    labels: ['직급전', '1회차', '2회차'], 
+                    datasets: [{{ 
+                        label: '매출', data: [4343316, 2164822, 3135452], 
+                        backgroundColor: gradTop,
+                        borderColor: 'rgba(255, 235, 160, 0.8)',
+                        borderWidth: {{top: 1, right: 1, left: 1, bottom: 0}},
+                        borderRadius: {{topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0}},
+                        hoverBackgroundColor: '#fff',
+                        hoverBorderColor: '#ffd700',
+                        barPercentage: 0.4
+                    }}] 
+                }}, 
                 options: commonOptions 
             }});
         }}
 
-        // 💡 매출 상세 모달 오픈 시 임원진 UI 렌더링 로직 추가
         function openSalesModal(season) {{
             const data = historyDb[season]; 
             if(!data) return;

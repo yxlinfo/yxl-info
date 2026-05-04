@@ -171,6 +171,7 @@ def generate_full_system(members, history_db):
     valid_vods = [v for v in vod_list if v["views"] > 0]
     top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
     main_vod = valid_vods[0] if valid_vods else {"id":"", "title":"", "date":"", "views":0, "thumb":""}
+    
     js_vod_data = json.dumps(vod_list, ensure_ascii=False)
     js_history_db = json.dumps(history_db, ensure_ascii=False)
 
@@ -230,6 +231,13 @@ def generate_full_system(members, history_db):
         .on-air .live-indicator {{ display: block; animation: pulseRed 2s infinite; }}
         @keyframes pulseRed {{ 0% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7); }} 70% {{ box-shadow: 0 0 0 10px rgba(220, 20, 60, 0); }} 100% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0); }} }}
 
+        /* 💡 썸네일 툴팁 프리뷰 CSS */
+        #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 320px; background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.95); overflow: hidden; transition: opacity 0.2s; }}
+        .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #222; }}
+        .p-info {{ padding: 15px; text-align: center; }}
+        .p-title {{ font-size: 14px; color: #f5f5dc; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
+        .p-live-badge {{ font-size: 12px; color: #ff4d4d; letter-spacing: 1px; font-weight: 900; }}
+
         .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
         .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; flex-wrap: wrap; gap: 10px; }}
         .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; }}
@@ -241,7 +249,6 @@ def generate_full_system(members, history_db):
         .chart-container {{ min-width: 1000px; height: 350px; }}
         .chart-container-small {{ min-width: 400px; height: 250px; }}
 
-        /* 💡 럭셔리 주간 달력 디자인 */
         .calendar-nav-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 15px; }}
         .nav-btn {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: 0.3s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }}
         .nav-btn:hover {{ background: #d4af37; color: #000; transform: scale(1.1); box-shadow: 0 0 15px rgba(212,175,55,0.4); }}
@@ -256,7 +263,6 @@ def generate_full_system(members, history_db):
         .dc-date {{ font-size: 18px; color: #fff; font-family: 'Cinzel', serif; font-weight: 900; margin-bottom: 12px; }}
         .dc-event {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 10px; padding: 4px 2px; border-radius: 5px; font-weight: 900; width: 95%; margin: 0 auto; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }}
         
-        /* 💡 프로필 모달 & 직급 폰트 부드럽게 */
         #p-modal {{ display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }}
         .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 600px; display: flex; gap: 40px; position: relative; align-items: center; flex-wrap: wrap; justify-content: center; }}
         .profile-left {{ display: flex; flex-direction: column; align-items: center; }}
@@ -270,7 +276,7 @@ def generate_full_system(members, history_db):
         .stat-value {{ font-size: 14px; color: #fff; }}
         .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; }}
         
-        .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Cinzel', serif; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 10px; }}
+        .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Cinzel', serif; letter-spacing: 2px; padding-bottom: 10px; }}
         .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; transition: 0.3s; cursor:pointer; }}
         .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); transform: translateX(10px); }}
         .t-date {{ font-size: 13px; color: #d4af37; margin-bottom: 5px; }}
@@ -279,7 +285,6 @@ def generate_full_system(members, history_db):
         .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }}
         .t-status.upcoming {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; }}
 
-        /* 💡 VOD 스타일 */
         .search-wrapper {{ position: relative; width: 100%; max-width: 300px; margin-top: 10px; }}
         .search-input {{ width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; }}
         .main-stage {{ background: rgba(8, 8, 12, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }}
@@ -297,6 +302,12 @@ def generate_full_system(members, history_db):
         .vod-text {{ padding: 12px; flex:1; display:flex; flex-direction:column; justify-content:space-between; }}
         .vod-text h4 {{ margin: 0 0 6px 0; font-size: 13px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }}
         .vod-text p {{ margin: 0; font-size: 11px; color: #aaa; }}
+        
+        /* 💡 VOD 정렬 버튼 CSS */
+        .sort-buttons {{ display: flex; gap: 8px; }}
+        .sort-btn {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.3s; font-weight: 700; font-family: 'Pretendard', sans-serif; letter-spacing: 0.5px; }}
+        .sort-btn:hover {{ background: rgba(212,175,55,0.1); color: #fff; }}
+        .sort-btn.active {{ background: linear-gradient(135deg, #d4af37, #aa801e); color: #000; font-weight: 900; border-color: #d4af37; box-shadow: 0 2px 10px rgba(212,175,55,0.3); }}
     </style>
 </head>
 <body>
@@ -335,7 +346,7 @@ def generate_full_system(members, history_db):
         <!-- 3. 주간 달력 & 타임라인 -->
         <section id="schedule" class="tab-content">
             <div class="timeline-section" style="margin-bottom: 40px;">
-                <div class="timeline-title">WEEKLY SCHEDULE</div>
+                <div class="timeline-title" style="border-bottom: 1px solid rgba(212,175,55,0.2);">WEEKLY SCHEDULE</div>
                 <div class="calendar-nav-container">
                     <button class="nav-btn" onclick="changeWeek(-7)">⟨</button>
                     <div class="weekly-calendar-row" id="calendarRow"></div>
@@ -343,7 +354,7 @@ def generate_full_system(members, history_db):
                 </div>
             </div>
             <div class="timeline-section">
-                <div class="timeline-title">OFFICIAL TIMELINE</div>
+                <div class="timeline-title" style="border-bottom: 1px solid rgba(212,175,55,0.2);">OFFICIAL TIMELINE</div>
                 <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
                 <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
                 <div class="timeline-item"><div><div class="t-date">05.14 (목) 17:00</div><div class="t-title">시즌 14 - 5회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
@@ -369,7 +380,7 @@ def generate_full_system(members, history_db):
                 </div>
             </div>
 
-            <div class="timeline-title" style="margin-bottom:0; font-size: 16px;">POPULAR TOP 5</div>
+            <div class="timeline-title" style="margin-bottom:0; font-size: 16px; border-bottom: 1px solid rgba(212,175,55,0.2);">POPULAR TOP 5</div>
             <div class="vod-grid">
                 {"".join([f'''
                 <div class="vod-card" onclick="changeMainPlayer('{v['id']}', '{v['title']}', '{v['date']}', '{v['views']}')">
@@ -381,10 +392,20 @@ def generate_full_system(members, history_db):
                 </div>''' for v in top_5_vods])}
             </div>
 
-            <div class="timeline-title" id="list-title" style="margin-bottom:0; font-size: 16px;">ALL VIDEOS</div>
+            <!-- 💡 VOD 정렬 버튼이 들어간 ALL VIDEOS 헤더 -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom:10px;">
+                <span class="timeline-title" id="list-title" style="margin-bottom:0; border:none; padding:0; font-size: 16px;">ALL VIDEOS</span>
+                <div class="sort-buttons">
+                    <button onclick="sortVOD('latest')" class="sort-btn active" id="btn-sort-latest">최신순</button>
+                    <button onclick="sortVOD('views')" class="sort-btn" id="btn-sort-views">조회수순</button>
+                </div>
+            </div>
             <div class="vod-grid" id="vodListContainer"></div>
         </section>
     </div>
+
+    <!-- 💡 복구된 썸네일 프리뷰(Tooltip) DOM -->
+    <div id="preview"><img src="" id="p-img" class="p-thumb"><div class="p-info"><div id="p-title" class="p-title"></div><div class="p-live-badge">🔴 ON AIR • <span id="p-viewers"></span> Vw.</div></div></div>
 
     <!-- 프로필 모달 -->
     <div id="p-modal" onclick="closeProfile()">
@@ -407,7 +428,10 @@ def generate_full_system(members, history_db):
     <script>
         const members = {js_member_data};
         const allVODs = {js_vod_data};
-        const historyDb = {js_history_db}; // 💡 자바스크립트용 DB 변수 복구
+        const historyDb = {js_history_db};
+        
+        let currentVODs = [...allVODs]; // 💡 정렬 및 검색을 위한 VOD 복사본
+        let currentSort = 'latest'; // 💡 기본 정렬 상태
         
         const events = {{
             "2026.05.07": "YXL 3회차",
@@ -487,7 +511,6 @@ def generate_full_system(members, history_db):
         }}
 
         function openSalesModal(season) {{
-            // 💡 변수명 에러 픽스: 자바스크립트 변수 historyDb 사용
             const data = historyDb[season]; 
             if(!data) return;
             
@@ -530,18 +553,63 @@ def generate_full_system(members, history_db):
                 </div>`).join('');
         }}
 
+        // 💡 VOD 정렬 로직
+        function sortAndRenderVODs() {{
+            if (currentSort === 'latest') {{
+                currentVODs.sort((a, b) => new Date(b.date.replace(/\\./g, '-')) - new Date(a.date.replace(/\\./g, '-')));
+            }} else if (currentSort === 'views') {{
+                currentVODs.sort((a, b) => b.views - a.views);
+            }}
+            renderVODList(currentVODs);
+        }}
+
+        function sortVOD(type) {{
+            currentSort = type;
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-sort-${{type}}`).classList.add('active');
+            sortAndRenderVODs();
+        }}
+
         function searchVOD() {{
             const query = document.getElementById('vodSearch').value.toLowerCase();
-            const filtered = allVODs.filter(v => v.title.toLowerCase().includes(query) || v.id.includes(query));
-            document.getElementById('list-title').innerText = query === "" ? "ALL VIDEOS" : `SEARCH RESULTS (${{filtered.length}})`;
-            renderVODList(filtered);
+            currentVODs = allVODs.filter(v => v.title.toLowerCase().includes(query) || v.id.includes(query));
+            document.getElementById('list-title').innerText = query === "" ? "ALL VIDEOS" : `SEARCH RESULTS (${{currentVODs.length}})`;
+            sortAndRenderVODs();
+        }}
+
+        // 💡 썸네일 프리뷰(Tooltip) 이벤트 등록 함수 복구
+        function initTooltips() {{
+            const units = document.querySelectorAll('.member-unit'); 
+            const preview = document.getElementById('preview');
+            units.forEach(unit => {{
+                unit.addEventListener('mousemove', (e) => {{
+                    const thumb = unit.getAttribute('data-thumb');
+                    if (thumb && thumb !== "None" && thumb !== "") {{
+                        document.getElementById('p-img').src = thumb; 
+                        document.getElementById('p-title').textContent = unit.getAttribute('data-title'); 
+                        document.getElementById('p-viewers').textContent = unit.getAttribute('data-viewers');
+                        preview.style.display = 'block';
+                        
+                        let x = e.clientX + 15; 
+                        let y = e.clientY + 15;
+                        if(x + 340 > window.innerWidth) x = window.innerWidth - 350;
+                        if(y + 250 > window.innerHeight) y = window.innerHeight - 260;
+                        
+                        preview.style.left = x + 'px'; 
+                        preview.style.top = y + 'px';
+                    }}
+                }});
+                unit.addEventListener('mouseleave', () => preview.style.display = 'none');
+            }});
         }}
 
         let time = 300;
         setInterval(() => {{ time--; const min = Math.floor(time/60); const sec = time%60; const el = document.getElementById('timer-text'); if(el) el.innerText = `NEXT: ${{min}}:${{sec<10?'0':''}}${{sec}}`; if(time<=0) location.reload(); }}, 1000);
         
+        // 초기화 실행
         renderCalendar();
-        renderVODList(allVODs);
+        sortAndRenderVODs(); // 최신순 기본 정렬 렌더링
+        initTooltips();      // 썸네일 마우스 호버 작동
     </script>
 </body>
 </html>

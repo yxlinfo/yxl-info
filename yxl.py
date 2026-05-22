@@ -50,7 +50,7 @@ def init_db_if_empty():
             2: {"rank": 6610938, "ep": [("1회차 상벌금데이", 6078903), ("2회차 명품데이", 3390108), ("3회차 직급프리데이", 4124926), ("4회차 팀전", 2313129), ("5회차 펌핑룰렛 및 퇴근전쟁", 1969188)]},
             3: {"rank": 13445194, "ep": [("1회차 블라인드 상금데이", 2683770), ("2회차 데스매치 및 퇴근전쟁", 2011356), ("3회차 직급프리데이", 1852181), ("4회차 전후반 지분전쟁", 1703576), ("5회차 일급데이 및 벌칙", 1863867)]},
             4: {"rank": 2561153, "ep": [("1회차 그녀를 이겨라 및 퇴근전쟁", 2035685), ("2회차 퐁당퐁당데이", 1702385), ("3회차 장들의 전쟁", 2676513), ("4회차 직급프리데이", 1216858), ("5회차 기여도 펌핑데이 및 퇴근전쟁", 1939123)]},
-            5: {"rank": 4252794, "ep": [("1회차 대표 VS 부장 팀전", 3400157), ("2회차 퐁당 & 가챠 상금데이", 2996095), ("3회차 조기퇴근데이", 2300171), ("4회차 직급프리데이", 2122733), ("5회차 기여도펌핑룰렛데이", 3700113)]},
+            5: {"rank": 4252794, "ep": [("1회차 대표 VS 부장 팀전", 3400157), ("2회차 퐁당 & 가챠 상금데이", 2996095), ("3회차 조기퇴근데이", 2300171), ("4회차 직급프리데이", 2122733), ("5회차 기여도펌핑룰렛데이", 370113)]},
             6: {"rank": 5953195, "ep": [("1회차 퐁당 & 비키니 벌칙데이", 2822840), ("2회차 난사데이 및 퇴근전쟁", 2076273), ("3회차 직급 프리데이", 2642197), ("4회차 팀전", 2948979), ("5회차 한방룰렛골드데이", 2043429)]},
             7: {"rank": 5746700, "ep": [("1회차 퐁당퐁당 상벌금데이", 3076958), ("2회차 대표님을 이겨라 및 퇴근전쟁", 2961402), ("3회차 직급 프리데이", 3738078), ("4회차 기여도 펌핑데이", 3390310), ("5회차 조기퇴근데이", 2023172)]},
             8: {"rank": 5769642, "ep": [("1회차 퐁당퐁당 상벌금데이", 4291255), ("2회차 주차방지데이", 2356810), ("3회차 대표 vs 이사 팀전", 3932965), ("4회차 조기퇴근데이", 1766989), ("5회차 기여도펌핑데이", 1815026)]},
@@ -90,7 +90,6 @@ def get_members_from_db():
         if name == '서니':
             try:
                 j_date = datetime.strptime("2026.04.14", "%Y.%m.%d").replace(tzinfo=kst)
-                # 💡 서니님 계산에도 1일차 포함 (+1) 반영
                 d_day = 271 + (now - j_date).days + 1
                 d_day_str = f"D+{d_day}"
             except: pass
@@ -98,7 +97,6 @@ def get_members_from_db():
             if join_date_str:
                 try:
                     j_date = datetime.strptime(join_date_str.strip(), "%Y.%m.%d").replace(tzinfo=kst)
-                    # 💡 전체 멤버 계산에 1일차 포함 (+1) 일괄 반영
                     d_day = (now - j_date).days + 1
                     d_day_str = f"D+{d_day}"
                 except: pass
@@ -185,7 +183,7 @@ def generate_full_system(members, history_db):
     js_rank_rev = [history_db.get(f"시즌{i}", {"직급전":0})["직급전"] for i in range(1, len(history_db) + 1)]
     js_norm_rev = [sum(item[1] for item in history_db.get(f"시즌{i}", {"contents":[]})["contents"]) for i in range(1, len(history_db) + 1)]
     all_season_sum = sum(js_rank_rev) + sum(js_norm_rev)
-    current_season_sum = sum([4343316, 2164822, 3135452, 2590620, 1271474])
+    current_season_sum = sum([4343316, 2164822, 3135452])
 
     print("[3/3] VOD 영상 캐시 확인 중 (스마트 업데이트)...")
     vod_ids = ["139389129", "140474073", "145078781", "145395293", "145430667", "145686859", "145694247", "146665451", "149341401", "149372371", "149482895", "149543791", "151963511", "152673671", "152932371", "153270385", "153906161", "155022377", "156072307", "156233659", "156443147", "156897587", "157766473", "159784167", "159835159", "160179551", "160229793", "163314531", "163507573", "165090649", "165095477", "166797677", "167711523", "168507233", "169165861", "171334577", "171346633", "171517903", "171625221", "181193639", "181202165", "181212107", "181319655", "182185345", "182561159", "185332075", "186322409", "188589109", "193831035"]
@@ -201,17 +199,13 @@ def generate_full_system(members, history_db):
                 cached_data = json.load(f)
             if cached_data.get("ids") == vod_ids:
                 vod_list = cached_data.get("data", [])
-                print("⚡ 저장된 VOD 캐시를 성공적으로 불러왔습니다.")
                 need_fetch = False
-        except Exception as e:
-            pass
+        except: pass
             
     if need_fetch:
-        print("⏳ 새로운 VOD 데이터를 API로 가져오는 중...")
         vod_list = [fetch_vod_data_by_api(vid) for vid in vod_ids]
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump({"ids": vod_ids, "data": vod_list}, f, ensure_ascii=False)
-        print("✅ 성공적으로 VOD 데이터를 캐시에 저장했습니다.")
 
     valid_vods = [v for v in vod_list if v["views"] > 0]
     top_5_vods = sorted(valid_vods, key=lambda x: x['views'], reverse=True)[:5]
@@ -268,99 +262,77 @@ def generate_full_system(members, history_db):
         .tab-content.active {{ display: block; }}
         @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(15px); }} to {{ opacity: 1; }} }}
 
+        /* 섹션별 공통 스타일 (세로 배치용) */
+        .content-section {{ margin-bottom: 60px; }}
+        .section-main-title {{ font-family: 'Cinzel', 'Pretendard', sans-serif; font-size: 24px; color: #d4af37; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); letter-spacing: 2px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); display: flex; align-items: center; }}
+        .section-main-title::before {{ content: ''; display: inline-block; width: 6px; height: 24px; background: #d4af37; margin-right: 12px; border-radius: 3px; box-shadow: 0 0 10px rgba(212, 175, 55, 0.6); }}
+
+        /* 현황판(Status) 스타일 */
         .tier-section {{ margin-bottom: 50px; }}
         .tier-header {{ display: flex; align-items: center; justify-content: center; margin-bottom: 30px; gap: 20px; }}
         .tier-title {{ font-family: 'Cinzel', serif; font-size: 22px; color: #f5f5dc; letter-spacing: 4px; text-shadow: 0 2px 15px rgba(212, 175, 55, 0.4); }}
         .tier-line {{ height: 1px; flex: 1; max-width: 250px; background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent); }}
-
         .row {{ display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; align-items: flex-start; }}
         .member-unit {{ position: relative; width: 130px; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; align-items: center; }}
         .member-unit:hover {{ transform: translateY(-8px) scale(1.05); z-index: 50; }}
-        
         .circle-frame {{ position: relative; width: 120px; height: 120px; border-radius: 50%; padding: 3px; background: #111; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.8); margin: 0 auto; transition: 0.3s; }}
         .profile-img {{ width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: contrast(1.1) saturate(1.1); transition: 0.5s; }}
         .embedded-info {{ position: absolute; bottom: 0; width: 100%; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 12px; z-index: 3; }}
         .pos-tag {{ font-size: 10px; margin-bottom: 3px; font-weight: 800; }}
         .name-label {{ font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }}
-        
         .d-day-outside {{ margin-top: 10px; font-size: 11px; color: #d4af37; font-weight: 900; letter-spacing: 0.5px; opacity: 0.8; }}
-        
         .overlay-menu {{ position: absolute; inset: 0; background: rgba(8,8,12,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; z-index: 10; border-radius: 50%; backdrop-filter: blur(3px); }}
         .member-unit:hover .overlay-menu {{ opacity: 1; }}
-        
         .click-guide {{ font-size: 10px; color: #000; background: #d4af37; padding: 5px 12px; border-radius: 12px; margin-bottom: 8px; font-weight: 900; letter-spacing: 1px; cursor: pointer; transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); border: 1px solid #d4af37; }}
         .click-guide:hover {{ transform: scale(1.15); box-shadow: 0 0 15px #d4af37, inset 0 0 5px #fff; background: #ffd700; }}
-        
         .btn {{ width: 80px; padding: 6px 0; border-radius: 15px; font-size: 10px; color: #fff; border: 1px solid rgba(255,255,255,0.4); text-decoration: none; text-align: center; margin-bottom: 5px; transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); display: block; font-weight: 700; background: rgba(255,255,255,0.05); }}
         .btn-home:hover {{ background: #fff; color: #000; font-weight: 900; transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.6); }}
-        
         .btn-live {{ background: rgba(220, 20, 60, 0.2); border-color: #dc143c; color: #ff4d4d; }}
         .btn-live:hover {{ background: #dc143c; color: #fff; font-weight: 900; transform: scale(1.1); box-shadow: 0 0 20px rgba(220, 20, 60, 0.8); }}
-        
         .live-indicator {{ position: absolute; top: -5px; right: -5px; background: #dc143c; color: #fff; font-size: 9px; font-weight: 900; padding: 3px 8px; border-radius: 6px; box-shadow: 0 2px 10px rgba(220, 20, 60, 0.5); z-index: 15; display: none; border: 1px solid rgba(255,255,255,0.3); }}
         .on-air .live-indicator {{ display: block; animation: pulseRed 2s infinite; }}
         .on-air .circle-frame {{ border: 2px solid #dc143c; box-shadow: 0 0 20px rgba(220, 20, 60, 0.4); }}
         @keyframes pulseRed {{ 0% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7); }} 70% {{ box-shadow: 0 0 0 10px rgba(220, 20, 60, 0); }} 100% {{ box-shadow: 0 0 0 0 rgba(220, 20, 60, 0); }} }}
 
-        #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 320px; background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.95); overflow: hidden; transition: opacity 0.2s; }}
-        .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #222; }}
-        .p-info {{ padding: 15px; text-align: center; }}
-        .p-title {{ font-size: 14px; color: #f5f5dc; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
-        .p-live-badge {{ font-size: 12px; font-weight: 900; letter-spacing: 1px; color: #ff4d4d; }}
-
-        .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
-        .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; flex-wrap: wrap; gap: 10px; }}
-        .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; }}
-        .total-sum-badge {{ font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 8px 18px; border-radius: 8px; font-weight: 900; }}
-        
-        .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
-        .chart-scroll-wrapper::-webkit-scrollbar {{ height: 8px; }}
-        .chart-scroll-wrapper::-webkit-scrollbar-thumb {{ background: linear-gradient(90deg, #8a6327, #d4af37, #8a6327); border-radius: 10px; }}
-        .chart-container {{ min-width: 1000px; height: 350px; }}
-        .chart-container-small {{ min-width: 400px; height: 250px; }}
-
-        .calendar-nav-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 15px; }}
-        .nav-btn {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: 0.3s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); flex-shrink: 0; }}
-        .nav-btn:hover {{ background: #d4af37; color: #000; transform: scale(1.1); box-shadow: 0 0 15px rgba(212,175,55,0.4); }}
-        
-        .weekly-calendar-row {{ flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }}
-        .day-card {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); min-width: 0; position: relative; overflow: hidden; }}
-        .day-card:hover {{ background: rgba(212,175,55,0.05); transform: translateY(-5px); border-color: rgba(212,175,55,0.5); }}
-        .day-card.selected {{ background: rgba(212,175,55,0.12); border-color: #d4af37; box-shadow: 0 0 20px rgba(212,175,55,0.2), inset 0 0 10px rgba(212,175,55,0.1); transform: scale(1.03); }}
-        .day-card.selected::before {{ content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #d4af37; }}
-        
-        .dc-day {{ font-size: 12px; margin-bottom: 6px; font-weight: 900; letter-spacing: 1px; color: #aaa; }}
-        .dc-date {{ font-size: 18px; font-weight: 900; margin-bottom: 12px; color: #fff; }}
-        .dc-event {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 10px; padding: 4px 2px; border-radius: 5px; font-weight: 900; width: 95%; margin: 0 auto; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }}
-        
+        /* 모달 공통 */
         #p-modal, #sales-modal {{ display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; align-items: flex-start; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }}
         
+        /* 프로필 모달 */
         .profile-container {{ background: linear-gradient(145deg, #0f0f15, #08080c); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; box-shadow: 0 20px 80px rgba(0,0,0,1); padding: 40px; width: 100%; max-width: 600px; display: flex; gap: 40px; position: relative; align-items: center; flex-wrap: wrap; justify-content: center; }}
         .profile-left {{ display: flex; flex-direction: column; align-items: center; }}
         .profile-left img {{ width: 150px; height: 150px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; margin-bottom: 15px; }}
         .profile-name {{ font-size: 26px; color: #fff; margin-bottom: 10px; }}
         .profile-tier {{ font-family: 'Pretendard', sans-serif; font-size: 13px; color: #d4af37; background: rgba(212,175,55,0.1); padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.4); font-weight: 700; }}
-        
         .profile-right {{ flex: 1; min-width: 250px; display: grid; grid-template-columns: 1fr; gap: 12px; border-left: 1px solid rgba(212,175,55,0.15); padding-left: 30px; }}
         .stat-box {{ background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }}
         .stat-label {{ font-size: 11px; color: #aa801e; font-weight: 900; }}
         .stat-value {{ font-size: 14px; color: #fff; text-align: right; word-break: keep-all; line-height: 1.4; }}
         .close-btn {{ position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 28px; color: #555; transition: 0.3s; }}
         .close-btn:hover {{ color: #d4af37; transform: rotate(90deg); }}
-        
+
+        /* 매출 상세 모달 */
         .sales-modal-inner {{ background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }}
         .sales-list-item {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; align-items: center; }}
-        
         .staff-info-row {{ display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.15); width: 100%; box-sizing: border-box; justify-content: space-around; margin-top: 10px; }}
         .staff-badge {{ display: flex; align-items: center; gap: 8px; }}
         .staff-pos {{ font-size: 11px; color: #d4af37; font-weight: 900; }}
         .staff-img {{ width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(212,175,55,0.5); cursor: pointer; transition: 0.3s; background: #111; }}
         .staff-img:hover {{ transform: scale(1.3); border-color: #d4af37; box-shadow: 0 0 10px rgba(212,175,55,0.6); z-index: 10; }}
         .staff-divider {{ width: 1px; height: 20px; background: rgba(255,255,255,0.1); }}
-
-        .timeline-title {{ font-size: 18px; color: #d4af37; font-family: 'Pretendard', sans-serif; font-weight: 900; letter-spacing: 1.5px; padding-bottom: 10px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); }}
         #s-title {{ font-size: 22px; font-family: 'Pretendard', sans-serif; font-weight: 900; color: #d4af37; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px; text-align: center; letter-spacing: 2px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4); }}
 
+        /* 스케줄(달력, 공식일정) 영역 */
+        .calendar-nav-container {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 15px; }}
+        .nav-btn {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: 0.3s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); flex-shrink: 0; }}
+        .nav-btn:hover {{ background: #d4af37; color: #000; transform: scale(1.1); box-shadow: 0 0 15px rgba(212,175,55,0.4); }}
+        .weekly-calendar-row {{ flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }}
+        .day-card {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); min-width: 0; position: relative; overflow: hidden; }}
+        .day-card:hover {{ background: rgba(212,175,55,0.05); transform: translateY(-5px); border-color: rgba(212,175,55,0.5); }}
+        .day-card.selected {{ background: rgba(212,175,55,0.12); border-color: #d4af37; box-shadow: 0 0 20px rgba(212,175,55,0.2), inset 0 0 10px rgba(212,175,55,0.1); transform: scale(1.03); }}
+        .day-card.selected::before {{ content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #d4af37; }}
+        .dc-day {{ font-size: 12px; margin-bottom: 6px; font-weight: 900; letter-spacing: 1px; color: #aaa; }}
+        .dc-date {{ font-size: 18px; font-weight: 900; margin-bottom: 12px; color: #fff; }}
+        .dc-event {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; font-size: 10px; padding: 4px 2px; border-radius: 5px; font-weight: 900; width: 95%; margin: 0 auto; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }}
         .timeline-item {{ background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #333; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; transition: 0.3s; cursor:pointer; }}
         .timeline-item:hover {{ border-color: rgba(212, 175, 55, 0.5); border-left: 4px solid #d4af37; background: rgba(212, 175, 55, 0.03); transform: translateX(10px); }}
         .t-date {{ font-size: 13px; color: #d4af37; margin-bottom: 5px; }}
@@ -369,15 +341,28 @@ def generate_full_system(members, history_db):
         .t-status {{ padding: 6px 14px; border-radius: 15px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff; }}
         .t-status.upcoming {{ background: linear-gradient(135deg, #d4af37, #8a6327); color: #000; }}
 
+        /* 차트 및 데이터 영역 */
+        .sales-section {{ background: rgba(255,255,255,0.015); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5); }}
+        .sales-header-container {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; border-left: 3px solid #d4af37; padding-left: 12px; flex-wrap: wrap; gap: 10px; }}
+        .sales-main-title {{ font-size: 18px; color: #d4af37; letter-spacing: 1px; }}
+        .total-sum-badge {{ font-size: 13px; color: #000; background: linear-gradient(135deg, #d4af37, #aa801e); padding: 8px 18px; border-radius: 8px; font-weight: 900; }}
+        .chart-scroll-wrapper {{ overflow-x: auto; width: 100%; padding-bottom: 12px; }}
+        .chart-scroll-wrapper::-webkit-scrollbar {{ height: 8px; }}
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb {{ background: linear-gradient(90deg, #8a6327, #d4af37, #8a6327); border-radius: 10px; }}
+        .chart-container {{ min-width: 1000px; height: 350px; }}
+        .chart-container-small {{ min-width: 400px; height: 250px; }}
+
+        /* 공석(Placeholder) 영역 스타일 */
+        .empty-placeholder {{ background: rgba(255,255,255,0.02); border: 1px dashed rgba(212,175,55,0.4); border-radius: 10px; padding: 50px 20px; text-align: center; color: #777; font-size: 14px; margin-bottom: 30px; }}
+
+        /* 보라방송 (VOD) 영역 */
         .search-wrapper {{ position: relative; width: 100%; max-width: 250px; margin-top: 10px; margin-right: 10px; }}
         .search-input {{ width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); padding: 10px 15px; border-radius: 20px; color: #fff; outline: none; font-size: 14px; font-family: 'Pretendard', sans-serif; }}
-        
         .main-stage {{ background: rgba(8, 8, 12, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }}
         .player-wrapper {{ width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }}
         .player-wrapper iframe {{ width: 100%; height: 100%; border: none; }}
         .player-info {{ width: 100%; }}
         .top-badge {{ background: linear-gradient(135deg, #d4af37, #aa801e); padding: 4px 10px; border-radius: 4px; font-size: 11px; margin-bottom: 10px; display: inline-block; color: #000; font-weight: 900; }}
-        
         .vod-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; margin-bottom: 40px; }}
         .vod-card {{ background: #0a0a0f; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s; overflow: hidden; display:flex; flex-direction:column; }}
         .vod-card:hover {{ transform: translateY(-5px); border-color: #d4af37; box-shadow: 0 10px 25px rgba(212,175,55,0.15); }}
@@ -387,25 +372,22 @@ def generate_full_system(members, history_db):
         .vod-text {{ padding: 12px; flex:1; display:flex; flex-direction:column; justify-content:space-between; }}
         .vod-text h4 {{ margin: 0 0 6px 0; font-size: 13px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }}
         .vod-text p {{ margin: 0; font-size: 11px; color: #aaa; }}
-        
         .sort-buttons {{ display: flex; gap: 8px; }}
         .sort-btn {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.3s; font-weight: 700; font-family: 'Pretendard', sans-serif; letter-spacing: 0.5px; }}
         .sort-btn:hover {{ background: rgba(212,175,55,0.1); color: #fff; }}
         .sort-btn.active {{ background: linear-gradient(135deg, #d4af37, #aa801e); color: #000; font-weight: 900; border-color: #d4af37; box-shadow: 0 2px 10px rgba(212,175,55,0.3); }}
 
+        #preview {{ position: fixed; pointer-events: none; display: none; z-index: 9999; width: 320px; background: #0a0a0f; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.95); overflow: hidden; transition: opacity 0.2s; }}
+        .p-thumb {{ width: 100%; aspect-ratio: 16/9; display: block; object-fit: cover; border-bottom: 1px solid #222; }}
+        .p-info {{ padding: 15px; text-align: center; }}
+        .p-title {{ font-size: 14px; color: #f5f5dc; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
+        .p-live-badge {{ font-size: 12px; font-weight: 900; letter-spacing: 1px; color: #ff4d4d; }}
+
         @media (max-width: 768px) {{
-            .weekly-calendar-row {{ 
-                display: flex; 
-                flex-wrap: nowrap; 
-                overflow-x: auto; 
-                gap: 8px; 
-                padding-bottom: 12px; 
-                -webkit-overflow-scrolling: touch; 
-            }}
+            .weekly-calendar-row {{ display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding-bottom: 12px; -webkit-overflow-scrolling: touch; }}
             .weekly-calendar-row::-webkit-scrollbar {{ height: 6px; }}
             .weekly-calendar-row::-webkit-scrollbar-thumb {{ background: rgba(212,175,55,0.5); border-radius: 10px; }}
             .day-card {{ min-width: 75px; flex-shrink: 0; }}
-            
             .search-wrapper {{ max-width: calc(100% - 20px); margin-right: 0; }}
             .radio-header-wrap {{ padding-right: 10px; padding-left: 5px; }}
         }}
@@ -415,60 +397,86 @@ def generate_full_system(members, history_db):
     <header class="nav-header">
         <div class="logo-section" onclick="location.reload()"><img src="./logo.gif" height="40" decoding="async" fetchpriority="high" onerror="this.src='https://i.namu.wiki/i/TtDiKQg0FImiHkc53ADsBHPbhvb0CDKw7ojXJGPbsnL9OM-lwfAUWb7hi_HZH8BRGz68CkaIoJ706nPgEn0ddg.gif'"><span class="update-timer" id="timer-text">NEXT: 5:00</span></div>
         <nav class="tab-menu">
-            <div class="tab-item active" onclick="switchTab(event, 'status')">조직도</div>
-            <div class="tab-item" onclick="switchTab(event, 'sales')">매출표</div>
-            <div class="tab-item" onclick="switchTab(event, 'schedule')">일정표</div>
-            <div class="tab-item" onclick="switchTab(event, 'radio')">합동방송</div>
+            <div class="tab-item active" onclick="switchTab(event, 'home')">홈</div>
+            <div class="tab-item" onclick="switchTab(event, 'status')">현황판</div>
+            <div class="tab-item" onclick="switchTab(event, 'data')">데이터</div>
+            <div class="tab-item" onclick="switchTab(event, 'bora')">보라방송</div>
         </nav>
     </header>
 
     <div class="main-container">
-        <!-- 1. 조직도 -->
-        <section id="status" class="tab-content active">{status_html}</section>
-
-        <!-- 2. 매출표 -->
-        <section id="sales" class="tab-content">
-            <div class="sales-section">
-                <div class="sales-header-container">
-                    <div style="display: flex; flex-direction: column;">
-                        <span class="sales-main-title">YXL 시즌 히스토리</span>
-                        <span style="font-size: 11px; color: #999; margin-top: 6px; font-weight: 700; letter-spacing: 0.5px;">※ 시즌별 그래프 클릭시 상세정보가 나옵니다.</span>
-                    </div>
-                    <div class="total-sum-badge">TOTAL: {format(all_season_sum, ',')}개</div>
-                </div>
-                <div class="chart-scroll-wrapper"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
-            </div>
-            <div class="sales-section">
-                <div class="sales-header-container">
-                    <span class="sales-main-title">YXL 시즌 14</span>
-                    <div class="total-sum-badge">시즌 합산: {format(current_season_sum, ',')}개</div>
-                </div>
-                <div class="chart-scroll-wrapper"><div class="chart-container-small"><canvas id="currentChart"></canvas></div></div>
-            </div>
-        </section>
-
-        <!-- 3. 일정표 -->
-        <section id="schedule" class="tab-content">
-            <div class="timeline-section" style="margin-bottom: 40px;">
-                <div class="timeline-title" style="border-bottom: 1px solid rgba(212,175,55,0.2);">주간일정</div>
+        
+        <section id="home" class="tab-content active">
+            <div class="content-section">
+                <div class="section-main-title">공지 & 일정</div>
                 <div class="calendar-nav-container">
                     <button class="nav-btn" onclick="changeWeek(-7)">⟨</button>
                     <div class="weekly-calendar-row" id="calendarRow"></div>
                     <button class="nav-btn" onclick="changeWeek(7)">⟩</button>
                 </div>
-            </div>
-            <div class="timeline-section">
-                <div class="timeline-title" style="border-bottom: 1px solid rgba(212,175,55,0.2);">공식일정</div>
                 <div class="timeline-item"><div><div class="t-date" style="color:#d4af37;">05.07 (목) 17:00</div><div class="t-title">시즌 14 - 3회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status upcoming">UPCOMING</div></div>
                 <div class="timeline-item"><div><div class="t-date">05.11 (월) 17:00</div><div class="t-title">시즌 14 - 4회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
-                <div class="timeline-item"><div><div class="t-date">05.14 (목) 17:00</div><div class="t-title">시즌 14 - 5회차 : YXL</div><div class="t-desc">참여: 멤버 전원</div></div><div class="t-status">STANDBY</div></div>
+            </div>
+            
+            <div class="content-section">
+                <div class="section-main-title">LIVE</div>
+                <div class="empty-placeholder">
+                    ON AIR 중인 방송이나 메인 화면이 연동될 영역입니다.
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-main-title">SHORTS</div>
+                <div class="empty-placeholder">
+                    멤버들의 하이라이트 숏츠 영상들이 갤러리 형태로 추가될 영역입니다.
+                </div>
             </div>
         </section>
 
-        <!-- 4. 합동방송 -->
-        <section id="radio" class="tab-content">
+        <section id="status" class="tab-content">
+            {status_html}
+        </section>
+
+        <section id="data" class="tab-content">
+            <div class="content-section">
+                <div class="section-main-title">매출표</div>
+                <div class="sales-section">
+                    <div class="sales-header-container">
+                        <div style="display: flex; flex-direction: column;">
+                            <span class="sales-main-title">YXL 시즌 히스토리</span>
+                            <span style="font-size: 11px; color: #999; margin-top: 6px; font-weight: 700; letter-spacing: 0.5px;">※ 시즌별 그래프 클릭시 상세정보가 나옵니다.</span>
+                        </div>
+                        <div class="total-sum-badge">TOTAL: {format(all_season_sum, ',')}개</div>
+                    </div>
+                    <div class="chart-scroll-wrapper"><div class="chart-container"><canvas id="historyChart"></canvas></div></div>
+                </div>
+                <div class="sales-section">
+                    <div class="sales-header-container">
+                        <span class="sales-main-title">YXL 시즌 14</span>
+                        <div class="total-sum-badge">시즌 합산: {format(current_season_sum, ',')}개</div>
+                    </div>
+                    <div class="chart-scroll-wrapper"><div class="chart-container-small"><canvas id="currentChart"></canvas></div></div>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <div class="section-main-title">기여도표</div>
+                <div class="empty-placeholder">
+                    멤버별 펀딩 기여도를 파이 차트나 도넛 차트 형태로 시각화할 영역입니다.
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-main-title">정산표</div>
+                <div class="empty-placeholder">
+                    회차별/시즌별 정확한 엑셀(테이블) 형태의 정산 데이터가 추가될 영역입니다.
+                </div>
+            </div>
+        </section>
+
+        <section id="bora" class="tab-content">
             <div class="radio-header-wrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; padding-right: 5px;">
-                <span class="timeline-title" style="margin:0; border:none;">최근 방송</span>
+                <span class="section-main-title" style="margin:0; border:none; padding:0;">최근 방송</span>
                 <div class="search-wrapper">
                     <input type="text" id="vodSearch" class="search-input" placeholder="영상 검색..." onkeyup="searchVOD()">
                 </div>
@@ -484,7 +492,7 @@ def generate_full_system(members, history_db):
                 </div>
             </div>
 
-            <div class="timeline-title" style="margin-bottom:0; font-size: 16px; border-bottom: 1px solid rgba(212,175,55,0.2);">인기 TOP 5</div>
+            <div class="section-main-title" style="margin-bottom:0; font-size: 20px;">인기 TOP 5</div>
             <div class="vod-grid">
                 {"".join([f'''
                 <div class="vod-card" onclick="changeMainPlayer('{v['id']}', '{v['title']}', '{v['date']}', '{v['views']}')">
@@ -497,7 +505,7 @@ def generate_full_system(members, history_db):
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom:10px;">
-                <span class="timeline-title" id="list-title" style="margin-bottom:0; border:none; padding:0; font-size: 16px;">전체 VOD</span>
+                <span class="section-main-title" id="list-title" style="margin-bottom:0; border:none; padding:0; font-size: 20px;">전체 VOD</span>
                 <div class="sort-buttons">
                     <button onclick="sortVOD('latest')" class="sort-btn active" id="btn-sort-latest">최신순</button>
                     <button onclick="sortVOD('views')" class="sort-btn" id="btn-sort-views">조회수순</button>
@@ -507,10 +515,8 @@ def generate_full_system(members, history_db):
         </section>
     </div>
 
-    <!-- 썸네일 프리뷰(Tooltip) -->
     <div id="preview"><img src="" id="p-img" class="p-thumb"><div class="p-info"><div id="p-title" class="p-title"></div><div id="p-live-badge" class="p-live-badge"></div></div></div>
 
-    <!-- 프로필 모달 -->
     <div id="p-modal" onclick="closeProfile()">
         <div class="profile-container" onclick="event.stopPropagation()">
             <div class="close-btn" onclick="closeProfile()">×</div>
@@ -519,7 +525,6 @@ def generate_full_system(members, history_db):
         </div>
     </div>
 
-    <!-- 매출 상세 모달 -->
     <div id="sales-modal" onclick="closeSalesModal()">
         <div class="sales-modal-inner" onclick="event.stopPropagation()">
             <div id="s-title"></div>
@@ -554,8 +559,10 @@ def generate_full_system(members, history_db):
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             e.currentTarget.classList.add('active');
             document.getElementById(id).classList.add('active');
-            if(id === 'sales') setTimeout(renderCharts, 50);
-            if(id === 'schedule') renderCalendar();
+            
+            // 탭 변경 시 필요한 렌더링 호출
+            if(id === 'data') setTimeout(renderCharts, 50);
+            if(id === 'home') renderCalendar();
         }}
 
         function changeWeek(days) {{
@@ -565,6 +572,7 @@ def generate_full_system(members, history_db):
 
         function renderCalendar() {{
             const row = document.getElementById('calendarRow');
+            if(!row) return;
             row.innerHTML = '';
             const daysArr = ['월', '화', '수', '목', '금', '토', '일'];
             const todayStr = new Date().toLocaleDateString('ko-KR', {{year:'numeric', month:'2-digit', day:'2-digit'}}).replace(/ /g,'').replace(/\\./g,'.').slice(0,-1);

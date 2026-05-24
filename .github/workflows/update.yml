@@ -2,8 +2,8 @@ name: Update SOOP Notice Data
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+    - cron: '*/30 * * * *' # 30분마다 자동 실행
+  workflow_dispatch: # 수동 실행 버튼 활성화
 
 jobs:
   scrape-and-update:
@@ -30,11 +30,12 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # 파일이 생겼는지 확인하고 커밋
-          if [ -f notice_data.json ]; then
-            git add notice_data.json
-            git commit -m "Auto-update: SOOP notice data"
-            git push
+          git add notice_data.json
+          
+          # 파일이 변경되었는지 확인하고, 변경되었을 때만 커밋
+          if git diff --cached --exit-code --quiet; then
+            echo "변경사항이 없어 작업을 건너뜁니다."
           else
-            echo "notice_data.json이 생성되지 않았습니다."
+            git commit -m "Auto-update: SOOP notice data [skip ci]"
+            git push
           fi

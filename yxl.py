@@ -1,67 +1,84 @@
-import requests
-from bs4 import BeautifulSoup
-import json
-import os
+import sqlite3
+from playwright.sync_api import sync_playwright
 
-# 스트리머 방송국 메인 주소만 있으면 됩니다 (이제 게시판 주소록 불필요)
-streamer_stations = {
-    "후잉♥": "https://www.sooplive.com/station/jaeha010",
-    "류서하♥": "https://www.sooplive.com/station/smkim82372",
-    "백나현": "https://www.sooplive.com/station/wk3220",
-    "너의˚멜로디": "https://www.sooplive.com/station/meldoy777",
-    "냥냥수주": "https://www.sooplive.com/station/star49",
-    "하랑짱♥": "https://www.sooplive.com/station/asy1218",
-    "ZO아름♡": "https://www.sooplive.com/station/ahrum0912",
-    "김유정S2": "https://www.sooplive.com/station/tkek55",
-    "미로。": "https://www.sooplive.com/station/fhwm0602",
-    "소다♥": "https://www.sooplive.com/station/zbxlzzz",
-    "서니_♥": "https://www.sooplive.com/station/iluvpp",
-    "꺼니": "https://www.sooplive.com/station/callgg",
-    "김푸:)": "https://www.sooplive.com/station/kimpooh0707"
-}
+# 1. 설정: 수집할 스트리머 리스트
+TARGET_STREAMERS = [
+    {"name": "후잉♥", "url": "https://www.sooplive.com/station/jaeha010/board/42110606"},
+    {"name": "류서하♥", "url": "https://www.sooplive.com/station/smkim82372/board/65560144"},
+    {"name": "백나현", "url": "https://www.sooplive.com/station/wk3220/board/79496724"},
+    {"name": "너의˚멜로디", "url": "https://www.sooplive.com/station/meldoy777/board/108366731"},
+    {"name": "냥냥수주", "url": "https://www.sooplive.com/station/star49/board/121609123"},
+    {"name": "하랑짱♥", "url": "https://www.sooplive.com/station/asy1218/board/113481743"},
+    {"name": "ZO아름♡", "url": "https://www.sooplive.com/station/ahrum0912/board/122843945"},
+    {"name": "김유정S2", "url": "https://www.sooplive.com/station/tkek55/board/112452503"},
+    {"name": "미로。", "url": "https://www.sooplive.com/station/fhwm0602/board/92166558"},
+    {"name": "소다♥", "url": "https://www.sooplive.com/station/zbxlzzz/board/13644761"},
+    {"name": "서니_♥", "url": "https://www.sooplive.com/station/iluvpp/91109284"},
+    {"name": "꺼니", "url": "https://www.sooplive.com/station/callgg/board/329000"},
+    {"name": "김푸:)", "url": "https://www.sooplive.com/station/kimpooh0707/board/69409509"}
+]
 
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+# 2. DB 초기화
+def init_db():
+    conn = sqlite3.connect('notices.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS announcements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            streamer_name TEXT,
+            title TEXT,
+            post_date TEXT,
+            link TEXT UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
-notice_list = []
+# 3. 크롤링 및 DB 저장
+def fetch_and_save():
+    init_db()
+    conn = sqlite3.connect('notices.db')
+    cursor = conn.cursor()
 
-for author, base_url in streamer_stations.items():
-    try:
-        # 게시판(board) 주소로 접속
-        board_url = f"{base_url}/board"
-        response = requests.get(board_url, headers=headers)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+
+        for streamer in TARGET_STREAMERS:
+            print(f"[{streamer['name']}] 수집 중...")
+            try:
+                page.goto(streamer['url'])
+                # 게시판 테이블이 로드될 때까지 대기
+                page.wait_for_selector("table.board_list", timeout=10000)
+                
+                # 첫 번째 게시물 데이터 가져오기
+                row = page.query_selector("table.board_list tbody tr")
+                if row:
+                    title_elem = row.query_selector("td.title a")
+                    date_elem = row.query_selector("td.date")
+                    
+                    if title_elem and date_elem:
+                        title = title_elem.inner_text().strip()
+                        link = "https://www.sooplive.com" + title_elem.get_attribute("href")
+                        date = date_elem.inner_text().strip()
+
+                        # 중복 여부 확인 후 저장
+                        cursor.execute("SELECT id FROM announcements WHERE link = ?", (link,))
+                        if not cursor.fetchone():
+                            cursor.execute(
+                                "INSERT INTO announcements (streamer_name, title, post_date, link) VALUES (?, ?, ?, ?)",
+                                (streamer['name'], title, date, link)
+                            )
+                            print(f" -> 새 글 발견: {title}")
+                            conn.commit()
+            except Exception as e:
+                print(f" -> 에러 발생 ({streamer['name']}): {e}")
         
-        posts = soup.select('li[class^="Post_post__"]')
-        
-        if posts:
-            latest_post = posts[0]
-            
-            # 제목 및 공지 여부
-            title_box = latest_post.select_one('[class^="ContentTitle_title__"]')
-            if title_box:
-                is_notice = True if title_box.select_one('[class^="ContentTitle_noti__"]') else False
-                title = title_box.find_all('span')[-1].text.strip()
-                
-                # 게시글 고유 링크 추출 (a 태그 href)
-                link_tag = latest_post.select_one('a[href^="/station/"]')
-                full_link = f"https://www.sooplive.com{link_tag['href']}" if link_tag else "#"
-                
-                # 날짜
-                date_box = latest_post.select_one('[class^="Interaction_details__"]')
-                date_text = date_box.find_all('span')[-1].text.strip()
-                
-                notice_list.append({
-                    "type": "notice" if is_notice else "normal",
-                    "title": title,
-                    "author": author,
-                    "date": date_text[5:],
-                    "link": full_link # 상세 페이지 링크 저장
-                })
-        print(f"[OK] {author}")
-    except Exception as e:
-        print(f"[Error] {author}: {e}")
+        browser.close()
+    
+    conn.close()
+    print("작업 완료.")
 
-# JSON 저장
-with open('notice_data.json', 'w', encoding='utf-8') as f:
-    json.dump(notice_list, f, ensure_ascii=False, indent=4)
+if __name__ == "__main__":
+    fetch_and_save()

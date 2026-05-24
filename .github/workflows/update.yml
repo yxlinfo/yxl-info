@@ -1,41 +1,26 @@
-name: Update SOOP Notice Data
-
+name: Update Data
 on:
   schedule:
-    - cron: '*/30 * * * *' # 30분마다 자동 실행
-  workflow_dispatch: # 수동 실행 버튼 활성화
+    - cron: '*/5 * * * *' # 5분마다 자동 실행
+  workflow_dispatch:
 
 jobs:
-  scrape-and-update:
+  run-script:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 저장소 코드 불러오기
-        uses: actions/checkout@v3
-
-      - name: 파이썬 환경 설정
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: 필수 라이브러리 설치
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4
-
-      - name: 파이썬 크롤링 스크립트 실행
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with: {python-version: '3.10'}
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+      - name: Run Crawler
         run: python yxl.py
-
-      - name: 변경된 데이터 커밋 및 푸시
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add notice_data.json
-          
-          # 파일이 변경되었는지 확인하고, 변경되었을 때만 커밋
-          if git diff --cached --exit-code --quiet; then
-            echo "변경사항이 없어 작업을 건너뜁니다."
-          else
-            git commit -m "Auto-update: SOOP notice data [skip ci]"
+          if ! git diff --cached --exit-code --quiet; then
+            git commit -m "Auto-update notice data"
             git push
           fi

@@ -3,63 +3,65 @@ from bs4 import BeautifulSoup
 import json
 import os
 
-streamer_boards = {
-    "후잉♥": "https://www.sooplive.com/station/jaeha010/board/42110606",
-    "류서하♥": "https://www.sooplive.com/station/smkim82372/board/65560144",
-    "백나현": "https://www.sooplive.com/station/wk3220/board/79496724",
-    "너의˚멜로디": "https://www.sooplive.com/station/meldoy777/board/108366731",
-    "냥냥수주": "https://www.sooplive.com/station/star49/board/121609123",
-    "하랑짱♥": "https://www.sooplive.com/station/asy1218/board/113481743",
-    "ZO아름♡": "https://www.sooplive.com/station/ahrum0912/board/122843945",
-    "김유정S2": "https://www.sooplive.com/station/tkek55/board/112452503",
-    "미로。": "https://www.sooplive.com/station/fhwm0602/board/92166558",
-    "소다♥": "https://www.sooplive.com/station/zbxlzzz/board/13644761",
-    "서니_♥": "https://www.sooplive.com/station/iluvpp/board/91109284",
-    "꺼니": "https://www.sooplive.com/station/callgg/board/329000",
-    "김푸:)": "https://www.sooplive.com/station/kimpooh0707/board/69409509"
+# 스트리머 방송국 메인 주소만 있으면 됩니다 (이제 게시판 주소록 불필요)
+streamer_stations = {
+    "후잉♥": "https://www.sooplive.com/station/jaeha010",
+    "류서하♥": "https://www.sooplive.com/station/smkim82372",
+    "백나현": "https://www.sooplive.com/station/wk3220",
+    "너의˚멜로디": "https://www.sooplive.com/station/meldoy777",
+    "냥냥수주": "https://www.sooplive.com/station/star49",
+    "하랑짱♥": "https://www.sooplive.com/station/asy1218",
+    "ZO아름♡": "https://www.sooplive.com/station/ahrum0912",
+    "김유정S2": "https://www.sooplive.com/station/tkek55",
+    "미로。": "https://www.sooplive.com/station/fhwm0602",
+    "소다♥": "https://www.sooplive.com/station/zbxlzzz",
+    "서니_♥": "https://www.sooplive.com/station/iluvpp",
+    "꺼니": "https://www.sooplive.com/station/callgg",
+    "김푸:)": "https://www.sooplive.com/station/kimpooh0707"
 }
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-}
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
 
 notice_list = []
 
-for author, url in streamer_boards.items():
+for author, base_url in streamer_stations.items():
     try:
-        response = requests.get(url, headers=headers)
+        # 게시판(board) 주소로 접속
+        board_url = f"{base_url}/board"
+        response = requests.get(board_url, headers=headers)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # 'Post_post__'로 시작하는 클래스 검색
         posts = soup.select('li[class^="Post_post__"]')
         
         if posts:
-            latest_post = posts[0] # 가장 최신 글 1개
-            title_element = latest_post.select_one('[class^="ContentTitle_title__"]')
+            latest_post = posts[0]
             
-            if title_element:
-                is_notice = True if title_element.select_one('[class^="ContentTitle_noti__"]') else False
-                title_spans = title_element.find_all('span')
-                title = title_spans[-1].text.strip() if title_spans else title_element.text.strip()
+            # 제목 및 공지 여부
+            title_box = latest_post.select_one('[class^="ContentTitle_title__"]')
+            if title_box:
+                is_notice = True if title_box.select_one('[class^="ContentTitle_noti__"]') else False
+                title = title_box.find_all('span')[-1].text.strip()
                 
-                date_element = latest_post.select_one('[class^="Interaction_details__"] > div:last-child span')
-                date = date_element.text.strip() if date_element else ''
-                formatted_date = date[5:10].replace('-', '.') if len(date) >= 10 else date
+                # 게시글 고유 링크 추출 (a 태그 href)
+                link_tag = latest_post.select_one('a[href^="/station/"]')
+                full_link = f"https://www.sooplive.com{link_tag['href']}" if link_tag else "#"
+                
+                # 날짜
+                date_box = latest_post.select_one('[class^="Interaction_details__"]')
+                date_text = date_box.find_all('span')[-1].text.strip()
                 
                 notice_list.append({
                     "type": "notice" if is_notice else "normal",
                     "title": title,
                     "author": author,
-                    "date": formatted_date
+                    "date": date_text[5:],
+                    "link": full_link # 상세 페이지 링크 저장
                 })
-        print(f"[{author}] Success")
+        print(f"[OK] {author}")
     except Exception as e:
-        print(f"[{author}] Error: {e}")
+        print(f"[Error] {author}: {e}")
 
-# JSON 파일로 저장 (현재 스크립트 실행 위치 기준)
-output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'notice_data.json')
-with open(output_path, 'w', encoding='utf-8') as f:
+# JSON 저장
+with open('notice_data.json', 'w', encoding='utf-8') as f:
     json.dump(notice_list, f, ensure_ascii=False, indent=4)
-
-print("Scraping completed and JSON saved.")

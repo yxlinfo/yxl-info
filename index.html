@@ -5,335 +5,111 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 대시보드</title>
     <style>
-        /* 기본 초기화 및 박스 모델 설정 */
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background-color: #121212; /* 고급스러운 다크 배경 */
+            background-color: #121212;
             color: #ffffff;
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 네비게이션 바 (상위 헤더) 스타일 */
+        /* 네비게이션 바 */
         .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #1a1a1a;
-            padding: 15px 30px;
-            border-bottom: 1px solid #333;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: #1a1a1a; padding: 15px 30px; border-bottom: 1px solid #333;
+            position: sticky; top: 0; z-index: 1000;
         }
-
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-            color: #d4af37; /* 시그니처 골드 컬러 */
-            text-decoration: none;
-            letter-spacing: 1px;
-        }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 35px;
-        }
-
-        .nav-links > li {
-            position: relative;
-        }
-
+        .logo { font-size: 22px; font-weight: bold; color: #d4af37; text-decoration: none; letter-spacing: 1px; }
+        .nav-links { list-style: none; display: flex; gap: 35px; }
+        .nav-links > li { position: relative; }
         .nav-links a {
-            color: #e0e0e0;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
-            transition: color 0.3s ease;
-            padding: 10px 0;
-            display: block;
+            color: #e0e0e0; text-decoration: none; font-size: 16px; font-weight: 500;
+            transition: color 0.3s ease; padding: 10px 0; display: block;
         }
+        .nav-links a:hover { color: #d4af37; }
 
-        /* 마우스 오버 시 골드 포인트 적용 */
-        .nav-links a:hover {
-            color: #d4af37; 
-        }
-
-        /* 하위 목록 (드롭다운 메뉴) 스타일 - 데이터 메뉴 전용 */
+        /* 드롭다운 */
         .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #1a1a1a;
-            list-style: none;
-            min-width: 140px;
-            border: 1px solid #333;
-            border-radius: 6px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-            padding: 8px 0;
-            z-index: 1001;
+            display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            background-color: #1a1a1a; list-style: none; min-width: 140px;
+            border: 1px solid #333; border-radius: 6px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+            padding: 8px 0; z-index: 1001;
         }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu li { text-align: center; }
+        .dropdown-menu a { padding: 10px 15px; font-size: 14px; color: #cccccc; }
+        .dropdown-menu a:hover { background-color: #2a2a2a; color: #d4af37; }
 
-        .dropdown:hover .dropdown-menu {
-            display: block;
-        }
+        .menu-toggle { display: none; flex-direction: column; cursor: pointer; gap: 5px; }
+        .menu-toggle span { height: 3px; width: 25px; background-color: #fff; border-radius: 2px; }
 
-        .dropdown-menu li {
-            text-align: center;
-        }
-
-        .dropdown-menu a {
-            padding: 10px 15px;
-            font-size: 14px;
-            color: #cccccc;
-            transition: background-color 0.2s, color 0.2s;
-        }
-
-        .dropdown-menu a:hover {
-            background-color: #2a2a2a;
-            color: #d4af37;
-        }
-
-        /* 모바일 햄버거 메뉴 토글러 */
-        .menu-toggle {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            gap: 5px;
-        }
-
-        .menu-toggle span {
-            height: 3px;
-            width: 25px;
-            background-color: #fff;
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-
-        /* 메인 콘텐츠 구조 (홈 섹션 분할 레이아웃) */
+        /* 메인 레이아웃 */
         .home-container {
-            max-width: 1300px;
-            margin: 40px auto;
-            padding: 0 20px;
-            display: grid;
-            gap: 30px;
-            grid-template-columns: 1fr 1fr; /* 하단 2분할을 위한 기본 설정 */
+            max-width: 1300px; margin: 40px auto; padding: 0 20px;
+            display: grid; gap: 30px; grid-template-columns: 1fr 1fr;
         }
-
-        /* 각 섹션의 공통 박스 디자인 */
         .section-box {
-            background-color: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            background-color: #1a1a1a; border: 1px solid #333; border-radius: 12px;
+            padding: 25px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
-
-        /* 공지사항 섹션 - 상단 전체 너비 차지 */
-        .notice-section {
-            grid-column: 1 / -1; 
-        }
-
+        .notice-section { grid-column: 1 / -1; }
+        
         .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #2e2e2e;
-            padding-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 2px solid #2e2e2e; padding-bottom: 12px;
         }
+        .section-title { font-size: 20px; font-weight: 600; color: #d4af37; }
+        .more-btn { font-size: 13px; color: #888; text-decoration: none; }
+        .more-btn:hover { color: #d4af37; }
 
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #d4af37;
-        }
-
-        .more-btn {
-            font-size: 13px;
-            color: #888;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .more-btn:hover {
-            color: #d4af37;
-        }
-
-        /* --- 공지사항 리스트 내부 스타일 --- */
-        .notice-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
+        /* 리스트 스타일 */
+        .notice-list { list-style: none; padding: 0; margin: 0; }
         .notice-item {
-            display: flex;
-            align-items: center;
-            padding: 14px 15px;
-            border-bottom: 1px solid #262626;
-            transition: background-color 0.2s ease;
+            display: flex; align-items: center; padding: 14px 15px;
+            border-bottom: 1px solid #262626; transition: background-color 0.2s ease;
         }
-
-        .notice-item:hover {
-            background-color: #222222;
-        }
-
-        .notice-item:last-child {
-            border-bottom: none;
-        }
-
+        .notice-item:hover { background-color: #222222; }
         .notice-badge {
-            background-color: #d4af37;
-            color: #121212;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 3px 7px;
-            border-radius: 4px;
-            margin-right: 15px;
-            white-space: nowrap;
+            background-color: #d4af37; color: #121212; font-size: 11px; font-weight: bold;
+            padding: 3px 7px; border-radius: 4px; margin-right: 15px; white-space: nowrap;
         }
-
-        .notice-badge.normal {
-            background-color: #3a3a3a;
-            color: #b5b5b5;
-        }
-
+        .notice-badge.normal { background-color: #3a3a3a; color: #b5b5b5; }
         .notice-title {
-            flex-grow: 1;
-            font-size: 15px;
-            color: #e0e0e0;
-            text-decoration: none;
-            transition: color 0.2s ease;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-right: 20px;
+            flex-grow: 1; font-size: 15px; color: #e0e0e0; text-decoration: none;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 20px;
         }
-
-        .notice-title:hover {
-            color: #d4af37;
-        }
-
+        .notice-title:hover { color: #d4af37; }
         .notice-author {
-            font-size: 13px;
-            color: #aaa;
-            text-decoration: none;
-            width: 110px;
-            text-align: right;
-            margin-right: 20px;
-            white-space: nowrap;
-            transition: color 0.2s;
+            font-size: 13px; color: #aaa; text-decoration: none; width: 110px;
+            text-align: right; margin-right: 20px; white-space: nowrap;
         }
+        .notice-author:hover { color: #d4af37; }
+        .notice-date { font-size: 13px; color: #666; width: 70px; text-align: right; white-space: nowrap; }
 
-        .notice-author:hover {
-            color: #d4af37;
-        }
-
-        .notice-date {
-            font-size: 13px;
-            color: #666;
-            width: 70px;
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        /* --- 라이브 및 시그댄스 기본 플레이스홀더 디자인 --- */
         .content-placeholder {
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #555;
-            font-size: 14px;
-            background-color: #121212;
-            border-radius: 8px;
-            border: 1px dashed #333;
+            min-height: 200px; display: flex; align-items: center; justify-content: center;
+            color: #555; font-size: 14px; background-color: #121212; border-radius: 8px; border: 1px dashed #333;
         }
 
-        /* 반응형 디자인 (태블릿 및 모바일) */
         @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-            }
-
-            .nav-links {
-                display: none;
-                flex-direction: column;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                width: 100%;
-                background-color: #1a1a1a;
-                padding: 20px 0;
-                gap: 10px;
-                border-bottom: 1px solid #333;
-            }
-
-            .nav-links.active {
-                display: flex;
-            }
-
-            .nav-links > li {
-                text-align: center;
-            }
-
-            .dropdown-menu {
-                position: static;
-                transform: none;
-                background-color: #222;
-                box-shadow: none;
-                display: none;
-                width: 100%;
-                border: none;
-                border-radius: 0;
-                margin-top: 5px;
-            }
-
-            .dropdown.active .dropdown-menu {
-                display: block;
-            }
-
-            .menu-toggle {
-                display: flex;
-            }
-
-            /* 모바일 화면에서는 홈 레이아웃의 모든 섹션을 1열로 나열 */
-            .home-container {
-                grid-template-columns: 1fr; 
-                margin: 20px auto;
-            }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; width: 100%; background-color: #1a1a1a; padding: 20px 0; gap: 10px; border-bottom: 1px solid #333; }
+            .nav-links.active { display: flex; }
+            .nav-links > li { text-align: center; }
+            .dropdown-menu { position: static; transform: none; background-color: #222; display: none; width: 100%; }
+            .dropdown.active .dropdown-menu { display: block; }
+            .menu-toggle { display: flex; }
+            .home-container { grid-template-columns: 1fr; margin: 20px auto; }
         }
     </style>
 </head>
 <body>
-
-    <!-- 상단 헤더 영역 -->
     <header>
         <nav class="navbar">
             <a href="#" class="logo">CREW DASHBOARD</a>
-            
-            <!-- 모바일용 햄버거 버튼 -->
-            <div class="menu-toggle" id="mobile-menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-
-            <!-- 상위 헤더 카테고리 -->
+            <div class="menu-toggle" id="mobile-menu"><span></span><span></span><span></span></div>
             <ul class="nav-links" id="nav-links">
                 <li><a href="#">홈</a></li>
                 <li><a href="#">현황판</a></li>
-                
-                <!-- 데이터 목록 (하위 드롭다운 포함) -->
                 <li class="dropdown">
                     <a href="#">데이터 ▾</a>
                     <ul class="dropdown-menu">
@@ -342,130 +118,90 @@
                         <li><a href="#">정산표</a></li>
                     </ul>
                 </li>
-                
                 <li><a href="#">보라방송</a></li>
             </ul>
         </nav>
     </header>
 
-    <!-- 홈 화면 메인 레이아웃 -->
     <main class="home-container">
-        
-        <!-- 1. 공지사항 섹션 (상단 전체 너비 배치) -->
         <section class="section-box notice-section">
             <div class="section-header">
                 <h2 class="section-title">공지사항</h2>
                 <a href="#" class="more-btn">더보기 +</a>
             </div>
-            
-            <!-- 자바스크립트로 스트리머별 공지가 동적 바인딩되는 컨테이너 -->
             <ul class="notice-list" id="notice-container">
-                <!-- 동적 데이터 삽입 영역 -->
+                <div class="content-placeholder" style="border:none; min-height:100px;">공지사항 데이터를 불러오는 중입니다...</div>
             </ul>
         </section>
 
-        <!-- 2. 라이브 섹션 (좌측 하단 배치) -->
         <section class="section-box">
             <div class="section-header">
-                <h2 class="section-title">라이브 목록</h2>
+                <h2 class="section-title">라이브</h2>
                 <a href="#" class="more-btn">더보기 +</a>
             </div>
-            <div class="content-placeholder">
-                현재 방송 상태 및 플랫폼 연동 라이브 구역입니다.
-            </div>
+            <div class="content-placeholder">현재 방송 중인 라이브 목록 구역입니다.</div>
         </section>
 
-        <!-- 3. 시그댄스 섹션 (우측 하단 배치) -->
         <section class="section-box">
             <div class="section-header">
-                <h2 class="section-title">시그댄스 목록</h2>
+                <h2 class="section-title">시그댄스</h2>
                 <a href="#" class="more-btn">더보기 +</a>
             </div>
-            <div class="content-placeholder">
-                시그댄스 카운트 및 미션 정산 요약 구역입니다.
-            </div>
+            <div class="content-placeholder">시그댄스 정산 및 리스트 구역입니다.</div>
         </section>
-
     </main>
 
     <script>
-        // 제공된 스트리머별 SOOP(아프리카TV) 공지사항 게시판 주소 데이터셋
-        const streamerBoards = {
-            "후잉♥": "https://www.sooplive.com/station/jaeha010/board/42110606",
-            "류서하♥": "https://www.sooplive.com/station/smkim82372/board/65560144",
-            "백나현": "https://www.sooplive.com/station/wk3220/board/79496724",
-            "너의˚멜로디": "https://www.sooplive.com/station/meldoy777/board/108366731",
-            "냥냥수주": "https://www.sooplive.com/station/star49/board/121609123",
-            "하랑짱♥": "https://www.sooplive.com/station/asy1218/board/113481743",
-            "ZO아름♡": "https://www.sooplive.com/station/ahrum0912/board/122843945",
-            "김유정S2": "https://www.sooplive.com/station/tkek55/board/112452503",
-            "미로。": "https://www.sooplive.com/station/fhwm0602/board/92166558",
-            "소다♥": "https://www.sooplive.com/station/zbxlzzz/board/13644761",
-            "서니_♥": "https://www.sooplive.com/station/iluvpp/board/91109284",
-            "꺼니": "https://www.sooplive.com/station/callgg/board/329000",
-            "김푸:)": "https://www.sooplive.com/station/kimpooh0707/board/69409509"
-        };
+        function loadNotices() {
+            // 파이썬 크롤러가 생성한 JSON 파일을 읽어옵니다
+            fetch('./notice_data.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('데이터 파일을 찾을 수 없습니다.');
+                    return response.json();
+                })
+                .then(data => {
+                    const container = document.getElementById('notice-container');
+                    container.innerHTML = ''; 
 
-        /* [공지사항 샘플 데이터 목록]
-           실제 운영 환경(GitHub Pages + GitHub Actions 자동화 등) 도입 시, 
-           이 noticeData 배열 내부를 주기적으로 크롤링된 최신 게시글 데이터 객체들로 갱신하여 커밋하면 자동 반영됩니다.
-        */
-        const noticeData = [
-            { type: 'notice', title: '★ 필독 ★ 크루 커뮤니티 가이드라인 및 공지사항', author: '후잉♥', date: '05.24' },
-            { type: 'normal', title: '오늘 방송은 오후 8시에 시작합니다! 다들 이따 봐요', author: '류서하♥', date: '05.24' },
-            { type: 'normal', title: '주간 시그댄스 일정표 공지 및 신청 안내', author: '하랑짱♥', date: '05.23' },
-            { type: 'normal', title: '공지사항 게시판 링크 연동 테스트 완료 및 정상 오픈', author: '꺼니', date: '05.23' },
-            { type: 'normal', title: '주말 합동 방송 관련 라인업 및 타임테이블 공유', author: '김푸:)', date: '05.22' },
-            { type: 'normal', title: '새로운 시그댄스 리스트 음원 및 안경 피드백 요청', author: '서니_♥', date: '05.22' }
-        ];
+                    if (data.length === 0) {
+                        container.innerHTML = '<div class="content-placeholder" style="border:none;">등록된 공지사항이 없습니다.</div>';
+                        return;
+                    }
 
-        // 공지사항 데이터를 화면에 그리되, 제공된 주소 매핑을 활용해 새 창 연결 구조화
-        function renderNotices() {
-            const container = document.getElementById('notice-container');
-            if(!container) return;
-            
-            container.innerHTML = ''; 
+                    data.forEach(notice => {
+                        const li = document.createElement('li');
+                        li.className = 'notice-item';
+                        const badgeClass = notice.type === 'notice' ? 'notice-badge' : 'notice-badge normal';
+                        const badgeText = notice.type === 'notice' ? '공지' : '일반';
+                        
+                        // JSON에 담긴 다이렉트 링크 사용
+                        const postUrl = notice.link || '#';
 
-            noticeData.forEach(notice => {
-                const li = document.createElement('li');
-                li.className = 'notice-item';
-
-                const badgeClass = notice.type === 'notice' ? 'notice-badge' : 'notice-badge normal';
-                const badgeText = notice.type === 'notice' ? '공지' : '일반';
-                
-                // 등록된 스트리머 주소가 있다면 매핑, 없다면 기본 값 지정
-                const boardUrl = streamerBoards[notice.author] || '#';
-
-                // 제목과 작성자 클릭 시 해당 스트리머의 SOOP 보드로 이동 (새 창 타겟팅)
-                li.innerHTML = `
-                    <span class="${badgeClass}">${badgeText}</span>
-                    <a class="notice-title" href="${boardUrl}" target="_blank" title="${notice.author} 게시판 공지로 이동">${notice.title}</a>
-                    <a class="notice-author" href="${boardUrl}" target="_blank" title="${notice.author} 게시판 바로가기">${notice.author}</a>
-                    <span class="notice-date">${notice.date}</span>
-                `;
-                container.appendChild(li);
-            });
+                        li.innerHTML = `
+                            <span class="${badgeClass}">${badgeText}</span>
+                            <a class="notice-title" href="${postUrl}" target="_blank">${notice.title}</a>
+                            <a class="notice-author" href="${postUrl}" target="_blank">${notice.author}</a>
+                            <span class="notice-date">${notice.date}</span>
+                        `;
+                        container.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    document.getElementById('notice-container').innerHTML = 
+                        '<div class="content-placeholder" style="border:none; color:#ff6b6b;">' + error.message + '</div>';
+                });
         }
 
-        // 반응형 및 모바일 이벤트 제어
         const mobileMenu = document.getElementById('mobile-menu');
         const navLinks = document.getElementById('nav-links');
         const dropdown = document.querySelector('.dropdown');
 
-        mobileMenu.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
-
+        mobileMenu.addEventListener('click', () => navLinks.classList.toggle('active'));
         dropdown.addEventListener('click', (e) => {
-            if(window.innerWidth <= 768) {
-                // 모바일 환경에서만 하위 메뉴 토글 작동
-                e.stopPropagation();
-                dropdown.classList.toggle('active');
-            }
+            if(window.innerWidth <= 768) { e.stopPropagation(); dropdown.classList.toggle('active'); }
         });
 
-        // 돔 구조가 로드되면 공지사항 초기 빌드
-        document.addEventListener('DOMContentLoaded', renderNotices);
+        document.addEventListener('DOMContentLoaded', loadNotices);
     </script>
 </body>
 </html>

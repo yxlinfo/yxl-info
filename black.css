@@ -1,0 +1,47 @@
+/* 기본 초기화 */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+body { background-color: #121212; color: #e0e0e0; }
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 5%;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+}
+
+.logo { font-size: 1.5rem; font-weight: bold; color: #c5a059; letter-spacing: 2px; }
+
+.nav-menu ul { display: flex; list-style: none; }
+.nav-menu li { position: relative; margin-left: 30px; }
+
+/* 링크 스타일 및 호버 효과 (화이트 배경 제거) */
+.nav-menu a {
+  text-decoration: none;
+  color: #b0b0b0;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+.nav-menu a:hover {
+  color: #c5a059; /* 골드 색상으로 변함 */
+}
+
+/* 드롭다운 메뉴 */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  width: 120px;
+  padding: 10px 0;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+
+.dropdown:hover .dropdown-content { display: block; }
+.dropdown-content li { margin: 0; padding: 5px 15px; }
+.dropdown-content a { display: block; font-size: 0.85rem; }

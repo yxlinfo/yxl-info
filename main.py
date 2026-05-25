@@ -1,42 +1,58 @@
-import requests
-import sqlite3
+import requests, sqlite3
 
-def save_notice():
-    # 타겟 API URL
-    url = "https://chapi.sooplive.com/api/asy1218/board/113481743?per_page=5&order_by=reg_date&page=1"
-    response = requests.get(url).json()
-    latest_post = response['data'][0] # 가장 최신 글 1개
+def run():
+    url = "https://chapi.sooplive.com/api/jaeha010/board/?per_page=4&order_by=reg_date&page=1"
     
-    new_title_no = latest_post['title_no']
+    # 봇 차단을 우회하기 위한 필수 헤더
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "Referer": "https://ch.sooplive.com/jaeha010"
+    }
     
-    conn = sqlite3.connect('yxlinfo.db')
-    cursor = conn.cursor()
-    
-    # 마지막으로 저장된 ID 확인
-    cursor.execute("SELECT last_title_no FROM sync_metadata WHERE user_id = 'asy1218'")
-    row = cursor.fetchone()
-    last_id = row[0] if row else 0
-    
-    # 새 글이 감지되면 저장
-    if new_title_no > last_id:
-        cursor.execute('''
-            INSERT OR IGNORE INTO streamer_notices 
-            (title_no, user_nick, title_name, content_summary, reg_date)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (new_title_no, latest_post['user_nick'], latest_post['title_name'], 
-              latest_post['content']['summary'], latest_post['reg_date']))
+    try:
+        # 응답을 먼저 받고, 그 다음에 JSON으로 변환
+        response = requests.get(url, headers=headers, timeout=10)
         
-        cursor.execute('''
-            INSERT OR REPLACE INTO sync_metadata (user_id, last_title_no)
-            VALUES (?, ?)
-        ''', ('asy1218', new_title_no))
+        # 1. 상태코드 확인
+        if response.status_code != 200:
+            print(f"서버가 요청을 거부했습니다. 상태코드: {response.status_code}")
+            return
+            
+        data = response.json()
+        items = data.get('data', [])
         
+        if not items:
+            print("데이터가 없습니다.")
+            return
+
+        conn = sqlite3.connect('yxlinfo.db')
+        cursor = conn.cursor()
+        
+        # DB 업데이트
+        for item in items:
+            cursor.execute('''INSERT OR REPLACE INTO streamer_notices VALUES (?,?,?,?,?,?,?)''',
+                           (item['title_no'], item['user_nick'], 'https:' + item['profile_image'], 
+                            item['title_name'], item['count']['read_cnt'], 
+                            item['count']['comment_cnt'], item['reg_date']))
         conn.commit()
-        print(f"새 공지 저장 완료: {latest_post['title_name']}")
-    else:
-        print("최신 공지 없음")
         
-    conn.close()
+        # HTML 생성 로직(생략된 부분)
+        cursor.execute("SELECT * FROM streamer_notices ORDER BY reg_date DESC LIMIT 4")
+        rows = cursor.fetchall()
+        
+        html = '<html><head><meta charset="UTF-8"><style>.wrap{display:flex; gap:15px; font-family:sans-serif;} .card{border:1px solid #ddd; padding:15px; width:220px; border-radius:12px; box-shadow: 2px 2px 8px #eee;} .prof{width:40px; height:40px; border-radius:50%;} .stats{color:#888; font-size:12px; margin-top:10px;} </style></head><body><div class="wrap">'
+        for r in rows:
+            html += f'<div class="card"><img src="{r[2]}" class="prof"> <b>{r[1]}</b><br><div style="height:40px; overflow:hidden;">{r[3]}</div><div class="stats">👁 {r[4]} 💬 {r[5]}</div></div>'
+        html += '</div></body></html>'
+        
+        with open("index.html", "w", encoding="utf-8") as f: f.write(html)
+        print("index.html 빌드 성공")
+        conn.close()
+        
+    except Exception as e:
+        print(f"에러 발생: {e}")
+        # 응답 내용을 출력해보면 서버가 왜 화가 났는지 알 수 있습니다.
+        if 'response' in locals():
+            print(f"응답 본문 확인: {response.text[:200]}")
 
-if __name__ == "__main__":
-    save_notice()
+if __name__ == "__main__": run()

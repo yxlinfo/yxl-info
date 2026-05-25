@@ -7,94 +7,91 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { background-color: #121212; color: #e0e0e0; }
 
-        /* [네비게이션바] */
-        .navbar {
-            display: flex;
-            align-items: center;
-            background-color: #181818;
-            padding: 15px 5%;
-            border-bottom: 1px solid #333;
-            position: relative;
-        }
-
-        .logo { font-size: 1.4rem; font-weight: 800; color: #d4af37; letter-spacing: 1px; }
-
-        /* 메뉴를 중앙으로 배치하기 위한 래퍼 */
-        .nav-wrapper {
-            flex: 1; /* 화면 중앙을 차지 */
-            display: flex;
-            justify-content: center; /* 내부 아이템 중앙 정렬 */
-        }
-
+        /* [네비게이션바] 로고 클릭 시 메인 이동 */
+        .navbar { display: flex; align-items: center; background-color: #181818; padding: 15px 5%; border-bottom: 1px solid #333; }
+        .logo-link { display: flex; align-items: center; }
+        .logo-img { height: 40px; cursor: pointer; }
+        
+        .nav-wrapper { flex: 1; display: flex; justify-content: center; }
         .nav-menu { display: flex; list-style: none; }
         .nav-menu > li { position: relative; margin: 0 20px; }
-        .nav-menu a { text-decoration: none; color: #ccc; font-size: 0.95rem; transition: 0.2s; padding: 10px 0; }
+        .nav-menu a { text-decoration: none; color: #ccc; font-size: 0.95rem; transition: 0.2s; }
         .nav-menu a:hover { color: #d4af37; }
 
-        /* [드롭다운] 마우스 안 사라지게 개선 */
-        .dropdown { position: relative; }
-        
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            top: 100%; /* 네비게이션바 바로 아래에 밀착 */
-            left: 50%; /* 가운데 정렬 시작점 */
-            transform: translateX(-50%); /* 정확히 중앙으로 이동 */
-            background-color: #1a1a1a;
-            border: 1px solid #333;
-            width: 130px;
-            padding: 5px 0;
-            z-index: 1000;
-        }
+        /* [본문 영역] */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        section { margin-bottom: 40px; }
+        h2 { color: #d4af37; font-size: 1.1rem; margin-bottom: 15px; border-left: 3px solid #d4af37; padding-left: 10px; }
 
-        /* 호버 시 유지 및 마우스 감지 영역 확대 */
-        .dropdown:hover .dropdown-content { display: block; }
-        
-        .dropdown-content li { list-style: none; text-align: center; }
-        .dropdown-content a { 
-            display: block; 
-            padding: 10px 15px; 
-            font-size: 0.9rem; 
-            color: #aaa; 
-        }
-        .dropdown-content a:hover { 
-            color: #d4af37; 
-            background-color: #222; 
-        }
+        /* [데이터 테이블 공통 스타일] */
+        table { width: 100%; border-collapse: collapse; background-color: #181818; }
+        th, td { padding: 12px; border: 1px solid #333; text-align: center; font-size: 0.9rem; }
+        th { background-color: #222; color: #d4af37; }
 
-        /* [본문] */
-        .content { padding: 40px 5%; }
-        h1 { color: #d4af37; font-size: 1.2rem; }
+        /* [라이브 상태 카드] */
+        .live-box { background: #181818; padding: 20px; border: 1px solid #333; text-align: center; }
+        .live-status { font-weight: bold; color: #4caf50; } /* 방송 중 색상 */
     </style>
 </head>
 <body>
 
     <header class="navbar">
-        <div class="logo">YXL</div>
+        <a href="index.html" class="logo-link">
+            <img src="logo.png" alt="YXL Logo" class="logo-img">
+        </a>
         
         <nav class="nav-wrapper">
             <ul class="nav-menu">
-                <li><a href="#">홈</a></li>
+                <li><a href="index.html">홈</a></li>
                 <li><a href="#">현황판</a></li>
-                <li class="dropdown">
-                    <a href="#">데이터 ▼</a>
-                    <ul class="dropdown-content">
-                        <li><a href="#">VIP랭킹</a></li>
-                        <li><a href="#">매출표</a></li>
-                        <li><a href="#">정산표</a></li>
-                    </ul>
-                </li>
+                <li class="dropdown"><a href="#">데이터 ▼</a></li>
                 <li><a href="#">시그니쳐</a></li>
                 <li><a href="#">보라방송</a></li>
             </ul>
         </nav>
-        
         <div style="width: 70px;"></div>
     </header>
 
-    <main class="content">
-        <h1>Dashboard</h1>
-        <p>데이터가 로딩되는 영역입니다.</p>
+    <main class="container">
+        <section>
+            <h2>공지사항</h2>
+            <table>
+                <tr>
+                    <th>번호</th>
+                    <th>제목</th>
+                    <th>날짜</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>YXL 대시보드 오픈 안내</td>
+                    <td>2026.05.25</td>
+                </tr>
+            </table>
+        </section>
+
+        <section>
+            <h2>라이브 상태</h2>
+            <div class="live-box">
+                <span class="live-status">● 방송 중</span>
+                <p style="margin-top:10px;">현재 스트리머가 방송을 진행하고 있습니다.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>일정표</h2>
+            <table>
+                <tr>
+                    <th>날짜</th>
+                    <th>시간</th>
+                    <th>내용</th>
+                </tr>
+                <tr>
+                    <td>05.26</td>
+                    <td>20:00</td>
+                    <td>정기 회의</td>
+                </tr>
+            </table>
+        </section>
     </main>
 
 </body>

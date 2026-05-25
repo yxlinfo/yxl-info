@@ -1,47 +1,48 @@
-/* 기본 초기화 */
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
-body { background-color: #121212; color: #e0e0e0; }
+/* 전역 설정 */
+:root {
+  --bg-color: #121212;
+  --panel-bg: #1e1e1e;
+  --text-main: #e0e0e0;
+  --text-dim: #a0a0a0;
+  --point-color: #d4af37; /* 고급스러운 골드 */
+}
 
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  margin: 0;
+}
+
+/* 네비게이션바 */
 .navbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1rem 5%;
-  background: #1a1a1a;
-  border-bottom: 1px solid #333;
+  background-color: #000;
+  padding: 15px 5%;
+  border-bottom: 2px solid var(--point-color);
 }
 
-.logo { font-size: 1.5rem; font-weight: bold; color: #c5a059; letter-spacing: 2px; }
+.logo { font-weight: 800; font-size: 1.4rem; color: var(--point-color); margin-right: 40px; }
 
-.nav-menu ul { display: flex; list-style: none; }
-.nav-menu li { position: relative; margin-left: 30px; }
+.nav-menu ul { display: flex; list-style: none; gap: 30px; margin: 0; }
+.nav-menu a { text-decoration: none; color: var(--text-main); font-size: 0.95rem; }
+.nav-menu a:hover { color: var(--point-color); }
 
-/* 링크 스타일 및 호버 효과 (화이트 배경 제거) */
-.nav-menu a {
-  text-decoration: none;
-  color: #b0b0b0;
-  font-size: 0.95rem;
-  transition: color 0.3s ease;
+/* 표(Table) 스타일 - 데이터 중심의 no3miggi 스타일 */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: var(--panel-bg);
 }
 
-.nav-menu a:hover {
-  color: #c5a059; /* 골드 색상으로 변함 */
-}
-
-/* 드롭다운 메뉴 */
-.dropdown-content {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: #1a1a1a;
+.data-table th, .data-table td {
+  padding: 12px;
   border: 1px solid #333;
-  width: 120px;
-  padding: 10px 0;
-  margin-top: 10px;
-  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
-.dropdown:hover .dropdown-content { display: block; }
-.dropdown-content li { margin: 0; padding: 5px 15px; }
-.dropdown-content a { display: block; font-size: 0.85rem; }
+.data-table th { background-color: #252525; color: var(--point-color); }
+.data-table tr:hover { background-color: #2a2a2a; }

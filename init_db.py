@@ -8,7 +8,9 @@ def init_notice_db():
             title_no INTEGER PRIMARY KEY,
             user_nick TEXT,
             profile_image TEXT,
+            thumbnail_url TEXT,
             title_name TEXT,
+            content_summary TEXT,
             read_cnt INTEGER,
             comment_cnt INTEGER,
             reg_date TEXT

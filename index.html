@@ -1,19 +1,44 @@
-<header class="navbar">
-  <div class="logo">YXL</div>
-  <nav class="nav-menu">
-    <ul>
-      <li><a href="#">홈</a></li>
-      <li><a href="#">현황판</a></li>
-      <li class="dropdown">
-        <a href="#" class="dropbtn">데이터 ▾</a>
-        <ul class="dropdown-content">
-          <li><a href="#">VIP랭킹</a></li>
-          <li><a href="#">매출표</a></li>
-          <li><a href="#">정산표</a></li>
-        </ul>
-      </li>
-      <li><a href="#">시그니쳐</a></li>
-      <li><a href="#">보라방송</a></li>
-    </ul>
-  </nav>
-</header>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="style.css">
+  <title>YXL Dashboard</title>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">YXL</div>
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="#">홈</a></li>
+        <li><a href="#">현황판</a></li>
+        <li class="dropdown"><a href="#">데이터 ▼</a></li>
+        <li><a href="#">시그니쳐</a></li>
+        <li><a href="#">보라방송</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main style="padding: 20px 5%;">
+    <h3>데이터 현황</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>이름</th>
+          <th>시즌</th>
+          <th>매출</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>서니</td>
+          <td>S13</td>
+          <td>1,200,000</td>
+          <td>(휴직복귀) 2026.04.14</td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

@@ -10,29 +10,42 @@ STREAMERS = [
 ]
 
 async def crawl_notice(page, user_id):
-    captured = []
-
-    async def handle_response(response):
-        if "chapi.sooplive.com" in response.url and "/board/" in response.url:
-            try:
-                data = await response.json()
-                captured.extend(data.get("data", []))
-            except Exception:
-                pass
-
-    page.on("response", handle_response)
-
     try:
-        await page.goto(
-            f"https://www.sooplive.com/station/{user_id}/board",
-            wait_until="networkidle",
-            timeout=20000
-        )
+        # 요청을 가로채서 field에 thumb 추가
+        async def modify_request(route, request):
+            url = request.url
+            if "chapi.sooplive.com" in url and "/board/" in url:
+                if "thumb" not in url:
+                    url = url.replace(
+                        "field=title,contents,user_nick,user_id,hashtags",
+                        "field=title,contents,user_nick,user_id,hashtags,thumb"
+                    )
+                await route.continue_(url=url)
+            else:
+                await route.continue_()
+
+        await page.route("**/*", modify_request)
+
+        async with page.expect_response(
+            lambda r: "chapi.sooplive.com" in r.url and "/board/" in r.url,
+            timeout=15000
+        ) as response_info:
+            await page.goto(
+                f"https://www.sooplive.com/station/{user_id}/board",
+                wait_until="domcontentloaded",
+                timeout=20000
+            )
+
+        response = await response_info.value
+        data = await response.json()
+        items = data.get("data", [])
+
     except Exception as e:
-        print(f"[페이지 오류] {user_id}: {e}")
+        print(f"[오류] {user_id}: {e}")
+        return []
 
     notices = []
-    for item in captured[:10]:
+    for item in items[:10]:
         notice = {
             "id": item.get("title_no"),
             "user_id": user_id,

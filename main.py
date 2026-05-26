@@ -11,15 +11,15 @@ STREAMERS = [
 
 async def crawl_notice(page, user_id):
     try:
-        # 요청을 가로채서 field에 thumb 추가
         async def modify_request(route, request):
             url = request.url
             if "chapi.sooplive.com" in url and "/board/" in url:
-                if "thumb" not in url:
-                    url = url.replace(
-                        "field=title,contents,user_nick,user_id,hashtags",
-                        "field=title,contents,user_nick,user_id,hashtags,thumb"
-                    )
+                url = url.replace(
+                    "field=title,contents,user_nick,user_id,hashtags",
+                    "field=title,contents,user_nick,user_id,hashtags,thumb"
+                )
+                url = url.replace("type=all", "type=notice")
+                url = url.replace("per_page=20", "per_page=2")
                 await route.continue_(url=url)
             else:
                 await route.continue_()
@@ -45,7 +45,7 @@ async def crawl_notice(page, user_id):
         return []
 
     notices = []
-    for item in items[:10]:
+    for item in items[:2]:
         notice = {
             "id": item.get("title_no"),
             "user_id": user_id,

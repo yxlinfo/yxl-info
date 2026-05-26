@@ -6,6 +6,9 @@ on:
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    concurrency:
+      group: update-data
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
       

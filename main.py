@@ -1,15 +1,12 @@
 import requests
 import json
-import os
 
 def update_notices():
-    # 스트리머 아이디와 공지사항 게시판 번호(103) 설정
     targets = [
-        {"id": "jaeha010", "board_no": "103"}  
+        {"id": "jaeha010", "board_no": "103"}  # 여러 스트리머가 있으면 콤마로 계속 추가하세요.
     ]
     all_notices = []
 
-    # 브라우저 위장 헤더
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Accept": "application/json, text/plain, */*",
@@ -19,10 +16,8 @@ def update_notices():
     for target in targets:
         bj_id = target["id"]
         board_no = target["board_no"]
-        
         headers["Referer"] = f"https://www.sooplive.com/station/{bj_id}/board"
         
-        # 특정 게시판(103) 번호를 정확히 호출
         url = f"https://chapi.sooplive.com/api/{bj_id}/board/?per_page=2&start_date=&end_date=&field=title,contents,user_nick,user_id,hashtags&keyword=&type=all&order_by=reg_date&board_number={board_no}&page=1"
         
         try:
@@ -30,20 +25,29 @@ def update_notices():
             if response.status_code == 200:
                 data = response.json()
                 
-                # 빈 데이터 응답 시 에러 메시지 출력
                 if "data" not in data or not data["data"]:
                     print(f"[{bj_id}] 게시글이 없습니다. 서버 응답: {data}")
                 
                 for item in data.get("data", [])[:2]:
+                    # 이미지 URL 앞에 https: 붙이기
                     thumbnail = f"https:{item['photos'][0]['url']}" if item.get('photos') else None
+                    profile_img = f"https:{item['profile_image']}" if item.get('profile_image') else None
                     
+                    # 카드와 모달에 들어갈 모든 데이터를 알뜰하게 긁어옵니다.
                     all_notices.append({
                         "id": item["bbs_no"],
+                        "user_nick": item["user_nick"],
+                        "profile_image": profile_img,
                         "title": item["title_name"],
                         "date": item["reg_date"],
-                        "summary": item["text_content"][:100] + "...",
+                        "summary": item["text_content"][:80] + "...",
                         "thumbnail": thumbnail,
-                        "full_html": item["content"]["content"]
+                        "read_cnt": item["count"]["read_cnt"],
+                        "vod_read_cnt": item["count"]["vod_read_cnt"],
+                        "comment_cnt": item["count"]["comment_cnt"],
+                        "like_cnt": item["count"]["like_cnt"],
+                        "photo_cnt": item["photo_cnt"],
+                        "full_html": item["content"]["content"] # 원본 사진/글씨체 100% 저장
                     })
                 print(f"[{bj_id}] 공지사항 수집 완료!")
             else:
@@ -52,12 +56,11 @@ def update_notices():
         except Exception as e:
             print(f"[{bj_id}] 실행 중 에러: {e}")
 
-    # 최신 날짜순 정렬 후 JSON 파일로 저장
+    # 최신 시간순으로 정렬해서 notices.json으로 구워냅니다.
     all_notices.sort(key=lambda x: x["date"], reverse=True)
     with open("notices.json", "w", encoding="utf-8") as f:
         json.dump(all_notices, f, ensure_ascii=False, indent=4)
     print("notices.json 갱신 완료!")
 
 if __name__ == "__main__":
-    # 기존에 다른 업데이트 함수가 있다면 이 위에 함께 배치하세요.
     update_notices()

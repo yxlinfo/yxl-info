@@ -1,32 +1,34 @@
-import requests
-import json
-import os
-
-# 기존 랭킹 업데이트 코드들...
-# ...
-
-# [추가할 부분] 공지사항 크롤링 및 저장 함수
 def update_notices():
-    # 스트리머 아이디 목록 (예시)
-    bj_ids = ["jaeha010"] # 여러 명일 경우 콤마로 추가
+    bj_ids = ["jaeha010"] # 여러 명일 경우 콤마로 구분하여 추가
     all_notices = []
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Accept": "application/json, text/plain, */*",
         "Origin": "https://www.sooplive.com"
     }
 
     for bj_id in bj_ids:
         headers["Referer"] = f"https://www.sooplive.com/station/{bj_id}/board"
-        url = f"https://chapi.sooplive.com/api/{bj_id}/board/?per_page=2&page=1"
+        
+        # 원래 알려주셨던 파라미터를 모두 포함한 주소로 복구 (갯수만 per_page=2로 수정)
+        url = f"https://chapi.sooplive.com/api/{bj_id}/board/?per_page=2&start_date=&end_date=&field=title,contents,user_nick,user_id,hashtags&keyword=&type=all&order_by=reg_date&board_number=&page=1"
         
         try:
             response = requests.get(url, headers=headers)
+            print(f"[{bj_id}] 연결 상태: {response.status_code}") # 200이 나오면 정상 연결
+            
             if response.status_code == 200:
                 data = response.json()
+                
+                # 만약 서버가 빈 데이터를 줬을 경우 로그에 원본 응답을 출력
+                if "data" not in data or not data["data"]:
+                    print(f"[{bj_id}] 서버 응답은 정상이나 게시글이 없습니다. 서버 응답값: {data}")
+                
                 for item in data.get("data", [])[:2]:
+                    # 썸네일 URL 처리
                     thumbnail = f"https:{item['photos'][0]['url']}" if item.get('photos') else None
+                    
                     all_notices.append({
                         "id": item["bbs_no"],
                         "title": item["title_name"],
@@ -36,17 +38,10 @@ def update_notices():
                         "full_html": item["content"]["content"]
                     })
         except Exception as e:
-            print(f"Error fetching {bj_id}: {e}")
+            print(f"[{bj_id}] 실행 중 에러: {e}")
 
-    # 최신 날짜순으로 정렬
+    # 최신 날짜순 정렬 후 JSON 저장
     all_notices.sort(key=lambda x: x["date"], reverse=True)
-
-    # JSON 파일로 저장
     with open("notices.json", "w", encoding="utf-8") as f:
         json.dump(all_notices, f, ensure_ascii=False, indent=4)
-    print("notices.json 업데이트 완료!")
-
-# 스크립트 실행 시 공지사항도 함께 업데이트되도록 호출
-if __name__ == "__main__":
-    # 기존 데이터베이스 업데이트 함수 호출()
-    update_notices()
+    print("notices.json 갱신 완료!")

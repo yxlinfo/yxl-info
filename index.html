@@ -1,43 +1,285 @@
-<script>
-    document.addEventListener('DOMContentLoaded', loadNotices);
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YXL Dashboard</title>
 
-    async function loadNotices() {
-        try {
-            const response = await fetch('notices.json');
-            const notices = await response.json();
-            const container = document.getElementById('notice-container');
-            container.innerHTML = ''; 
-
-            notices.forEach(n => {
-                // 48시간 이내 NEW 뱃지 계산
-                const isNew = (new Date() - new Date(n.date.replace(/-/g, '/'))) < (48 * 60 * 60 * 1000);
-                
-                const cardHTML = `
-                    <div class="notice-card" onclick="goToPost('${n.id}', '${n.user_id}')">
-                        ${isNew ? '<span class="badge-new">NEW</span>' : ''}
-                        ${n.thumbnail ? `<img src="${n.thumbnail}" class="thumb-img">` : ''}
-                        <div class="card-meta-top">
-                            <div class="author-info">
-                                ${n.profile_image ? `<img src="${n.profile_image}" class="profile-img">` : ''}
-                                <span class="card-author">${n.user_nick}</span>
-                            </div>
-                            <span class="card-date">${n.date.substring(5, 10)}</span>
-                        </div>
-                        <h4>${n.title}</h4>
-                        <p>${n.summary}</p>
-                        <div class="card-meta-bottom">
-                            <span>조회:${n.read_cnt}</span> <span>VOD:${n.vod_read_cnt}</span>
-                            <span>댓글:${n.comment_cnt}</span> <span>추천:${n.like_cnt}</span>
-                        </div>
-                    </div>`;
-                container.insertAdjacentHTML('beforeend', cardHTML);
-            });
-        } catch (e) {
-            console.error("데이터 로드 에러:", e);
+    <style>
+        :root {
+            --bg-dark: #12100C;
+            --card-bg: #1A1713;
+            --gold: #C5A059;
+            --gold-light: #E6C275;
+            --text-main: #FDFDFD;
+            --text-sub: #A69A8A;
+            --border-gold: rgba(197, 160, 89, 0.3);
         }
-    }
 
-    function goToPost(bbs_no, user_id) {
-        window.open(`https://www.sooplive.com/station/${user_id}/board/${bbs_no}`, '_blank');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Pretendard, sans-serif;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+        }
+
+        .navbar {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-gold);
+            padding: 14px 20px;
+        }
+
+        .logo {
+            color: var(--gold-light);
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            color: var(--gold-light);
+            margin-bottom: 20px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .notice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .notice-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .notice-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(197,160,89,0.15);
+        }
+
+        .badge-new {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #ff4e50, #f9d423);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 5px 8px;
+            border-radius: 6px;
+            z-index: 5;
+        }
+
+        .notice-thumb {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #222;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .top-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .author img {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid var(--border-gold);
+        }
+
+        .author-name {
+            color: var(--gold-light);
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .date {
+            color: var(--text-sub);
+            font-size: 0.7rem;
+        }
+
+        .title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .summary {
+            color: var(--text-sub);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .bottom-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 12px;
+        }
+
+        .empty {
+            color: var(--text-sub);
+            text-align: center;
+            padding: 50px 0;
+        }
+
+        @media (max-width: 768px) {
+            .notice-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="logo">YXL Dashboard</div>
+</header>
+
+<main class="container">
+    <div class="section-title">
+        스트리머 공지사항
+    </div>
+
+    <div id="notice-container" class="notice-grid">
+        <div class="empty">공지사항 불러오는 중...</div>
+    </div>
+</main>
+
+<script>
+async function loadNotices() {
+    const container = document.getElementById('notice-container');
+
+    try {
+        const response = await fetch('./notices.json');
+        const notices = await response.json();
+
+        container.innerHTML = '';
+
+        if (!notices.length) {
+            container.innerHTML =
+                '<div class="empty">공지사항이 없습니다.</div>';
+            return;
+        }
+
+        notices.forEach(notice => {
+
+            const isNew =
+                (new Date() - new Date(notice.date.replace(/-/g, '/')))
+                < (48 * 60 * 60 * 1000);
+
+            const card = document.createElement('div');
+
+            card.className = 'notice-card';
+
+            card.onclick = () => {
+                window.open(
+                    `https://www.sooplive.com/station/${notice.user_id}/board/${notice.id}`,
+                    '_blank'
+                );
+            };
+
+            card.innerHTML = `
+                ${isNew ? '<div class="badge-new">NEW</div>' : ''}
+
+                <img
+                    class="notice-thumb"
+                    src="${notice.thumbnail || 'logo.png'}"
+                    alt=""
+                >
+
+                <div class="card-content">
+
+                    <div class="top-meta">
+                        <div class="author">
+                            <img src="${notice.profile_image}">
+                            <div class="author-name">
+                                ${notice.user_nick}
+                            </div>
+                        </div>
+
+                        <div class="date">
+                            ${notice.date.substring(5, 10)}
+                        </div>
+                    </div>
+
+                    <div class="title">
+                        ${notice.title}
+                    </div>
+
+                    <div class="summary">
+                        ${notice.summary}
+                    </div>
+
+                    <div class="bottom-meta">
+                        <span>조회 ${notice.read_cnt}</span>
+                        <span>VOD ${notice.vod_read_cnt}</span>
+                        <span>댓글 ${notice.comment_cnt}</span>
+                        <span>추천 ${notice.like_cnt}</span>
+                        <span>사진 ${notice.photo_cnt}</span>
+                    </div>
+
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        container.innerHTML = `
+            <div class="empty">
+                notices.json 로드 실패
+            </div>
+        `;
     }
+}
+
+loadNotices();
 </script>
+
+</body>
+</html>

@@ -1,47 +1,83 @@
-import requests
 import json
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime
 
-def update_notices():
-    targets = [{"id": "jaeha010", "board_no": "103"}]
+OUTPUT_FILE = "notices.json"
+
+# 테스트용 스트리머 ID 목록
+STREAMERS = [
+    "jaeha010"
+]
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0"
+}
+
+
+def crawl_notice(user_id):
+    try:
+        url = f"https://bjapi.sooplive.co.kr/api/{user_id}/board"
+
+        response = requests.get(url, headers=HEADERS)
+        data = response.json()
+
+        notices = []
+
+        for item in data.get("data", [])[:10]:
+            notice = {
+                "id": item.get("title_no"),
+                "user_id": user_id,
+                "user_nick": item.get("writer_nick", ""),
+                "profile_image": item.get("profile_image", ""),
+                "title": item.get("title", ""),
+                "date": item.get("reg_date", ""),
+                "summary": BeautifulSoup(
+                    item.get("content", ""),
+                    "html.parser"
+                ).get_text(strip=True)[:120],
+
+                "thumbnail": item.get("thumb", ""),
+
+                "read_cnt": item.get("read_cnt", 0),
+                "vod_read_cnt": item.get("vod_read_cnt", 0),
+                "comment_cnt": item.get("comment_cnt", 0),
+                "like_cnt": item.get("like_cnt", 0),
+                "photo_cnt": item.get("photo_cnt", 0)
+            }
+
+            notices.append(notice)
+
+        return notices
+
+    except Exception as e:
+        print(f"[ERROR] {user_id}: {e}")
+        return []
+
+
+def main():
     all_notices = []
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
-        "Origin": "https://www.sooplive.com"
-    }
+    for streamer in STREAMERS:
+        notices = crawl_notice(streamer)
+        all_notices.extend(notices)
 
-    for target in targets:
-        bj_id = target["id"]
-        board_no = target["board_no"]
-        headers["Referer"] = f"https://www.sooplive.com/station/{bj_id}/board"
-        url = f"https://chapi.sooplive.com/api/{bj_id}/board/?per_page=2&board_number={board_no}&page=1"
-        
-        try:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                data = response.json()
-                for item in data.get("data", [])[:2]:
-                    all_notices.append({
-                        "id": item["bbs_no"],
-                        "user_id": item["user_id"],
-                        "user_nick": item["user_nick"],
-                        "profile_image": f"https:{item['profile_image']}" if item.get('profile_image') else None,
-                        "title": item["title_name"],
-                        "date": item["reg_date"],
-                        "summary": item["text_content"][:80] + "...",
-                        "thumbnail": f"https:{item['photos'][0]['url']}" if item.get('photos') else None,
-                        "read_cnt": item["count"]["read_cnt"],
-                        "vod_read_cnt": item["count"]["vod_read_cnt"],
-                        "comment_cnt": item["count"]["comment_cnt"],
-                        "like_cnt": item["count"]["like_cnt"],
-                        "photo_cnt": item["photo_cnt"]
-                    })
-        except Exception as e:
-            print(f"[{bj_id}] 에러: {e}")
+    # 최신순 정렬
+    all_notices.sort(
+        key=lambda x: x.get("date", ""),
+        reverse=True
+    )
 
-    with open("notices.json", "w", encoding="utf-8") as f:
-        json.dump(all_notices, f, ensure_ascii=False, indent=4)
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(
+            all_notices,
+            f,
+            ensure_ascii=False,
+            indent=4
+        )
+
+    print(f"[완료] notices.json 저장 완료 ({len(all_notices)}개)")
+
 
 if __name__ == "__main__":
-    update_notices()
+    main()

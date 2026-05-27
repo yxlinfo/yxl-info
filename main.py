@@ -1,4 +1,5 @@
 import json
+import re
 import asyncio
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
@@ -30,14 +31,14 @@ async def crawl_notice(page, streamer):
         async def modify_request(route, request):
             url = request.url
             if "chapi.sooplive.com" in url and "/board/" in url:
+                print(f"[원본 URL] {url}")
                 url = url.replace(
                     "field=title,contents,user_nick,user_id,hashtags",
                     "field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date"
                 )
                 url = url.replace("per_page=20", "per_page=1")
-                if "board_number=" in url:
-                    import re
-                    url = re.sub(r"board_number=[^&]*", f"board_number={board_number}", url)
+                url = re.sub(r"board_number=[^&]*", f"board_number={board_number}", url)
+                print(f"[수정 URL] {url}")
                 await route.continue_(url=url)
             else:
                 await route.continue_()

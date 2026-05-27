@@ -16,10 +16,10 @@ async def crawl_notice(page, user_id):
             if "chapi.sooplive.com" in url and "/board/" in url:
                 url = url.replace(
                     "field=title,contents,user_nick,user_id,hashtags",
-                    "field=title,contents,user_nick,user_id,hashtags,thumb"
+                    "field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date"
                 )
-                url = url.replace("type=all", "type=notice")
-                url = url.replace("per_page=20", "per_page=2")
+                url = url.replace("type=all", "type=all")
+                url = url.replace("per_page=20", "per_page=20")
                 await route.continue_(url=url)
             else:
                 await route.continue_()
@@ -46,22 +46,23 @@ async def crawl_notice(page, user_id):
 
     notices = []
     for item in items[:2]:
+        photos = item.get("photos", [])
+        thumbnail = ("https:" + photos[0]["url"]) if photos else ""
+
+        count = item.get("count", {})
+
         notice = {
             "id": item.get("title_no"),
             "user_id": user_id,
             "user_nick": item.get("user_nick", ""),
-            "profile_image": item.get("profile_image", ""),
-            "title": item.get("title", ""),
+            "profile_image": "https:" + item.get("profile_image", "").lstrip("//") if item.get("profile_image", "").startswith("//") else item.get("profile_image", ""),
+            "title": item.get("title_name", ""),
             "date": item.get("reg_date", ""),
-            "summary": BeautifulSoup(
-                item.get("contents", ""),
-                "html.parser"
-            ).get_text(strip=True)[:120],
-            "thumbnail": item.get("thumb", ""),
-            "read_cnt": item.get("read_cnt", 0),
-            "vod_read_cnt": item.get("vod_read_cnt", 0),
-            "comment_cnt": item.get("comment_cnt", 0),
-            "like_cnt": item.get("like_cnt", 0),
+            "notice_yn": item.get("notice_yn", 0),
+            "thumbnail": thumbnail,
+            "like_cnt": count.get("like_cnt", 0),
+            "read_cnt": count.get("read_cnt", 0),
+            "comment_cnt": count.get("comment_cnt", 0),
             "photo_cnt": item.get("photo_cnt", 0)
         }
         notices.append(notice)

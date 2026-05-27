@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YXL Dashboard</title>
-
     <style>
         :root {
             --bg-dark: #12100C;
@@ -16,17 +15,9 @@
             --border-gold: rgba(197, 160, 89, 0.3);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Pretendard, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Pretendard, sans-serif; }
 
-        body {
-            background: var(--bg-dark);
-            color: var(--text-main);
-        }
+        body { background: var(--bg-dark); color: var(--text-main); }
 
         .navbar {
             background: var(--card-bg);
@@ -34,17 +25,9 @@
             padding: 14px 20px;
         }
 
-        .logo {
-            color: var(--gold-light);
-            font-size: 1.2rem;
-            font-weight: 800;
-        }
+        .logo { color: var(--gold-light); font-size: 1.2rem; font-weight: 800; }
 
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
 
         .section-title {
             color: var(--gold-light);
@@ -74,15 +57,28 @@
             box-shadow: 0 8px 20px rgba(197,160,89,0.15);
         }
 
-        .badge-new {
+        .badge-notice {
             position: absolute;
             top: 10px;
             left: 10px;
+            background: linear-gradient(135deg, #C5A059, #E6C275);
+            color: #12100C;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 6px;
+            z-index: 5;
+        }
+
+        .badge-new {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             background: linear-gradient(135deg, #ff4e50, #f9d423);
             color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            padding: 5px 8px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 8px;
             border-radius: 6px;
             z-index: 5;
         }
@@ -92,11 +88,10 @@
             height: 180px;
             object-fit: cover;
             background: #222;
+            display: block;
         }
 
-        .card-content {
-            padding: 15px;
-        }
+        .card-content { padding: 14px; }
 
         .top-meta {
             display: flex;
@@ -105,11 +100,7 @@
             margin-bottom: 10px;
         }
 
-        .author {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .author { display: flex; align-items: center; gap: 8px; }
 
         .author img {
             width: 26px;
@@ -118,60 +109,37 @@
             border: 1px solid var(--border-gold);
         }
 
-        .author-name {
-            color: var(--gold-light);
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
+        .author-name { color: var(--gold-light); font-size: 0.8rem; font-weight: bold; }
 
-        .date {
-            color: var(--text-sub);
-            font-size: 0.7rem;
-        }
+        .date { color: var(--text-sub); font-size: 0.7rem; }
 
         .title {
             font-size: 0.95rem;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 14px;
             line-height: 1.4;
-        }
-
-        .summary {
-            color: var(--text-sub);
-            font-size: 0.8rem;
-            line-height: 1.5;
-            margin-bottom: 15px;
-
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
         }
 
         .bottom-meta {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            font-size: 0.7rem;
+            gap: 14px;
+            font-size: 0.75rem;
             color: var(--text-sub);
             border-top: 1px solid rgba(255,255,255,0.05);
             padding-top: 12px;
         }
 
-        .empty {
-            color: var(--text-sub);
-            text-align: center;
-            padding: 50px 0;
-        }
+        .meta-item { display: flex; align-items: center; gap: 4px; }
+
+        .meta-item svg { width: 13px; height: 13px; fill: var(--text-sub); }
+
+        .empty { color: var(--text-sub); text-align: center; padding: 50px 0; }
 
         @media (max-width: 768px) {
-            .notice-grid {
-                grid-template-columns: 1fr;
-            }
+            .notice-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
-
 <body>
 
 <header class="navbar">
@@ -179,10 +147,7 @@
 </header>
 
 <main class="container">
-    <div class="section-title">
-        스트리머 공지사항
-    </div>
-
+    <div class="section-title">스트리머 공지사항</div>
     <div id="notice-container" class="notice-grid">
         <div class="empty">공지사항 불러오는 중...</div>
     </div>
@@ -191,76 +156,60 @@
 <script>
 async function loadNotices() {
     const container = document.getElementById('notice-container');
-
     try {
         const response = await fetch('./notices.json');
         const notices = await response.json();
-
         container.innerHTML = '';
 
         if (!notices.length) {
-            container.innerHTML =
-                '<div class="empty">공지사항이 없습니다.</div>';
+            container.innerHTML = '<div class="empty">공지사항이 없습니다.</div>';
             return;
         }
 
         notices.forEach(notice => {
-
-            const isNew =
-                (new Date() - new Date(notice.date.replace(/-/g, '/')))
-                < (48 * 60 * 60 * 1000);
+            const isNew = (new Date() - new Date(notice.date.replace(/-/g, '/'))) < (48 * 60 * 60 * 1000);
+            const dateStr = notice.date.substring(5, 10);
 
             const card = document.createElement('div');
-
             card.className = 'notice-card';
-
-            card.onclick = () => {
-                window.open(
-                    `https://www.sooplive.com/station/${notice.user_id}/board/${notice.id}`,
-                    '_blank'
-                );
-            };
+            card.onclick = () => window.open(`https://www.sooplive.com/station/${notice.user_id}/board/${notice.id}`, '_blank');
 
             card.innerHTML = `
+                ${notice.notice_yn === 1 ? '<div class="badge-notice">공지</div>' : ''}
                 ${isNew ? '<div class="badge-new">NEW</div>' : ''}
 
-                <img
-                    class="notice-thumb"
-                    src="${notice.thumbnail || 'logo.png'}"
-                    alt=""
-                >
+                <img class="notice-thumb" src="${notice.thumbnail || ''}" alt=""
+                    onerror="this.style.display='none'">
 
                 <div class="card-content">
-
                     <div class="top-meta">
                         <div class="author">
-                            <img src="${notice.profile_image}">
-                            <div class="author-name">
-                                ${notice.user_nick}
-                            </div>
+                            <img src="${notice.profile_image}" onerror="this.style.display='none'">
+                            <div class="author-name">${notice.user_nick}</div>
                         </div>
-
-                        <div class="date">
-                            ${notice.date.substring(5, 10)}
-                        </div>
+                        <div class="date">${dateStr}</div>
                     </div>
 
-                    <div class="title">
-                        ${notice.title}
-                    </div>
-
-                    <div class="summary">
-                        ${notice.summary}
-                    </div>
+                    <div class="title">${notice.title}</div>
 
                     <div class="bottom-meta">
-                        <span>조회 ${notice.read_cnt}</span>
-                        <span>VOD ${notice.vod_read_cnt}</span>
-                        <span>댓글 ${notice.comment_cnt}</span>
-                        <span>추천 ${notice.like_cnt}</span>
-                        <span>사진 ${notice.photo_cnt}</span>
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                            ${notice.read_cnt}
+                        </div>
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                            ${notice.comment_cnt}
+                        </div>
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            ${notice.like_cnt}
+                        </div>
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                            ${notice.photo_cnt}
+                        </div>
                     </div>
-
                 </div>
             `;
 
@@ -269,12 +218,7 @@ async function loadNotices() {
 
     } catch (error) {
         console.error(error);
-
-        container.innerHTML = `
-            <div class="empty">
-                notices.json 로드 실패
-            </div>
-        `;
+        container.innerHTML = '<div class="empty">notices.json 로드 실패</div>';
     }
 }
 

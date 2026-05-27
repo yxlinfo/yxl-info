@@ -6,23 +6,26 @@ from bs4 import BeautifulSoup
 OUTPUT_FILE = "notices.json"
 
 STREAMERS = [
-  { "jaeha010", "board_number" : "42110606" },
-  { "yuambo", "board_number" : "93146806" },
-  { "smkim82372", "board_number" : "65560144" },
-  { "wk3220", "board_number" : "79496724" },
-  { "meldoy777", "board_number" : "108366731" },
-  { "star49", "board_number" : "108901583" },
-  { "ahrum0912", "board_number" : "122843945" },
-  { "tkek55", "board_number" : "112452503" },
-  { "fhwm0602", "board_number" : "114371465" },
-  { "zbxlzzz", "board_number" : "13644761" },
-  { "iluvpp", "board_number" : "91109284" },
-  { "callgg", "board_number" : "329000" },
-  { "kimpooh0707", "board_number" : "69409509" },
-  { "asy1218", "board_number" : "113481743" }
+    {"id": "jaeha010",    "board_number": "42110606"},
+    {"id": "yuambo",      "board_number": "93146806"},
+    {"id": "smkim82372",  "board_number": "65560144"},
+    {"id": "wk3220",      "board_number": "79496724"},
+    {"id": "meldoy777",   "board_number": "108366731"},
+    {"id": "star49",      "board_number": "108901583"},
+    {"id": "ahrum0912",   "board_number": "122843945"},
+    {"id": "tkek55",      "board_number": "112452503"},
+    {"id": "fhwm0602",    "board_number": "114371465"},
+    {"id": "zbxlzzz",     "board_number": "13644761"},
+    {"id": "iluvpp",      "board_number": "91109284"},
+    {"id": "callgg",      "board_number": "329000"},
+    {"id": "kimpooh0707", "board_number": "69409509"},
+    {"id": "asy1218",     "board_number": "113481743"},
 ]
 
-async def crawl_notice(page, user_id):
+async def crawl_notice(page, streamer):
+    user_id = streamer["id"]
+    board_number = streamer["board_number"]
+
     try:
         async def modify_request(route, request):
             url = request.url
@@ -31,8 +34,10 @@ async def crawl_notice(page, user_id):
                     "field=title,contents,user_nick,user_id,hashtags",
                     "field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date"
                 )
-                url = url.replace("type=all", "type=all")
-                url = url.replace("per_page=20", "per_page=20")
+                url = url.replace("per_page=20", "per_page=1")
+                if "board_number=" in url:
+                    import re
+                    url = re.sub(r"board_number=[^&]*", f"board_number={board_number}", url)
                 await route.continue_(url=url)
             else:
                 await route.continue_()
@@ -49,12 +54,15 @@ async def crawl_notice(page, user_id):
                 timeout=20000
             )
 
+        await page.unroute("**/*")
+
         response = await response_info.value
         data = await response.json()
         items = data.get("data", [])
 
     except Exception as e:
         print(f"[오류] {user_id}: {e}")
+        await page.unroute("**/*")
         return []
 
     notices = []
@@ -62,13 +70,17 @@ async def crawl_notice(page, user_id):
         photos = item.get("photos", [])
         thumbnail = ("https:" + photos[0]["url"]) if photos else ""
 
+        profile = item.get("profile_image", "")
+        if profile.startswith("//"):
+            profile = "https:" + profile
+
         count = item.get("count", {})
 
         notice = {
             "id": item.get("title_no"),
             "user_id": user_id,
             "user_nick": item.get("user_nick", ""),
-            "profile_image": "https:" + item.get("profile_image", "").lstrip("//") if item.get("profile_image", "").startswith("//") else item.get("profile_image", ""),
+            "profile_image": profile,
             "title": item.get("title_name", ""),
             "date": item.get("reg_date", ""),
             "notice_yn": item.get("notice_yn", 0),

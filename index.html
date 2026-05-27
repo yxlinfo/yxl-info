@@ -27,116 +27,150 @@
 
         .logo { color: var(--gold-light); font-size: 1.2rem; font-weight: 800; }
 
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
 
         .section-title {
             color: var(--gold-light);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             font-size: 1rem;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .notice-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 16px;
+            background: var(--gold-light);
+            border-radius: 2px;
+        }
+
+        .notice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .notice-card {
             background: var(--card-bg);
             border: 1px solid var(--border-gold);
             border-radius: 12px;
-            overflow: hidden;
+            padding: 14px 16px;
             cursor: pointer;
             transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             position: relative;
         }
 
         .notice-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(197,160,89,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(197,160,89,0.15);
         }
 
-        .badge-notice {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: linear-gradient(135deg, #C5A059, #E6C275);
-            color: #12100C;
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 6px;
-            z-index: 5;
+        .profile-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-gold);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .card-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 5px;
+        }
+
+        .author-name {
+            color: var(--gold-light);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .time-ago {
+            color: var(--text-sub);
+            font-size: 0.72rem;
         }
 
         .badge-new {
-            position: absolute;
-            top: 10px;
-            right: 10px;
             background: linear-gradient(135deg, #ff4e50, #f9d423);
             color: white;
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 6px;
-            z-index: 5;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
 
-        .notice-thumb {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: #222;
-            display: block;
+        .badge-notice {
+            background: linear-gradient(135deg, #C5A059, #E6C275);
+            color: #12100C;
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
 
-        .card-content { padding: 14px; }
-
-        .top-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .author { display: flex; align-items: center; gap: 8px; }
-
-        .author img {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: 1px solid var(--border-gold);
-        }
-
-        .author-name { color: var(--gold-light); font-size: 0.8rem; font-weight: bold; }
-
-        .date { color: var(--text-sub); font-size: 0.7rem; }
-
-        .title {
-            font-size: 0.95rem;
-            font-weight: bold;
-            margin-bottom: 14px;
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
             line-height: 1.4;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .bottom-meta {
+        .card-meta {
             display: flex;
-            gap: 14px;
-            font-size: 0.75rem;
+            gap: 12px;
+            font-size: 0.72rem;
             color: var(--text-sub);
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 12px;
         }
 
-        .meta-item { display: flex; align-items: center; gap: 4px; }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
 
-        .meta-item svg { width: 13px; height: 13px; fill: var(--text-sub); }
+        .meta-item svg {
+            width: 12px;
+            height: 12px;
+            fill: var(--text-sub);
+        }
+
+        .thumb-wrap {
+            flex-shrink: 0;
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #222;
+        }
+
+        .thumb-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         .empty { color: var(--text-sub); text-align: center; padding: 50px 0; }
 
-        @media (max-width: 768px) {
-            .notice-grid { grid-template-columns: 1fr; }
+        @media (max-width: 600px) {
+            .card-title { font-size: 0.85rem; }
+            .thumb-wrap { width: 54px; height: 54px; }
         }
     </style>
 </head>
@@ -147,13 +181,24 @@
 </header>
 
 <main class="container">
-    <div class="section-title">스트리머 공지사항</div>
-    <div id="notice-container" class="notice-grid">
+    <div class="section-title">공지</div>
+    <div id="notice-container" class="notice-list">
         <div class="empty">공지사항 불러오는 중...</div>
     </div>
 </main>
 
 <script>
+function timeAgo(dateStr) {
+    const now = new Date();
+    const past = new Date(dateStr.replace(/-/g, '/'));
+    const diff = Math.floor((now - past) / 1000);
+
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+    return `${Math.floor(diff / 86400)}일 전`;
+}
+
 async function loadNotices() {
     const container = document.getElementById('notice-container');
     try {
@@ -168,49 +213,46 @@ async function loadNotices() {
 
         notices.forEach(notice => {
             const isNew = (new Date() - new Date(notice.date.replace(/-/g, '/'))) < (48 * 60 * 60 * 1000);
-            const dateStr = notice.date.substring(5, 10);
 
             const card = document.createElement('div');
             card.className = 'notice-card';
-            card.onclick = () => window.open(`https://www.sooplive.com/station/${notice.user_id}/board/${notice.id}`, '_blank');
+            card.onclick = () => window.open(`https://www.sooplive.com/station/${notice.user_id}/post/${notice.id}`, '_blank');
 
             card.innerHTML = `
-                ${notice.notice_yn === 1 ? '<div class="badge-notice">공지</div>' : ''}
-                ${isNew ? '<div class="badge-new">NEW</div>' : ''}
+                <img class="profile-img" src="${notice.profile_image}" onerror="this.style.display='none'">
 
-                <img class="notice-thumb" src="${notice.thumbnail || ''}" alt=""
-                    onerror="this.style.display='none'">
-
-                <div class="card-content">
-                    <div class="top-meta">
-                        <div class="author">
-                            <img src="${notice.profile_image}" onerror="this.style.display='none'">
-                            <div class="author-name">${notice.user_nick}</div>
-                        </div>
-                        <div class="date">${dateStr}</div>
+                <div class="card-body">
+                    <div class="card-top">
+                        <span class="author-name">${notice.user_nick}</span>
+                        <span class="time-ago">${timeAgo(notice.date)}</span>
+                        ${isNew ? '<span class="badge-new">NEW</span>' : ''}
+                        ${notice.notice_yn === 1 ? '<span class="badge-notice">공지</span>' : ''}
                     </div>
-
-                    <div class="title">${notice.title}</div>
-
-                    <div class="bottom-meta">
+                    <div class="card-title">${notice.title}</div>
+                    <div class="card-meta">
                         <div class="meta-item">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                             ${notice.read_cnt}
                         </div>
                         <div class="meta-item">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
                             ${notice.comment_cnt}
                         </div>
                         <div class="meta-item">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                             ${notice.like_cnt}
                         </div>
                         <div class="meta-item">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                             ${notice.photo_cnt}
                         </div>
                     </div>
                 </div>
+
+                ${notice.thumbnail ? `
+                <div class="thumb-wrap">
+                    <img src="${notice.thumbnail}" onerror="this.parentElement.style.display='none'">
+                </div>` : ''}
             `;
 
             container.appendChild(card);

@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 OUTPUT_FILE = "notices.json"
 
 STREAMERS = [
-    "jaeha010"
+    "jaeha010","yuambo","smkim82372","wk3220","meldoy777","star49","ahrum0912","tkek55","fhwm0602","zbxlzzz","iluvpp","callgg","kimpooh0707","asy1218"
 ]
 
 async def crawl_notice(page, user_id):

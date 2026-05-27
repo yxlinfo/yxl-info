@@ -60,6 +60,8 @@ async def crawl_notice(page, streamer):
         response = await response_info.value
         data = await response.json()
         items = data.get("data", [])
+        items = [i for i in items if str(i.get("bbs_no", "")) == str(board_number)]
+        print(f"[필터 후] {user_id}: {len(items)}개 (board_number={board_number})")
 
     except Exception as e:
         print(f"[오류] {user_id}: {e}")

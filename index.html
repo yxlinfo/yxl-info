@@ -8,7 +8,6 @@
         :root {
             --bg-dark: #12100C;
             --card-bg: #1A1713;
-            --gold: #C5A059;
             --gold-light: #E6C275;
             --text-main: #FDFDFD;
             --text-sub: #A69A8A;
@@ -16,195 +15,166 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Pretendard, sans-serif; }
-
         body { background: var(--bg-dark); color: var(--text-main); }
 
         .navbar {
             background: var(--card-bg);
             border-bottom: 1px solid var(--border-gold);
-            padding: 14px 20px;
+            padding: 12px 20px;
         }
+        .logo { color: var(--gold-light); font-size: 1.1rem; font-weight: 800; }
 
-        .logo { color: var(--gold-light); font-size: 1.2rem; font-weight: 800; }
-
-        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 24px; }
 
         .section-title {
             color: var(--gold-light);
-            margin-bottom: 16px;
-            font-size: 1rem;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
         }
-
         .section-title::before {
             content: '';
             display: inline-block;
             width: 3px;
-            height: 16px;
+            height: 13px;
             background: var(--gold-light);
             border-radius: 2px;
         }
 
-        /* 슬라이드 래퍼 */
+        /* 슬라이드 영역 */
         .slide-wrapper {
             position: relative;
-        }
-
-        .notice-list {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            padding-bottom: 4px;
-        }
-
-        .notice-list::-webkit-scrollbar { display: none; }
-
-        /* 4개 초과 시 카드 너비 고정으로 슬라이드 */
-        .notice-list.overflow {
-            grid-template-columns: repeat(auto-fill, 280px);
-        }
-
-        .notice-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-gold);
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: 0.2s;
-            scroll-snap-align: start;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .notice-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(197,160,89,0.15);
-        }
-
-        /* 썸네일 */
-        .thumb-wrap {
-            width: 100%;
-            height: 160px;
-            background: #1e1b17;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .thumb-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .thumb-placeholder {
-            width: 100%;
-            height: 160px;
-            background: #1e1b17;
-        }
-
-        /* 카드 본문 */
-        .card-content {
-            padding: 12px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex: 1;
-        }
-
-        /* 작성자 */
-        .card-author {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
+        .notice-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            flex: 1;
+        }
+        .notice-list::-webkit-scrollbar { display: none; }
+
+        /* 카드 */
+        .notice-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 11px 13px;
+            cursor: pointer;
+            transition: 0.18s;
+            scroll-snap-align: start;
+            flex: 0 0 calc(25% - 8px);
+            min-width: 220px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(197,160,89,0.15);
+            border-color: rgba(197,160,89,0.6);
+        }
+
+        /* 왼쪽 본문 */
+        .card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+
         .profile-img {
-            width: 28px;
-            height: 28px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             border: 1px solid var(--border-gold);
             object-fit: cover;
             flex-shrink: 0;
         }
 
-        .author-info {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
         .author-name {
             color: var(--gold-light);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .time-ago {
             color: var(--text-sub);
-            font-size: 0.7rem;
+            font-size: 0.67rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .badge-new {
             background: linear-gradient(135deg, #ff4e50, #f9d423);
             color: white;
-            font-size: 0.6rem;
+            font-size: 0.58rem;
             font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            flex-shrink: 0;
         }
 
-        .badge-notice {
-            background: linear-gradient(135deg, #C5A059, #E6C275);
-            color: #12100C;
-            font-size: 0.6rem;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        /* 제목 */
         .card-title {
-            font-size: 0.88rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            line-height: 1.4;
+            line-height: 1.35;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            color: var(--text-main);
         }
 
-        /* 하단 메타 */
         .card-meta {
             display: flex;
-            gap: 10px;
-            font-size: 0.7rem;
+            gap: 8px;
+            font-size: 0.67rem;
             color: var(--text-sub);
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 8px;
-            margin-top: auto;
         }
 
         .meta-item { display: flex; align-items: center; gap: 3px; }
-        .meta-item svg { width: 12px; height: 12px; fill: var(--text-sub); }
+        .meta-item svg { width: 11px; height: 11px; fill: var(--text-sub); }
+
+        /* 우측 썸네일 */
+        .thumb-wrap {
+            flex-shrink: 0;
+            width: 58px;
+            height: 58px;
+            border-radius: 7px;
+            overflow: hidden;
+            background: #222;
+        }
+        .thumb-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         /* 슬라이드 버튼 */
         .slide-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(197,160,89,0.9);
+            flex-shrink: 0;
+            background: rgba(197,160,89,0.85);
             border: none;
             color: #12100C;
-            width: 34px;
-            height: 34px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             cursor: pointer;
             font-size: 1rem;
@@ -212,25 +182,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 10;
             transition: 0.2s;
         }
-
         .slide-btn:hover { background: var(--gold-light); }
-        .slide-btn.left { left: -16px; }
-        .slide-btn.right { right: -16px; }
-        .slide-btn.hidden { display: none; }
+        .slide-btn.hidden { visibility: hidden; }
 
-        .empty { color: var(--text-sub); text-align: center; padding: 50px 0; }
-
-        @media (max-width: 900px) {
-            .notice-list { grid-template-columns: repeat(2, 1fr); }
-            .notice-list.overflow { grid-template-columns: repeat(auto-fill, 240px); }
-        }
-
-        @media (max-width: 500px) {
-            .notice-list { grid-template-columns: repeat(1, 1fr); }
-        }
+        .empty { color: var(--text-sub); text-align: center; padding: 30px 0; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -242,11 +199,11 @@
 <main class="container">
     <div class="section-title">공지</div>
     <div class="slide-wrapper">
-        <button class="slide-btn left hidden" id="btn-left">&#8249;</button>
+        <button class="slide-btn hidden" id="btn-left">&#8249;</button>
         <div id="notice-container" class="notice-list">
-            <div class="empty">공지사항 불러오는 중...</div>
+            <div class="empty">불러오는 중...</div>
         </div>
-        <button class="slide-btn right hidden" id="btn-right">&#8250;</button>
+        <button class="slide-btn hidden" id="btn-right">&#8250;</button>
     </div>
 </main>
 
@@ -259,6 +216,14 @@ function timeAgo(dateStr) {
     if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
     return `${Math.floor(diff / 86400)}일 전`;
+}
+
+function isToday(dateStr) {
+    const now = new Date();
+    const past = new Date(dateStr.replace(/-/g, '/'));
+    return now.getFullYear() === past.getFullYear() &&
+           now.getMonth() === past.getMonth() &&
+           now.getDate() === past.getDate();
 }
 
 async function loadNotices() {
@@ -276,39 +241,27 @@ async function loadNotices() {
             return;
         }
 
-        // 4개 초과 시 슬라이드 모드
         if (notices.length > 4) {
-            container.classList.add('overflow');
             btnLeft.classList.remove('hidden');
             btnRight.classList.remove('hidden');
         }
 
         notices.forEach(notice => {
-            const isNew = (new Date() - new Date(notice.date.replace(/-/g, '/'))) < (48 * 60 * 60 * 1000);
-
             const card = document.createElement('div');
             card.className = 'notice-card';
-            card.onclick = () => window.open(`https://www.sooplive.com/station/${notice.user_id}/post/${notice.id}`, '_blank');
+            card.onclick = () => window.open(
+                `https://www.sooplive.com/station/${notice.user_id}/post/${notice.id}`, '_blank'
+            );
 
             card.innerHTML = `
-                ${notice.thumbnail
-                    ? `<div class="thumb-wrap"><img src="${notice.thumbnail}" onerror="this.parentElement.style.display='none'"></div>`
-                    : `<div class="thumb-placeholder"></div>`
-                }
-
-                <div class="card-content">
-                    <div class="card-author">
+                <div class="card-body">
+                    <div class="card-top">
                         <img class="profile-img" src="${notice.profile_image}" onerror="this.style.display='none'">
-                        <div class="author-info">
-                            <span class="author-name">${notice.user_nick}</span>
-                            <span class="time-ago">${timeAgo(notice.date)}</span>
-                            ${isNew ? '<span class="badge-new">NEW</span>' : ''}
-                            ${notice.notice_yn === 1 ? '<span class="badge-notice">공지</span>' : ''}
-                        </div>
+                        <span class="author-name">${notice.user_nick}</span>
+                        <span class="time-ago">${timeAgo(notice.date)}</span>
+                        ${isToday(notice.date) ? '<span class="badge-new">NEW</span>' : ''}
                     </div>
-
                     <div class="card-title">${notice.title}</div>
-
                     <div class="card-meta">
                         <div class="meta-item">
                             <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
@@ -322,21 +275,20 @@ async function loadNotices() {
                             <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                             ${notice.like_cnt}
                         </div>
-                        <div class="meta-item">
-                            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                            ${notice.photo_cnt}
-                        </div>
                     </div>
                 </div>
+                ${notice.thumbnail ? `
+                <div class="thumb-wrap">
+                    <img src="${notice.thumbnail}" onerror="this.parentElement.style.display='none'">
+                </div>` : ''}
             `;
 
             container.appendChild(card);
         });
 
-        // 슬라이드 버튼
-        const scrollAmount = 300;
-        btnLeft.onclick = () => container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-        btnRight.onclick = () => container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        const cardWidth = 230;
+        btnLeft.onclick = () => container.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        btnRight.onclick = () => container.scrollBy({ left: cardWidth, behavior: 'smooth' });
 
     } catch (error) {
         console.error(error);

@@ -6,7 +6,20 @@ from bs4 import BeautifulSoup
 OUTPUT_FILE = "notices.json"
 
 STREAMERS = [
-    "jaeha010","yuambo","smkim82372","wk3220","meldoy777","star49","ahrum0912","tkek55","fhwm0602","zbxlzzz","iluvpp","callgg","kimpooh0707","asy1218"
+  { "jaeha010", "board_number" : "42110606" },
+  { "yuambo", "board_number" : "93146806" },
+  { "smkim82372", "board_number" : "65560144" },
+  { "wk3220", "board_number" : "79496724" },
+  { "meldoy777", "board_number" : "108366731" },
+  { "star49", "board_number" : "108901583" },
+  { "ahrum0912", "board_number" : "122843945" },
+  { "tkek55", "board_number" : "112452503" },
+  { "fhwm0602", "board_number" : "114371465" },
+  { "zbxlzzz", "board_number" : "13644761" },
+  { "iluvpp", "board_number" : "91109284" },
+  { "callgg", "board_number" : "329000" },
+  { "kimpooh0707", "board_number" : "69409509" },
+  { "asy1218", "board_number" : "113481743" }
 ]
 
 async def crawl_notice(page, user_id):
@@ -45,7 +58,7 @@ async def crawl_notice(page, user_id):
         return []
 
     notices = []
-    for item in items[:2]:
+    for item in items[:1]:
         photos = item.get("photos", [])
         thumbnail = ("https:" + photos[0]["url"]) if photos else ""
 

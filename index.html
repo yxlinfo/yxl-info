@@ -2,302 +2,76 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YXL Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
-        :root {
-            --bg-dark: #12100C;
-            --card-bg: #1A1713;
-            --gold-light: #E6C275;
-            --text-main: #FDFDFD;
-            --text-sub: #A69A8A;
-            --border-gold: rgba(197, 160, 89, 0.3);
-        }
+        :root { --gold: #d4af37; --bg: #08080c; --border: rgba(212, 175, 55, 0.2); }
+        body { background: var(--bg); color: #fff; font-family: 'Pretendard', sans-serif; padding: 20px; margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; border-left: 3px solid var(--gold); padding-left: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .section { margin-bottom: 25px; }
+        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* 박스 및 리스트 */
+        .box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 8px; }
+        .item { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .item:last-child { border: none; }
+        
+        /* 텍스트 스타일 */
+        .name { font-weight: 700; color: #fff; }
+        .pos { color: var(--gold); font-size: 11px; margin-left: 6px; }
+        .live-badge { color: #ff4757; font-weight: 800; font-size: 11px; text-decoration: none; }
+        .date { color: #888; font-size: 12px; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Pretendard, sans-serif; }
-        body { background: var(--bg-dark); color: var(--text-main); }
-
-        .navbar {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border-gold);
-            padding: 12px 20px;
-        }
-        .logo { color: var(--gold-light); font-size: 1.1rem; font-weight: 800; }
-
-        .container { max-width: 1400px; margin: 20px auto; padding: 0 24px; }
-
-        .section-title {
-            color: var(--gold-light);
-            margin-bottom: 12px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-        .section-title::before {
-            content: '';
-            display: inline-block;
-            width: 3px;
-            height: 13px;
-            background: var(--gold-light);
-            border-radius: 2px;
-        }
-
-        /* 슬라이드 영역 */
-        .slide-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .notice-list {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            flex: 1;
-        }
-        .notice-list::-webkit-scrollbar { display: none; }
-
-        /* 카드 */
-        .notice-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-gold);
-            border-radius: 10px;
-            padding: 11px 13px;
-            cursor: pointer;
-            transition: 0.18s;
-            scroll-snap-align: start;
-            flex: 0 0 calc(25% - 8px);
-            min-width: 220px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .notice-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 14px rgba(197,160,89,0.15);
-            border-color: rgba(197,160,89,0.6);
-        }
-
-        /* 왼쪽 본문 */
-        .card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-
-        .card-top {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: nowrap;
-            overflow: hidden;
-        }
-
-        .profile-img {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            border: 1px solid var(--border-gold);
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .author-name {
-            color: var(--gold-light);
-            font-size: 0.75rem;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .time-ago {
-            color: var(--text-sub);
-            font-size: 0.67rem;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .badge-new {
-            background: linear-gradient(135deg, #ff4e50, #f9d423);
-            color: white;
-            font-size: 0.58rem;
-            font-weight: 800;
-            padding: 1px 5px;
-            border-radius: 3px;
-            flex-shrink: 0;
-        }
-
-        .card-title {
-            font-size: 0.8rem;
-            font-weight: 600;
-            line-height: 1.35;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            color: var(--text-main);
-        }
-
-        .card-meta {
-            display: flex;
-            gap: 8px;
-            font-size: 0.67rem;
-            color: var(--text-sub);
-        }
-
-        .meta-item { display: flex; align-items: center; gap: 3px; }
-        .meta-item svg { width: 11px; height: 11px; fill: var(--text-sub); }
-
-        /* 우측 썸네일 */
-        .thumb-wrap {
-            flex-shrink: 0;
-            width: 58px;
-            height: 58px;
-            border-radius: 7px;
-            overflow: hidden;
-            background: #222;
-        }
-        .thumb-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* 슬라이드 버튼 */
-        .slide-btn {
-            flex-shrink: 0;
-            background: rgba(197,160,89,0.85);
-            border: none;
-            color: #12100C;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        .slide-btn:hover { background: var(--gold-light); }
-        .slide-btn.hidden { visibility: hidden; }
-
-        .empty { color: var(--text-sub); text-align: center; padding: 30px 0; font-size: 0.85rem; }
+        @media (max-width: 600px) { .bottom-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-
-<header class="navbar">
-    <div class="logo">YXL Dashboard</div>
-</header>
-
-<main class="container">
-    <div class="section-title">공지</div>
-    <div class="slide-wrapper">
-        <button class="slide-btn hidden" id="btn-left">&#8249;</button>
-        <div id="notice-container" class="notice-list">
-            <div class="empty">불러오는 중...</div>
-        </div>
-        <button class="slide-btn hidden" id="btn-right">&#8250;</button>
+<div class="container">
+    <div class="section">
+        <h2>공지사항</h2>
+        <div id="notice-list" class="box">로딩 중...</div>
     </div>
-</main>
+
+    <div class="bottom-grid">
+        <div class="section">
+            <h2>LIVE</h2>
+            <div id="live-list" class="box">로딩 중...</div>
+        </div>
+        <div class="section">
+            <h2>일정표</h2>
+            <div class="box">
+                <div class="item">
+                    <span class="name">2026.05.31 Y사 퀴즈쇼</span>
+                </div>
+                </div>
+        </div>
+    </div>
+</div>
 
 <script>
-function timeAgo(dateStr) {
-    const now = new Date();
-    const past = new Date(dateStr.replace(/-/g, '/'));
-    const diff = Math.floor((now - past) / 1000);
-    if (diff < 60) return '방금 전';
-    if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-    return `${Math.floor(diff / 86400)}일 전`;
-}
+    // 공지사항 로드
+    fetch('notices.json').then(r => r.json()).then(data => {
+        document.getElementById('notice-list').innerHTML = data.slice(0, 5).map(n => `
+            <div class="item">
+                <span>${n.title}</span>
+                <span class="date">${n.user_nick}</span>
+            </div>
+        `).join('');
+    });
 
-function isToday(dateStr) {
-    const now = new Date();
-    const past = new Date(dateStr.replace(/-/g, '/'));
-    return now.getFullYear() === past.getFullYear() &&
-           now.getMonth() === past.getMonth() &&
-           now.getDate() === past.getDate();
-}
-
-async function loadNotices() {
-    const container = document.getElementById('notice-container');
-    const btnLeft = document.getElementById('btn-left');
-    const btnRight = document.getElementById('btn-right');
-
-    try {
-        const response = await fetch('./notices.json');
-        const notices = await response.json();
-        container.innerHTML = '';
-
-        if (!notices.length) {
-            container.innerHTML = '<div class="empty">공지사항이 없습니다.</div>';
-            return;
-        }
-
-        if (notices.length > 4) {
-            btnLeft.classList.remove('hidden');
-            btnRight.classList.remove('hidden');
-        }
-
-        notices.forEach(notice => {
-            const card = document.createElement('div');
-            card.className = 'notice-card';
-            card.onclick = () => window.open(
-                `https://www.sooplive.com/station/${notice.user_id}/post/${notice.id}`, '_blank'
-            );
-
-            card.innerHTML = `
-                <div class="card-body">
-                    <div class="card-top">
-                        <img class="profile-img" src="${notice.profile_image}" onerror="this.style.display='none'">
-                        <span class="author-name">${notice.user_nick}</span>
-                        <span class="time-ago">${timeAgo(notice.date)}</span>
-                        ${isToday(notice.date) ? '<span class="badge-new">NEW</span>' : ''}
-                    </div>
-                    <div class="card-title">${notice.title}</div>
-                    <div class="card-meta">
-                        <div class="meta-item">
-                            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                            ${notice.read_cnt}
-                        </div>
-                        <div class="meta-item">
-                            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                            ${notice.comment_cnt}
-                        </div>
-                        <div class="meta-item">
-                            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                            ${notice.like_cnt}
-                        </div>
-                    </div>
-                </div>
-                ${notice.thumbnail ? `
-                <div class="thumb-wrap">
-                    <img src="${notice.thumbnail}" onerror="this.parentElement.style.display='none'">
-                </div>` : ''}
-            `;
-
-            container.appendChild(card);
-        });
-
-        const cardWidth = 230;
-        btnLeft.onclick = () => container.scrollBy({ left: -cardWidth, behavior: 'smooth' });
-        btnRight.onclick = () => container.scrollBy({ left: cardWidth, behavior: 'smooth' });
-
-    } catch (error) {
-        console.error(error);
-        container.innerHTML = '<div class="empty">notices.json 로드 실패</div>';
-    }
-}
-
-loadNotices();
+    // 라이브 로드
+    fetch('live.json').then(r => r.json()).then(data => {
+        const list = document.getElementById('live-list');
+        if(data.length === 0) { list.innerHTML = '<div class="item">현재 방송 중인 멤버가 없습니다.</div>'; return; }
+        list.innerHTML = data.map(l => `
+            <div class="item">
+                <div><span class="name">${l.name}</span><span class="pos">${l.pos}</span></div>
+                <a href="${l.live_link}" target="_blank" class="live-badge">LIVE ${l.viewers.toLocaleString()}</a>
+            </div>
+        `).join('');
+    });
 </script>
-
 </body>
 </html>

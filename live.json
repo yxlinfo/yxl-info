@@ -1,8 +1,15 @@
-[
-    {
-        "name": "류서하",
-        "pos": "과장",
-        "viewers": 82,
-        "live_link": "https://play.sooplive.com/smkim82372/294377767"
-    }
-]
+{
+    "live_count": 1,
+    "total_count": 14,
+    "lives": [
+        {
+            "name": "류서하",
+            "pos": "과장",
+            "profile": "https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017",
+            "title": "[YXL : 과장] 하이",
+            "viewers": 80,
+            "thumb": "https://liveimg.sooplive.com/h/294377767.webp",
+            "live_link": "https://play.sooplive.com/smkim82372/294377767"
+        }
+    ]
+}

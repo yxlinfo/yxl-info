@@ -2,76 +2,350 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YXL Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
-        :root { --gold: #d4af37; --bg: #08080c; --border: rgba(212, 175, 55, 0.2); }
-        body { background: var(--bg); color: #fff; font-family: 'Pretendard', sans-serif; padding: 20px; margin: 0; }
-        .container { max-width: 900px; margin: 0 auto; }
-        
-        h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; border-left: 3px solid var(--gold); padding-left: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .section { margin-bottom: 25px; }
-        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        
-        /* 박스 및 리스트 */
-        .box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 8px; }
-        .item { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-        .item:last-child { border: none; }
-        
-        /* 텍스트 스타일 */
-        .name { font-weight: 700; color: #fff; }
-        .pos { color: var(--gold); font-size: 11px; margin-left: 6px; }
-        .live-badge { color: #ff4757; font-weight: 800; font-size: 11px; text-decoration: none; }
-        .date { color: #888; font-size: 12px; }
+        :root {
+            --bg:          #0F0D09;
+            --panel:       #181410;
+            --card:        #1E1A14;
+            --gold:        #C5A059;
+            --gold-light:  #E6C275;
+            --text:        #F5F0E8;
+            --text-sub:    #8A7F70;
+            --border:      rgba(197,160,89,0.22);
+            --border-h:    rgba(197,160,89,0.5);
+            --red:         #d9213a;
+        }
 
-        @media (max-width: 600px) { .bottom-grid { grid-template-columns: 1fr; } }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:var(--text); font-family:Pretendard,'Apple SD Gothic Neo',sans-serif; min-height:100vh; }
+
+        /* ── 네비 ── */
+        .navbar {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 28px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .logo { color:var(--gold-light); font-size:1rem; font-weight:900; letter-spacing:2px; }
+
+        /* ── 컨테이너 ── */
+        .wrap { max-width:1360px; margin:0 auto; padding:20px 24px; display:flex; flex-direction:column; gap:18px; }
+
+        /* ── 섹션 헤더 ── */
+        .sec-head {
+            display:flex; align-items:center; gap:7px;
+            font-size:0.78rem; font-weight:700; color:var(--gold-light);
+            margin-bottom:10px;
+        }
+        .sec-head::before { content:''; width:3px; height:12px; background:var(--gold-light); border-radius:2px; flex-shrink:0; }
+        .sec-head .dot {
+            width:6px; height:6px; border-radius:50%;
+            background:var(--red); box-shadow:0 0 6px rgba(217,33,58,0.9);
+            animation:blink 1.4s infinite;
+        }
+        .sec-head .sub { margin-left:auto; font-size:0.68rem; color:var(--text-sub); font-weight:600; }
+        .sec-head .sub b { color:var(--gold-light); }
+
+        /* ════════════════════════════
+           공지 슬라이드
+        ════════════════════════════ */
+        .notice-row { display:flex; align-items:center; gap:8px; }
+        .notice-list {
+            display:flex; gap:9px;
+            overflow-x:auto; scroll-snap-type:x mandatory;
+            -webkit-overflow-scrolling:touch; scrollbar-width:none; flex:1;
+        }
+        .notice-list::-webkit-scrollbar { display:none; }
+
+        .n-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:9px; padding:10px 12px;
+            cursor:pointer; transition:0.16s;
+            scroll-snap-align:start;
+            flex:0 0 calc(25% - 7px); min-width:200px;
+            display:flex; align-items:center; gap:9px;
+        }
+        .n-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(197,160,89,0.12); border-color:var(--border-h); }
+
+        .n-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+        .n-top { display:flex; align-items:center; gap:5px; overflow:hidden; }
+        .n-avatar { width:18px; height:18px; border-radius:50%; border:1px solid var(--border); object-fit:cover; flex-shrink:0; }
+        .n-name { color:var(--gold-light); font-size:0.7rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .n-time { color:var(--text-sub); font-size:0.62rem; white-space:nowrap; flex-shrink:0; }
+        .badge-new { background:linear-gradient(135deg,#ff4e50,#f9d423); color:#fff; font-size:0.54rem; font-weight:800; padding:1px 4px; border-radius:3px; flex-shrink:0; }
+        .n-title { font-size:0.75rem; font-weight:600; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .n-meta { display:flex; gap:7px; font-size:0.61rem; color:var(--text-sub); }
+        .n-mi { display:flex; align-items:center; gap:2px; }
+        .n-mi svg { width:9px; height:9px; fill:var(--text-sub); }
+        .n-thumb { flex-shrink:0; width:50px; height:50px; border-radius:6px; overflow:hidden; background:#1a1a1a; }
+        .n-thumb img { width:100%; height:100%; object-fit:cover; }
+
+        .sl-btn {
+            flex-shrink:0; background:rgba(197,160,89,0.75); border:none;
+            color:#0F0D09; width:24px; height:24px; border-radius:50%;
+            cursor:pointer; font-size:0.9rem; font-weight:bold;
+            display:flex; align-items:center; justify-content:center; transition:0.18s;
+        }
+        .sl-btn:hover { background:var(--gold-light); }
+        .sl-btn.hidden { visibility:hidden; }
+
+        /* ════════════════════════════
+           하단 2열
+        ════════════════════════════ */
+        .bottom { display:grid; grid-template-columns:320px 1fr; gap:14px; align-items:start; }
+
+        .panel {
+            background:var(--panel); border:1px solid var(--border);
+            border-radius:12px; padding:16px 16px 12px;
+        }
+
+        /* ── 라이브 ── */
+        .live-list { display:flex; flex-direction:column; }
+
+        .live-card {
+            display:flex; align-items:center; gap:10px;
+            padding:8px 4px; border-radius:8px;
+            text-decoration:none; color:inherit; transition:background 0.16s;
+            border-bottom:1px solid rgba(255,255,255,0.04);
+        }
+        .live-card:last-child { border-bottom:none; }
+        .live-card:hover { background:rgba(255,255,255,0.035); }
+
+        .l-thumb {
+            position:relative; width:96px; min-width:96px;
+            aspect-ratio:16/9; border-radius:6px; overflow:hidden; background:#111; flex-shrink:0;
+        }
+        .l-thumb img { width:100%; height:100%; object-fit:cover; transition:0.28s; }
+        .live-card:hover .l-thumb img { transform:scale(1.05); }
+        .b-live { position:absolute; top:4px; left:4px; background:var(--red); color:#fff; font-size:0.54rem; font-weight:900; padding:1px 5px; border-radius:2px; letter-spacing:1px; }
+        .b-view { position:absolute; bottom:4px; left:4px; background:rgba(0,0,0,0.72); color:#fff; font-size:0.62rem; font-weight:700; padding:1px 5px; border-radius:2px; }
+
+        .l-info { display:flex; flex-direction:column; gap:4px; overflow:hidden; flex:1; }
+        .l-profile { display:flex; align-items:center; gap:6px; }
+        .l-avatar { width:22px; height:22px; border-radius:50%; object-fit:cover; border:1.5px solid rgba(217,33,58,0.45); flex-shrink:0; }
+        .l-name { font-size:0.77rem; font-weight:800; color:var(--text); }
+        .l-pos { font-size:0.64rem; font-weight:700; color:var(--gold-light); }
+        .l-ttl { font-size:0.68rem; color:var(--text-sub); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+        /* ── 일정표 ── */
+        .sched-list { display:flex; flex-direction:column; gap:0; }
+
+        .sched-item {
+            display:flex; align-items:center; gap:14px;
+            padding:11px 6px;
+            border-bottom:1px solid rgba(255,255,255,0.04);
+        }
+        .sched-item:last-child { border-bottom:none; }
+
+        .sched-date-wrap { display:flex; flex-direction:column; align-items:center; min-width:40px; }
+        .sched-month { font-size:0.6rem; color:var(--text-sub); font-weight:600; text-transform:uppercase; }
+        .sched-day { font-size:1.3rem; font-weight:900; color:var(--gold-light); line-height:1; }
+        .sched-dow { font-size:0.58rem; color:var(--text-sub); font-weight:600; margin-top:2px; }
+
+        .sched-divider { width:1px; height:36px; background:var(--border); flex-shrink:0; }
+
+        .sched-info { display:flex; flex-direction:column; gap:3px; flex:1; min-width:0; }
+        .sched-title { font-size:0.82rem; font-weight:700; color:var(--text); }
+        .sched-desc { font-size:0.68rem; color:var(--text-sub); }
+
+        .sched-badge-today {
+            background:linear-gradient(135deg,var(--gold),var(--gold-light));
+            color:#0F0D09; font-size:0.58rem; font-weight:800;
+            padding:2px 6px; border-radius:3px; flex-shrink:0;
+        }
+        .sched-badge-upcoming {
+            background:rgba(197,160,89,0.12); color:var(--gold);
+            font-size:0.58rem; font-weight:700;
+            padding:2px 6px; border-radius:3px; flex-shrink:0;
+            border:1px solid var(--border);
+        }
+
+        .empty { color:var(--text-sub); text-align:center; padding:18px 0; font-size:0.78rem; }
+        .offline { color:var(--text-sub); font-size:0.75rem; padding:14px 0; text-align:center; }
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+        @media (max-width:860px) {
+            .bottom { grid-template-columns:1fr; }
+            .n-card { flex:0 0 calc(50% - 5px); }
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="section">
-        <h2>공지사항</h2>
-        <div id="notice-list" class="box">로딩 중...</div>
-    </div>
 
-    <div class="bottom-grid">
-        <div class="section">
-            <h2>LIVE</h2>
-            <div id="live-list" class="box">로딩 중...</div>
+<header class="navbar">
+    <div class="logo">YXL</div>
+</header>
+
+<main class="wrap">
+
+    <!-- 공지 -->
+    <section>
+        <div class="sec-head">공지사항</div>
+        <div class="notice-row">
+            <button class="sl-btn hidden" id="btn-l">&#8249;</button>
+            <div id="notice-list" class="notice-list"><div class="empty">불러오는 중…</div></div>
+            <button class="sl-btn hidden" id="btn-r">&#8250;</button>
         </div>
-        <div class="section">
-            <h2>일정표</h2>
-            <div class="box">
-                <div class="item">
-                    <span class="name">2026.05.31 Y사 퀴즈쇼</span>
-                </div>
-                </div>
+    </section>
+
+    <!-- 하단 -->
+    <div class="bottom">
+
+        <!-- 라이브 -->
+        <div class="panel">
+            <div class="sec-head">
+                <span class="dot"></span>라이브
+                <span class="sub" id="live-cnt"></span>
+            </div>
+            <div id="live-list" class="live-list"><div class="empty">불러오는 중…</div></div>
         </div>
+
+        <!-- 일정표 -->
+        <div class="panel">
+            <div class="sec-head">일정표</div>
+            <div id="sched-list" class="sched-list"><div class="empty">불러오는 중…</div></div>
+        </div>
+
     </div>
-</div>
+</main>
 
 <script>
-    // 공지사항 로드
-    fetch('notices.json').then(r => r.json()).then(data => {
-        document.getElementById('notice-list').innerHTML = data.slice(0, 5).map(n => `
-            <div class="item">
-                <span>${n.title}</span>
-                <span class="date">${n.user_nick}</span>
-            </div>
-        `).join('');
-    });
+const DOW = ['일','월','화','수','목','금','토'];
 
-    // 라이브 로드
-    fetch('live.json').then(r => r.json()).then(data => {
-        const list = document.getElementById('live-list');
-        if(data.length === 0) { list.innerHTML = '<div class="item">현재 방송 중인 멤버가 없습니다.</div>'; return; }
-        list.innerHTML = data.map(l => `
-            <div class="item">
-                <div><span class="name">${l.name}</span><span class="pos">${l.pos}</span></div>
-                <a href="${l.live_link}" target="_blank" class="live-badge">LIVE ${l.viewers.toLocaleString()}</a>
-            </div>
-        `).join('');
-    });
+function timeAgo(s) {
+    const d = Math.floor((Date.now() - new Date(s.replace(/-/g,'/'))) / 1000);
+    if (d < 60) return '방금 전';
+    if (d < 3600) return `${Math.floor(d/60)}분 전`;
+    if (d < 86400) return `${Math.floor(d/3600)}시간 전`;
+    return `${Math.floor(d/86400)}일 전`;
+}
+function isToday(s) {
+    const n=new Date(), p=new Date(s.replace(/-/g,'/'));
+    return n.getFullYear()===p.getFullYear()&&n.getMonth()===p.getMonth()&&n.getDate()===p.getDate();
+}
+function fmt(n){ return Number(n).toLocaleString(); }
+
+/* 공지 */
+async function loadNotices() {
+    const el = document.getElementById('notice-list');
+    const bL = document.getElementById('btn-l');
+    const bR = document.getElementById('btn-r');
+    try {
+        const list = await fetch('./notices.json').then(r=>r.json());
+        el.innerHTML = '';
+        if (!list.length) { el.innerHTML='<div class="empty">공지사항 없음</div>'; return; }
+        if (list.length > 4) { bL.classList.remove('hidden'); bR.classList.remove('hidden'); }
+        list.forEach(n => {
+            const c = document.createElement('div');
+            c.className = 'n-card';
+            c.onclick = () => window.open(`https://www.sooplive.com/station/${n.user_id}/post/${n.id}`,'_blank');
+            c.innerHTML = `
+                <div class="n-body">
+                    <div class="n-top">
+                        <img class="n-avatar" src="${n.profile_image}" onerror="this.style.display='none'">
+                        <span class="n-name">${n.user_nick}</span>
+                        <span class="n-time">${timeAgo(n.date)}</span>
+                        ${isToday(n.date)?'<span class="badge-new">NEW</span>':''}
+                    </div>
+                    <div class="n-title">${n.title}</div>
+                    <div class="n-meta">
+                        <div class="n-mi"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>${fmt(n.read_cnt)}</div>
+                        <div class="n-mi"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>${fmt(n.comment_cnt)}</div>
+                        <div class="n-mi"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>${fmt(n.like_cnt)}</div>
+                    </div>
+                </div>
+                ${n.thumbnail?`<div class="n-thumb"><img src="${n.thumbnail}" onerror="this.parentElement.style.display='none'"></div>`:''}
+            `;
+            el.appendChild(c);
+        });
+        bL.onclick = () => el.scrollBy({left:-240,behavior:'smooth'});
+        bR.onclick = () => el.scrollBy({left:240,behavior:'smooth'});
+    } catch(e) { el.innerHTML='<div class="empty">로드 실패</div>'; }
+}
+
+/* 라이브 */
+async function loadLive() {
+    const el = document.getElementById('live-list');
+    const cnt = document.getElementById('live-cnt');
+    try {
+        const data = await fetch('./live.json').then(r=>r.json());
+        cnt.innerHTML = `<b>${data.live_count}명</b> / ${data.total_count}명`;
+        el.innerHTML = '';
+        if (!data.lives.length) { el.innerHTML='<div class="offline">현재 방송 중인 멤버가 없습니다.</div>'; return; }
+        data.lives.forEach(l => {
+            const a = document.createElement('a');
+            a.className = 'live-card';
+            a.href = l.live_link; a.target = '_blank';
+            a.innerHTML = `
+                <div class="l-thumb">
+                    <img src="${l.thumb}" onerror="this.style.background='#111'">
+                    <span class="b-live">LIVE</span>
+                    <span class="b-view">${fmt(l.viewers)}</span>
+                </div>
+                <div class="l-info">
+                    <div class="l-profile">
+                        <img class="l-avatar" src="${l.profile}" onerror="this.style.display='none'">
+                        <span class="l-name">${l.name}</span>
+                        <span class="l-pos">${l.pos}</span>
+                    </div>
+                    <p class="l-ttl">${l.title}</p>
+                </div>
+            `;
+            el.appendChild(a);
+        });
+    } catch(e) { el.innerHTML='<div class="empty">로드 실패</div>'; }
+}
+
+/* 일정 */
+async function loadSchedule() {
+    const el = document.getElementById('sched-list');
+    try {
+        const list = await fetch('./schedule.json').then(r=>r.json());
+        el.innerHTML = '';
+        if (!list.length) { el.innerHTML='<div class="empty">등록된 일정이 없습니다.</div>'; return; }
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        list.forEach(s => {
+            const d = new Date(s.date);
+            const isPast = d < today;
+            if (isPast) return; // 지난 일정 숨김
+
+            const isTd = isToday(s.date);
+            const month = (d.getMonth()+1) + '월';
+            const day = d.getDate();
+            const dow = DOW[d.getDay()];
+
+            const item = document.createElement('div');
+            item.className = 'sched-item';
+            item.innerHTML = `
+                <div class="sched-date-wrap">
+                    <span class="sched-month">${month}</span>
+                    <span class="sched-day">${day}</span>
+                    <span class="sched-dow">${dow}요일</span>
+                </div>
+                <div class="sched-divider"></div>
+                <div class="sched-info">
+                    <span class="sched-title">${s.title}</span>
+                    ${s.desc ? `<span class="sched-desc">${s.desc}</span>` : ''}
+                </div>
+                ${isTd ? '<span class="sched-badge-today">오늘</span>' : '<span class="sched-badge-upcoming">예정</span>'}
+            `;
+            el.appendChild(item);
+        });
+
+        if (!el.children.length) el.innerHTML='<div class="empty">예정된 일정이 없습니다.</div>';
+    } catch(e) { el.innerHTML='<div class="empty">로드 실패</div>'; }
+}
+
+loadNotices();
+loadLive();
+loadSchedule();
 </script>
+
 </body>
 </html>

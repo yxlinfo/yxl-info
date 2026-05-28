@@ -1,10 +1,9 @@
 import json
-import re
 import asyncio
 import requests
 from playwright.async_api import async_playwright
 
-# --- 설정 ---
+# --- 설정 (기존 리스트 유지) ---
 STREAMERS = [
     {"id": "jaeha010", "board_number": "42110606"},
     {"id": "yuambo", "board_number": "93146806"},
@@ -40,19 +39,62 @@ MEMBERS = [
 ]
 
 # --- 1. 공지사항 크롤러 ---
-async def run_notices(page):
-    all_notices = []
-    for streamer in STREAMERS:
-        try:
-            # 기존 main.py의 크롤링 로직 생략(간결하게 유지)
-            # (여기에 기존에 쓰시던 꼼꼼한 크롤링 로직을 넣으세요)
-            pass
-        except: pass
-    with open("notices.json", "w", encoding="utf-8") as f:
-        json.dump(all_notices, f, ensure_ascii=False, indent=4)
+async def crawl_notice(page, streamer):
+    user_id = streamer["id"]
+    board_number = streamer["board_number"]
+    notices = []
+    
+    # API 요청 가로채기
+    async def modify_request(route, request):
+        url = request.url
+        if "chapi.sooplive.com" in url and "/board/" in url:
+            # 상세 정보가 포함된 필드로 요청
+            url = url.replace("field=title,contents,user_nick,user_id,hashtags", "field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date,count")
+            url = url.replace("per_page=20", "per_page=1")
+            import re
+            url = re.sub(r"board_number=[^&]*", f"board_number={board_number}", url)
+            await route.continue_(url=url)
+        else:
+            await route.continue_()
+
+    await page.route("**/*", modify_request)
+    try:
+        async with page.expect_response(lambda r: "chapi.sooplive.com" in r.url and "/board/" in r.url, timeout=10000) as response_info:
+            await page.goto(f"https://www.sooplive.com/station/{user_id}/board", wait_until="domcontentloaded", timeout=15000)
+        
+        data = await (await response_info.value).json()
+        items = [i for i in data.get("data", []) if str(i.get("bbs_no", "")) == str(board_number)]
+        
+        if items:
+            item = items[0]
+            count_info = item.get("count", {})
+            photos = item.get("photos", [])
+            thumbnail = photos[0] if photos else "https://via.placeholder.com/240x135/1E1A14/C5A059?text=No+Image"
+            profile = item.get("profile_image", "")
+            if profile.startswith("//"): profile = "https:" + profile
+
+            notices.append({
+                "id": item.get("title_no"),
+                "user_id": user_id,
+                "user_nick": item.get("user_nick", ""),
+                "profile_image": profile,
+                "title": item.get("title_name", ""),
+                "date": item.get("reg_date", ""),
+                "thumbnail": thumbnail,
+                "like_cnt": count_info.get("like_cnt", 0),
+                "read_cnt": count_info.get("read_cnt", 0),
+                "comment_cnt": count_info.get("comment_cnt", 0),
+                "link": f"https://www.sooplive.com/station/{user_id}/board/{item.get('title_no')}"
+            })
+    except Exception as e:
+        print(f"[오류] {user_id}: {e}")
+    finally:
+        await page.unroute("**/*")
+        
+    return notices
 
 # --- 2. 라이브 상태 크롤러 ---
-def run_live():
+def crawl_lives():
     lives = []
     for m in MEMBERS:
         url = f"https://api-channel.sooplive.com/v1.1/channel/{m['id']}/home/section/broad"
@@ -60,32 +102,38 @@ def run_live():
             res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=5).json()
             if res and "broadNo" in res:
                 lives.append({
-                    "name": m["name"], "pos": m["pos"], "profile": m["img"],
-                    "title": res.get("broadTitle", ""), "viewers": res.get("currentSumViewer", 0),
-                    "thumb": f"https://liveimg.sooplive.com/h/{res['broadNo']}.webp",
+                    "name": m["name"],
+                    "pos": m["pos"],
+                    "profile_image": m["img"],
+                    "title": res.get("broadTitle", ""),
+                    "viewers": res.get("currentSumViewer", 0),
+                    "start_time": res.get("broadStart", ""), # SOOP API 방송 시작 시간
+                    "thumbnail": f"https://liveimg.sooplive.com/h/{res['broadNo']}.webp",
                     "live_link": f"https://play.sooplive.com/{m['id']}/{res['broadNo']}"
                 })
         except: pass
     
-    # [핵심] HTML이 요구하는 구조로 감싸서 저장
-    data = {
-        "live_count": len(lives),
-        "total_count": len(MEMBERS),
-        "lives": lives
-    }
     with open("live.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+        json.dump(lives, f, ensure_ascii=False, indent=4)
 
 # --- 메인 실행 ---
 async def main():
+    print("데이터 수집 시작...")
+    all_notices = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
-        await run_notices(page)
+        for streamer in STREAMERS:
+            notices = await crawl_notice(page, streamer)
+            all_notices.extend(notices)
         await browser.close()
     
-    run_live()
-    print("업데이트 완료")
+    all_notices.sort(key=lambda x: x.get("date", ""), reverse=True)
+    with open("notices.json", "w", encoding="utf-8") as f:
+        json.dump(all_notices, f, ensure_ascii=False, indent=4)
+        
+    crawl_lives()
+    print("데이터 수집 완료!")
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <title>YXL Dashboard</title>
     <style>
         :root {
@@ -14,26 +15,22 @@
         body { background:var(--bg); color:var(--text); font-family:Pretendard,'Apple SD Gothic Neo',sans-serif; padding: 20px; }
         .container { max-width: 950px; margin: 0 auto; }
         a { text-decoration: none; color: inherit; transition: border 0.2s; }
-        a:hover { border-color: var(--gold) !important; } /* 마우스 오버 시 흰색이 아닌 골드로 변경 */
+        a:hover { border-color: var(--gold) !important; }
 
-        /* 섹션 타이틀 & SVG 아이콘 */
         h2 { font-size: 15px; color: var(--gold); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
         h2 svg { width: 18px; height: 18px; fill: var(--gold); }
         .section { margin-bottom: 35px; }
 
-        /* 가로 스크롤 공통 (공지, 라이브) */
         .h-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 12px; scrollbar-width: thin; scrollbar-color: var(--gold-dim) var(--panel); flex-wrap: nowrap; }
         
-        /* 공지사항 카드 */
         .notice-card { flex: 0 0 260px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
         .notice-thumb { width: 100%; height: 146px; object-fit: cover; background: #000; }
         .notice-info { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         .notice-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .notice-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-sub); }
         .user-prof { display: flex; align-items: center; gap: 6px; }
-        .user-prof img { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--gold-dim); }
+        .user-prof img { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--gold-dim); object-fit: cover; }
 
-        /* 라이브 카드 */
         .live-card { flex: 0 0 280px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: relative; }
         .live-thumb { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
         .live-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -46,11 +43,9 @@
         .live-name { font-size: 12px; font-weight: 700; color: var(--gold); }
         .live-time { font-size: 10px; color: var(--text-sub); display: block; margin-top: 2px; }
 
-        /* 일정표 & 숏츠 하단 분할 */
         .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 15px; min-height: 250px; }
         
-        /* 일정표 아이템 */
         .sched-card { background: var(--card); border-left: 3px solid var(--gold); padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; align-items: center; gap: 15px; }
         .sched-dday { font-size: 16px; font-weight: 800; color: var(--gold); min-width: 50px; text-align: center; }
         .sched-title { font-size: 13px; font-weight: 600; display: block; margin-bottom: 3px; }
@@ -61,7 +56,6 @@
 </head>
 <body>
 <div class="container">
-    
     <section class="section">
         <h2>
             <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
@@ -100,7 +94,6 @@
 </div>
 
 <script>
-    // 1. 공지사항 (클릭 시 링크 이동, 썸네일/프로필/조회수 등 메타데이터 포함)
     fetch('notices.json').then(r => r.json()).then(data => {
         const el = document.getElementById('notice-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub)">등록된 공지사항이 없습니다.</div>'; return; }
@@ -108,25 +101,23 @@
             <a href="${n.link}" target="_blank" class="notice-card">
                 <img src="${n.thumbnail}" class="notice-thumb" onerror="this.src='https://via.placeholder.com/260x146/1E1A14/C5A059?text=No+Image'">
                 <div class="notice-info">
-                    <span class="notice-title">${n.title}</span>
+                    <span class="notice-title">${n.title || '제목 없음'}</span>
                     <div class="notice-meta">
                         <div class="user-prof">
                             <img src="${n.profile_image}" onerror="this.src='https://via.placeholder.com/20/1E1A14/C5A059'">
-                            <span>${n.user_nick}</span>
+                            <span>${n.user_nick || '알 수 없음'}</span>
                         </div>
-                        <span>조회 ${n.read_cnt} | 👍 ${n.like_cnt}</span>
+                        <span>조회 ${n.read_cnt || 0} | 👍 ${n.like_cnt || 0}</span>
                     </div>
                 </div>
             </a>
         `).join('');
     }).catch(() => { document.getElementById('notice-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 2. 라이브 (썸네일, 닉네임, 프로필, 시청자수, 방송시작시간)
     fetch('live.json').then(r => r.json()).then(data => {
         const el = document.getElementById('live-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub); padding:10px;">현재 방송 중인 멤버가 없습니다.</div>'; return; }
         el.innerHTML = data.map(l => {
-            // 방송 시작 시간 포맷팅 (예: 2026-05-31 20:00:00 -> 20:00 시작)
             let timeStr = "";
             if(l.start_time) {
                 const parts = l.start_time.split(" ");
@@ -137,16 +128,16 @@
                 <div class="live-thumb">
                     <img src="${l.thumbnail}" onerror="this.src='https://via.placeholder.com/280x157/1E1A14/C5A059?text=No+Signal'">
                     <span class="badge-live">LIVE</span>
-                    <span class="badge-viewers">👥 ${l.viewers.toLocaleString()}명</span>
+                    <span class="badge-viewers">👥 ${(l.viewers || 0).toLocaleString()}명</span>
                 </div>
                 <div class="live-info">
-                    <img src="${l.profile_image}" class="live-prof">
+                    <img src="${l.profile_image}" class="live-prof" onerror="this.src='https://via.placeholder.com/36/1E1A14/C5A059'">
                     <div class="live-text">
-                        <div class="live-title">${l.title}</div>
+                        <div class="live-title">${l.title || '방송 중'}</div>
                         <div>
                             <span class="live-name">${l.name} (${l.pos})</span>
                         </div>
-                        <span class="live-time">⏱ ${timeStr}</span>
+                        <span class="live-time">⏱ ${timeStr || '방금 전'}</span>
                     </div>
                 </div>
             </a>
@@ -154,25 +145,21 @@
         }).join('');
     }).catch(() => { document.getElementById('live-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 3. 일정표 (한국 시간 KST 기준 D-Day 계산)
     fetch('schedule.json').then(r => r.json()).then(data => {
         const el = document.getElementById('schedule-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub)">등록된 일정이 없습니다.</div>'; return; }
         
-        // 브라우저 위치와 상관없이 무조건 한국(KST) 시간을 기준으로 '오늘 자정' 구하기
         const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' });
         const parts = formatter.formatToParts(new Date());
         const kstDateStr = `${parts.find(p=>p.type==='year').value}-${parts.find(p=>p.type==='month').value}-${parts.find(p=>p.type==='day').value}T00:00:00+09:00`;
         const todayKST = new Date(kstDateStr);
 
         el.innerHTML = data.map(s => {
-            const target = new Date(s.date + "+09:00"); // KST로 파싱
+            const target = new Date(s.date + "+09:00");
             target.setHours(0,0,0,0);
             
-            // 일수 차이 계산
             const diff = Math.ceil((target - todayKST) / (1000 * 60 * 60 * 24));
             let dday = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : "종료");
-            
             const targetDateStr = `${target.getMonth()+1}월 ${target.getDate()}일`;
             
             return `

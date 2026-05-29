@@ -20,51 +20,71 @@
         h2 svg { width: 18px; height: 18px; fill: var(--gold); }
         .section { margin-bottom: 35px; }
 
-        /* ⭐️ 드래그 스크롤 컨테이너 */
+        /* 드래그 스크롤 컨테이너 */
         .drag-scroll-container { 
             display: flex; 
             overflow-x: auto; 
-            padding: 15px 10px 25px 10px; /* 호버 시 위로 튀어오를 공간(25px) 확보 */
-            scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
-            -ms-overflow-style: none; /* IE 스크롤바 숨김 */
+            padding: 15px 10px 25px 10px; 
+            scrollbar-width: none; 
+            -ms-overflow-style: none; 
             cursor: grab;
             flex-wrap: nowrap;
         }
-        .drag-scroll-container::-webkit-scrollbar { display: none; /* 크롬 스크롤바 숨김 */ }
+        .drag-scroll-container::-webkit-scrollbar { display: none; }
         .drag-scroll-container:active { cursor: grabbing; }
 
-        /* ⭐️ 겹침(Peeking) 카드 공통 스타일 */
+        /* 겹침(Peeking) 카드 공통 스타일 */
         .peek-card {
             position: relative;
-            margin-left: -50px; /* 앞 카드 밑으로 50px 파고듦 */
-            box-shadow: -10px 0 20px -5px rgba(0,0,0,0.6); /* 겹친 부분 그림자 */
+            margin-left: -50px; 
+            box-shadow: -10px 0 20px -5px rgba(0,0,0,0.6); 
             transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), margin 0.3s ease, border-color 0.2s;
-            user-select: none; /* 텍스트 선택 방지 */
+            user-select: none; 
             -webkit-user-drag: none;
         }
-        .peek-card:first-child { 
-            margin-left: 0; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
-        }
-        /* 마우스 호버 시 인터랙션 */
+        .peek-card:first-child { margin-left: 0; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .peek-card:hover {
-            transform: translateY(-12px) rotate(-1deg); /* 살짝 위로 튀어오르며 회전 */
-            margin-right: 50px; /* 숨겨져 있던 우측 카드를 밀어내어 풀리게 함 */
+            transform: translateY(-12px) rotate(-1deg); 
+            margin-right: 50px; 
             z-index: 10;
             border-color: var(--gold) !important;
             box-shadow: 0 15px 30px rgba(0,0,0,0.5);
         }
-        /* 드래그 중일 땐 호버 효과 끄기 (덜컥거림 방지) */
         .is-dragging .peek-card { pointer-events: none; }
         
-        /* 공지사항 전용 설정 */
-        .notice-card { flex: 0 0 240px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-        .notice-thumb { width: 100%; height: 135px; object-fit: cover; background: #000; pointer-events: none; }
-        .notice-info { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .notice-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .notice-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-sub); }
-        .user-prof { display: flex; align-items: center; gap: 6px; }
-        .user-prof img { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--gold-dim); object-fit: cover; pointer-events: none; }
+        /* 📌 수정됨: 공지사항 (사이드 미니 썸네일형) */
+        .notice-card { 
+            flex: 0 0 280px; 
+            height: 110px; /* 고정 높이 */
+            background: var(--panel); 
+            border: 1px solid var(--border); 
+            border-radius: 10px; 
+            display: flex; 
+            align-items: center; 
+            padding: 15px; 
+            gap: 12px;
+            box-sizing: border-box;
+        }
+        .notice-text-content {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; overflow: hidden;
+        }
+        .notice-title { 
+            font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text);
+            /* 최대 2줄 텍스트 허용 및 말줄임표 처리 */
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; 
+        }
+        .notice-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-sub); }
+        .user-prof { display: flex; align-items: center; gap: 4px; }
+        .user-prof img { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--gold-dim); object-fit: cover; }
+        .notice-stats { font-size: 11px; color: var(--gold-dim); letter-spacing: 0.5px; }
+
+        /* 썸네일 영역 */
+        .notice-mini-thumb {
+            width: 64px; height: 64px; border-radius: 8px; background: var(--card); border: 1px solid var(--border);
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .notice-mini-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .fallback-svg { width: 24px; height: 24px; fill: var(--gold-dim); opacity: 0.5; } /* 대체 아이콘 */
 
         /* 라이브 전용 설정 */
         .live-card { flex: 0 0 260px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: relative; }
@@ -130,29 +150,45 @@
 </div>
 
 <script>
-    // 1. 공지사항 데이터 렌더링 (peek-card 클래스 추가)
+    // 1. 공지사항 렌더링 (사이드 미니 썸네일형)
     fetch('notices.json').then(r => r.json()).then(data => {
         const el = document.getElementById('notice-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub)">등록된 공지사항이 없습니다.</div>'; return; }
-        el.innerHTML = data.slice(0, 15).map(n => `
+        
+        el.innerHTML = data.slice(0, 15).map(n => {
+            // 이미지가 없거나 'No Image' 등 플레이스홀더 주소인 경우 방어
+            const isNoImage = !n.thumbnail || n.thumbnail.includes('placeholder') || n.thumbnail.includes('No+Image');
+            
+            let thumbHTML = '';
+            if(isNoImage) {
+                // 이미지가 없을 때 대체되는 세련된 펜 아이콘 SVG
+                thumbHTML = `<svg class="fallback-svg" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+            } else {
+                thumbHTML = `<img src="${n.thumbnail}" draggable="false" onerror="this.outerHTML='<svg class=\\'fallback-svg\\' viewBox=\\'0 0 24 24\\'><path d=\\'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z\\'/></svg>'">`;
+            }
+
+            return `
             <a href="${n.link}" target="_blank" class="notice-card peek-card">
-                <img src="${n.thumbnail}" class="notice-thumb" draggable="false" onerror="this.src='https://via.placeholder.com/260x146/1E1A14/C5A059?text=No+Image'">
-                <div class="notice-info">
-                    <span class="notice-title">${n.title || '제목 없음'}</span>
+                <div class="notice-text-content">
+                    <div class="notice-title">${n.title || '제목 없음'}</div>
                     <div class="notice-meta">
-                        <div class="user-prof">
-                            <img src="${n.profile_image}" draggable="false" onerror="this.src='https://via.placeholder.com/20/1E1A14/C5A059'">
-                            <span>${n.user_nick || '알 수 없음'}</span>
-                        </div>
-                        <span>조회 ${n.read_cnt || 0} | 👍 ${n.like_cnt || 0}</span>
+                        <span class="user-prof">
+                            <img src="${n.profile_image}" onerror="this.src='https://via.placeholder.com/20/1E1A14/C5A059'">
+                        </span>
+                        <span>${n.user_nick || '알 수 없음'}</span>
                     </div>
+                    <div class="notice-stats">조회 ${n.read_cnt || 0} &nbsp;|&nbsp; 추천 ${n.like_cnt || 0}</div>
+                </div>
+                <div class="notice-mini-thumb">
+                    ${thumbHTML}
                 </div>
             </a>
-        `).join('');
-        initDragScroll(); // 렌더링 완료 후 드래그 이벤트 등록
+            `;
+        }).join('');
+        initDragScroll(); 
     }).catch(() => { document.getElementById('notice-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 2. 라이브 데이터 렌더링 (peek-card 클래스 추가)
+    // 2. 라이브 데이터 렌더링
     fetch('live.json').then(r => r.json()).then(data => {
         const el = document.getElementById('live-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub); padding:10px;">현재 방송 중인 멤버가 없습니다.</div>'; return; }
@@ -173,16 +209,14 @@
                     <img src="${l.profile_image}" class="live-prof" draggable="false" onerror="this.src='https://via.placeholder.com/36/1E1A14/C5A059'">
                     <div class="live-text">
                         <div class="live-title">${l.title || '방송 중'}</div>
-                        <div>
-                            <span class="live-name">${l.name} (${l.pos})</span>
-                        </div>
+                        <div><span class="live-name">${l.name} (${l.pos})</span></div>
                         <span class="live-time">⏱ ${timeStr || '방금 전'}</span>
                     </div>
                 </div>
             </a>
             `;
         }).join('');
-        initDragScroll(); // 렌더링 완료 후 드래그 이벤트 등록
+        initDragScroll();
     }).catch(() => { document.getElementById('live-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
     // 3. 일정표 데이터 렌더링
@@ -213,11 +247,10 @@
         }).join('');
     }).catch(() => { document.getElementById('schedule-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // ⭐️ PC 마우스 드래그 & 클릭 방지 스크립트 ⭐️
+    // PC 마우스 드래그 & 클릭 방지 스크립트
     function initDragScroll() {
         const sliders = document.querySelectorAll('.drag-scroll-container');
         sliders.forEach(slider => {
-            // 중복 이벤트 방지를 위한 체크
             if(slider.dataset.dragInit === 'true') return;
             slider.dataset.dragInit = 'true';
 
@@ -233,29 +266,19 @@
                 startX = e.pageX - slider.offsetLeft;
                 scrollLeft = slider.scrollLeft;
             });
-            slider.addEventListener('mouseleave', () => {
-                isDown = false;
-                slider.classList.remove('is-dragging');
-            });
-            slider.addEventListener('mouseup', () => {
-                isDown = false;
-                slider.classList.remove('is-dragging');
-            });
+            slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('is-dragging'); });
+            slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('is-dragging'); });
             slider.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
                 e.preventDefault();
                 const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 1.5; // 드래그 속도 조절 (1.5배)
-                if (Math.abs(walk) > 5) isDragging = true; // 5px 이상 움직이면 드래그로 간주
+                const walk = (x - startX) * 1.5; 
+                if (Math.abs(walk) > 5) isDragging = true; 
                 slider.scrollLeft = scrollLeft - walk;
             });
             
-            // 드래그 후 마우스 뗐을 때 링크 열림 방지
             slider.addEventListener('click', (e) => {
-                if (isDragging) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
+                if (isDragging) { e.preventDefault(); e.stopPropagation(); }
             }, true);
         });
     }

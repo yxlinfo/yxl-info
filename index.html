@@ -233,7 +233,7 @@
         `).join('');
     }).catch(() => { document.getElementById('live-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 일정표 렌더링
+// 일정표 렌더링
     fetch('schedule.json').then(r => r.json()).then(data => {
         const el = document.getElementById('schedule-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--sub)">등록된 일정이 없습니다.</div>'; return; }
@@ -242,18 +242,43 @@
         todayKST.setHours(0,0,0,0);
 
         el.innerHTML = data.map(s => {
-            const target = new Date(s.date + "+09:00");
-            target.setHours(0,0,0,0);
-            const diff = Math.ceil((target - todayKST) / (1000 * 60 * 60 * 24));
+            // 1. 날짜 데이터 안전하게 파싱 (오타 방어)
+            const safeStr = s.date.replace(/t/i, ' ').trim(); // 't'를 띄어쓰기로 변경하고 앞뒤 공백 제거
+            const dateParts = safeStr.split(' ');
+            const timePart = dateParts[1] ? dateParts[1] : '00:00';
+            const target = new Date(`${dateParts[0]}T${timePart}:00+09:00`);
+            
+            // 2. D-Day 계산
+            const dDayTarget = new Date(target);
+            dDayTarget.setHours(0,0,0,0);
+            const diff = Math.ceil((dDayTarget - todayKST) / (1000 * 60 * 60 * 24));
             let dday = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : "종료");
             
+            // 3. 시간 문자열 추출 (예: 19:00)
+            const hours = target.getHours().toString().padStart(2, '0');
+            const mins = target.getMinutes().toString().padStart(2, '0');
+            const timeDisplay = dateParts[1] ? ` ⏰ ${hours}:${mins}` : '';
+
+            // 4. 타입 배지 생성
+            const typeBadge = s.type ? `<span style="background:var(--gold); color:#000; padding:2px 5px; border-radius:3px; font-size:10px; font-weight:800;">${s.type}</span>` : '';
+            
+            // 5. 세부 내용(desc) 박스 생성
+            const descBox = s.desc ? `<div style="font-size:11px; color:var(--text); background:rgba(255,255,255,0.05); padding:8px 10px; border-radius:4px; width:100%; line-height:1.4; white-space:pre-wrap;">${s.desc}</div>` : '';
+
             return `
-            <div class="sched-card">
-                <div class="sched-dday">${dday}</div>
-                <div>
-                    <div style="font-size:13px; font-weight:600; margin-bottom:3px">${s.title}</div>
-                    <div style="font-size:11px; color:var(--sub)">${target.getMonth()+1}월 ${target.getDate()}일 ${s.desc ? `| ${s.desc}` : ''}</div>
+            <div class="sched-card" style="flex-direction: column; align-items: flex-start; gap: 10px; padding: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                    <div class="sched-dday">${dday}</div>
+                    <div style="flex: 1;">
+                        <div style="font-size:14px; font-weight:700; margin-bottom:5px; display:flex; align-items:center; gap:6px;">
+                            ${typeBadge} ${s.title}
+                        </div>
+                        <div style="font-size:12px; color:var(--sub)">
+                            📅 ${target.getMonth()+1}월 ${target.getDate()}일${timeDisplay}
+                        </div>
+                    </div>
                 </div>
+                ${descBox}
             </div>`;
         }).join('');
     }).catch(() => { document.getElementById('schedule-list').innerHTML = '데이터를 불러올 수 없습니다.'; });

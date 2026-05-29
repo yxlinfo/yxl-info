@@ -1,7 +1,7 @@
 import json
 import asyncio
 import requests
-import re
+from urllib.parse import urlparse, urlencode, parse_qsl, urlunparse
 from playwright.async_api import async_playwright
 
 STREAMERS = [
@@ -38,35 +38,42 @@ async def crawl_notice(page, streamer):
     
     async def modify_request(route, request):
         if "chapi.sooplive.com" in request.url and "/board/" in request.url:
-            url = request.url
+            # ⭐️ 수정됨: urllib를 사용해 에러 없이 완벽하게 URL 조합
+            parsed = urlparse(request.url)
+            query = dict(parse_qsl(parsed.query))
             
-            # ⭐️ 1. '전체글'이 아닌 '해당 게시판(board_number)'만 내놓으라고 강제 지정!
-            if "bbs_no=" in url: url = re.sub(r"bbs_no=\d+", f"bbs_no={board_number}", url)
-            else: url += f"&bbs_no={board_number}"
+            # bbs_no를 빼서 억지로 한 게시판만 좁혀 보지 않고 '전체 게시판' 기준으로 50개를 넉넉히 가져옴
+            if "bbs_no" in query:
+                del query["bbs_no"]
+                
+            query["per_page"] = "50"
+            query["field"] = "title_name,reg_date,count,profile_image,notice_yn,bbs_no"
             
-            if "per_page=" in url: url = re.sub(r"per_page=\d+", "per_page=15", url)
-            else: url += "&per_page=15"
-            
-            if "field=" in url: url = re.sub(r"field=[^&]*", "field=title_name,reg_date,count,profile_image", url)
-            
-            await route.continue_(url=url)
+            new_url = urlunparse(parsed._replace(query=urlencode(query)))
+            await route.continue_(url=new_url)
         else:
             await route.continue_()
 
     await page.route("**/*", modify_request)
     try:
-        # ⭐️ 2. 접속할 때부터 '해당 공지 게시판 주소'로 다이렉트 접속
-        await page.goto(f"https://www.sooplive.com/station/{user_id}/board?bbs_no={board_number}", wait_until="domcontentloaded", timeout=15000)
+        # 특정 게시판 번호를 빼고 방송국 게시판 홈(전체)으로 접근
+        await page.goto(f"https://www.sooplive.com/station/{user_id}/board", wait_until="domcontentloaded", timeout=15000)
         async with page.expect_response(lambda r: "chapi.sooplive.com" in r.url and "/board/" in r.url, timeout=10000) as response_info:
             pass
         data = await (await response_info.value).json()
         
         items = data.get("data", [])
+        target_items = []
         
-        if items:
-            # ⭐️ 3. 과거에 쓴 '상단 고정 공지'에 속지 않도록, 가져온 게시글을 '가장 최근 시간' 기준으로 재정렬!
-            items.sort(key=lambda x: x.get("reg_date", ""), reverse=True)
-            item = items[0]
+        # ⭐️ 수정됨: 전체 50개 글 중에서 '설정해둔 게시판 번호'와 같거나 '공지사항(notice_yn=1)'으로 체크된 글을 모두 수집
+        for i in items:
+            if str(i.get("bbs_no", "")) == str(board_number) or str(i.get("notice_yn", "")) == "1":
+                target_items.append(i)
+                
+        if target_items:
+            # 수집된 공지글 중 옛날 고정 공지에 속지 않도록 '실제 작성 시간'으로 정렬 후 가장 첫 번째(최신) 추출
+            target_items.sort(key=lambda x: x.get("reg_date", ""), reverse=True)
+            item = target_items[0]
             
             count_info = item.get("count", {})
             profile = item.get("profile_image", "")
@@ -83,11 +90,10 @@ async def crawl_notice(page, streamer):
                 "link": f"https://www.sooplive.com/station/{user_id}/post/{item.get('title_no', '')}"
             }
     except Exception as e:
-        pass
+        print(f"[{user_id}] 크롤링 오류: {e}")
     finally:
         await page.unroute("**/*")
         
-    # 공지사항이 없는 멤버라도 에러 내지 않고 기본(더미) 카드를 생성하여 14명 유지
     return {
         "user_nick": member_info.get("name", user_id),
         "title": "최근 등록된 공지사항이 없습니다.",
@@ -130,7 +136,7 @@ async def main():
             if notice: all_notices.append(notice)
         await browser.close()
     
-    # ⭐️ 14명의 공지를 최종적으로 최신순(내림차순) 정렬하여 화면 맨 왼쪽에 최신글이 배치되게 함
+    # 14명의 데이터를 모아 최종적으로 최신 글이 배열 앞(왼쪽 화면)에 오도록 내림차순 정렬
     all_notices.sort(key=lambda x: x["date"], reverse=True)
     
     with open("notices.json", "w", encoding="utf-8") as f:

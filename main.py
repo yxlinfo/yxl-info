@@ -4,22 +4,14 @@ import requests
 import re
 from playwright.async_api import async_playwright
 
-# --- 설정 (기존 리스트 유지) ---
 STREAMERS = [
-    {"id": "jaeha010", "board_number": "42110606"},
-    {"id": "yuambo", "board_number": "93146806"},
-    {"id": "smkim82372", "board_number": "65560144"},
-    {"id": "wk3220", "board_number": "79496724"},
-    {"id": "meldoy777", "board_number": "108366731"},
-    {"id": "star49", "board_number": "108901583"},
-    {"id": "ahrum0912", "board_number": "122843945"},
-    {"id": "tkek55", "board_number": "112452503"},
-    {"id": "fhwm0602", "board_number": "114371465"},
-    {"id": "zbxlzzz", "board_number": "13644761"},
-    {"id": "iluvpp", "board_number": "91109284"},
-    {"id": "callgg", "board_number": "329000"},
-    {"id": "kimpooh0707", "board_number": "69409509"},
-    {"id": "asy1218", "board_number": "113481743"},
+    {"id": "jaeha010", "board_number": "42110606"}, {"id": "yuambo", "board_number": "93146806"},
+    {"id": "smkim82372", "board_number": "65560144"}, {"id": "wk3220", "board_number": "79496724"},
+    {"id": "meldoy777", "board_number": "108366731"}, {"id": "star49", "board_number": "108901583"},
+    {"id": "ahrum0912", "board_number": "122843945"}, {"id": "tkek55", "board_number": "112452503"},
+    {"id": "fhwm0602", "board_number": "114371465"}, {"id": "zbxlzzz", "board_number": "13644761"},
+    {"id": "iluvpp", "board_number": "91109284"}, {"id": "callgg", "board_number": "329000"},
+    {"id": "kimpooh0707", "board_number": "69409509"}, {"id": "asy1218", "board_number": "113481743"}
 ]
 
 MEMBERS = [
@@ -36,69 +28,51 @@ MEMBERS = [
     {"name": "서니", "id": "iluvpp", "pos": "시급이", "img": "https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035"},
     {"name": "너의멜로디", "id": "meldoy777", "pos": "비서실장", "img": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633"},
     {"name": "꺼니", "id": "callgg", "pos": "웨이터", "img": "https://storage2.ygosu.com/?code=S69f0a951064842.70871652"},
-    {"name": "김푸", "id": "kimpooh0707", "pos": "웨이터", "img": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517"},
+    {"name": "김푸", "id": "kimpooh0707", "pos": "웨이터", "img": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517"}
 ]
 
 async def crawl_notice(page, streamer):
     user_id = streamer["id"]
     board_number = streamer["board_number"]
-    notices = []
     
     async def modify_request(route, request):
-        url = request.url
-        if "chapi.sooplive.com" in url and "/board/" in url:
-            # ⭐️ 수정됨: 데이터를 넉넉히 가져와서 공지 게시판을 안전하게 찾도록 조치
-            if "field=" in url: url = re.sub(r"field=[^&]*", "field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date,count", url)
-            else: url += "&field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date,count"
-            
-            if "per_page=" in url: url = re.sub(r"per_page=[^&]*", "per_page=20", url)
+        if "chapi.sooplive.com" in request.url and "/board/" in request.url:
+            url = request.url
+            if "per_page=" in url: url = re.sub(r"per_page=\d+", "per_page=20", url)
             else: url += "&per_page=20"
-            
-            if "board_number=" in url: url = re.sub(r"board_number=[^&]*", f"board_number={board_number}", url)
-            else: url += f"&board_number={board_number}"
-            
+            if "field=" in url: url = re.sub(r"field=[^&]*", "field=title_name,reg_date,count,profile_image", url)
             await route.continue_(url=url)
         else:
             await route.continue_()
 
     await page.route("**/*", modify_request)
     try:
+        await page.goto(f"https://www.sooplive.com/station/{user_id}/board", wait_until="domcontentloaded", timeout=15000)
         async with page.expect_response(lambda r: "chapi.sooplive.com" in r.url and "/board/" in r.url, timeout=10000) as response_info:
-            await page.goto(f"https://www.sooplive.com/station/{user_id}/board", wait_until="domcontentloaded", timeout=15000)
-        
+            pass
         data = await (await response_info.value).json()
-        items = [i for i in data.get("data", []) if str(i.get("bbs_no", "")) == str(board_number)]
         
+        items = [i for i in data.get("data", []) if str(i.get("bbs_no", "")) == str(board_number)]
         if items:
             item = items[0]
             count_info = item.get("count", {})
-            photos = item.get("photos", [])
-            
-            thumbnail = photos[0] if photos else ""
-            if thumbnail and thumbnail.startswith("//"): thumbnail = "https:" + thumbnail
-            
-            profile = item.get("profile_image") or "https://via.placeholder.com/20/1E1A14/C5A059"
+            profile = item.get("profile_image", "")
             if profile.startswith("//"): profile = "https:" + profile
-
-            notices.append({
-                "id": item.get("title_no") or "",
-                "user_id": user_id,
-                "user_nick": item.get("user_nick") or "알 수 없음",
-                "profile_image": profile,
-                "title": item.get("title_name") or "제목 없음",
-                "date": item.get("reg_date") or "",
-                "thumbnail": thumbnail,
-                "like_cnt": count_info.get("like_cnt", 0),
+            
+            return {
+                "user_nick": item.get("user_nick", "알 수 없음"),
+                "title": item.get("title_name", "제목 없음"),
+                "date": item.get("reg_date", ""),
                 "read_cnt": count_info.get("read_cnt", 0),
-                # ⭐️ post 링크 주소 고정
+                "like_cnt": count_info.get("like_cnt", 0),
+                "comment_cnt": count_info.get("comment_cnt", 0),
+                "profile_image": profile or "https://via.placeholder.com/40/1E1A14/C5A059",
                 "link": f"https://www.sooplive.com/station/{user_id}/post/{item.get('title_no', '')}"
-            })
-    except Exception as e:
-        print(f"[오류] {user_id}: {e}")
+            }
+    except: pass
     finally:
         await page.unroute("**/*")
-        
-    return notices
+    return None
 
 def crawl_lives():
     lives = []
@@ -107,15 +81,13 @@ def crawl_lives():
         try:
             res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=5).json()
             if res and "broadNo" in res:
-                broad_title = res.get("broadTitle")
-                start_time = res.get("broadStart")
                 lives.append({
                     "name": m["name"],
                     "pos": m["pos"],
                     "profile_image": m["img"],
-                    "title": broad_title if broad_title else "방송 중",
+                    "title": res.get("broadTitle", "방송 중"),
                     "viewers": res.get("currentSumViewer", 0),
-                    "start_time": start_time if start_time else "",
+                    "start_time": res.get("broadStart", ""),
                     "thumbnail": f"https://liveimg.sooplive.com/h/{res['broadNo']}.webp",
                     "live_link": f"https://play.sooplive.com/{m['id']}/{res['broadNo']}"
                 })
@@ -125,22 +97,24 @@ def crawl_lives():
         json.dump(lives, f, ensure_ascii=False, indent=4)
 
 async def main():
-    print("데이터 수집 시작...")
+    print("데이터 갱신 중...")
     all_notices = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
-        for streamer in STREAMERS:
-            notices = await crawl_notice(page, streamer)
-            all_notices.extend(notices)
+        for s in STREAMERS:
+            notice = await crawl_notice(page, s)
+            if notice: all_notices.append(notice)
         await browser.close()
     
-    all_notices.sort(key=lambda x: x.get("date", ""), reverse=True)
+    # ⭐️ 핵심: 가장 최신 글이 배열의 앞(왼쪽)으로 오도록 내림차순(reverse=True) 정렬!
+    all_notices.sort(key=lambda x: x["date"], reverse=True)
+    
     with open("notices.json", "w", encoding="utf-8") as f:
         json.dump(all_notices, f, ensure_ascii=False, indent=4)
         
     crawl_lives()
-    print("데이터 수집 완료!")
+    print("완료!")
 
 if __name__ == "__main__":
     asyncio.run(main())

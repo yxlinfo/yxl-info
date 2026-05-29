@@ -7,287 +7,218 @@
     <title>YXL Dashboard</title>
     <style>
         :root {
-            --bg: #0F0D09; --panel: #181410; --card: #1E1A14;
-            --gold: #C5A059; --gold-dim: #8c7340; --text: #F5F0E8;
-            --text-sub: #8A7F70; --border: rgba(197,160,89,0.22); --red: #d9213a;
+            --bg: #0F0D09; --panel: #181410; --card: #201b15;
+            --gold: #C5A059; --text: #F5F0E8; --sub: #8A7F70; --border: #332b22;
         }
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-        body { background:var(--bg); color:var(--text); font-family:Pretendard,'Apple SD Gothic Neo',sans-serif; padding: 20px; }
-        .container { max-width: 950px; margin: 0 auto; }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: Pretendard, sans-serif; padding: 20px; }
         a { text-decoration: none; color: inherit; }
+        .container { max-width: 1000px; margin: 0 auto; }
 
-        h2 { font-size: 15px; color: var(--gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        h2 svg { width: 18px; height: 18px; fill: var(--gold); }
-        .section { margin-bottom: 35px; }
-
-        /* 드래그 스크롤 컨테이너 */
-        .drag-scroll-container { 
-            display: flex; overflow-x: auto; padding: 15px 10px 25px 10px; 
-            scrollbar-width: none; -ms-overflow-style: none; cursor: grab; flex-wrap: nowrap;
-        }
-        .drag-scroll-container::-webkit-scrollbar { display: none; }
-        .drag-scroll-container:active { cursor: grabbing; }
-
-        /* 겹침(Peeking) 카드 디자인 */
-        .peek-card {
-            position: relative; margin-left: -50px; 
-            box-shadow: -10px 0 20px -5px rgba(0,0,0,0.6); 
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), margin 0.3s ease, border-color 0.2s;
-            user-select: none; -webkit-user-drag: none;
-        }
-        .peek-card:first-child { margin-left: 0; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .peek-card:hover {
-            transform: translateY(-12px) rotate(-1deg); margin-right: 50px; z-index: 10;
-            border-color: var(--gold) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        /* 독립된 카테고리 박스 디자인 */
+        .category-section {
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px; margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* ⭐️ NEW 뱃지 스타일 */
-        .badge-new {
-            background: linear-gradient(135deg, #ff4e50, #f9d423);
-            color: #fff; font-size: 9px; font-weight: 800; padding: 1px 4px;
-            border-radius: 3px; margin-right: 4px; vertical-align: text-bottom;
+        /* 헤더 & 좌우 스크롤 버튼 */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(197,160,89,0.2); padding-bottom: 10px; }
+        .section-title { font-size: 16px; color: var(--gold); font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .section-meta { font-size: 13px; color: var(--sub); font-weight: normal; margin-left: 8px; }
+        .nav-buttons { display: flex; gap: 6px; }
+        .nav-btn { 
+            background: var(--card); border: 1px solid var(--border); color: var(--gold); 
+            width: 32px; height: 32px; border-radius: 5px; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; 
         }
+        .nav-btn:hover { background: var(--gold); color: #000; }
 
-        /* 공지사항 (사이드 미니 썸네일형) */
-        .notice-card { 
-            flex: 0 0 280px; height: 110px; background: var(--panel); border: 1px solid var(--border); 
-            border-radius: 10px; display: flex; align-items: center; padding: 15px; gap: 12px; box-sizing: border-box;
+        /* 가로 스크롤 영역 (심플 나열) */
+        .scroll-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scroll-behavior: smooth; scrollbar-width: none; }
+        .scroll-container::-webkit-scrollbar { display: none; }
+
+        /* 공지사항 카드 (프로필 강조형) */
+        .notice-card {
+            flex: 0 0 280px; background: var(--card); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+            transition: transform 0.2s, border-color 0.2s;
         }
-        .notice-text-content { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 5px; overflow: hidden; }
-        .notice-title { 
-            font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text);
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; 
-        }
-        .notice-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-sub); }
-        .user-prof { display: flex; align-items: center; gap: 4px; }
-        .user-prof img { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--gold-dim); object-fit: cover; }
-        .notice-stats { font-size: 11px; color: var(--gold-dim); letter-spacing: 0.5px; }
+        .notice-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+        .nc-head { display: flex; align-items: center; gap: 10px; }
+        .nc-prof { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; }
+        .nc-name { font-size: 14px; font-weight: bold; color: var(--text); }
+        .nc-title { font-size: 13px; color: var(--text); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .nc-stats { font-size: 11px; color: var(--sub); display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; }
         
-        .notice-mini-thumb { width: 64px; height: 64px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .notice-mini-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .fallback-svg { width: 24px; height: 24px; fill: var(--gold-dim); opacity: 0.5; }
+        .badge-new { background: #d9213a; color: white; padding: 1px 4px; border-radius: 3px; font-size: 9px; font-weight: bold; margin-right: 5px; }
 
-        /* 라이브 */
-        .live-card { flex: 0 0 260px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: relative; }
-        .live-thumb { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
-        .live-thumb img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        .badge-live { position: absolute; top: 8px; left: 8px; background: var(--red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 800; }
-        .badge-viewers { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; font-size: 11px; padding: 2px 6px; border-radius: 3px; }
-        .live-info { padding: 12px; display: flex; gap: 10px; align-items: center; }
-        .live-prof { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; pointer-events: none; }
-        .live-text { flex: 1; overflow: hidden; }
-        .live-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-        .live-name { font-size: 12px; font-weight: 700; color: var(--gold); }
-        .live-time { font-size: 10px; color: var(--text-sub); display: block; margin-top: 2px; }
+        /* 라이브 카드 (우측 하단 시청자 수) */
+        .live-card {
+            flex: 0 0 270px; background: var(--card); border: 1px solid var(--border);
+            border-radius: 8px; overflow: hidden; transition: transform 0.2s, border-color 0.2s;
+        }
+        .live-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+        .lc-thumb-area { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
+        .lc-thumb-area img { width: 100%; height: 100%; object-fit: cover; }
+        .lc-badge-live { position: absolute; top: 8px; left: 8px; background: #d9213a; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+        .lc-badge-viewers { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: white; font-size: 11px; font-weight: bold; padding: 3px 6px; border-radius: 4px; }
+        .lc-info { padding: 12px; display: flex; gap: 10px; align-items: center; }
+        .lc-prof { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--gold); object-fit: cover; }
+        .lc-text { flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 2px; }
+        .lc-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lc-name { font-size: 12px; font-weight: bold; color: var(--gold); }
+        .lc-time { font-size: 11px; color: var(--sub); }
 
-        /* 하단 그리드 (일정표 & 숏츠) */
+        /* 하단 2분할 그리드 */
         .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 15px; min-height: 250px; }
-        .sched-card { background: var(--card); border-left: 3px solid var(--gold); padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; align-items: center; gap: 15px; transition: transform 0.2s; }
-        .sched-card:hover { transform: translateX(5px); border-color: var(--gold); }
+        .sched-card { background: var(--card); border-left: 3px solid var(--gold); padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; align-items: center; gap: 15px; }
         .sched-dday { font-size: 16px; font-weight: 800; color: var(--gold); min-width: 50px; text-align: center; }
-        .sched-title { font-size: 13px; font-weight: 600; display: block; margin-bottom: 3px; }
-        .sched-date { font-size: 11px; color: var(--text-sub); }
-
+        
         @media (max-width: 768px) { .bottom-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 <div class="container">
-    <section class="section">
-        <h2>
-            <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-            공지사항
-        </h2>
-        <div id="notice-list" class="drag-scroll-container">로딩 중...</div>
-    </section>
+    
+    <div class="category-section">
+        <div class="section-header">
+            <div class="section-title">📢 멤버별 최신 공지사항</div>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="scrollArea('notice-list', -300)">◀</button>
+                <button class="nav-btn" onclick="scrollArea('notice-list', 300)">▶</button>
+            </div>
+        </div>
+        <div id="notice-list" class="scroll-container">로딩 중...</div>
+    </div>
 
-    <section class="section">
-        <h2>
-            <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
-            LIVE
-        </h2>
-        <div id="live-list" class="drag-scroll-container">로딩 중...</div>
-    </section>
+    <div class="category-section">
+        <div class="section-header">
+            <div class="section-title">📺 LIVE <span class="section-meta" id="live-count-text"></span></div>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="scrollArea('live-list', -300)">◀</button>
+                <button class="nav-btn" onclick="scrollArea('live-list', 300)">▶</button>
+            </div>
+        </div>
+        <div id="live-list" class="scroll-container">로딩 중...</div>
+    </div>
 
     <div class="bottom-grid">
-        <section class="section">
-            <h2>
-                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
-                일정표
-            </h2>
-            <div id="schedule-list" class="box">로딩 중...</div>
-        </section>
-        <section class="section">
-            <h2>
-                <svg viewBox="0 0 24 24"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-                숏츠
-            </h2>
-            <div class="box" style="display:flex; align-items:center; justify-content:center; color:var(--text-sub);">
-                업데이트 예정
-            </div>
-        </section>
+        <div class="category-section">
+            <div class="section-header"><div class="section-title">📅 일정표</div></div>
+            <div id="schedule-list">로딩 중...</div>
+        </div>
+        <div class="category-section">
+            <div class="section-header"><div class="section-title">🎬 숏츠</div></div>
+            <div style="text-align:center; color:var(--sub); padding:30px 0;">업데이트 예정</div>
+        </div>
     </div>
 </div>
 
 <script>
-    // ⭐️ KST 기준 시간 포맷 함수 (방금 전, 2시간 전 계산)
-    function timeAgo(dateString) {
-        if (!dateString) return '';
-        const isoStr = dateString.replace(' ', 'T') + '+09:00'; // 안전한 날짜 파싱을 위해 표준화
-        const target = new Date(isoStr);
-        const now = new Date();
-        const diffMs = now - target;
-        if (diffMs < 0) return '방금 전'; 
+    // 버튼 스크롤 함수
+    function scrollArea(id, amount) {
+        document.getElementById(id).scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    // 완벽한 시간 계산 함수 (NaN 오류 방지)
+    function timeAgo(dateStr) {
+        if (!dateStr) return "시간 정보 없음";
+        const safeStr = dateStr.replace(/ /g, 'T').split('.')[0] + '+09:00';
+        const target = new Date(safeStr);
+        
+        if (isNaN(target.getTime())) return "시간 알 수 없음";
+
+        const diffMs = new Date() - target;
+        if (diffMs < 0) return "방금 전"; 
         
         const diffMins = Math.floor(diffMs / 60000);
         const diffHrs = Math.floor(diffMins / 60);
         const diffDays = Math.floor(diffHrs / 24);
 
-        if (diffMins < 60) return diffMins <= 0 ? '방금 전' : `${diffMins}분 전`;
+        if (diffMins < 60) return diffMins <= 0 ? "방금 전" : `${diffMins}분 전`;
         if (diffHrs < 24) return `${diffHrs}시간 전`;
         return `${diffDays}일 전`;
     }
 
-    // ⭐️ 10시간 이내인지 확인하여 NEW 뱃지 반환 함수
-    function getNewBadge(dateString) {
-        if (!dateString) return '';
-        const isoStr = dateString.replace(' ', 'T') + '+09:00';
-        const target = new Date(isoStr);
-        const diffHrs = (new Date() - target) / (1000 * 60 * 60);
-        return (diffHrs >= 0 && diffHrs < 10) ? '<span class="badge-new">NEW</span>' : '';
-    }
-
-    // 1. 공지사항 렌더링
+    // 공지사항 렌더링
     fetch('notices.json').then(r => r.json()).then(data => {
         const el = document.getElementById('notice-list');
-        if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub)">등록된 공지사항이 없습니다.</div>'; return; }
+        if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--sub)">공지사항이 없습니다.</div>'; return; }
         
-        el.innerHTML = data.slice(0, 15).map(n => {
-            const isNoImage = !n.thumbnail || n.thumbnail.includes('placeholder') || n.thumbnail.includes('No+Image');
-            const thumbHTML = isNoImage 
-                ? `<svg class="fallback-svg" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`
-                : `<img src="${n.thumbnail}" draggable="false" onerror="this.outerHTML='<svg class=\\'fallback-svg\\' viewBox=\\'0 0 24 24\\'><path d=\\'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z\\'/></svg>'">`;
-
+        el.innerHTML = data.map(n => {
+            const isNew = (new Date() - new Date(n.date.replace(/ /g, 'T')+'+09:00')) / 3600000 < 10;
             return `
-            <a href="${n.link}" target="_blank" class="notice-card peek-card">
-                <div class="notice-text-content">
-                    <div class="notice-title">
-                        ${getNewBadge(n.date)}
-                        ${n.title || '제목 없음'}
-                    </div>
-                    <div class="notice-meta">
-                        <span class="user-prof"><img src="${n.profile_image}" onerror="this.src='https://via.placeholder.com/20/1E1A14/C5A059'"></span>
-                        <span>${n.user_nick || '알 수 없음'}</span>
-                    </div>
-                    <div class="notice-stats">
-                        🕒 ${timeAgo(n.date)} &nbsp;|&nbsp; 조회 ${n.read_cnt || 0}
-                    </div>
+            <a href="${n.link}" target="_blank" class="notice-card">
+                <div class="nc-head">
+                    <img src="${n.profile_image}" class="nc-prof" onerror="this.src='https://via.placeholder.com/34/1E1A14/C5A059'">
+                    <span class="nc-name">${n.user_nick}</span>
                 </div>
-                <div class="notice-mini-thumb">${thumbHTML}</div>
+                <div class="nc-title">
+                    ${isNew ? '<span class="badge-new">NEW</span>' : ''}${n.title}
+                </div>
+                <div class="nc-stats">
+                    <span>🕒 ${timeAgo(n.date)}</span>
+                    <span>👁️ ${n.read_cnt}</span>
+                    <span>👍 ${n.like_cnt}</span>
+                    <span>💬 ${n.comment_cnt}</span>
+                </div>
             </a>
             `;
         }).join('');
-        initDragScroll(); 
+        // ⭐️ 오른쪽으로 억지로 이동시키던 스크롤 로직 삭제됨 (최신순이 가장 먼저(왼쪽) 보임)
     }).catch(() => { document.getElementById('notice-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 2. 라이브 렌더링
+    // 라이브 렌더링
     fetch('live.json').then(r => r.json()).then(data => {
         const el = document.getElementById('live-list');
-        if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub); padding:10px;">현재 방송 중인 멤버가 없습니다.</div>'; return; }
-        el.innerHTML = data.map(l => {
-            return `
-            <a href="${l.live_link}" target="_blank" class="live-card peek-card">
-                <div class="live-thumb">
-                    <img src="${l.thumbnail}" draggable="false" onerror="this.src='https://via.placeholder.com/280x157/1E1A14/C5A059?text=No+Signal'">
-                    <span class="badge-live">LIVE</span>
-                    <span class="badge-viewers">👥 ${(l.viewers || 0).toLocaleString()}명</span>
+        document.getElementById('live-count-text').textContent = `(총원 14명 / 라이브 인원 ${data.length}명)`;
+        
+        if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--sub)">현재 방송 중인 멤버가 없습니다.</div>'; return; }
+        
+        el.innerHTML = data.map(l => `
+            <a href="${l.live_link}" target="_blank" class="live-card">
+                <div class="lc-thumb-area">
+                    <img src="${l.thumbnail}" onerror="this.src='https://via.placeholder.com/270x152/1E1A14/C5A059?text=No+Signal'">
+                    <span class="lc-badge-live">LIVE</span>
+                    <span class="lc-badge-viewers">👥 ${l.viewers.toLocaleString()}명</span>
                 </div>
-                <div class="live-info">
-                    <img src="${l.profile_image}" class="live-prof" draggable="false" onerror="this.src='https://via.placeholder.com/36/1E1A14/C5A059'">
-                    <div class="live-text">
-                        <div class="live-title">${l.title || '방송 중'}</div>
-                        <div><span class="live-name">${l.name} (${l.pos})</span></div>
-                        <span class="live-time">⏱ ${timeAgo(l.start_time)} 시작</span>
+                <div class="lc-info">
+                    <img src="${l.profile_image}" class="lc-prof" onerror="this.src='https://via.placeholder.com/36/1E1A14/C5A059'">
+                    <div class="lc-text">
+                        <div class="lc-title">${l.title}</div>
+                        <span class="lc-name">${l.name} (${l.pos})</span>
+                        <span class="lc-time">⏱ ${timeAgo(l.start_time)} 시작</span>
                     </div>
                 </div>
             </a>
-            `;
-        }).join('');
-        initDragScroll();
+        `).join('');
     }).catch(() => { document.getElementById('live-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 3. 일정표 렌더링 (KST 기준)
+    // 일정표 렌더링
     fetch('schedule.json').then(r => r.json()).then(data => {
         const el = document.getElementById('schedule-list');
-        if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub)">등록된 일정이 없습니다.</div>'; return; }
+        if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--sub)">등록된 일정이 없습니다.</div>'; return; }
         
-        const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' });
-        const parts = formatter.formatToParts(new Date());
-        const kstDateStr = `${parts.find(p=>p.type==='year').value}-${parts.find(p=>p.type==='month').value}-${parts.find(p=>p.type==='day').value}T00:00:00+09:00`;
-        const todayKST = new Date(kstDateStr);
+        const todayKST = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Seoul'}));
+        todayKST.setHours(0,0,0,0);
 
         el.innerHTML = data.map(s => {
             const target = new Date(s.date + "+09:00");
             target.setHours(0,0,0,0);
             const diff = Math.ceil((target - todayKST) / (1000 * 60 * 60 * 24));
             let dday = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : "종료");
-            const targetDateStr = `${target.getMonth()+1}월 ${target.getDate()}일`;
             
             return `
             <div class="sched-card">
                 <div class="sched-dday">${dday}</div>
                 <div>
-                    <span class="sched-title">${s.title}</span>
-                    <span class="sched-date">${targetDateStr} ${s.desc ? `| ${s.desc}` : ''}</span>
+                    <div style="font-size:13px; font-weight:600; margin-bottom:3px">${s.title}</div>
+                    <div style="font-size:11px; color:var(--sub)">${target.getMonth()+1}월 ${target.getDate()}일 ${s.desc ? `| ${s.desc}` : ''}</div>
                 </div>
             </div>`;
         }).join('');
     }).catch(() => { document.getElementById('schedule-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
-
-    // ⭐️ 완벽하게 개선된 마우스 드래그 & 클릭 방지 스크립트 ⭐️
-    function initDragScroll() {
-        const sliders = document.querySelectorAll('.drag-scroll-container');
-        sliders.forEach(slider => {
-            if(slider.dataset.dragInit === 'true') return;
-            slider.dataset.dragInit = 'true';
-
-            let isDown = false;
-            let isDragging = false;
-            let startX, scrollLeft;
-
-            slider.addEventListener('mousedown', (e) => {
-                isDown = true;
-                isDragging = false; // 마우스를 누를 땐 드래그 상태 초기화
-                slider.classList.add('is-dragging');
-                startX = e.pageX - slider.offsetLeft;
-                scrollLeft = slider.scrollLeft;
-            });
-            slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('is-dragging'); });
-            slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('is-dragging'); });
-            
-            slider.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 1.5; 
-                
-                // 마우스가 5px 이상 움직여야 비로소 '드래그'로 인정하여 클릭을 차단함
-                if (Math.abs(walk) > 5) {
-                    isDragging = true;
-                    e.preventDefault(); 
-                }
-                slider.scrollLeft = scrollLeft - walk;
-            });
-            
-            // 링크 이동을 제어하는 클릭 이벤트 (드래그 시 차단, 단순 클릭 시 허용)
-            slider.addEventListener('click', (e) => {
-                if (isDragging) { 
-                    e.preventDefault(); 
-                    e.stopPropagation(); 
-                }
-            }, true);
-        });
-    }
 </script>
 </body>
 </html>

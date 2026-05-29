@@ -14,39 +14,76 @@
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
         body { background:var(--bg); color:var(--text); font-family:Pretendard,'Apple SD Gothic Neo',sans-serif; padding: 20px; }
         .container { max-width: 950px; margin: 0 auto; }
-        a { text-decoration: none; color: inherit; transition: border 0.2s; }
-        a:hover { border-color: var(--gold) !important; }
+        a { text-decoration: none; color: inherit; }
 
-        h2 { font-size: 15px; color: var(--gold); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        h2 { font-size: 15px; color: var(--gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
         h2 svg { width: 18px; height: 18px; fill: var(--gold); }
         .section { margin-bottom: 35px; }
 
-        .h-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 12px; scrollbar-width: thin; scrollbar-color: var(--gold-dim) var(--panel); flex-wrap: nowrap; }
+        /* ⭐️ 드래그 스크롤 컨테이너 */
+        .drag-scroll-container { 
+            display: flex; 
+            overflow-x: auto; 
+            padding: 15px 10px 25px 10px; /* 호버 시 위로 튀어오를 공간(25px) 확보 */
+            scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
+            -ms-overflow-style: none; /* IE 스크롤바 숨김 */
+            cursor: grab;
+            flex-wrap: nowrap;
+        }
+        .drag-scroll-container::-webkit-scrollbar { display: none; /* 크롬 스크롤바 숨김 */ }
+        .drag-scroll-container:active { cursor: grabbing; }
+
+        /* ⭐️ 겹침(Peeking) 카드 공통 스타일 */
+        .peek-card {
+            position: relative;
+            margin-left: -50px; /* 앞 카드 밑으로 50px 파고듦 */
+            box-shadow: -10px 0 20px -5px rgba(0,0,0,0.6); /* 겹친 부분 그림자 */
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), margin 0.3s ease, border-color 0.2s;
+            user-select: none; /* 텍스트 선택 방지 */
+            -webkit-user-drag: none;
+        }
+        .peek-card:first-child { 
+            margin-left: 0; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+        }
+        /* 마우스 호버 시 인터랙션 */
+        .peek-card:hover {
+            transform: translateY(-12px) rotate(-1deg); /* 살짝 위로 튀어오르며 회전 */
+            margin-right: 50px; /* 숨겨져 있던 우측 카드를 밀어내어 풀리게 함 */
+            z-index: 10;
+            border-color: var(--gold) !important;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+        /* 드래그 중일 땐 호버 효과 끄기 (덜컥거림 방지) */
+        .is-dragging .peek-card { pointer-events: none; }
         
-        .notice-card { flex: 0 0 260px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-        .notice-thumb { width: 100%; height: 146px; object-fit: cover; background: #000; }
+        /* 공지사항 전용 설정 */
+        .notice-card { flex: 0 0 240px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+        .notice-thumb { width: 100%; height: 135px; object-fit: cover; background: #000; pointer-events: none; }
         .notice-info { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .notice-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .notice-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .notice-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-sub); }
         .user-prof { display: flex; align-items: center; gap: 6px; }
-        .user-prof img { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--gold-dim); object-fit: cover; }
+        .user-prof img { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--gold-dim); object-fit: cover; pointer-events: none; }
 
-        .live-card { flex: 0 0 280px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: relative; }
+        /* 라이브 전용 설정 */
+        .live-card { flex: 0 0 260px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: relative; }
         .live-thumb { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
-        .live-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .live-thumb img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .badge-live { position: absolute; top: 8px; left: 8px; background: var(--red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 800; }
         .badge-viewers { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; font-size: 11px; padding: 2px 6px; border-radius: 3px; }
         .live-info { padding: 12px; display: flex; gap: 10px; align-items: center; }
-        .live-prof { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; }
+        .live-prof { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; pointer-events: none; }
         .live-text { flex: 1; overflow: hidden; }
         .live-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
         .live-name { font-size: 12px; font-weight: 700; color: var(--gold); }
         .live-time { font-size: 10px; color: var(--text-sub); display: block; margin-top: 2px; }
 
+        /* 하단 그리드 (일정표 & 숏츠) */
         .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 15px; min-height: 250px; }
-        
-        .sched-card { background: var(--card); border-left: 3px solid var(--gold); padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; align-items: center; gap: 15px; }
+        .sched-card { background: var(--card); border-left: 3px solid var(--gold); padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; align-items: center; gap: 15px; transition: transform 0.2s; }
+        .sched-card:hover { transform: translateX(5px); border-color: var(--gold); }
         .sched-dday { font-size: 16px; font-weight: 800; color: var(--gold); min-width: 50px; text-align: center; }
         .sched-title { font-size: 13px; font-weight: 600; display: block; margin-bottom: 3px; }
         .sched-date { font-size: 11px; color: var(--text-sub); }
@@ -61,7 +98,7 @@
             <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
             공지사항
         </h2>
-        <div id="notice-list" class="h-scroll">로딩 중...</div>
+        <div id="notice-list" class="drag-scroll-container">로딩 중...</div>
     </section>
 
     <section class="section">
@@ -69,7 +106,7 @@
             <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
             LIVE
         </h2>
-        <div id="live-list" class="h-scroll">로딩 중...</div>
+        <div id="live-list" class="drag-scroll-container">로딩 중...</div>
     </section>
 
     <div class="bottom-grid">
@@ -80,7 +117,6 @@
             </h2>
             <div id="schedule-list" class="box">로딩 중...</div>
         </section>
-
         <section class="section">
             <h2>
                 <svg viewBox="0 0 24 24"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
@@ -94,17 +130,18 @@
 </div>
 
 <script>
+    // 1. 공지사항 데이터 렌더링 (peek-card 클래스 추가)
     fetch('notices.json').then(r => r.json()).then(data => {
         const el = document.getElementById('notice-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub)">등록된 공지사항이 없습니다.</div>'; return; }
-        el.innerHTML = data.slice(0, 10).map(n => `
-            <a href="${n.link}" target="_blank" class="notice-card">
-                <img src="${n.thumbnail}" class="notice-thumb" onerror="this.src='https://via.placeholder.com/260x146/1E1A14/C5A059?text=No+Image'">
+        el.innerHTML = data.slice(0, 15).map(n => `
+            <a href="${n.link}" target="_blank" class="notice-card peek-card">
+                <img src="${n.thumbnail}" class="notice-thumb" draggable="false" onerror="this.src='https://via.placeholder.com/260x146/1E1A14/C5A059?text=No+Image'">
                 <div class="notice-info">
                     <span class="notice-title">${n.title || '제목 없음'}</span>
                     <div class="notice-meta">
                         <div class="user-prof">
-                            <img src="${n.profile_image}" onerror="this.src='https://via.placeholder.com/20/1E1A14/C5A059'">
+                            <img src="${n.profile_image}" draggable="false" onerror="this.src='https://via.placeholder.com/20/1E1A14/C5A059'">
                             <span>${n.user_nick || '알 수 없음'}</span>
                         </div>
                         <span>조회 ${n.read_cnt || 0} | 👍 ${n.like_cnt || 0}</span>
@@ -112,8 +149,10 @@
                 </div>
             </a>
         `).join('');
+        initDragScroll(); // 렌더링 완료 후 드래그 이벤트 등록
     }).catch(() => { document.getElementById('notice-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
+    // 2. 라이브 데이터 렌더링 (peek-card 클래스 추가)
     fetch('live.json').then(r => r.json()).then(data => {
         const el = document.getElementById('live-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub); padding:10px;">현재 방송 중인 멤버가 없습니다.</div>'; return; }
@@ -124,14 +163,14 @@
                 if(parts.length > 1) timeStr = parts[1].substring(0, 5) + " 시작";
             }
             return `
-            <a href="${l.live_link}" target="_blank" class="live-card">
+            <a href="${l.live_link}" target="_blank" class="live-card peek-card">
                 <div class="live-thumb">
-                    <img src="${l.thumbnail}" onerror="this.src='https://via.placeholder.com/280x157/1E1A14/C5A059?text=No+Signal'">
+                    <img src="${l.thumbnail}" draggable="false" onerror="this.src='https://via.placeholder.com/280x157/1E1A14/C5A059?text=No+Signal'">
                     <span class="badge-live">LIVE</span>
                     <span class="badge-viewers">👥 ${(l.viewers || 0).toLocaleString()}명</span>
                 </div>
                 <div class="live-info">
-                    <img src="${l.profile_image}" class="live-prof" onerror="this.src='https://via.placeholder.com/36/1E1A14/C5A059'">
+                    <img src="${l.profile_image}" class="live-prof" draggable="false" onerror="this.src='https://via.placeholder.com/36/1E1A14/C5A059'">
                     <div class="live-text">
                         <div class="live-title">${l.title || '방송 중'}</div>
                         <div>
@@ -143,8 +182,10 @@
             </a>
             `;
         }).join('');
+        initDragScroll(); // 렌더링 완료 후 드래그 이벤트 등록
     }).catch(() => { document.getElementById('live-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
+    // 3. 일정표 데이터 렌더링
     fetch('schedule.json').then(r => r.json()).then(data => {
         const el = document.getElementById('schedule-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--text-sub)">등록된 일정이 없습니다.</div>'; return; }
@@ -157,7 +198,6 @@
         el.innerHTML = data.map(s => {
             const target = new Date(s.date + "+09:00");
             target.setHours(0,0,0,0);
-            
             const diff = Math.ceil((target - todayKST) / (1000 * 60 * 60 * 24));
             let dday = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : "종료");
             const targetDateStr = `${target.getMonth()+1}월 ${target.getDate()}일`;
@@ -172,6 +212,53 @@
             </div>`;
         }).join('');
     }).catch(() => { document.getElementById('schedule-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
+
+    // ⭐️ PC 마우스 드래그 & 클릭 방지 스크립트 ⭐️
+    function initDragScroll() {
+        const sliders = document.querySelectorAll('.drag-scroll-container');
+        sliders.forEach(slider => {
+            // 중복 이벤트 방지를 위한 체크
+            if(slider.dataset.dragInit === 'true') return;
+            slider.dataset.dragInit = 'true';
+
+            let isDown = false;
+            let isDragging = false;
+            let startX;
+            let scrollLeft;
+
+            slider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                isDragging = false;
+                slider.classList.add('is-dragging');
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+            });
+            slider.addEventListener('mouseleave', () => {
+                isDown = false;
+                slider.classList.remove('is-dragging');
+            });
+            slider.addEventListener('mouseup', () => {
+                isDown = false;
+                slider.classList.remove('is-dragging');
+            });
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 1.5; // 드래그 속도 조절 (1.5배)
+                if (Math.abs(walk) > 5) isDragging = true; // 5px 이상 움직이면 드래그로 간주
+                slider.scrollLeft = scrollLeft - walk;
+            });
+            
+            // 드래그 후 마우스 뗐을 때 링크 열림 방지
+            slider.addEventListener('click', (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+        });
+    }
 </script>
 </body>
 </html>

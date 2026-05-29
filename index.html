@@ -6,7 +6,6 @@
     <meta name="referrer" content="no-referrer">
     <title>YXL Dashboard</title>
     <style>
-        /* ⭐️ 배달의민족 주아체 웹폰트 로드 */
         @font-face {
             font-family: 'BMJUA';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff') format('woff');
@@ -15,37 +14,29 @@
         }
 
         :root {
-            /* 컬러 팔레트 */
             --bg: #0F0D09; --panel: #181410; --card: #201b15;
             --gold: #C5A059; --text: #F5F0E8; --sub: #8A7F70; --border: #332b22;
             
-            /* ⭐️ 글자 크기 계층 규칙 (Typography Hierarchy) */
             --font-main: 'BMJUA', sans-serif;
-            --fz-title: 18px; /* 섹션 헤더 타이틀 */
-            --fz-lg: 15px;    /* 카드 주요 제목, 디데이 */
-            --fz-md: 13px;    /* 닉네임, 일반 텍스트 */
-            --fz-sm: 12px;    /* 서브 텍스트, 날짜 */
-            --fz-xs: 11px;    /* 메타 정보(조회수, 뱃지 등) */
+            --fz-title: 18px; 
+            --fz-lg: 15px;    
+            --fz-md: 13px;    
+            --fz-sm: 12px;    
+            --fz-xs: 11px;    
         }
         
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* 폰트 일괄 적용 및 자간(letter-spacing) 최적화 */
-        body { 
-            background: var(--bg); color: var(--text); padding: 20px; 
-            font-family: var(--font-main); letter-spacing: 0.3px; 
-        }
+        body { background: var(--bg); color: var(--text); padding: 20px; font-family: var(--font-main); letter-spacing: 0.3px; }
         a { text-decoration: none; color: inherit; }
         .container { max-width: 1000px; margin: 0 auto; }
 
-        /* 공통 카테고리 박스 디자인 */
         .category-section {
             background: var(--panel); border: 1px solid var(--border);
             border-radius: 12px; padding: 20px; margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* 헤더 & 좌우 스크롤 버튼 */
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(197,160,89,0.2); padding-bottom: 10px; }
         .section-title { font-size: var(--fz-title); color: var(--gold); display: flex; align-items: center; gap: 8px; }
         .section-meta { font-size: var(--fz-md); color: var(--sub); margin-left: 8px; }
@@ -58,7 +49,6 @@
         }
         .nav-btn:hover { background: var(--gold); color: #000; }
 
-        /* 가로 스크롤 영역 */
         .scroll-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scroll-behavior: smooth; scrollbar-width: none; }
         .scroll-container::-webkit-scrollbar { display: none; }
 
@@ -91,24 +81,13 @@
         .lc-text { flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 4px; }
         .lc-title { font-size: var(--fz-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
         .lc-name { font-size: var(--fz-md); color: var(--gold); }
-        .lc-time { font-size: var(--fz-xs); color: var(--sub); }
 
-        /* 하단 2분할 그리드 (일정표 3 : 숏츠 7) */
-        .bottom-grid { 
-            display: grid; 
-            grid-template-columns: 3fr 7fr; 
-            gap: 20px; 
-        }
-        .bottom-grid > .category-section {
-            min-width: 0; 
-            margin-bottom: 0; 
-        }
+        .bottom-grid { display: grid; grid-template-columns: 3fr 7fr; gap: 20px; }
+        .bottom-grid > .category-section { min-width: 0; margin-bottom: 0; }
         
-        /* 일정표 카드 */
         .sched-card { background: var(--card); border-left: 3px solid var(--gold); padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; align-items: center; gap: 15px; word-break: keep-all; }
         .sched-dday { font-size: var(--fz-title); color: var(--gold); min-width: 55px; text-align: center; }
 
-        /* 숏츠 카드 */
         .shorts-card {
             flex: 0 0 150px;
             background: var(--card); border: 1px solid var(--border);
@@ -170,18 +149,15 @@
 </div>
 
 <script>
-    // 버튼 스크롤 함수
     function scrollArea(id, amount) {
         document.getElementById(id).scrollBy({ left: amount, behavior: 'smooth' });
     }
 
-    // 시간 계산 함수
     function timeAgo(dateStr) {
-        if (!dateStr) return "시간 정보 없음";
+        if (!dateStr || dateStr.startsWith('1970')) return "-";
         const safeStr = dateStr.replace(/ /g, 'T').split('.')[0] + '+09:00';
         const target = new Date(safeStr);
-        
-        if (isNaN(target.getTime())) return "시간 알 수 없음";
+        if (isNaN(target.getTime())) return "-";
 
         const diffMs = new Date() - target;
         if (diffMs < 0) return "방금 전"; 
@@ -195,13 +171,14 @@
         return `${diffDays}일 전`;
     }
 
-    // 공지사항 렌더링
     fetch('notices.json').then(r => r.json()).then(data => {
         const el = document.getElementById('notice-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--sub)">공지사항이 없습니다.</div>'; return; }
         
         el.innerHTML = data.map(n => {
-            const isNew = (new Date() - new Date(n.date.replace(/ /g, 'T')+'+09:00')) / 3600000 < 10;
+            const isNew = !n.date.startsWith('1970') && (new Date() - new Date(n.date.replace(/ /g, 'T')+'+09:00')) / 3600000 < 10;
+            const timeDisplay = n.date.startsWith('1970') ? '기록 없음' : `🕒 ${timeAgo(n.date)}`;
+            
             return `
             <a href="${n.link}" target="_blank" class="notice-card">
                 <div class="nc-head">
@@ -212,7 +189,7 @@
                     ${isNew ? '<span class="badge-new">NEW</span>' : ''}${n.title}
                 </div>
                 <div class="nc-stats">
-                    <span>🕒 ${timeAgo(n.date)}</span>
+                    <span>${timeDisplay}</span>
                     <span>👁️ ${n.read_cnt}</span>
                     <span>👍 ${n.like_cnt}</span>
                     <span>💬 ${n.comment_cnt}</span>
@@ -222,7 +199,6 @@
         }).join('');
     }).catch(() => { document.getElementById('notice-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 라이브 렌더링
     fetch('live.json').then(r => r.json()).then(data => {
         const el = document.getElementById('live-list');
         document.getElementById('live-count-text').textContent = `(총원 14명 / 라이브 인원 ${data.length}명)`;
@@ -241,14 +217,12 @@
                     <div class="lc-text">
                         <div class="lc-title">${l.title}</div>
                         <div class="lc-name">${l.name} (${l.pos})</div>
-                        <div class="lc-time">⏱ ${timeAgo(l.start_time)} 시작</div>
-                    </div>
+                        </div>
                 </div>
             </a>
         `).join('');
     }).catch(() => { document.getElementById('live-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 일정표 렌더링
     fetch('schedule.json').then(r => r.json()).then(data => {
         const el = document.getElementById('schedule-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--sub)">등록된 일정이 없습니다.</div>'; return; }
@@ -292,7 +266,6 @@
         }).join('');
     }).catch(() => { document.getElementById('schedule-list').innerHTML = '데이터를 불러올 수 없습니다.'; });
 
-    // 숏츠 렌더링
     fetch('shorts.json').then(r => r.json()).then(data => {
         const el = document.getElementById('shorts-list');
         if(!data || data.length === 0) { el.innerHTML = '<div style="color:var(--sub)">등록된 숏츠가 없습니다.</div>'; return; }

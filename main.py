@@ -34,12 +34,14 @@ MEMBERS = [
 async def crawl_notice(page, streamer):
     user_id = streamer["id"]
     board_number = streamer["board_number"]
+    member_info = next((m for m in MEMBERS if m["id"] == user_id), {})
     
     async def modify_request(route, request):
         if "chapi.sooplive.com" in request.url and "/board/" in request.url:
             url = request.url
-            if "per_page=" in url: url = re.sub(r"per_page=\d+", "per_page=20", url)
-            else: url += "&per_page=20"
+            # ⭐️ 100개까지 넉넉하게 긁어와서 공지사항 누락 방지
+            if "per_page=" in url: url = re.sub(r"per_page=\d+", "per_page=100", url)
+            else: url += "&per_page=100"
             if "field=" in url: url = re.sub(r"field=[^&]*", "field=title_name,reg_date,count,profile_image", url)
             await route.continue_(url=url)
         else:
@@ -60,19 +62,28 @@ async def crawl_notice(page, streamer):
             if profile.startswith("//"): profile = "https:" + profile
             
             return {
-                "user_nick": item.get("user_nick", "알 수 없음"),
+                "user_nick": item.get("user_nick", member_info.get("name", "알 수 없음")),
                 "title": item.get("title_name", "제목 없음"),
                 "date": item.get("reg_date", ""),
                 "read_cnt": count_info.get("read_cnt", 0),
                 "like_cnt": count_info.get("like_cnt", 0),
                 "comment_cnt": count_info.get("comment_cnt", 0),
-                "profile_image": profile or "https://via.placeholder.com/40/1E1A14/C5A059",
+                "profile_image": profile or member_info.get("img", "https://via.placeholder.com/40/1E1A14/C5A059"),
                 "link": f"https://www.sooplive.com/station/{user_id}/post/{item.get('title_no', '')}"
             }
     except: pass
     finally:
         await page.unroute("**/*")
-    return None
+        
+    # ⭐️ 공지사항이 아예 없는 멤버도 카드가 누락되지 않도록 더미(기본) 데이터 강제 반환
+    return {
+        "user_nick": member_info.get("name", user_id),
+        "title": "최근 등록된 공지사항이 없습니다.",
+        "date": "1970-01-01 00:00:00", # 가장 오래된 시간 처리
+        "read_cnt": 0, "like_cnt": 0, "comment_cnt": 0,
+        "profile_image": member_info.get("img", "https://via.placeholder.com/40/1E1A14/C5A059"),
+        "link": f"https://www.sooplive.com/station/{user_id}"
+    }
 
 def crawl_lives():
     lives = []
@@ -107,7 +118,8 @@ async def main():
             if notice: all_notices.append(notice)
         await browser.close()
     
-    # ⭐️ 핵심: 가장 최신 글이 배열의 앞(왼쪽)으로 오도록 내림차순(reverse=True) 정렬!
+    # ⭐️ 핵심: reverse=True 를 적용하여 무조건 최신 글이 배열의 맨 앞(왼쪽)으로 오도록 정렬!
+    # 더미 데이터(1970년)를 가진 멤버는 자동으로 맨 끝(오른쪽)으로 밀려납니다.
     all_notices.sort(key=lambda x: x["date"], reverse=True)
     
     with open("notices.json", "w", encoding="utf-8") as f:

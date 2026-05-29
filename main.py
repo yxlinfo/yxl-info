@@ -83,7 +83,7 @@ async def crawl_notice(page, streamer):
                 "thumbnail": thumbnail,
                 "like_cnt": count_info.get("like_cnt", 0),
                 "read_cnt": count_info.get("read_cnt", 0),
-                "link": f"https://www.sooplive.com/station/{user_id}/board/{item.get('title_no', '')}"
+                "link": f"https://www.sooplive.com/station/{user_id}/post/{item.get('title_no', '')}"
             })
     except Exception as e:
         print(f"[오류] {user_id}: {e}")

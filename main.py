@@ -39,24 +39,35 @@ async def crawl_notice(page, streamer):
     async def modify_request(route, request):
         if "chapi.sooplive.com" in request.url and "/board/" in request.url:
             url = request.url
-            # ⭐️ 100개까지 넉넉하게 긁어와서 공지사항 누락 방지
-            if "per_page=" in url: url = re.sub(r"per_page=\d+", "per_page=100", url)
-            else: url += "&per_page=100"
+            
+            # ⭐️ 1. '전체글'이 아닌 '해당 게시판(board_number)'만 내놓으라고 강제 지정!
+            if "bbs_no=" in url: url = re.sub(r"bbs_no=\d+", f"bbs_no={board_number}", url)
+            else: url += f"&bbs_no={board_number}"
+            
+            if "per_page=" in url: url = re.sub(r"per_page=\d+", "per_page=15", url)
+            else: url += "&per_page=15"
+            
             if "field=" in url: url = re.sub(r"field=[^&]*", "field=title_name,reg_date,count,profile_image", url)
+            
             await route.continue_(url=url)
         else:
             await route.continue_()
 
     await page.route("**/*", modify_request)
     try:
-        await page.goto(f"https://www.sooplive.com/station/{user_id}/board", wait_until="domcontentloaded", timeout=15000)
+        # ⭐️ 2. 접속할 때부터 '해당 공지 게시판 주소'로 다이렉트 접속
+        await page.goto(f"https://www.sooplive.com/station/{user_id}/board?bbs_no={board_number}", wait_until="domcontentloaded", timeout=15000)
         async with page.expect_response(lambda r: "chapi.sooplive.com" in r.url and "/board/" in r.url, timeout=10000) as response_info:
             pass
         data = await (await response_info.value).json()
         
-        items = [i for i in data.get("data", []) if str(i.get("bbs_no", "")) == str(board_number)]
+        items = data.get("data", [])
+        
         if items:
+            # ⭐️ 3. 과거에 쓴 '상단 고정 공지'에 속지 않도록, 가져온 게시글을 '가장 최근 시간' 기준으로 재정렬!
+            items.sort(key=lambda x: x.get("reg_date", ""), reverse=True)
             item = items[0]
+            
             count_info = item.get("count", {})
             profile = item.get("profile_image", "")
             if profile.startswith("//"): profile = "https:" + profile
@@ -71,15 +82,16 @@ async def crawl_notice(page, streamer):
                 "profile_image": profile or member_info.get("img", "https://via.placeholder.com/40/1E1A14/C5A059"),
                 "link": f"https://www.sooplive.com/station/{user_id}/post/{item.get('title_no', '')}"
             }
-    except: pass
+    except Exception as e:
+        pass
     finally:
         await page.unroute("**/*")
         
-    # ⭐️ 공지사항이 아예 없는 멤버도 카드가 누락되지 않도록 더미(기본) 데이터 강제 반환
+    # 공지사항이 없는 멤버라도 에러 내지 않고 기본(더미) 카드를 생성하여 14명 유지
     return {
         "user_nick": member_info.get("name", user_id),
         "title": "최근 등록된 공지사항이 없습니다.",
-        "date": "1970-01-01 00:00:00", # 가장 오래된 시간 처리
+        "date": "1970-01-01 00:00:00",
         "read_cnt": 0, "like_cnt": 0, "comment_cnt": 0,
         "profile_image": member_info.get("img", "https://via.placeholder.com/40/1E1A14/C5A059"),
         "link": f"https://www.sooplive.com/station/{user_id}"
@@ -118,8 +130,7 @@ async def main():
             if notice: all_notices.append(notice)
         await browser.close()
     
-    # ⭐️ 핵심: reverse=True 를 적용하여 무조건 최신 글이 배열의 맨 앞(왼쪽)으로 오도록 정렬!
-    # 더미 데이터(1970년)를 가진 멤버는 자동으로 맨 끝(오른쪽)으로 밀려납니다.
+    # ⭐️ 14명의 공지를 최종적으로 최신순(내림차순) 정렬하여 화면 맨 왼쪽에 최신글이 배치되게 함
     all_notices.sort(key=lambda x: x["date"], reverse=True)
     
     with open("notices.json", "w", encoding="utf-8") as f:

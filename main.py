@@ -4,7 +4,7 @@ import requests
 import re
 from playwright.async_api import async_playwright
 
-# --- 설정 ---
+# --- 설정 (기존 리스트 유지) ---
 STREAMERS = [
     {"id": "jaeha010", "board_number": "42110606"},
     {"id": "yuambo", "board_number": "93146806"},
@@ -47,9 +47,16 @@ async def crawl_notice(page, streamer):
     async def modify_request(route, request):
         url = request.url
         if "chapi.sooplive.com" in url and "/board/" in url:
-            url = url.replace("field=title,contents,user_nick,user_id,hashtags", "field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date,count")
-            url = url.replace("per_page=20", "per_page=1")
-            url = re.sub(r"board_number=[^&]*", f"board_number={board_number}", url)
+            # ⭐️ 수정됨: 데이터를 넉넉히 가져와서 공지 게시판을 안전하게 찾도록 조치
+            if "field=" in url: url = re.sub(r"field=[^&]*", "field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date,count", url)
+            else: url += "&field=title_name,contents,user_nick,user_id,profile_image,photo_cnt,notice_yn,photos,reg_date,count"
+            
+            if "per_page=" in url: url = re.sub(r"per_page=[^&]*", "per_page=20", url)
+            else: url += "&per_page=20"
+            
+            if "board_number=" in url: url = re.sub(r"board_number=[^&]*", f"board_number={board_number}", url)
+            else: url += f"&board_number={board_number}"
+            
             await route.continue_(url=url)
         else:
             await route.continue_()
@@ -67,9 +74,9 @@ async def crawl_notice(page, streamer):
             count_info = item.get("count", {})
             photos = item.get("photos", [])
             
-            # 빈 값 방어 코드
-            thumbnail = photos[0] if photos else "https://via.placeholder.com/260x146/1E1A14/C5A059?text=No+Image"
-            if thumbnail.startswith("//"): thumbnail = "https:" + thumbnail
+            thumbnail = photos[0] if photos else ""
+            if thumbnail and thumbnail.startswith("//"): thumbnail = "https:" + thumbnail
+            
             profile = item.get("profile_image") or "https://via.placeholder.com/20/1E1A14/C5A059"
             if profile.startswith("//"): profile = "https:" + profile
 
@@ -83,6 +90,7 @@ async def crawl_notice(page, streamer):
                 "thumbnail": thumbnail,
                 "like_cnt": count_info.get("like_cnt", 0),
                 "read_cnt": count_info.get("read_cnt", 0),
+                # ⭐️ post 링크 주소 고정
                 "link": f"https://www.sooplive.com/station/{user_id}/post/{item.get('title_no', '')}"
             })
     except Exception as e:
@@ -99,10 +107,8 @@ def crawl_lives():
         try:
             res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=5).json()
             if res and "broadNo" in res:
-                # API에서 None이 오면 ""(빈 문자열)로 치환
                 broad_title = res.get("broadTitle")
                 start_time = res.get("broadStart")
-                
                 lives.append({
                     "name": m["name"],
                     "pos": m["pos"],

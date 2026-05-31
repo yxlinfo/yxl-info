@@ -1,52 +1,12 @@
 [
     {
-        "name": "후잉",
-        "pos": "차장",
-        "profile_image": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475",
-        "title": "[YXL 차장] 오랜만입니다람쥐 안녕하세염보성",
-        "viewers": 199,
-        "start_time": "2026-05-31T13:25:42.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/294456205.webp",
-        "live_link": "https://play.sooplive.com/jaeha010/294456205"
-    },
-    {
-        "name": "김유정",
-        "pos": "인턴장",
-        "profile_image": "https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878",
-        "title": "[ YXL:인턴장]왜 매일 온것같지?잘 놀았어 애들아?",
-        "viewers": 112,
-        "start_time": "2026-05-31T13:05:40.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/294455643.webp",
-        "live_link": "https://play.sooplive.com/tkek55/294455643"
-    },
-    {
         "name": "백나현",
         "pos": "팀장",
         "profile_image": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531",
         "title": "[YXL팀장]머묶나현 1445방셀",
-        "viewers": 487,
+        "viewers": 488,
         "start_time": "2026-05-31T15:13:42.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/294458781.webp",
         "live_link": "https://play.sooplive.com/wk3220/294458781"
-    },
-    {
-        "name": "아름",
-        "pos": "선임사원",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
-        "title": "[YXL: 선사] 회식끄읏",
-        "viewers": 124,
-        "start_time": "2026-05-31T14:49:18.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/294458353.webp",
-        "live_link": "https://play.sooplive.com/ahrum0912/294458353"
-    },
-    {
-        "name": "서니",
-        "pos": "시급이",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035",
-        "title": "[YXL 시급] 1414 ㅈ경서니 방셀 ! 1명",
-        "viewers": 228,
-        "start_time": "2026-05-31T13:22:22.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/294456107.webp",
-        "live_link": "https://play.sooplive.com/iluvpp/294456107"
     }
 ]

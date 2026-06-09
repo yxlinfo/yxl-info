@@ -1,12 +1,32 @@
 [
     {
+        "name": "류서하",
+        "pos": "과장",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017",
+        "title": "[YXL : 과장]mt 방셀 3명 팔아연",
+        "viewers": 144,
+        "start_time": "2026-06-09T11:07:52.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/294687531.webp",
+        "live_link": "https://play.sooplive.com/smkim82372/294687531"
+    },
+    {
         "name": "김유정",
         "pos": "인턴장",
         "profile_image": "https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878",
         "title": "[ YXL:인턴장]유--자 열 ---충",
-        "viewers": 61,
+        "viewers": 81,
         "start_time": "2026-06-09T08:33:50.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/294682149.webp",
         "live_link": "https://play.sooplive.com/tkek55/294682149"
+    },
+    {
+        "name": "백나현",
+        "pos": "팀장",
+        "profile_image": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531",
+        "title": "[YXL팀장] 엠티 재밌었다요",
+        "viewers": 419,
+        "start_time": "2026-06-09T12:16:25.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/294690575.webp",
+        "live_link": "https://play.sooplive.com/wk3220/294690575"
     }
 ]

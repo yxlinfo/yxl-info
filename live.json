@@ -1,12 +1,32 @@
 [
     {
-        "name": "염보성",
-        "pos": "대표",
-        "profile_image": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692",
-        "title": "YB가쏜다 (스시집) BJ편 1080p",
-        "viewers": 6772,
-        "start_time": "2026-06-10T12:30:58.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/294716273.webp",
-        "live_link": "https://play.sooplive.com/yuambo/294716273"
+        "name": "김유정",
+        "pos": "인턴장",
+        "profile_image": "https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878",
+        "title": "[ YXL:인턴장]씨스루",
+        "viewers": 45,
+        "start_time": "2026-06-13T09:02:07.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/294785287.webp",
+        "live_link": "https://play.sooplive.com/tkek55/294785287"
+    },
+    {
+        "name": "아름",
+        "pos": "선임사원",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
+        "title": "[YXL: 선사] 교복 이렇게 입어도 되나..? 첫방셀 1492",
+        "viewers": 64,
+        "start_time": "2026-06-13T09:00:32.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/294785223.webp",
+        "live_link": "https://play.sooplive.com/ahrum0912/294785223"
+    },
+    {
+        "name": "너의멜로디",
+        "pos": "비서실장",
+        "profile_image": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633",
+        "title": "[YXL:비실] 길------멘 통팬 감사합니다!깡총깡총",
+        "viewers": 90,
+        "start_time": "2026-06-13T08:17:14.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/294784275.webp",
+        "live_link": "https://play.sooplive.com/meldoy777/294784275"
     }
 ]

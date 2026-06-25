@@ -1,42 +1,12 @@
 [
     {
-        "name": "냥냥수주",
-        "pos": "대리",
-        "profile_image": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971",
-        "title": "[YXL:대리] 내일 팀전 처음으로 이겨보싶네요 ㄹㅇㄹㅇ...간절하다...",
-        "viewers": 84,
-        "start_time": "2026-06-25T18:12:17.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295107959.webp",
-        "live_link": "https://play.sooplive.com/star49/295107959"
-    },
-    {
-        "name": "백나현",
-        "pos": "팀장",
-        "profile_image": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531",
-        "title": "[YXL 팀장]퇴근방송 감사합니다!!",
-        "viewers": 222,
-        "start_time": "2026-06-25T18:07:29.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295107927.webp",
-        "live_link": "https://play.sooplive.com/wk3220/295107927"
-    },
-    {
         "name": "아름",
         "pos": "선임사원",
         "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
         "title": "[YXL: 선사]퇴근방송 감사합니다 아플단♥",
-        "viewers": 61,
+        "viewers": 75,
         "start_time": "2026-06-25T18:19:04.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295108003.webp",
         "live_link": "https://play.sooplive.com/ahrum0912/295108003"
-    },
-    {
-        "name": "김푸",
-        "pos": "웨이터",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517",
-        "title": "[YXL] 퇴근방송",
-        "viewers": 6,
-        "start_time": "2026-06-25T05:35:07.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295089445.webp",
-        "live_link": "https://play.sooplive.com/kimpooh0707/295089445"
     }
 ]

@@ -1,60 +1,40 @@
 [
     {
-        "name": "염보성",
-        "pos": "대표",
-        "profile_image": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692",
-        "title": "YXL 시즌15 3회차 3부 팀 퇴근전쟁 !!!!  잔류자 후잉,냥냥수주,소다",
-        "viewers": 1184,
-        "start_time": "2026-06-25T08:00:33.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295092193.webp",
-        "live_link": "https://play.sooplive.com/yuambo/295092193"
-    },
-    {
-        "name": "후잉",
-        "pos": "차장",
-        "profile_image": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475",
-        "title": "[YXL 차장] 퇴근전쟁 혼자남고십지 안습니답 ....3.3만개 모아모아...!!",
-        "viewers": 0,
-        "start_time": "2026-06-25T16:29:56.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295107093.webp",
-        "live_link": "https://play.sooplive.com/jaeha010/295107093"
-    },
-    {
         "name": "냥냥수주",
         "pos": "대리",
         "profile_image": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971",
-        "title": "[yxl:대리]3만개..퇴근...",
-        "viewers": 0,
-        "start_time": "2026-06-25T12:37:24.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295102043.webp",
-        "live_link": "https://play.sooplive.com/star49/295102043"
-    },
-    {
-        "name": "소다",
-        "pos": "번데기",
-        "profile_image": "https://storage2.ygosu.com/?code=S696b623ea18219.09523333",
-        "title": "[YXL]퇴근전쟁 9천개 도와줘 소플단  ..",
-        "viewers": 0,
-        "start_time": "2026-06-25T17:00:13.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295107397.webp",
-        "live_link": "https://play.sooplive.com/zbxlzzz/295107397"
+        "title": "[YXL:대리] 내일 팀전 처음으로 이겨보싶네요 ㄹㅇㄹㅇ...간절하다...",
+        "viewers": 84,
+        "start_time": "2026-06-25T18:12:17.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295107959.webp",
+        "live_link": "https://play.sooplive.com/star49/295107959"
     },
     {
         "name": "백나현",
         "pos": "팀장",
         "profile_image": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531",
-        "title": "[YXL 팀장]밥전쟁 시작 ㅠㅠ",
-        "viewers": 0,
-        "start_time": "2026-06-25T08:47:20.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295093159.webp",
-        "live_link": "https://play.sooplive.com/wk3220/295093159"
+        "title": "[YXL 팀장]퇴근방송 감사합니다!!",
+        "viewers": 222,
+        "start_time": "2026-06-25T18:07:29.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295107927.webp",
+        "live_link": "https://play.sooplive.com/wk3220/295107927"
+    },
+    {
+        "name": "아름",
+        "pos": "선임사원",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
+        "title": "[YXL: 선사]퇴근방송 감사합니다 아플단♥",
+        "viewers": 61,
+        "start_time": "2026-06-25T18:19:04.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295108003.webp",
+        "live_link": "https://play.sooplive.com/ahrum0912/295108003"
     },
     {
         "name": "김푸",
         "pos": "웨이터",
         "profile_image": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517",
-        "title": "[YXL] 김푸 오늘 플레이어!! 모든 공약 싯가!! 열심히하겠습니다",
-        "viewers": 9,
+        "title": "[YXL] 퇴근방송",
+        "viewers": 6,
         "start_time": "2026-06-25T05:35:07.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295089445.webp",
         "live_link": "https://play.sooplive.com/kimpooh0707/295089445"

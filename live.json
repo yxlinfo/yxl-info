@@ -1,23 +1,13 @@
 [
     {
-        "name": "류서하",
-        "pos": "과장",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017",
-        "title": "[ YXL : 과장 ] hi 그냥 생존신고",
-        "viewers": 113,
-        "start_time": "2026-06-26T12:19:36.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295126095.webp",
-        "live_link": "https://play.sooplive.com/smkim82372/295126095"
-    },
-    {
         "name": "하랑짱",
         "pos": "휴직",
         "profile_image": "https://storage2.ygosu.com/?code=S696b61f365c0e3.11842146",
-        "title": "[YXL:휴직] 오늘 안전한날이야(큰탐 안킴)",
-        "viewers": 0,
-        "start_time": "2026-06-26T13:23:19.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295128325.webp",
-        "live_link": "https://play.sooplive.com/asy1218/295128325"
+        "title": "[YXL:휴직] 빈집 ㅠ_ㅠ.. SOS",
+        "viewers": 59,
+        "start_time": "2026-06-26T13:25:52.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295128397.webp",
+        "live_link": "https://play.sooplive.com/asy1218/295128397"
     },
     {
         "name": "김유정",
@@ -28,5 +18,15 @@
         "start_time": "2026-06-26T11:23:54.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295123727.webp",
         "live_link": "https://play.sooplive.com/tkek55/295123727"
+    },
+    {
+        "name": "김푸",
+        "pos": "웨이터",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517",
+        "title": "[YXL]  일수합니다",
+        "viewers": 15,
+        "start_time": "2026-06-26T14:50:58.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295130683.webp",
+        "live_link": "https://play.sooplive.com/kimpooh0707/295130683"
     }
 ]

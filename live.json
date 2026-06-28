@@ -1,32 +1,42 @@
 [
     {
-        "name": "류서하",
-        "pos": "과장",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017",
-        "title": "[ YXL : 과장 ] 서하랜드 의리게임 오픈!!",
-        "viewers": 139,
-        "start_time": "2026-06-28T03:01:46.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295163023.webp",
-        "live_link": "https://play.sooplive.com/smkim82372/295163023"
+        "name": "후잉",
+        "pos": "차장",
+        "profile_image": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475",
+        "title": "[YXL 차장] 15만개으 기적.. 토끼가튼 집이 기다리구이써요 .",
+        "viewers": 31,
+        "start_time": "2026-06-28T11:15:04.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295175173.webp",
+        "live_link": "https://play.sooplive.com/jaeha010/295175173"
+    },
+    {
+        "name": "냥냥수주",
+        "pos": "대리",
+        "profile_image": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971",
+        "title": "[YXL:대리] 조기퇴근데이 7망개..!!",
+        "viewers": 110,
+        "start_time": "2026-06-28T09:30:37.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295171475.webp",
+        "live_link": "https://play.sooplive.com/star49/295171475"
+    },
+    {
+        "name": "아름",
+        "pos": "선임사원",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
+        "title": "[YXL: 선사]조기퇴근데이 6만개 출근단2배공약 (1/7)",
+        "viewers": 52,
+        "start_time": "2026-06-28T09:20:23.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295171215.webp",
+        "live_link": "https://play.sooplive.com/ahrum0912/295171215"
     },
     {
         "name": "너의멜로디",
         "pos": "비서실장",
         "profile_image": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633",
-        "title": "[YXL:비실] 내일 조기퇴근 8만개 저금통 노방종",
-        "viewers": 128,
+        "title": "[YXL:비실] 조기 퇴근데이 8만개 저금통노방종",
+        "viewers": 97,
         "start_time": "2026-06-28T05:34:33.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295165887.webp",
         "live_link": "https://play.sooplive.com/meldoy777/295165887"
-    },
-    {
-        "name": "김푸",
-        "pos": "웨이터",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517",
-        "title": "[YXL] 푸나 5만개!!!! 감사합니다!!!!",
-        "viewers": 21,
-        "start_time": "2026-06-28T05:13:09.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295165439.webp",
-        "live_link": "https://play.sooplive.com/kimpooh0707/295165439"
     }
 ]

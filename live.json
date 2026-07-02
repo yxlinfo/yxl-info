@@ -1,42 +1,62 @@
 [
     {
+        "name": "염보성",
+        "pos": "대표",
+        "profile_image": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692",
+        "title": "YXL 시즌 15 5회차 용병데이!! 새로운 용병 친구들을 소개 하겠습니다.!!!",
+        "viewers": 1791,
+        "start_time": "2026-07-02T08:00:39.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295266595.webp",
+        "live_link": "https://play.sooplive.com/yuambo/295266595"
+    },
+    {
+        "name": "후잉",
+        "pos": "차장",
+        "profile_image": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475",
+        "title": "[YXL 차장] 용병데이 [친구:유림♡] 잉쁠다앙..!!",
+        "viewers": 0,
+        "start_time": "2026-07-02T08:24:56.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295267209.webp",
+        "live_link": "https://play.sooplive.com/jaeha010/295267209"
+    },
+    {
         "name": "냥냥수주",
         "pos": "대리",
         "profile_image": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971",
-        "title": "[yxl:대리]용병데이 with윤슬!!",
-        "viewers": 28,
-        "start_time": "2026-07-02T07:48:09.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295266221.webp",
-        "live_link": "https://play.sooplive.com/star49/295266221"
+        "title": "[yxl:대리]용병데이 ..꼴찌즁..ㅠㅠ",
+        "viewers": 0,
+        "start_time": "2026-07-02T08:58:13.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295268043.webp",
+        "live_link": "https://play.sooplive.com/star49/295268043"
+    },
+    {
+        "name": "소다",
+        "pos": "번데기",
+        "profile_image": "https://storage2.ygosu.com/?code=S696b623ea18219.09523333",
+        "title": "[YXL]일반회차 마지막날 ..용병데이 챈꾸님이랑 출근  ♡..",
+        "viewers": 0,
+        "start_time": "2026-07-02T09:00:45.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295268245.webp",
+        "live_link": "https://play.sooplive.com/zbxlzzz/295268245"
     },
     {
         "name": "김유정",
         "pos": "인턴장",
         "profile_image": "https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878",
-        "title": "[YXL:인턴장]용병데이 출근",
-        "viewers": 12,
-        "start_time": "2026-07-02T07:49:20.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295266239.webp",
-        "live_link": "https://play.sooplive.com/tkek55/295266239"
+        "title": "[YXL:인턴장]시그 이어주세오  ㅠㅠㅠㅠ",
+        "viewers": 0,
+        "start_time": "2026-07-02T09:43:57.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295269643.webp",
+        "live_link": "https://play.sooplive.com/tkek55/295269643"
     },
     {
-        "name": "아름",
-        "pos": "선임사원",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
-        "title": "[yxl 선사]용병데이 출근방송",
-        "viewers": 67,
-        "start_time": "2026-07-02T07:19:58.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295265711.webp",
-        "live_link": "https://play.sooplive.com/ahrum0912/295265711"
-    },
-    {
-        "name": "너의멜로디",
-        "pos": "비서실장",
-        "profile_image": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633",
-        "title": "[YXL:비실] 용병데이 !! 모여조 멜플단",
-        "viewers": 111,
-        "start_time": "2026-07-02T07:19:11.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295265695.webp",
-        "live_link": "https://play.sooplive.com/meldoy777/295265695"
+        "name": "서니",
+        "pos": "시급이",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035",
+        "title": "[YXL 시급] 용병데이 서니 시그하나씩 부탁드려염 ..",
+        "viewers": 0,
+        "start_time": "2026-07-02T08:21:43.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295267145.webp",
+        "live_link": "https://play.sooplive.com/iluvpp/295267145"
     }
 ]

@@ -1,1 +1,42 @@
-[]
+[
+    {
+        "name": "냥냥수주",
+        "pos": "대리",
+        "profile_image": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971",
+        "title": "[yxl:대리]용병데이 with윤슬!!",
+        "viewers": 28,
+        "start_time": "2026-07-02T07:48:09.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295266221.webp",
+        "live_link": "https://play.sooplive.com/star49/295266221"
+    },
+    {
+        "name": "김유정",
+        "pos": "인턴장",
+        "profile_image": "https://storage2.ygosu.com/?code=S68ba9d207c63b1.00242878",
+        "title": "[YXL:인턴장]용병데이 출근",
+        "viewers": 12,
+        "start_time": "2026-07-02T07:49:20.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295266239.webp",
+        "live_link": "https://play.sooplive.com/tkek55/295266239"
+    },
+    {
+        "name": "아름",
+        "pos": "선임사원",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
+        "title": "[yxl 선사]용병데이 출근방송",
+        "viewers": 67,
+        "start_time": "2026-07-02T07:19:58.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295265711.webp",
+        "live_link": "https://play.sooplive.com/ahrum0912/295265711"
+    },
+    {
+        "name": "너의멜로디",
+        "pos": "비서실장",
+        "profile_image": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633",
+        "title": "[YXL:비실] 용병데이 !! 모여조 멜플단",
+        "viewers": 111,
+        "start_time": "2026-07-02T07:19:11.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295265695.webp",
+        "live_link": "https://play.sooplive.com/meldoy777/295265695"
+    }
+]

@@ -1,45 +1,5 @@
 [
     {
-        "name": "염보성",
-        "pos": "대표",
-        "profile_image": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692",
-        "title": "YXL 시즌 15 5회차 용병데이!! 총상금 2천만원 !!! 12시에 카운트 시작합니다.!!",
-        "viewers": 1625,
-        "start_time": "2026-07-02T08:00:39.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295266595.webp",
-        "live_link": "https://play.sooplive.com/yuambo/295266595"
-    },
-    {
-        "name": "후잉",
-        "pos": "차장",
-        "profile_image": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475",
-        "title": "[YXL 차장] 용병데이 [친구:유림♡] 잉쁠다앙..!!",
-        "viewers": 0,
-        "start_time": "2026-07-02T08:24:56.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295267209.webp",
-        "live_link": "https://play.sooplive.com/jaeha010/295267209"
-    },
-    {
-        "name": "냥냥수주",
-        "pos": "대리",
-        "profile_image": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971",
-        "title": "[yxl:대리]곧카운트인데 꼴찌에..10만점 저희만못채웠어요...",
-        "viewers": 0,
-        "start_time": "2026-07-02T13:13:46.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295278005.webp",
-        "live_link": "https://play.sooplive.com/star49/295278005"
-    },
-    {
-        "name": "소다",
-        "pos": "번데기",
-        "profile_image": "https://storage2.ygosu.com/?code=S696b623ea18219.09523333",
-        "title": "[YXL]열두시카운트 이대로 끝나면 기여도도 못받앙 ㅠㅠㅠ..",
-        "viewers": 0,
-        "start_time": "2026-07-02T14:31:50.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295280063.webp",
-        "live_link": "https://play.sooplive.com/zbxlzzz/295280063"
-    },
-    {
         "name": "백나현",
         "pos": "팀장",
         "profile_image": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531",
@@ -48,25 +8,5 @@
         "start_time": "2026-07-02T11:51:02.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295274819.webp",
         "live_link": "https://play.sooplive.com/wk3220/295274819"
-    },
-    {
-        "name": "아름",
-        "pos": "선임사원",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
-        "title": "[yxl 선사]용병데이&일급프리 꼴등은..",
-        "viewers": 0,
-        "start_time": "2026-07-02T12:59:22.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295277383.webp",
-        "live_link": "https://play.sooplive.com/ahrum0912/295277383"
-    },
-    {
-        "name": "서니",
-        "pos": "시급이",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a954b0c8f6.90064035",
-        "title": "[YXL 시급] 용병데이 윤랑이 버스타기 싫다 ,,, =_= 서니플 한번만여 ㅠ",
-        "viewers": 0,
-        "start_time": "2026-07-02T12:17:04.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295276079.webp",
-        "live_link": "https://play.sooplive.com/iluvpp/295276079"
     }
 ]

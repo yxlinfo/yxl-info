@@ -1,10 +1,30 @@
 [
     {
+        "name": "염보성",
+        "pos": "대표",
+        "profile_image": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692",
+        "title": "염보성 팟캐스트2화(김인호 알파메일)",
+        "viewers": 3867,
+        "start_time": "2026-07-03T10:01:56.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295295403.webp",
+        "live_link": "https://play.sooplive.com/yuambo/295295403"
+    },
+    {
+        "name": "백나현",
+        "pos": "팀장",
+        "profile_image": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531",
+        "title": "[YXL 팀장]안뇽",
+        "viewers": 259,
+        "start_time": "2026-07-03T10:34:35.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295296535.webp",
+        "live_link": "https://play.sooplive.com/wk3220/295296535"
+    },
+    {
         "name": "아름",
         "pos": "선임사원",
         "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
         "title": "[YXL: 선사]직급전 D-7",
-        "viewers": 88,
+        "viewers": 79,
         "start_time": "2026-07-03T07:13:57.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295290871.webp",
         "live_link": "https://play.sooplive.com/ahrum0912/295290871"
@@ -14,7 +34,7 @@
         "pos": "비서실장",
         "profile_image": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633",
         "title": "[YXL:비실] 직급전 d-7 멜플단의 영웅이 되어주실분",
-        "viewers": 61,
+        "viewers": 124,
         "start_time": "2026-07-03T08:00:39.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295291859.webp",
         "live_link": "https://play.sooplive.com/meldoy777/295291859"

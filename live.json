@@ -1,22 +1,32 @@
 [
     {
+        "name": "냥냥수주",
+        "pos": "대리",
+        "profile_image": "https://storage2.ygosu.com/?code=S69777860bfb1b2.15315971",
+        "title": "[YB]안녕하세요 와이비 냠냠수주입니냥",
+        "viewers": 164,
+        "start_time": "2026-07-10T13:33:53.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295477397.webp",
+        "live_link": "https://play.sooplive.com/star49/295477397"
+    },
+    {
+        "name": "류서하",
+        "pos": "과장",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017",
+        "title": "[ YB ] 와이비 겜서하 임니다",
+        "viewers": 259,
+        "start_time": "2026-07-10T15:13:52.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295479949.webp",
+        "live_link": "https://play.sooplive.com/smkim82372/295479949"
+    },
+    {
         "name": "하랑짱",
         "pos": "휴직",
         "profile_image": "https://storage2.ygosu.com/?code=S696b61f365c0e3.11842146",
         "title": "또잉 YB 랑짱입미다 랑삼주 열혈 오신날 얏호 ♥",
-        "viewers": 93,
+        "viewers": 109,
         "start_time": "2026-07-10T12:11:54.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295474435.webp",
         "live_link": "https://play.sooplive.com/asy1218/295474435"
-    },
-    {
-        "name": "너의멜로디",
-        "pos": "비서실장",
-        "profile_image": "https://storage2.ygosu.com/?code=S69cb6c7203b578.77318633",
-        "title": "[YB] 로디입니다 앞으로 잘부탁드립니다!!",
-        "viewers": 208,
-        "start_time": "2026-07-10T08:33:57.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295466223.webp",
-        "live_link": "https://play.sooplive.com/meldoy777/295466223"
     }
 ]

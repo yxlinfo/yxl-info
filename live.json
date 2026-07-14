@@ -1,12 +1,32 @@
 [
     {
+        "name": "염보성",
+        "pos": "대표",
+        "profile_image": "https://storage2.ygosu.com/?code=S68dbfbfc3f44e8.21921692",
+        "title": "염보성 안녕하세염(YB)",
+        "viewers": 1687,
+        "start_time": "2026-07-14T10:01:56.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295569195.webp",
+        "live_link": "https://play.sooplive.com/yuambo/295569195"
+    },
+    {
         "name": "백나현",
         "pos": "팀장",
         "profile_image": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531",
-        "title": "[YB] 안뇽",
-        "viewers": 567,
+        "title": "[YB] 킵디깅 땅파다 디질란다",
+        "viewers": 370,
         "start_time": "2026-07-14T04:48:29.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295562019.webp",
         "live_link": "https://play.sooplive.com/wk3220/295562019"
+    },
+    {
+        "name": "아름",
+        "pos": "선임사원",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
+        "title": "[YB]보고싶다!!",
+        "viewers": 83,
+        "start_time": "2026-07-14T09:04:22.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295567381.webp",
+        "live_link": "https://play.sooplive.com/ahrum0912/295567381"
     }
 ]

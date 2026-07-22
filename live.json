@@ -1,10 +1,20 @@
 [
     {
+        "name": "후잉",
+        "pos": "차장",
+        "profile_image": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475",
+        "title": "[YB]  일년마네 단발이되., ,",
+        "viewers": 79,
+        "start_time": "2026-07-22T10:40:40.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/295771611.webp",
+        "live_link": "https://play.sooplive.com/jaeha010/295771611"
+    },
+    {
         "name": "아름",
         "pos": "선임사원",
         "profile_image": "https://storage2.ygosu.com/?code=S69f0a918af6ab2.84500064",
         "title": "[YB]심심한데..? 방셀 1492(0/2)",
-        "viewers": 24,
+        "viewers": 64,
         "start_time": "2026-07-22T09:25:34.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295768851.webp",
         "live_link": "https://play.sooplive.com/ahrum0912/295768851"
@@ -14,19 +24,9 @@
         "pos": "웨이터",
         "profile_image": "https://storage2.ygosu.com/?code=S69f0a951064842.70871652",
         "title": "[YB] 벤티타고 해남가서 술먹방 오는 사람 선착순 1명 3만개+@ 해남살이 육하원칙중!",
-        "viewers": 73,
+        "viewers": 53,
         "start_time": "2026-07-22T02:45:08.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/295760955.webp",
         "live_link": "https://play.sooplive.com/callgg/295760955"
-    },
-    {
-        "name": "김푸",
-        "pos": "웨이터",
-        "profile_image": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517",
-        "title": "[세얼간이] 아늑x멘토 귀가중",
-        "viewers": 34,
-        "start_time": "2026-07-22T06:33:32.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/295764699.webp",
-        "live_link": "https://play.sooplive.com/kimpooh0707/295764699"
     }
 ]

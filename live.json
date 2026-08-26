@@ -4,19 +4,39 @@
         "pos": "차장",
         "profile_image": "https://storage2.ygosu.com/?code=S688d2e96622764.18115475",
         "title": "셔츠얌 -",
-        "viewers": 168,
+        "viewers": 187,
         "start_time": "2026-08-26T11:39:09.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/296658669.webp",
         "live_link": "https://play.sooplive.com/jaeha010/296658669"
+    },
+    {
+        "name": "류서하",
+        "pos": "과장",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a926dedb50.11272017",
+        "title": "아직 세팅 중 ㅠ",
+        "viewers": 101,
+        "start_time": "2026-08-26T13:55:39.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/296663317.webp",
+        "live_link": "https://play.sooplive.com/smkim82372/296663317"
     },
     {
         "name": "꺼니",
         "pos": "웨이터",
         "profile_image": "https://storage2.ygosu.com/?code=S69f0a951064842.70871652",
         "title": "[더블비] 현실 매니저 지원자 민심 테스트봅니다",
-        "viewers": 34,
+        "viewers": 33,
         "start_time": "2026-08-26T13:03:44.000Z",
         "thumbnail": "https://liveimg.sooplive.com/h/296661953.webp",
         "live_link": "https://play.sooplive.com/callgg/296661953"
+    },
+    {
+        "name": "김푸",
+        "pos": "웨이터",
+        "profile_image": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517",
+        "title": "히사시부리",
+        "viewers": 39,
+        "start_time": "2026-08-26T13:44:39.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/296663101.webp",
+        "live_link": "https://play.sooplive.com/kimpooh0707/296663101"
     }
 ]

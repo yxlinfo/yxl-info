@@ -1,12 +1,22 @@
 [
     {
+        "name": "백나현",
+        "pos": "팀장",
+        "profile_image": "https://storage2.ygosu.com/?code=S69ccd4724ffea8.45980531",
+        "title": "[판타지유:과장]굿모닝",
+        "viewers": 322,
+        "start_time": "2026-10-28T22:01:38.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/298190691.webp",
+        "live_link": "https://play.sooplive.com/wk3220/298190691"
+    },
+    {
         "name": "김푸",
         "pos": "웨이터",
         "profile_image": "https://storage2.ygosu.com/?code=S69f0a94dc072d2.06945517",
-        "title": "[FA] 귀인은 언제 올지 모르기에",
-        "viewers": 30,
-        "start_time": "2026-10-28T14:23:49.000Z",
-        "thumbnail": "https://liveimg.sooplive.com/h/298187305.webp",
-        "live_link": "https://play.sooplive.com/kimpooh0707/298187305"
+        "title": "[FA] 귀인 올때까지.",
+        "viewers": 32,
+        "start_time": "2026-10-28T22:26:35.000Z",
+        "thumbnail": "https://liveimg.sooplive.com/h/298190829.webp",
+        "live_link": "https://play.sooplive.com/kimpooh0707/298190829"
     }
 ]
